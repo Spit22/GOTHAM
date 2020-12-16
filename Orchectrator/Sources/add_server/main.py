@@ -8,7 +8,7 @@ username = "rev"
 password = "pass"
 file_path = "/home/spitfire/test.txt"
 remote_file_path = "/home/rev"
-commands = ["echo 'coucou' > /home/rev/coucou.txt"]
+commands = ["echo 'coucou' > /home/rev/coucou.txt","cat coucou.txt"]
 
 if __name__ == '__main__':
     Gotham_SSH_SCP.main(hostname, port, username, password, file_path, remote_file_path, commands)
