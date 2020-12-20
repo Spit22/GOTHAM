@@ -1,5 +1,5 @@
 #from gotham_server_communication import main
-import Gotham_SSH_SCP
+from Gotham_SSH_SCP import send_file, execute_commands
 
 # the data
 hostname = "192.168.1.38"
@@ -11,4 +11,5 @@ remote_file_path = "/home/rev"
 commands = ["echo 'coucou' > /home/rev/coucou.txt","cat coucou.txt"]
 
 if __name__ == '__main__':
-    Gotham_SSH_SCP.main(hostname, port, username, password, file_path, remote_file_path, commands)
+    send_file(hostname, port, username, password, file_path, remote_file_path)
+    execute_commands(hostname, port, username, password, commands)

@@ -7,7 +7,7 @@ class GothamServer:
     This class represents a server being part of the project
     '''
 
-    def __init__(self, hostname, port, username, password, file_path, remote_file_path, commands):
+    def __init__(self, hostname, port, username, password):
         '''
         Initialize a GhotamServer object
         '''
@@ -18,12 +18,6 @@ class GothamServer:
         self.port = port
         # User's password
         self.password = password
-        # Local path of the file to send 
-        self.file_path = file_path
-        # Remote path of the file sent
-        self.remote_file_path = remote_file_path
-        # Commands to execute on the remote server
-        self.commands = commands
         # Some variable for class's methods
         self.ssh_session = None
         self.scp_session = None
@@ -61,7 +55,7 @@ class GothamServer:
             self.scp_session.close()
             print("[+] SCP Session closed")
         
-    def upload_file(self):
+    def upload_file(self, file_path, remote_file_path):
         '''
         Upload a single file to a remote directory
         '''
@@ -69,19 +63,19 @@ class GothamServer:
         self.is_connected = self.connect()
         # Send the file
         self.scp_session.put(
-            self.file_path,
+            file_path,
             recursive = True,
-            remote_path = self.remote_file_path
+            remote_path = remote_file_path
         )
         print("[+] File Uploaded !")
         
-    def execute_commands(self):
+    def commands_execution(self, commands):
         '''
         Execute multiple commands
         '''
         # Start an SSH connection
         self.is_connected = self.connect()
         # Execute all of the commands
-        for cmd in self.commands:
+        for cmd in commands:
             self.ssh_session.exec_command(cmd)
             print("[+] Command executed !")
