@@ -9,11 +9,11 @@ print(Gotham_home)
 hostname = "192.168.1.38"
 port = "22"
 username = "rev"
-password = "pass"
+ssh_key_path = Gotham_home+"/Orchestrator/Safe/test_key"
 file_path = Gotham_home+"/Orchestrator/NGINX_scripts/blabla"
 remote_file_path = "/home/rev"
 commands = ["echo 'coucou' > /home/rev/coucou.txt","cat coucou.txt"]
 
 if __name__ == '__main__':
-    send_file(hostname, port, username, password, file_path, remote_file_path)
-    execute_commands(hostname, port, username, password, commands)
+    send_file(hostname, port, username, ssh_key_path, file_path, remote_file_path)
+    execute_commands(hostname, port, username, ssh_key_path, commands)
