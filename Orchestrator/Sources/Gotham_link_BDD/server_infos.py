@@ -7,7 +7,7 @@ def normalize_used_arguments(arg, default_arg):
     else:
         return default_arg
 
-def main(username, password, hostname, port, database, ip="%", id="%", name="%", tag="%", state="%"):
+def main(username, password, hostname, port, database, ip, id, name, tag, state):
     # Frame used arguments with %
     ip = normalize_used_arguments(ip, "%")
     id = normalize_used_arguments(id, "%")
