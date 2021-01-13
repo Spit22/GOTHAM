@@ -6,17 +6,18 @@ Gotham_home = os.environ.get("GOTHAM_HOME")
 print(Gotham_home)
 
 # the data
-#hostname = "192.168.1.38"
-#port = "22"
-#username = "rev"
-#ssh_key = "INSERT KEY HERE"
-#file_path = Gotham_home+"/Orchestrator/NGINX_scripts/blabla"
-#remote_file_path = "/home/rev"
-#commands = ["echo 'coucou' > /home/rev/coucou.txt","cat coucou.txt"]
+ip = ""
+ssh_port = "22"
+ssh_key = ""
 
-def deploy(ip, ssh_port, ssh_key, proxyConfig_file, remote_dest):
+def deploy(ip, ssh_port, ssh_key):
+    # Déclaration des variables globales
+    proxyConfig_file = "/data/template/nginx_rp.conf"
+    remote_dest = "/etc/nginx/sites-available/gotham_rp.conf"
+    commands = ["nginx -t", "systemctl restart nginx"]
+    # Features
     send_file(ip, ssh_port, ssh_key, proxyConfig_file, remote_dest)
     execute_commands(ip, ssh_port, ssh_key, commands)
 
 if __name__ == '__main__':
-    main(ip, ssh_port, ssh_key, proxyConfig_file, remote_dest):
+    main(ip, ssh_port, ssh_key):
