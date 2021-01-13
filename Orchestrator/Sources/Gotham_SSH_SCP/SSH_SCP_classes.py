@@ -7,18 +7,18 @@ class GothamServer:
     This class represents a server being part of the project
     '''
 
-    def __init__(self, hostname, port, username, ssh_key_path):
+    def __init__(self, hostname, port, ssh_key):
         '''
         Initialize a GhotamServer object
         '''
         # SSH credentials (username@hostname)
         self.hostname = hostname
-        self.username = username
+        #self.username = username
         # Remote SSH port
         self.port = port
         # User's password
-        self.ssh_key = None
-        self.ssh_key_path = ssh_key_path
+        self.ssh_key = ssh_key
+        #self.ssh_key_path = ssh_key_path
         # Some variable for class's methods
         self.ssh_session = None
         self.scp_session = None
@@ -30,7 +30,7 @@ class GothamServer:
         '''
         if self.is_connected is False:
             # Init an SSH session
-            self.ssh_key = paramiko.RSAKey.from_private_key_file(self.ssh_key_path)
+            #self.ssh_key = paramiko.RSAKey.from_private_key_file(self.ssh_key_path)
             self.ssh_session = paramiko.SSHClient()
             # Check in known_host file
             self.ssh_session.load_system_host_keys()
