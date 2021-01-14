@@ -17,7 +17,7 @@ class GothamServer:
         # Remote SSH port
         self.port = port
         # User's password
-        self.ssh_key = ssh_key
+        self.ssh_key = paramiko.RSAKey.from_private_key(ssh_key)
         #self.ssh_key_path = ssh_key_path
         # Some variable for class's methods
         self.ssh_session = None
@@ -30,7 +30,6 @@ class GothamServer:
         '''
         if self.is_connected is False:
             # Init an SSH session
-            #self.ssh_key = paramiko.RSAKey.from_private_key_file(self.ssh_key_path)
             self.ssh_session = paramiko.SSHClient()
             # Check in known_host file
             self.ssh_session.load_system_host_keys()
