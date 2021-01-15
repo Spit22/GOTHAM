@@ -7,7 +7,7 @@ def normalize_used_arguments(arg, default_arg):
     else:
         return default_arg
 
-def main(username, password, hostname, port, database, ip, id, name, tag, state):
+def main(DB_username, DB_password, DB_hostname, DB_port, DB_database, ip, id, name, tag, state):
     # Frame used arguments with %
     ip = normalize_used_arguments(ip, "%")
     id = normalize_used_arguments(id, "%")
@@ -17,11 +17,11 @@ def main(username, password, hostname, port, database, ip, id, name, tag, state)
     # Start connection with mariadb server, hosting the internal DB
     try:
         conn = mariadb.connect(
-            user=username,
-            password=password,
-            host=hostname,
-            port=int(port),
-            database=database
+            user=DB_username,
+            password=DB_password,
+            host=DB_hostname,
+            port=int(DB_port),
+            database=DB_database
         )
     except mariadb.Error as e:
         print(f"Error connecting to MariaDB server: {e}")
