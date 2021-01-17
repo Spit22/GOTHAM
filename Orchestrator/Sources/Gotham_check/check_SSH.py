@@ -6,7 +6,7 @@ def main(ip, ssh_port, used_ssh_key):
     command_exec_check = ["echo 'alive' > /tmp/gotham_status && rm -rf /tmp/gotham_status"]
     # Try to execute the commands to the remote server
     try:
-        execute_commands(ip, ssh_port, used_ssh_key, command_exec_check)
+        execute_commands(ip, "192.168.1.171", ssh_port, used_ssh_key, command_exec_check)
     except:
         # If it's not possible, return False
         return False

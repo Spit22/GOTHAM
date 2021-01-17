@@ -23,5 +23,5 @@ print("####################")
 print("####################")
 #print(check_doublon_server(DB_settings, hostname))
 print("####################")
-print(check_doublon_tag(DB_settings, "OpenSSH"))
+print(check_doublon_tag(DB_settings, "DNS"))
 ##########-TESTS-##########
