@@ -9,7 +9,7 @@ def normalize_used_arguments(arg, default_arg):
 
 def main(DB_settings, ip, id, name, tag, state):
     # Frame used arguments with %
-    #ip = normalize_used_arguments(ip, "%")
+    ip = normalize_used_arguments(ip, "%")
     id = normalize_used_arguments(id, "%")
     name = normalize_used_arguments(name, "%")
     tag = normalize_used_arguments(tag, "%")

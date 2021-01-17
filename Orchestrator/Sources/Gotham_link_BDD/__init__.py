@@ -14,6 +14,7 @@ def get_server_infos(DB_settings, ip="%", id="%", name="%", tag="%", state="%"):
 def add_server_DB(DB_settings, server_infos):
     return add_server_in_IDB.main(DB_settings, server_infos)
 
+
 #def add_honeypot_DB(DB_settings, ...):
 
 #def add_link_DB(DB_settings, ...):
