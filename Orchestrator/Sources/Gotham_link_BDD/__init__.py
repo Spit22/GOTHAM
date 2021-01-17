@@ -1,9 +1,12 @@
-from . import server_infos
-from . import add_server_in_IDB
+from . import get_infos
+from . import add_in_IDB
 
 ########## READ IN THE INTERNAL DATABASE ##########
-def get_server_infos(DB_settings, ip="%", id="%", name="%", tag="%", state="%"):
-    return server_infos.main(DB_settings, ip=ip, id=id, name=name, tag=tag, state=state)
+def get_server_infos(DB_settings, mode=False, ip="%", id="%", name="%", tag="%", state="%"):
+    return get_infos.server(DB_settings, mode, ip, id, name, tag, state)
+
+def get_tag_infos(DB_settings, mode=False, tag="%", id="%"):
+    return get_infos.tag(DB_settings, mode, tag, id)
 
 #def get_honeypot_infos(DB_settings, ...):
 
@@ -12,7 +15,7 @@ def get_server_infos(DB_settings, ip="%", id="%", name="%", tag="%", state="%"):
 
 ########## WRITE IN THE INTERNAL DATABASE ##########
 def add_server_DB(DB_settings, server_infos):
-    return add_server_in_IDB.main(DB_settings, server_infos)
+    return add_in_IDB.server(DB_settings, server_infos)
 
 
 #def add_honeypot_DB(DB_settings, ...):
