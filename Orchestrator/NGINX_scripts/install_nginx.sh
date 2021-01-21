@@ -5,13 +5,13 @@
 # Utilisation : ./install_nginx port_RP IP_distante port_distant
 
 # Update
-apt update
+apt update -y
 
 #Install C compiler
-apt install build-essential
+apt install build-essential -y
 
 #Install wget
-apt install wget
+apt install wget -y
 
 # Download and extract NGINX sources
 wget https://nginx.org/download/nginx-1.19.5.tar.gz && tar zxvf nginx-1.19.5.tar.gz
