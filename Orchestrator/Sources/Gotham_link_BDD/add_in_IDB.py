@@ -11,7 +11,7 @@ from . import get_infos
 
 # Retrieve settings from config file
 config = configparser.ConfigParser()
-config.read('Orchestrator/Config/config.ini')
+config.read('/home/vagrant/GOTHAM/git/GOTHAM/Orchestrator/Config/config.ini')
 _separator = config['tag']['separator']
 
 def server(DB_connection, server_infos):
