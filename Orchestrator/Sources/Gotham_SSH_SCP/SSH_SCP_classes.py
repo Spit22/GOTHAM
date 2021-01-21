@@ -18,7 +18,6 @@ class GothamServer:
         self.port = port
         # User's password
         self.ssh_key = paramiko.RSAKey.from_private_key(ssh_key)
-        #self.ssh_key_path = ssh_key_path
         # Some variable for class's methods
         self.ssh_session = None
         self.scp_session = None
@@ -78,5 +77,9 @@ class GothamServer:
         self.is_connected = self.connect()
         # Execute all of the commands
         for cmd in commands:
-            self.ssh_session.exec_command(cmd)
+            stdin, stdout, stderr = self.ssh_session.exec_command(cmd)
+
+            for line in stdout.read().splitlines():
+                print(line)
+
             print("[+] Command executed !")
