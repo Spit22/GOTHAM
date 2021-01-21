@@ -2,15 +2,23 @@
 import flask
 import json
 import uuid
+import base64
 from flask import request, jsonify
+from io import StringIO # a suppr
 
 # GOTHAM'S LIBS
-import add_server 
+import add_server  
+import Gotham_link_BDD
+import Gotham_check
+
 
 app = flask.Flask(__name__)
-app.config["DEBUG"] = True
 
+# Cette section remplace temporairement le fichier de configuration /etc/gotham/orchestrator.conf #
+app.config["DEBUG"] = True
 version = "0.0"
+db_settings = {"username":"root", "password":"password", "hostname":"localhost", "port":"3306", "database":"GOTHAM"}
+###################################################################################################
 
 @app.route('/', methods=['GET'])
 def index():
@@ -41,7 +49,7 @@ def add_hp():
         return "NOT IMPLEMENTED"
 
 @app.route('/add/server', methods=['POST'])
-def add_server():
+def add_srv():
         # Creates a server object
         # 
         # name (string) : nom du serveur
@@ -52,36 +60,53 @@ def add_server():
         # ssh_port (int) : port d'écoute du service SSH 
 
         # Get POST data on JSON format
-        data = request.json
-
-        # Make sure all data are in JSON
-        data = json.loads(data)
+        data = request.get_json()
 
         # Get all function's parameters
-        name = data["name"]
-        descr = data["descr"]
-        tags = data["tags"]
-        ip = data["ip"]
-        ssh_key = data["ssh_key"]
-        ssh_port = data["ssh_port"]
+        try:
+            name = data["name"]
+            descr = data["descr"]
+            tags = data["tags"]
+            ip = data["ip"]
+            encoded_ssh_key = data["ssh_key"]
+            # Decode and format the ssh key
+            ssh_key = base64.b64decode(encoded_ssh_key) # ssh_key is byte
+            ssh_key = ssh_key.decode('ascii') # ssh_key is ascii string
+            check_ssh_key = StringIO(ssh_key) # ssh_key for the check is a file-like object
+            deploy_ssh_key = StringIO(ssh_key) # ssh_key for the deployment is a file-like object
+            ssh_port = data["ssh_port"]
 
-	# On commence par vérifier que l'ip n'existe pas en base
-	if exists:
-		return "Provided ip already exists in database"
+        except Exception as e:
+            return "Invalid data sent "+str(e)
 
-	# On check si les informations de connexion sont bonnes
-	if connexion_error:
-		return "Provided ssh_key or ssh_port is wrong"
+	# First check the ip not already exists in database
+        exists = Gotham_check.check_doublon_server(db_settings, ip)
+        if exists:
+            return "Provided ip already exists in database"
 
-	# On génère un identifiant unique
-	id = 'sv-'+str(uuid.uuid4().hex)
+	# Check given auth information are ok
+        connected = Gotham_check.check_ssh(ip, ssh_port, check_ssh_key)	
+        if not connected:
+            return "Provided ssh_key or ssh_port is wrong"
 
-	# On déploie le Reverse-Proxy sur le serveur
-        add_server.deploy(ip, ssh_port, ssh_key)
+	# If all checks are ok, we can generate a an id for the new server
+        id = 'sv-'+str(uuid.uuid4().hex)
 
-	# On enregistre les données dans la base
+	    # Deploy the reverse-proxy service on the new server
+        try:
+            add_server.deploy(ip, ssh_port, deploy_ssh_key)
+        except Exception as e:
+            return "Something went wrong while deploying Reverse-Proxy"
 
-        return "NOT IMPLEMENTED"
+	# Store new server and tags on the internal database
+        try:
+            sql_data = {'id':str(id),'name':str(name),'descr':str(descr),'tag':str(tags),'ip':str(ip),'ssh_key':str(ssh_key),'ssh_port':str(ssh_port),'state':'INACTIVE'}
+            Gotham_link_BDD.add_server_DB(db_settings, sql_data)
+        except Exception as e:
+            return "Internal database error"
+
+        # If all operations succeed
+        return "OK : "+str(id)
 
 @app.route('/add/link', methods=['POST'])
 def add_link():
