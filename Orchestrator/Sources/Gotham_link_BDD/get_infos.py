@@ -1,11 +1,33 @@
 import mariadb
 import sys
 
+############################### MISCELLANEOUS ###############################
+
 def normalize_used_arguments(arg, default_arg):
     if not(arg == default_arg):
         return "%" + arg + "%"
     else:
         return default_arg
+
+############################### TAG SECTION ###############################
+
+def tag(DB_connection, mode=False, tag='%', id='%'):
+    if mode:
+        tag = normalize_used_arguments(tag, "%")
+        id = normalize_used_arguments(id, "%")
+    # Get MariaDB cursor
+    cur = DB_connection.cursor()
+    # Execute SQL request
+    cur.execute("SELECT * FROM Tags WHERE tag LIKE ? AND id like ?", (tag,id))
+    # Convert answer to JSON
+    row_headers=[x[0] for x in cur.description]
+    rv = cur.fetchall()
+    json_data=[]
+    for result in rv:
+       json_data.append(dict(zip(row_headers,result)))
+    return json_data
+
+############################### SERVER SECTION ###############################
 
 def server(DB_connection, mode=False, ip="%", id="%", name="%", tag="%", state="%"):
     # Frame used arguments with %
@@ -28,19 +50,24 @@ def server(DB_connection, mode=False, ip="%", id="%", name="%", tag="%", state="
     # Before the return, close the connection
     return json_data
 
+############################### HONEYPOT SECTION ###############################
 
-def tag(DB_connection, mode=False, tag='%', id='%'):
+def honeypot(DB_connection, mode=False, id="%", name="%", tag="%", state="%"):
+    # Frame used arguments with %
     if mode:
-        tag = normalize_used_arguments(tag, "%")
         id = normalize_used_arguments(id, "%")
+        name = normalize_used_arguments(name, "%")
+        tag = normalize_used_arguments(tag, "%")
+        state = normalize_used_arguments(state, "%")
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request
-    cur.execute("SELECT * FROM Tags WHERE tag LIKE ? AND id like ?", (tag,id))
+    cur.execute("SELECT * FROM v_hp_full WHERE hp_id LIKE ? AND hp_name LIKE ? AND hp_tags LIKE ? AND hp_state LIKE ?", (id,name,tag,state))
     # Convert answer to JSON
     row_headers=[x[0] for x in cur.description]
     rv = cur.fetchall()
     json_data=[]
     for result in rv:
        json_data.append(dict(zip(row_headers,result)))
+    # Before the return, close the connection
     return json_data
