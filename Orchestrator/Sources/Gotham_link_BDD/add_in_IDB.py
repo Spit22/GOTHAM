@@ -13,7 +13,7 @@ from . import get_infos
 
 # Retrieve settings from config file
 config = configparser.ConfigParser()
-config.read('Orchestrator/Config/config.ini')
+config.read('../Config/config.ini')
 _separator = config['tag']['separator']
 
 def tag(DB_connection, tag):

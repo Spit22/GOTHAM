@@ -92,7 +92,7 @@ def add_srv():
 	# If all checks are ok, we can generate a an id for the new server
         id = 'sv-'+str(uuid.uuid4().hex)
 
-	    # Deploy the reverse-proxy service on the new server
+	# Deploy the reverse-proxy service on the new server
         try:
             add_server.deploy(ip, ssh_port, deploy_ssh_key)
         except Exception as e:
