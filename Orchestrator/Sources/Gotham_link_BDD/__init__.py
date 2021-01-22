@@ -134,4 +134,23 @@ def add_honeypot_DB(DB_settings, hp_infos):
         sys.exit(1)
     return add_in_IDB.honeypot(DB_connection, hp_infos)
 
-#def add_link_DB(DB_settings, ...):
+def add_link_DB(DB_settings, lk_infos):
+    '''
+    Add a link in the internal database and returns a boolean
+
+    ARGUMENTS:
+        DB_settings (dict) : all the settings to connect to the internal database
+        lk_infos (dict) : the informations of the honeypot we want to add in the internal database
+    '''
+    try:
+        DB_connection = mariadb.connect(
+            user=DB_settings["username"],
+            password=DB_settings["password"],
+            host=DB_settings["hostname"],
+            port=int(DB_settings["port"]),
+            database=DB_settings["database"]
+        )
+    except mariadb.Error as e:
+        print(f"Error connecting to MariaDB server: {e}")
+        sys.exit(1)
+    return add_in_IDB.link(DB_connection, lk_infos)

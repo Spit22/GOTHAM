@@ -13,7 +13,7 @@ from . import get_infos
 
 # Retrieve settings from config file
 config = configparser.ConfigParser()
-config.read('../Config/config.ini')
+config.read('Orchestrator/Config/config.ini')
 _separator = config['tag']['separator']
 
 def tag(DB_connection, tag):
@@ -98,15 +98,15 @@ def normalize_dico_honeypot_infos(hp_infos):
     return hp_infos
 
 def honeypot(DB_connection, hp_infos):
-    # Normalize server_infos
+    # Normalize honeypot_infos
     hp_infos = normalize_dico_honeypot_infos(hp_infos)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request
     try:
-        # Insert values in Server table
+        # Insert values in Honeypot table
         cur.execute("INSERT INTO Honeypot (id,name,descr,port,parser,logs,source,id_container,state) VALUES (?,?,?,?,?,?,?,?,?)", (hp_infos["id"], hp_infos["name"], hp_infos["descr"],  hp_infos["port"], hp_infos["parser"],  hp_infos["logs"],  hp_infos["source"], hp_infos["id_container"], hp_infos["state"]))
-        # Then link the tags to the server
+        # Then link the tags to the honeypot
         tag_list = hp_infos['tag'].split(_separator)
         for a_tag in tag_list:
             answer = get_infos.tag(DB_connection, tag=a_tag)
@@ -135,3 +135,82 @@ def hp_tags(DB_connection, tag_id, id_hp):
         print(f"Error inserting data in the database: {e}")
         return False
 
+############################### LINK SECTION ###############################
+
+def normalize_dico_link_infos(lk_infos):
+    default_lk_infos = config['link_infos_default']
+    for key, value in default_lk_infos.items():
+        if value == 'NOT NULL':
+            if not(key in lk_infos):
+                sys.exit("Database error: you must fill this field: "+key)
+            elif(lk_infos[key] == '' or lk_infos[key] == 0):
+                sys.exit("Database error: you must fill this field: "+key)
+        else:
+            if not(key in lk_infos):
+                lk_infos[key] = value
+    return lk_infos
+
+def link(DB_connection, lk_infos):
+    # Normalize link_infos
+    lk_infos = normalize_dico_link_infos(lk_infos)
+    # Get MariaDB cursor
+    cur = DB_connection.cursor()
+    # Execute SQL request
+    try:
+        # Insert values in Link table
+        cur.execute("INSERT INTO Link (id,nb_hp,nb_serv,port) VALUES (?,?,?,?)", (lk_infos["id"], lk_infos["nb_hp"], lk_infos["nb_serv"],  lk_infos["port"]))
+        # Then link the tags to the link
+        tag_hp_list = lk_infos['tag_hp'].split(_separator)
+        tag_serv_list = lk_infos['tag_serv'].split(_separator)
+        # Work on tag_hp_list
+        for a_tag_hp in tag_hp_list:
+            answer = get_infos.tag(DB_connection, tag=a_tag_hp)
+            if answer != []:
+                tag_id = answer[0]['id']
+            # if it is a new tag -> add it in the Tags table
+            else:
+                if tag(DB_connection, a_tag_hp):
+                    answer = get_infos.tag(DB_connection, tag=a_tag_hp)
+                    tag_id = answer[0]['id']
+                else:
+                    sys.exit("Error trying to insert tag_hp in internal database")
+            link_tags_hp(DB_connection, tag_id, lk_infos["id"])
+            DB_connection.commit()
+        # work on tag_serv_list
+        for a_tag_serv in tag_serv_list:
+            answer = get_infos.tag(DB_connection, tag=a_tag_serv)
+            if answer != []:
+                tag_id = answer[0]['id']
+            # if it is a new tag -> add it in the Tags table
+            else:
+                if tag(DB_connection, a_tag_serv):
+                    answer = get_infos.tag(DB_connection, tag=a_tag_serv)
+                    tag_id = answer[0]['id']
+                else:
+                    sys.exit("Error trying to insert tag_serv in internal database")
+            link_tags_serv(DB_connection, tag_id, lk_infos["id"])
+            DB_connection.commit()
+        return True
+    except mariadb.Error as e:
+        print(f"Error inserting data in the database: {e}")
+        return False
+
+def link_tags_hp(DB_connection, tag_id, id_lk):
+    cur = DB_connection.cursor()
+    try:
+        cur.execute("INSERT INTO Link_Tags_hp (id_tag,id_link) VALUES (?,?)", (tag_id,id_lk))
+        DB_connection.commit()
+        return True
+    except mariadb.Error as e:
+        print(f"Error inserting data in the database: {e}")
+        return False
+    
+def link_tags_serv(DB_connection, tag_id, id_lk):
+    cur = DB_connection.cursor()
+    try:
+        cur.execute("INSERT INTO Link_Tags_serv (id_tag,id_link) VALUES (?,?)", (tag_id,id_lk))
+        DB_connection.commit()
+        return True
+    except mariadb.Error as e:
+        print(f"Error inserting data in the database: {e}")
+        return False
