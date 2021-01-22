@@ -2,7 +2,7 @@
 # Import Gotham's libs
 from Gotham_SSH_SCP import send_file_and_execute_commands
 
-def generate_compose(id, dockerfile_path, log_path, honeypot_port, mapped_port):
+def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_port):
     # Generates a docker-compose.yml file  from given information
     #
     # id (string) : id of the honeypot
@@ -29,7 +29,9 @@ def generate_compose(id, dockerfile_path, log_path, honeypot_port, mapped_port):
     dockercompose.write('      dockerfile: Dockerfile\n')
     # Map ports
     dockercompose.write('    ports:\n')
-    dockercompose.write('      - '+str(mapped_port)+':'+str(honeypot_port))
+    dockercompose.write('      - \"'+str(mapped_port)+':'+str(honeypot_port)+"\"\n")
+    # Add a TTY
+    dockercompose.write('    tty: true')
     # Close file
     dockercompose.close()
 
@@ -41,15 +43,17 @@ def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path):
     # used_ssh_key (file-like object) : ssh key used to connect to server
     #
     # Return True if succeed, False in the other case
-
+    dockerfile_path = [ dockerfile_path+"/Dockerfile", dockerfile_path+"/docker-compose.yml" ]
+    print(dockerfile_path)
     # Declare local vars
-    docker_dest = "/tmp/tmpdocker/"
-    command_exec_compose = ["cd "+str(docker_dest),"docker-compose up -d", "rm -rf /tmp/tmpdocker"]
-    
+    docker_dest = "/data/tmp/"
+    command_exec_compose = ["cd "+str(docker_dest),"docker-compose -f "+str(docker_dest)+"/docker-compose.yml  up -d"]
+
     # Copy docker files on datacenter, and execute docker-compose
     try:
         send_file_and_execute_commands(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, docker_dest, command_exec_compose)
     except Exception as e:
+        print(e)
         return False
     # If deployment is OK, return True
     return True
