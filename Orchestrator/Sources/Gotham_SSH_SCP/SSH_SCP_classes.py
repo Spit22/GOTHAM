@@ -55,19 +55,20 @@ class GothamServer:
             self.scp_session.close()
             print("[+] SCP Session closed")
         
-    def upload_file(self, file_path, remote_file_path):
+    def upload_files(self, file_paths, remote_file_path):
         '''
-        Upload a single file to a remote directory
+        Upload files to a remote directory
         '''
         # Start an SCP connection
         self.is_connected = self.connect()
-        # Send the file
-        self.scp_session.put(
-            file_path,
-            recursive = True,
-            remote_path = remote_file_path
-        )
-        print("[+] File Uploaded !")
+        # Send files
+        for file_path in file_paths:
+            self.scp_session.put(
+                file_path,
+                recursive = True,
+                remote_path = remote_file_path
+            )
+            print("[+] File Uploaded !")
         
     def commands_execution(self, commands):
         '''
