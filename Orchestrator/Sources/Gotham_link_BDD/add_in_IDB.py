@@ -105,7 +105,7 @@ def honeypot(DB_connection, hp_infos):
     # Execute SQL request
     try:
         # Insert values in Server table
-        cur.execute("INSERT INTO Honeypot (id,name,descr,parser,logs,source,state) VALUES (?,?,?,?,?,?,?)", (hp_infos["id"], hp_infos["name"], hp_infos["descr"],  hp_infos["parser"],  hp_infos["logs"],  hp_infos["source"],  hp_infos["state"]))
+        cur.execute("INSERT INTO Honeypot (id,name,descr,port,parser,logs,source,id_container,state) VALUES (?,?,?,?,?,?,?)", (hp_infos["id"], hp_infos["name"], hp_infos["descr"],  hp_info["port"], hp_infos["parser"],  hp_infos["logs"],  hp_infos["source"], hp_infos["id_container"], hp_infos["state"]))
         # Then link the tags to the server
         tag_list = hp_infos['tag'].split(_separator)
         for a_tag in tag_list:
