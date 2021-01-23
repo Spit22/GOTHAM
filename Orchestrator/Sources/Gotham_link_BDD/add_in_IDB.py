@@ -13,7 +13,7 @@ from . import get_infos
 
 # Retrieve settings from config file
 config = configparser.ConfigParser()
-config.read('Orchestrator/Config/config.ini')
+config.read('../Config/config.ini')
 _separator = config['tag']['separator']
 
 def tag(DB_connection, tag):
@@ -159,6 +159,7 @@ def link(DB_connection, lk_infos):
     try:
         # Insert values in Link table
         cur.execute("INSERT INTO Link (id,nb_hp,nb_serv) VALUES (?,?,?)", (lk_infos["id"], lk_infos["nb_hp"], lk_infos["nb_serv"]))
+        DB_connection.commit()
         # Then link the tags to the link
         tag_hp_list = lk_infos['tag_hp'].split(_separator)
         tag_serv_list = lk_infos['tag_serv'].split(_separator)
@@ -175,7 +176,6 @@ def link(DB_connection, lk_infos):
                 else:
                     sys.exit("Error trying to insert tag_hp in internal database")
             link_tags_hp(DB_connection, tag_id, lk_infos["id"])
-            DB_connection.commit()
         # work on tag_serv_list
         for a_tag_serv in tag_serv_list:
             answer = get_infos.tag(DB_connection, tag=a_tag_serv)
@@ -189,7 +189,6 @@ def link(DB_connection, lk_infos):
                 else:
                     sys.exit("Error trying to insert tag_serv in internal database")
             link_tags_serv(DB_connection, tag_id, lk_infos["id"])
-            DB_connection.commit()
         return True
     except mariadb.Error as e:
         print(f"Error inserting data in the database: {e}")
@@ -215,3 +214,33 @@ def link_tags_serv(DB_connection, tag_id, id_lk):
         print(f"Error inserting data in the database: {e}")
         return False
 
+
+############################### LHS SECTION ###############################
+
+def normalize_dico_lhs_infos(lhs_infos):
+    default_lhs_infos = {"id_lk":"NOT NULL","id_hp":"NOT NULL","id_serv":"NOT NULL","port":"NOT NULL"}
+    for key, value in default_lhs_infos.items():
+        if value == 'NOT NULL':
+            if not(key in lhs_infos):
+                sys.exit("Database error: you must fill this field: "+key)
+            elif(lhs_infos[key] == '' or lhs_infos[key] == 0):
+                sys.exit("Database error: you must fill this field: "+key)
+        else:
+            if not(key in lhs_infos):
+                lhs_infos[key] = value
+    return lhs_infos
+
+def link_hp_serv(DB_connection, lhs_infos):
+    # Normalize lhs_infos
+    lhs_infos = normalize_dico_lhs_infos(lhs_infos)
+    # Get MariaDB cursor
+    cur = DB_connection.cursor()
+    # Execute SQL request
+    try:
+        # Insert values in Link_Hp_Serv table
+        cur.execute("INSERT INTO Link_Hp_Serv (id_link,id_hp,id_serv,port) VALUES (?,?,?,?)", (lhs_infos["id_lk"], lhs_infos["id_hp"], lhs_infos["id_serv"], lhs_infos["port"]))
+        DB_connection.commit()
+        return True
+    except mariadb.Error as e:
+        print(f"Error inserting data in the database: {e}")
+        return False

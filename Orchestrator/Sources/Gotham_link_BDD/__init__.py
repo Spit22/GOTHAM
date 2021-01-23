@@ -154,3 +154,25 @@ def add_link_DB(DB_settings, lk_infos):
         print(f"Error connecting to MariaDB server: {e}")
         sys.exit(1)
     return add_in_IDB.link(DB_connection, lk_infos)
+
+
+def add_lhs_DB(DB_settings, lhs_infos):
+    '''
+    Add a link-honeypot-server combination in the internal database and returns a boolean
+
+    ARGUMENTS:
+        DB_settings (dict) : all the settings to connect to the internal database
+        lhs_infos (dict) : the informations of the combination we want to add in the internal database
+    '''
+    try:
+        DB_connection = mariadb.connect(
+            user=DB_settings["username"],
+            password=DB_settings["password"],
+            host=DB_settings["hostname"],
+            port=int(DB_settings["port"]),
+            database=DB_settings["database"]
+        )
+    except mariadb.Error as e:
+        print(f"Error connecting to MariaDB server: {e}")
+        sys.exit(1)
+    return add_in_IDB.link_hp_serv(DB_connection, lhs_infos)
