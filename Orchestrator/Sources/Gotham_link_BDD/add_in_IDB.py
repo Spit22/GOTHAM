@@ -158,7 +158,7 @@ def link(DB_connection, lk_infos):
     # Execute SQL request
     try:
         # Insert values in Link table
-        cur.execute("INSERT INTO Link (id,nb_hp,nb_serv,port) VALUES (?,?,?,?)", (lk_infos["id"], lk_infos["nb_hp"], lk_infos["nb_serv"],  lk_infos["port"]))
+        cur.execute("INSERT INTO Link (id,nb_hp,nb_serv) VALUES (?,?,?)", (lk_infos["id"], lk_infos["nb_hp"], lk_infos["nb_serv"]))
         # Then link the tags to the link
         tag_hp_list = lk_infos['tag_hp'].split(_separator)
         tag_serv_list = lk_infos['tag_serv'].split(_separator)
@@ -214,3 +214,4 @@ def link_tags_serv(DB_connection, tag_id, id_lk):
     except mariadb.Error as e:
         print(f"Error inserting data in the database: {e}")
         return False
+
