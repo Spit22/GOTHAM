@@ -4,7 +4,7 @@ from . import get_infos
 from . import add_in_IDB
 
 ########## READ IN THE INTERNAL DATABASE ##########
-def get_server_infos(DB_settings, mode=False, ip="%", id="%", name="%", tag="%", state="%", descr="%", ssh_port="%"):
+def get_server_infos(DB_settings, mode=False, ip="%", id="%", name="%", tags="%", state="%", descr="%", ssh_port="%"):
     '''
     Retrieve a JSON with all the data of one or several servers from the internal database
 
@@ -28,11 +28,11 @@ def get_server_infos(DB_settings, mode=False, ip="%", id="%", name="%", tag="%",
     except mariadb.Error as e:
         print(f"Error connecting to MariaDB server: {e}")
         sys.exit(1)
-    result = get_infos.server(DB_connection, mode, ip, id, name, tag, state, descr, ssh_port)
+    result = get_infos.server(DB_connection, mode, ip, id, name, tags, state, descr, ssh_port)
     DB_connection.close()
     return result
 
-def get_honeypot_infos(DB_settings, mode=False, id="%", name="%", tag="%", state="%", descr="%", port="%", parser="%", logs="%", source="%", id_container="%"):
+def get_honeypot_infos(DB_settings, mode=False, id="%", name="%", tags="%", state="%", descr="%", port="%", parser="%", logs="%", source="%", id_container="%"):
     '''
     Retrieve a JSON with all the data of one or several servers from the internal database
 
@@ -56,9 +56,33 @@ def get_honeypot_infos(DB_settings, mode=False, id="%", name="%", tag="%", state
     except mariadb.Error as e:
         print(f"Error connecting to MariaDB server: {e}")
         sys.exit(1)
-    result = get_infos.honeypot(DB_connection, mode, id, name, tag, state, descr, port, parser, logs, source, id_container)
+    result = get_infos.honeypot(DB_connection, mode, id, name, tags, state, descr, port, parser, logs, source, id_container)
     DB_connection.close()
     return result
+
+def get_link_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="%", tags_hp="%", tags_serv="%"):
+    '''
+    Retrieve a JSON with all the data of one or several servers from the internal database
+
+    ARGUMENTS:
+        DB_settings (dict) : all the settings to connect to the internal database
+       
+    '''
+    try:
+        DB_connection = mariadb.connect(
+            user=DB_settings["username"],
+            password=DB_settings["password"],
+            host=DB_settings["hostname"],
+            port=int(DB_settings["port"]),
+            database=DB_settings["database"]
+        )
+    except mariadb.Error as e:
+        print(f"Error connecting to MariaDB server: {e}")
+        sys.exit(1)
+    result = get_infos.link(DB_connection, mode, id, nb_hp, nb_serv, tags_hp, tags_serv)
+    DB_connection.close()
+    return result
+
 
 def get_tag_infos(DB_settings, mode=False, tag="%", id="%"):
     '''

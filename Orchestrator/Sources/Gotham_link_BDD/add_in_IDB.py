@@ -3,7 +3,6 @@ import mariadb
 import sys
 import os
 import configparser
-import sys
 
 from . import get_infos
 
@@ -53,8 +52,9 @@ def server(DB_connection, server_infos):
     try:
         # Insert values in Server table
         cur.execute("INSERT INTO Server (id,name,descr,ip,ssh_key,ssh_port,state) VALUES (?,?,?,?,?,?,?)", (server_infos["id"], server_infos["name"], server_infos["descr"],  server_infos["ip"],  server_infos["ssh_key"],  server_infos["ssh_port"],  server_infos["state"]))
+        DB_connection.commit()
         # Then link the tags to the server
-        tag_list = server_infos['tag'].split(_separator)
+        tag_list = server_infos['tags'].split(_separator)
         for a_tag in tag_list:
             answer = get_infos.tag(DB_connection, tag=a_tag)
             if answer != []:
@@ -66,7 +66,6 @@ def server(DB_connection, server_infos):
                 else:
                     sys.exit("Error trying to insert tag in internal database")
             serv_tags(DB_connection, tag_id, server_infos["id"])
-            DB_connection.commit()
         return True
     except mariadb.Error as e:
         print(f"Error inserting data in the database: {e}")
@@ -106,8 +105,9 @@ def honeypot(DB_connection, hp_infos):
     try:
         # Insert values in Honeypot table
         cur.execute("INSERT INTO Honeypot (id,name,descr,port,parser,logs,source,id_container,state) VALUES (?,?,?,?,?,?,?,?,?)", (hp_infos["id"], hp_infos["name"], hp_infos["descr"],  hp_infos["port"], hp_infos["parser"],  hp_infos["logs"],  hp_infos["source"], hp_infos["id_container"], hp_infos["state"]))
+        DB_connection.commit()
         # Then link the tags to the honeypot
-        tag_list = hp_infos['tag'].split(_separator)
+        tag_list = hp_infos['tags'].split(_separator)
         for a_tag in tag_list:
             answer = get_infos.tag(DB_connection, tag=a_tag)
             if answer != []:
@@ -119,7 +119,6 @@ def honeypot(DB_connection, hp_infos):
                 else:
                     sys.exit("Error trying to insert tag in internal database")
             hp_tags(DB_connection, tag_id, hp_infos["id"])
-            DB_connection.commit()
         return True
     except mariadb.Error as e:
         print(f"Error inserting data in the database: {e}")
@@ -161,8 +160,8 @@ def link(DB_connection, lk_infos):
         cur.execute("INSERT INTO Link (id,nb_hp,nb_serv) VALUES (?,?,?)", (lk_infos["id"], lk_infos["nb_hp"], lk_infos["nb_serv"]))
         DB_connection.commit()
         # Then link the tags to the link
-        tag_hp_list = lk_infos['tag_hp'].split(_separator)
-        tag_serv_list = lk_infos['tag_serv'].split(_separator)
+        tag_hp_list = lk_infos['tags_hp'].split(_separator)
+        tag_serv_list = lk_infos['tags_serv'].split(_separator)
         # Work on tag_hp_list
         for a_tag_hp in tag_hp_list:
             answer = get_infos.tag(DB_connection, tag=a_tag_hp)

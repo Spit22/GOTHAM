@@ -1,6 +1,39 @@
-from Gotham_link_BDD import add_link_DB
+from Gotham_link_BDD import get_server_infos,get_honeypot_infos,get_tag_infos,add_server_DB,add_honeypot_DB,add_link_DB,add_lhs_DB,get_link_infos
 
-db_settings = {"username":"gotham", "password":"password", "hostname":"192.168.1.172", "port":"3306", "database":"GOTHAM"}
-lk_infos = {"id":"lk-1B5B3A1E32EE11EBB1F25E22FC2CA667", "nb_hp": 4, "nb_serv": 2, "port": 66, "tag_hp":"OpenSSH,SSH,Elasticsearch", "tag_serv":"Europe,Suisse,Geneve"}
 
-print(add_link_DB(db_settings, lk_infos))
+DB_settings = {"username":"gotham", "password":"password", "hostname":"localhost", "port":"3306", "database":"gotham"}
+lk_infos = {"id":"lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F", "nb_hp": 4, "nb_serv": 2, "tags_hp":"OpenSSH,SSH,Elasticsearch", "tags_serv":"Europe,Suisse,Geneve,TagDeTest42,TagDeTest4254,TagDeTest427"}
+# Server settings
+server_infos = {"ip":"172.0.0.2", "id":"sv-71F6EFA6F2FF11EB830EF9FEFD2CA37F", "name":"", "tags":"Europe", "state":"TO_ADD" }
+recordings = {'id':'sv-62323F6F323F38F42d656DF86466666F','name':'serveur-test-6','descr':'blabla','tags':'Europe,France,SSH,TestTag,TagDeTest4TesTag666','ip':'98.254.99.99','ssh_key':'non','ssh_port':'22','state':'to add'}
+honeypot_infos = {"id":"hp-1F5B3AFE32EE71EFB1D25EFFFC2CA69F", 'name':'hp-test-6','descr':'blabla','tags':'TestTag22,TesTag666,TagDeTest42', 'port':22,'parser':'TO_ADD','logs':'TO_ADD','source':"TO_ADD", "id_container":"FABC12345678",'state':'to add'}
+##########-SETTINGS-##########
+
+
+##########-TESTS-##########
+print("########## ########## TEST ########## ##########")
+print("########## Add server ##########")
+print(add_server_DB(DB_settings, recordings))
+print("########## Add Honeypot ##########")
+print(add_honeypot_DB(DB_settings, honeypot_infos))
+print("########## Add link ##########")
+print(add_link_DB(DB_settings, lk_infos))
+print("########## Get server infos tag false ##########")
+print(get_server_infos(DB_settings, mode=False, tags=recordings["tags"]))
+print("########## Get server infos tag true ##########")
+print(get_server_infos(DB_settings, mode=True, tags=recordings["tags"]))
+print("########## Get server infos ip ##########")
+print(get_server_infos(DB_settings, mode=True, ip=server_infos["ip"]))
+print("########## Get tag infos id ##########")
+print(get_tag_infos(DB_settings, id="1"))
+print("########## Get Honeypot infos tag ##########")
+print(get_honeypot_infos(DB_settings, tags=honeypot_infos["tags"]))
+print("########## Get Honeypot infos port ##########")
+print(get_honeypot_infos(DB_settings, mode=True, port=honeypot_infos["port"]))
+print("########## Get link infos tag ##########")
+print(get_link_infos(DB_settings, tags_hp=lk_infos["tags_hp"]))
+print("########## Get link infos id ##########")
+print(get_link_infos(DB_settings, mode=True, id=lk_infos["id"]))
+print("####################")
+##########-TESTS-##########
+
