@@ -7,7 +7,7 @@
   `parser` text NOT NULL,
   `logs` varchar(255) NOT NULL,
   `source` varchar(255) NOT NULL,
-  `id_container` char(12) DEFAULT NULL,
+  `port_container` char(12) DEFAULT NULL,
   `state` varchar(10) DEFAULT NULL,
 
 # Link
@@ -92,14 +92,8 @@ def normalize_state(type, state):
         sys.exit("Error in state : state not available")
     return state
 
-def normalize_id_container(id_container):
-    if len(id_container) != 12:
-        sys.exit("Error in id_container : bad length")
-    try:
-        int(id_container, 16)
-    except:
-        sys.exit("Error in id_container : not hexadecimal")
-    return id_container
+def normalize_port_container(port_container):
+    return normalize_port(port_container)
 
 def normalize_ip(ip):
     if not(re.match(r"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$", ip)):

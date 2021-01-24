@@ -32,7 +32,7 @@ def get_server_infos(DB_settings, mode=False, ip="%", id="%", name="%", tags="%"
     DB_connection.close()
     return result
 
-def get_honeypot_infos(DB_settings, mode=False, id="%", name="%", tags="%", state="%", descr="%", port="%", parser="%", logs="%", source="%", id_container="%"):
+def get_honeypot_infos(DB_settings, mode=False, id="%", name="%", tags="%", state="%", descr="%", port="%", parser="%", logs="%", source="%", port_container="%"):
     '''
     Retrieve a JSON with all the data of one or several servers from the internal database
 
@@ -56,7 +56,7 @@ def get_honeypot_infos(DB_settings, mode=False, id="%", name="%", tags="%", stat
     except mariadb.Error as e:
         print(f"Error connecting to MariaDB server: {e}")
         sys.exit(1)
-    result = get_infos.honeypot(DB_connection, mode, id, name, tags, state, descr, port, parser, logs, source, id_container)
+    result = get_infos.honeypot(DB_connection, mode, id, name, tags, state, descr, port, parser, logs, source, port_container)
     DB_connection.close()
     return result
 
