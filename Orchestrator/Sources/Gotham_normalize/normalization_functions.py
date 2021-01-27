@@ -29,6 +29,7 @@
 import sys
 import re
 import configparser
+import os
 
 
 def normalize_id(type, id):
@@ -81,8 +82,10 @@ def normalize_source(source):
 
 def normalize_state(type, state):
     state = state.upper()
+    GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+    # Retrieve settings from config file
     config = configparser.ConfigParser()
-    config.read('../Config/config.ini')
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     available_state_list = config['state'][type+'_state'].split(',')
     if len(state) > 10:
         sys.exit("Error in state : too long")
@@ -125,9 +128,10 @@ def normalize_nb_serv(nb_serv):
     return int(nb_serv)
 
 def normalize_tags(tags):
+    GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
     # Retrieve settings from config file
     config = configparser.ConfigParser()
-    config.read('../Config/config.ini')
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     separator = config['tag']['separator']
     tags_list = tags.split(separator)
     res = ''
@@ -140,9 +144,10 @@ def normalize_tags(tags):
     return res
 
 def normalize_ports(ports):
+    GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
     # Retrieve settings from config file
     config = configparser.ConfigParser()
-    config.read('../Config/config.ini')
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     separator = config['tag']['separator']
     ports_list = ports.split(separator)
     res = ''

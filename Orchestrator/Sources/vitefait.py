@@ -1,7 +1,7 @@
 from Gotham_link_BDD import get_server_infos,get_honeypot_infos,get_tag_infos,add_server_DB,add_honeypot_DB,add_link_DB,add_lhs_DB,get_link_infos
 from Gotham_normalize import normalize_honeypot_infos,normalize_server_infos,normalize_link_infos
 
-DB_settings = {"username":"gotham", "password":"password", "hostname":"localhost", "port":"3306", "database":"gotham"}
+DB_settings = {"username":"gotham", "password":"password", "hostname":"192.168.1.172", "port":"3306", "database":"GOTHAM"}
 lk_infos = {"id":"lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F", "nb_hp": 4, "nb_serv": 2, "tags_hp":"OpenSSH,SSH,Elasticsearch", "tags_serv":"Europe,Suisse,Geneve,TagDeTest42,TagDeTest4254,TagDeTest427"}
 lk_port_infos = {"id":"lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F", "nb_hp": 4, "nb_serv": 2, "tags_hp":"OpenSSH,SSH,Elasticsearch", "tags_serv":"Europe ,  suisse,  geneve,TagDeTest42,TagDeTest4254,TagDeTest427","ports":"22, 189  ,  469,6484,88"}
 # Server settings
