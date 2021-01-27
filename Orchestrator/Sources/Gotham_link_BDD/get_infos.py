@@ -2,10 +2,14 @@ import mariadb
 import sys
 import configparser
 import re
+import os
+
+# Set the path of the home directory of GOTHAM
+GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 
 # Retrieve settings from config file
 config = configparser.ConfigParser()
-config.read('../Config/config.ini')
+config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
 _separator = config['tag']['separator']
 
 ############################### MISCELLANEOUS ###############################

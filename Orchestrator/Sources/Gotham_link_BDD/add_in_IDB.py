@@ -6,14 +6,15 @@ import configparser
 
 from . import get_infos
 
-#sys.path.append('/home/spitfire/GOTHAM/Orchestrator/Sources')
-
-############################### TAG SECTION ###############################
+# Set the path of the home directory of GOTHAM
+GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 
 # Retrieve settings from config file
 config = configparser.ConfigParser()
-config.read('../Config/config.ini')
+config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
 _separator = config['tag']['separator']
+
+############################### TAG SECTION ###############################
 
 def tag(DB_connection, tag):
     # Get MariaDB cursor
