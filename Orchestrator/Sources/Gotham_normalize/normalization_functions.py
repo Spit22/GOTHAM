@@ -1,68 +1,46 @@
-'''
-#Honeypot
-  `id` varchar(35) NOT NULL,
-  `name` varchar(128) NOT NULL,
-  `descr` text DEFAULT NULL,
-  `port` int(5) DEFAULT NULL,
-  `parser` text NOT NULL,
-  `logs` varchar(255) NOT NULL,
-  `source` varchar(255) NOT NULL,
-  `port_container` char(12) DEFAULT NULL,
-  `state` varchar(10) DEFAULT NULL,
-
-# Link
-  `id` varchar(35) NOT NULL,
-  `nb_hp` int(5) NOT NULL,
-  `nb_serv` int(5) NOT NULL,
-
-# Server
-  `id` varchar(35) NOT NULL,
-  `name` varchar(128) NOT NULL,
-  `descr` text DEFAULT NULL,
-  `ip` varchar(15) NOT NULL,
-  `ssh_port` int(5) NOT NULL DEFAULT 22,
-  `state` varchar(10) DEFAULT NULL,
-
-# Tags
-  `tag` varchar(22) NOT NULL,
-'''
 import sys
 import re
 import configparser
 import os
 
+# Logging components
+import os
+import logging
+GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+
 
 def normalize_id(type, id):
     if not(id[:3] == (type + '-')):
-        sys.exit("Error in id header")
+        logging.warning(f"id type doesn't match: {id}")
     try:
         int(id[3:], 16)
     except:
-        sys.exit("Error in id content: not hexadecimal")
+        logging.warning(f"id has a invalid type : {id} : id must be an interger !")
     if len(id) != 35:
-        sys.exit("Error in id : invalid length")
+        logging.warning(f"id has a invalid length : {id} : the length of the id must be 35 !")
     return id
 
 def normalize_name(name):
     if len(name) > 128:
-        sys.exit("Error in name : too long")
+        logging.warning(f"name has a invalid length : {name} : name length must be under 128 !")
     if not(re.match(r"^[a-zA-Z0-9_\-]*$", name)):
-        sys.exit("Error in name : invalid syntax")
+        logging.warning(f"name has a invalid syntax : {name}")
     return name
     
 def normalize_descr(descr):
     if not(re.match(r"^[a-zA-Z0-9_\-\s]*$", descr)):
-        sys.exit("Error in name : invalid syntax")
+        logging.warning(f"descr has a invalid syntax : {descr}")
     return descr
 
 def normalize_port(port):
     try:
         int(port)
     except:
-        sys.exit("Error in port : not an interger")
+        logging.warning(f"port has a invalid type : {port} : port must be an interger !")
     port = int(port)
     if (port < 0) or (port > 65536):
-        sys.exit("Error in port : invalid")
+        logging.warning(f"id has a invalid value : {id} : port must be between 0 and 65536 !")
     return port
 
 def normalize_parser(parser):
@@ -70,15 +48,15 @@ def normalize_parser(parser):
 
 def normalize_logs(logs):
     if len(logs) > 255:
-        sys.exit("Error in logs : too long")
+        logging.warning(f"log path has a invalid length : {logs} : log path length must be under 255 !")
     if not(re.match(r"^[a-zA-Z0-9_/:\"\-\s]*$", logs)):
-        sys.exit("Error in logs : not a path")
+        logging.warning(f"log path has a invalid syntax : {logs}")
     
 def normalize_source(source):
     if len(source) > 255:
-        sys.exit("Error in source : too long")
+        logging.warning(f"source path has a invalid length : {source} : source length must be under 255 !")
     if not(re.match(r"^[a-zA-Z0-9_/:\"\-\s]*$", source)):
-        sys.exit("Error in source : not a path")
+        logging.warning(f"source has a invalid syntax : {source}")
 
 def normalize_state(type, state):
     state = state.upper()
@@ -88,11 +66,11 @@ def normalize_state(type, state):
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     available_state_list = config['state'][type+'_state'].split(',')
     if len(state) > 10:
-        sys.exit("Error in state : too long")
+        logging.warning(f"state has a invalid length : {state} : state length must be under 10 !")
     if not(re.match(r"^[A-Z]*$", state)):
-        sys.exit("Error in state : invalid syntax")
+        logging.warning(f"state has a invalid syntax : {state}")
     if not(state in available_state_list):
-        sys.exit("Error in state : state not available")
+        logging.warning(f"state is not available : {state} : check the configuration")
     return state
 
 def normalize_port_container(port_container):
@@ -100,7 +78,7 @@ def normalize_port_container(port_container):
 
 def normalize_ip(ip):
     if not(re.match(r"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$", ip)):
-        sys.exit("Error in ip : invalid syntax")
+        logging.warning(f"ip has a invalid syntax : {ip}")
     return ip
 
 def normalize_ssh_port(ssh_port):
@@ -111,20 +89,20 @@ def normalize_ssh_key(ssh_key):
 
 def normalize_nb_hp(nb_hp):
     if len(str(nb_hp)) > 5:
-        sys.exit("Error in nb_hp : bad length")
+        logging.warning(f"Number of honeypots (nb_hp) has a invalid length : {nb_hp} : nb_hp length must be under 5 !")
     try:
         int(nb_hp)
     except:
-        sys.exit("Error in nb_hp : not an integer")
+        logging.warning(f"Number of honeypots (nb_hp) has a invalid type : {nb_hp} : nb_hp must be an interger !")
     return int(nb_hp)
 
 def normalize_nb_serv(nb_serv):
     if len(str(nb_serv)) > 5:
-        sys.exit("Error in nb_serv : bad length")
+        logging.warning(f"Number of servers (nb_serv) has a invalid length : {nb_serv} : nb_hp length must be under 5 !")
     try:
         int(nb_serv)
     except:
-        sys.exit("Error in nb_serv : not an integer")
+        logging.warning(f"Number of servers (nb_serv) has a invalid type : {nb_serv} : nb_serv must be an interger !")
     return int(nb_serv)
 
 def normalize_tags(tags):
@@ -164,7 +142,7 @@ def normalize_tag(tag):
     tag = tag.strip()
     tag = tag[0].upper() + tag[1:]
     if not(re.match(r"^[a-zA-Z0-9_\-]*$", tag)):
-        sys.exit("Error in tags : invalid syntax")
+        logging.warning(f"tag has a invalid syntax : {tag}")
     return tag
 
 

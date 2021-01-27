@@ -1,5 +1,8 @@
-from Gotham_link_BDD import get_server_infos,get_honeypot_infos,get_tag_infos,add_server_DB,add_honeypot_DB,add_link_DB,add_lhs_DB,get_link_infos
+from Gotham_link_BDD import get_server_infos,get_honeypot_infos,get_tag_infos,get_link_infos
+from Gotham_link_BDD import add_server_DB,add_honeypot_DB,add_link_DB,add_lhs_DB
 from Gotham_normalize import normalize_honeypot_infos,normalize_server_infos,normalize_link_infos
+from Gotham_check import check_used_port, check_ssh
+import mariadb
 
 DB_settings = {"username":"gotham", "password":"password", "hostname":"192.168.1.172", "port":"3306", "database":"GOTHAM"}
 lk_infos = {"id":"lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F", "nb_hp": 4, "nb_serv": 2, "tags_hp":"OpenSSH,SSH,Elasticsearch", "tags_serv":"Europe,Suisse,Geneve,TagDeTest42,TagDeTest4254,TagDeTest427"}
@@ -10,7 +13,7 @@ recordings = {'id':'sv-62323F6F323F38F42d656DF86466666F','name':'serveur-test-6'
 honeypot_infos = {"id":"hp-1F5B3AFE32EE71EFB1D25EFFFC2CA69F", 'name':'hp-test-6','tags':'TestTag22,TesTag666,TagDeTest42', 'port':22,'parser':'TO_ADD','logs':'TO_ADD','source':"TO_ADD", "port_container":22,'state':'UNUSED'}
 ##########-SETTINGS-##########
 
-
+'''
 ##########-TESTS-##########
 print("########## ########## TEST LINK BDD########## ##########")
 print("########## Add server ##########")
@@ -45,4 +48,5 @@ print(normalize_server_infos(recordings))
 print("########## Normalize Link ##########")
 print(normalize_link_infos(lk_port_infos))
 ##########-TESTS-##########
-
+'''
+print(check_ssh('192.168.1.16', 22, 'uubb'))

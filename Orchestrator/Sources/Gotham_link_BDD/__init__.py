@@ -3,6 +3,12 @@ import sys
 from . import get_infos
 from . import add_in_IDB
 
+# Logging components
+import os
+import logging
+GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+
 ########## READ IN THE INTERNAL DATABASE ##########
 def get_server_infos(DB_settings, mode=False, ip="%", id="%", name="%", tags="%", state="%", descr="%", ssh_port="%"):
     '''
@@ -26,7 +32,7 @@ def get_server_infos(DB_settings, mode=False, ip="%", id="%", name="%", tags="%"
             database=DB_settings["database"]
         )
     except mariadb.Error as e:
-        print(f"Error connecting to MariaDB server: {e}")
+        logging.error(f"Can't connect to the internal database : {e}")
         sys.exit(1)
     result = get_infos.server(DB_connection, mode, ip, id, name, tags, state, descr, ssh_port)
     DB_connection.close()
@@ -54,7 +60,7 @@ def get_honeypot_infos(DB_settings, mode=False, id="%", name="%", tags="%", stat
             database=DB_settings["database"]
         )
     except mariadb.Error as e:
-        print(f"Error connecting to MariaDB server: {e}")
+        logging.error(f"Can't connect to the internal database : {e}")
         sys.exit(1)
     result = get_infos.honeypot(DB_connection, mode, id, name, tags, state, descr, port, parser, logs, source, port_container)
     DB_connection.close()
@@ -77,7 +83,7 @@ def get_link_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="%", tags
             database=DB_settings["database"]
         )
     except mariadb.Error as e:
-        print(f"Error connecting to MariaDB server: {e}")
+        logging.error(f"Can't connect to the internal database : {e}")
         sys.exit(1)
     result = get_infos.link(DB_connection, mode, id, nb_hp, nb_serv, tags_hp, tags_serv)
     DB_connection.close()
@@ -103,7 +109,7 @@ def get_tag_infos(DB_settings, mode=False, tag="%", id="%"):
             database=DB_settings["database"]
         )
     except mariadb.Error as e:
-        print(f"Error connecting to MariaDB server: {e}")
+        logging.error(f"Can't connect to the internal database : {e}")
         sys.exit(1)
     result = get_infos.tag(DB_connection, mode, tag, id)
     DB_connection.close()
@@ -132,7 +138,7 @@ def add_server_DB(DB_settings, server_infos):
             database=DB_settings["database"]
         )
     except mariadb.Error as e:
-        print(f"Error connecting to MariaDB server: {e}")
+        logging.error(f"Can't connect to the internal database : {e}")
         sys.exit(1)
     return add_in_IDB.server(DB_connection, server_infos)
 
@@ -154,7 +160,7 @@ def add_honeypot_DB(DB_settings, hp_infos):
             database=DB_settings["database"]
         )
     except mariadb.Error as e:
-        print(f"Error connecting to MariaDB server: {e}")
+        logging.error(f"Can't connect to the internal database : {e}")
         sys.exit(1)
     return add_in_IDB.honeypot(DB_connection, hp_infos)
 
@@ -175,7 +181,7 @@ def add_link_DB(DB_settings, lk_infos):
             database=DB_settings["database"]
         )
     except mariadb.Error as e:
-        print(f"Error connecting to MariaDB server: {e}")
+        logging.error(f"Can't connect to the internal database : {e}")
         sys.exit(1)
     return add_in_IDB.link(DB_connection, lk_infos)
 
@@ -197,6 +203,6 @@ def add_lhs_DB(DB_settings, lhs_infos):
             database=DB_settings["database"]
         )
     except mariadb.Error as e:
-        print(f"Error connecting to MariaDB server: {e}")
+        logging.error(f"Can't connect to the internal database : {e}")
         sys.exit(1)
     return add_in_IDB.link_hp_serv(DB_connection, lhs_infos)

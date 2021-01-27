@@ -5,6 +5,12 @@ from . import check_USED_PORT
 import mariadb
 import sys
 
+# Logging components
+import os
+import logging
+GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+
 def check_ssh(ip, ssh_port, ssh_key):
     '''
     Check if the orchestrator is able to connect to the server
@@ -55,7 +61,7 @@ def check_used_port(DB_settings):
             database=DB_settings["database"]
         )
     except mariadb.Error as e:
-        print(f"Error connecting to MariaDB server: {e}")
+        logging.error(f"Can't connect to the internal database : {e}")
         sys.exit(1)
     result = check_USED_PORT.get_used_port(DB_connection)
     DB_connection.close()

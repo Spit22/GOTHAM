@@ -1,13 +1,15 @@
 
 import mariadb
 import sys
-import os
 import configparser
 
 from . import get_infos
 
-# Set the path of the home directory of GOTHAM
+# Logging components
+import os
+import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
 # Retrieve settings from config file
 config = configparser.ConfigParser()
@@ -25,7 +27,7 @@ def tag(DB_connection, tag):
         DB_connection.commit()
         return True
     except mariadb.Error as e:
-        print(f"[+]Error inserting data in the database: {e}")
+        logging.error(f"Can't insert tag '{tag}' in the internal database : {e}")
         return False
 
 
@@ -69,7 +71,7 @@ def server(DB_connection, server_infos):
             serv_tags(DB_connection, tag_id, server_infos["id"])
         return True
     except mariadb.Error as e:
-        print(f"Error inserting data in the database: {e}")
+        logging.error(f"Can't insert server '{server_infos['ip']}' in the internal database : {e}")
         return False
 
 def serv_tags(DB_connection, tag_id, id_serv):
@@ -79,7 +81,7 @@ def serv_tags(DB_connection, tag_id, id_serv):
         DB_connection.commit()
         return True
     except mariadb.Error as e:
-        print(f"Error inserting data in the database: {e}")
+        logging.error(f"Can't insert serv_tag '{tag_id} -- {id_serv}' in the internal database : {e}")
         return False
 
 ############################### HONEYPOT SECTION ###############################
@@ -122,7 +124,7 @@ def honeypot(DB_connection, hp_infos):
             hp_tags(DB_connection, tag_id, hp_infos["id"])
         return True
     except mariadb.Error as e:
-        print(f"Error inserting data in the database: {e}")
+        logging.error(f"Can't insert honeypot '{hp_infos['name']}' in the internal database : {e}")
         return False
 
 def hp_tags(DB_connection, tag_id, id_hp):
@@ -132,7 +134,7 @@ def hp_tags(DB_connection, tag_id, id_hp):
         DB_connection.commit()
         return True
     except mariadb.Error as e:
-        print(f"Error inserting data in the database: {e}")
+        logging.error(f"Can't insert hp_tag '{tag_id} -- {id_hp}' in the internal database : {e}")
         return False
 
 ############################### LINK SECTION ###############################
@@ -191,7 +193,7 @@ def link(DB_connection, lk_infos):
             link_tags_serv(DB_connection, tag_id, lk_infos["id"])
         return True
     except mariadb.Error as e:
-        print(f"Error inserting data in the database: {e}")
+        logging.error(f"Can't insert link '{lk_infos['id']}' in the internal database : {e}")
         return False
 
 def link_tags_hp(DB_connection, tag_id, id_lk):
@@ -201,7 +203,7 @@ def link_tags_hp(DB_connection, tag_id, id_lk):
         DB_connection.commit()
         return True
     except mariadb.Error as e:
-        print(f"Error inserting data in the database: {e}")
+        logging.error(f"Can't insert link_tags_hp '{tag_id} -- {id_lk}' in the internal database : {e}")
         return False
     
 def link_tags_serv(DB_connection, tag_id, id_lk):
@@ -211,7 +213,7 @@ def link_tags_serv(DB_connection, tag_id, id_lk):
         DB_connection.commit()
         return True
     except mariadb.Error as e:
-        print(f"Error inserting data in the database: {e}")
+        logging.error(f"Can't insert link_tags_serv '{tag_id} -- {id_lk}' in the internal database : {e}")
         return False
 
 
@@ -242,5 +244,5 @@ def link_hp_serv(DB_connection, lhs_infos):
         DB_connection.commit()
         return True
     except mariadb.Error as e:
-        print(f"Error inserting data in the database: {e}")
+        logging.error(f"Can't insert link_hp_serv '{lhs_infos['id_lk']} -- {lhs_infos['id_hp']} -- {lhs_infos['id_serv']}' in the internal database : {e}")
         return False
