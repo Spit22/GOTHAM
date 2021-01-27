@@ -1,5 +1,7 @@
 from Gotham_link_BDD import get_server_infos,get_honeypot_infos,get_tag_infos,get_link_infos
 from Gotham_link_BDD import add_server_DB,add_honeypot_DB,add_link_DB,add_lhs_DB
+from Gotham_link_BDD import remove_server_DB
+
 from Gotham_normalize import normalize_honeypot_infos,normalize_server_infos,normalize_link_infos
 from Gotham_check import check_used_port, check_ssh
 import mariadb
@@ -13,7 +15,7 @@ recordings = {'id':'sv-62323F6F323F38F42d656DF86466666F','name':'serveur-test-6'
 honeypot_infos = {"id":"hp-1F5B3AFE32EE71EFB1D25EFFFC2CA69F", 'name':'hp-test-6','tags':'TestTag22,TesTag666,TagDeTest42', 'port':22,'parser':'TO_ADD','logs':'TO_ADD','source':"TO_ADD", "port_container":22,'state':'UNUSED'}
 ##########-SETTINGS-##########
 
-'''
+
 ##########-TESTS-##########
 print("########## ########## TEST LINK BDD########## ##########")
 print("########## Add server ##########")
@@ -22,6 +24,7 @@ print("########## Add Honeypot ##########")
 print(add_honeypot_DB(DB_settings, honeypot_infos))
 print("########## Add link ##########")
 print(add_link_DB(DB_settings, lk_infos))
+
 print("########## Get server infos tag false ##########")
 print(get_server_infos(DB_settings, mode=False, tags=recordings["tags"]))
 print("########## Get server infos tag true ##########")
@@ -47,6 +50,12 @@ print("########## Normalize Server ##########")
 print(normalize_server_infos(recordings))
 print("########## Normalize Link ##########")
 print(normalize_link_infos(lk_port_infos))
+
+print("########## ########## TEST REMOVE ########## ##########")
+print(remove_server_DB(DB_settings, 'hp-62323F6F323F38F42d65666666666666' ))
 ##########-TESTS-##########
-'''
-print(check_ssh('192.168.1.16', 22, 'uubb'))
+
+recordings = {'id':'sv-62323F6F323F38F42d65666666666666','name':'serveur-test-6','descr':'blabla','tags':'Europe,France,SSH,TestTag,TagDeTest4TesTag666','ip':'42.42.42.42#','ssh_key':'non','ssh_port':'22','state':'ERROR'}
+
+#print(add_server_DB(DB_settings, recordings))
+print(remove_server_DB(DB_settings, 'hp-62323F6F323F38F42d65666666666666' ))
