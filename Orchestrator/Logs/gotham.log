@@ -6,3 +6,9 @@
 2021-01-27 15:21:38,503 -- root -- ERROR -- Can't execute commands on 192.168.1.16 : 'str' object has no attribute 'readlines'
 2021-01-27 15:21:51,085 -- root -- ERROR -- Can't execute commands on 192.168.1.16 : 'str' object has no attribute 'readlines'
 2021-01-27 15:24:42,710 -- root -- ERROR -- Can't execute commands on 192.168.1.16 : 'str' object has no attribute 'readlines'
+2021-01-27 21:31:03,661 -- root -- ERROR -- You tried to remove a running server with the id = sv-62323F6F323F38F42d65666666666666
+2021-01-27 21:31:11,964 -- root -- ERROR -- You tried to remove a running server with the id = sv-62323F6F323F38F42d65666666666666
+2021-01-27 21:31:46,659 -- root -- ERROR -- You tried to remove a running server with the id = sv-62323F6F323F38F42d65666666666666
+2021-01-27 21:32:42,742 -- root -- ERROR -- You tried to remove a running server with the id = sv-7AE1ADA833CD11EBBB2C46E0FB2CA371
+2021-01-27 21:34:21,667 -- root -- WARNING -- id type doesn't match: hp-62323F6F323F38F42d65666666666666
+2021-01-27 21:34:21,681 -- root -- INFO -- You tried to remove a server that doesn't exists with the id = hp-62323F6F323F38F42d65666666666666

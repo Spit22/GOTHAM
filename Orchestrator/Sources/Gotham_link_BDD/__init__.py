@@ -2,6 +2,8 @@ import mariadb
 import sys
 from . import get_infos
 from . import add_in_IDB
+from . import remove_in_IDB
+from Gotham_normalize import normalize_id_server
 
 # Logging components
 import os
@@ -206,3 +208,41 @@ def add_lhs_DB(DB_settings, lhs_infos):
         logging.error(f"Can't connect to the internal database : {e}")
         sys.exit(1)
     return add_in_IDB.link_hp_serv(DB_connection, lhs_infos)
+
+########## REMOVE IN THE INTERNAL DATABASE ##########
+def remove_server_DB(DB_settings, id):
+    '''
+    Remove a server in the internal database and returns a boolean
+    ARGUMENTS:
+        DB_settings (dict) : all the settings to connect to the internal database
+        id (string) : the id of the server we want to remove in the internal database
+    '''
+    # Connect to the database
+    try:
+        DB_connection = mariadb.connect(
+            user=DB_settings["username"],
+            password=DB_settings["password"],
+            host=DB_settings["hostname"],
+            port=int(DB_settings["port"]),
+            database=DB_settings["database"]
+        )
+    except mariadb.Error as e:
+        logging.error(f"Can't connect to the internal database : {e}")
+        sys.exit(1)
+    # Check id format
+    try:
+        id = normalize_id_server(id)
+    except:
+        logging.error(f"Can't remove the server : his id is invalid")
+        sys.exit(1)
+    # Check if server exists
+    result = get_infos.server(DB_connection, id=id)
+    if result == []:
+        logging.info(f"You tried to remove a server that doesn't exists with the id = {id}")
+        # This ''error'' doesn't stop the script !! 
+    # Check if the server is running
+    if not(result[0]['link_id'] == None):
+        logging.error(f"You tried to remove a running server with the id = {id}")
+        sys.exit(1)
+    # If everything is OK, we remove the server
+    return remove_in_IDB.server(DB_connection, id)

@@ -31,6 +31,8 @@ def normalize_link_infos(lk_infos):
       lk_infos[key]=normalize_key(value)
   return lk_infos
 
+def normalize_id_server(id):
+  return normalization_functions.normalize_id('sv', id)
 
 # method_to_call = getattr(foo, 'bar')
 # result = method_to_call()
