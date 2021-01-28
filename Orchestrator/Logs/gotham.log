@@ -1106,3 +1106,51 @@
 2021-01-28 16:31:50,171 -- root -- INFO -- Link with the id 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69E' has just been deleted from the table Link_Tags_hp of the internal database
 2021-01-28 16:31:50,171 -- root -- INFO -- Link with the id 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69E' has just been deleted from the table Link of the internal database
 2021-01-28 16:31:50,171 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 16:34:35,723 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 16:34:35,756 -- root -- INFO -- Server with the id '10' has just been added in the table Serv_Tags of the internal database
+2021-01-28 16:34:35,777 -- root -- INFO -- Server with the id '3' has just been added in the table Serv_Tags of the internal database
+2021-01-28 16:34:35,796 -- root -- INFO -- Server with the id '1' has just been added in the table Serv_Tags of the internal database
+2021-01-28 16:34:35,812 -- root -- INFO -- Server with the id '26' has just been added in the table Serv_Tags of the internal database
+2021-01-28 16:34:35,832 -- root -- INFO -- Server with the id '27' has just been added in the table Serv_Tags of the internal database
+2021-01-28 16:34:35,832 -- root -- INFO -- Server with the id 'sv-62323F6F323F38F42d656DF861566696' has just been added in the table Server of the internal database
+2021-01-28 16:34:35,832 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 16:34:35,868 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 16:34:35,897 -- root -- INFO -- Honeypot with the id 'hp-1F5B3AFE32EE71EFB1D25EFFFC2CA666' has just been added in the table Hp_Tags of the internal database
+2021-01-28 16:34:35,937 -- root -- INFO -- Honeypot with the id 'hp-1F5B3AFE32EE71EFB1D25EFFFC2CA666' has just been added in the table Hp_Tags of the internal database
+2021-01-28 16:34:35,954 -- root -- INFO -- Honeypot with the id 'hp-1F5B3AFE32EE71EFB1D25EFFFC2CA666' has just been added in the table Hp_Tags of the internal database
+2021-01-28 16:34:35,954 -- root -- INFO -- Honeypot with the id 'hp-1F5B3AFE32EE71EFB1D25EFFFC2CA666' has just been added in the table Honeypot of the internal database
+2021-01-28 16:34:35,954 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 16:34:35,980 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 16:34:36,009 -- root -- INFO -- Link-Tags-hp with the id '36 -- lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69E' has just been added in the table Link_Tags_hp of the internal database
+2021-01-28 16:34:36,026 -- root -- INFO -- Link-Tags-serv with the id '37 -- lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69E' has just been added in the table Link_Tags_serv of the internal database
+2021-01-28 16:34:36,026 -- root -- INFO -- Link with the id 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69E' has just been added in the table Link of the internal database
+2021-01-28 16:34:36,026 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 16:34:36,047 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 16:34:36,058 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 16:34:36,083 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 16:34:36,092 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 16:34:36,116 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 16:34:36,135 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 16:34:36,159 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 16:34:36,164 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 16:34:36,185 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 16:34:36,197 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 16:34:36,219 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 16:34:36,232 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 16:34:36,260 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 16:34:36,282 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 16:34:36,302 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 16:34:36,328 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 16:34:36,357 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 16:34:36,393 -- root -- INFO -- Server with the id 'sv-62323F6F323F38F42d656DF861566696' has just been deleted from the table Serv_Tags of the internal database
+2021-01-28 16:34:36,393 -- root -- INFO -- Server with the id 'sv-62323F6F323F38F42d656DF861566696' has just been deleted from the table Server of the internal database
+2021-01-28 16:34:36,393 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 16:34:36,420 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 16:34:36,447 -- root -- INFO -- Honeypot with the id 'hp-1F5B3AFE32EE71EFB1D25EFFFC2CA666' has just been deleted from the table Hp_Tags of the internal database
+2021-01-28 16:34:36,447 -- root -- INFO -- Honeypot with the id 'hp-1F5B3AFE32EE71EFB1D25EFFFC2CA666' has just been deleted from the table Honeypot of the internal database
+2021-01-28 16:34:36,447 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 16:34:36,488 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 16:34:36,533 -- root -- INFO -- Link with the id 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69E' has just been deleted from the table Link_Tags_serv of the internal database
+2021-01-28 16:34:36,533 -- root -- INFO -- Link with the id 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69E' has just been deleted from the table Link_Tags_hp of the internal database
+2021-01-28 16:34:36,533 -- root -- INFO -- Link with the id 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69E' has just been deleted from the table Link of the internal database
+2021-01-28 16:34:36,533 -- root -- DEBUG -- [-] Connection to the internal database closed
