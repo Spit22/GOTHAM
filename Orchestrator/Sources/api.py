@@ -231,6 +231,35 @@ def add_lk():
         tag_hp = data["tag_hp"]
         nb_srv = data["nb_srv"]
         nb_hp = data["nb_hp"]
+        exposed_ports = data["exposed_ports"]
+
+        # We check that no link exists with same tags, otherwise return error
+        
+        # We check all provided tags exists, otherwise return error
+
+        # Get the number of honeypots corresponding to tags
+
+        # Get the number of servers corresponding to tags with one of possible ports open
+
+        # Checking we have enough servers for the nb_srv directive, otherwise return error
+
+        # Checking we have enough honeypots for the nb_hp directive
+
+        #   # If we don't have any honeypots corresponding, just return error,
+        #   # If we don't have enough but we have one or more
+        #   #   # Choose one of available honeypots (the best scored), and obtain informations
+        #   #   # Duplicate this honeypot
+        # If having enough honeypots, choose best honeypots (the bests scored)
+
+        # Choose best servers (the best scored)
+
+        # Deploy new reverse-proxies's configurations
+
+        # Check redirection is effective
+
+        # Create link id
+
+        # Insert new link object in database
 
         return "NOT IMPLEMENTED"
 
