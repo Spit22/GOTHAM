@@ -1,7 +1,13 @@
 # Import external libs
 from io import StringIO
-import os
 import base64
+
+# Logging components
+import os
+import logging
+GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+
 
 # Import Gotham's libs
 from Gotham_SSH_SCP import send_file_and_execute_commands
@@ -26,5 +32,6 @@ def deploy(ip, ssh_port, used_ssh_key):
     try:
         send_file_and_execute_commands(ip, ssh_port, used_ssh_key, installNginx_file, installNginx_dest, command_exec_install)
     except Exception as e:
+        logging.error(f"Server deployement failed : {e}")
         return False
     return True

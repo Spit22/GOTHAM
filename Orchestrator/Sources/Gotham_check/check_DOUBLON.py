@@ -1,7 +1,3 @@
-# Append Sources folder path to be able to import the libraries inside
-import sys
-sys.path.append('/home/spitfire/GOTHAM/Orchestrator/Sources')
-
 # Import libraries
 from Gotham_link_BDD import get_server_infos, get_tag_infos
 

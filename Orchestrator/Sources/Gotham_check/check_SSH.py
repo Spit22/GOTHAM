@@ -1,6 +1,13 @@
 #from gotham_server_communication import main
 from io import StringIO
 from Gotham_SSH_SCP import execute_commands
+import sys
+
+# Logging components
+import os
+import logging
+GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
 def main(ip, ssh_port, used_ssh_key):
     # Check if the SSH server is operational
@@ -15,7 +22,7 @@ def main(ip, ssh_port, used_ssh_key):
     try:
         execute_commands(ip, ssh_port, used_ssh_key, command_exec_check)
     except Exception as e:
-        # If it's not possible, return False
-        return False
+        logging.error(f"Can't execute commands on {ip} : {e}")
+        sys.exit(1)
     # If we were able to execute the commands, return True
     return True

@@ -1,20 +1,22 @@
 
 import mariadb
 import sys
-import os
 import configparser
-import sys
 
 from . import get_infos
 
-#sys.path.append('/home/spitfire/GOTHAM/Orchestrator/Sources')
-
-############################### TAG SECTION ###############################
+# Logging components
+import os
+import logging
+GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
 # Retrieve settings from config file
 config = configparser.ConfigParser()
-config.read('../Config/config.ini')
+config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
 _separator = config['tag']['separator']
+
+############################### TAG SECTION ###############################
 
 def tag(DB_connection, tag):
     # Get MariaDB cursor
@@ -23,9 +25,10 @@ def tag(DB_connection, tag):
     try:
         cur.execute("INSERT INTO Tags (tag) VALUES (?)",(tag,))
         DB_connection.commit()
+        logging.info(f"Tag '{tag}' has just been added in the table Tags of the internal database")
         return True
     except mariadb.Error as e:
-        print(f"[+]Error inserting data in the database: {e}")
+        logging.error(f"Can't insert tag '{tag}' in the internal database : {e}")
         return False
 
 
@@ -53,8 +56,9 @@ def server(DB_connection, server_infos):
     try:
         # Insert values in Server table
         cur.execute("INSERT INTO Server (id,name,descr,ip,ssh_key,ssh_port,state) VALUES (?,?,?,?,?,?,?)", (server_infos["id"], server_infos["name"], server_infos["descr"],  server_infos["ip"],  server_infos["ssh_key"],  server_infos["ssh_port"],  server_infos["state"]))
+        DB_connection.commit()
         # Then link the tags to the server
-        tag_list = server_infos['tag'].split(_separator)
+        tag_list = server_infos['tags'].split(_separator)
         for a_tag in tag_list:
             answer = get_infos.tag(DB_connection, tag=a_tag)
             if answer != []:
@@ -66,10 +70,10 @@ def server(DB_connection, server_infos):
                 else:
                     sys.exit("Error trying to insert tag in internal database")
             serv_tags(DB_connection, tag_id, server_infos["id"])
-            DB_connection.commit()
+        logging.info(f"Server with the id '{server_infos['id']}' has just been added in the table Server of the internal database")
         return True
     except mariadb.Error as e:
-        print(f"Error inserting data in the database: {e}")
+        logging.error(f"Can't insert server with the id '{server_infos['id']}' in the internal database : {e}")
         return False
 
 def serv_tags(DB_connection, tag_id, id_serv):
@@ -77,9 +81,10 @@ def serv_tags(DB_connection, tag_id, id_serv):
     try:
         cur.execute("INSERT INTO Serv_Tags (id_tag,id_serv) VALUES (?,?)", (tag_id,id_serv))
         DB_connection.commit()
+        logging.info(f"Server with the id '{tag_id}' has just been added in the table Serv_Tags of the internal database")
         return True
     except mariadb.Error as e:
-        print(f"Error inserting data in the database: {e}")
+        logging.error(f"Can't insert serv_tag '{tag_id} -- {id_serv}' in the internal database : {e}")
         return False
 
 ############################### HONEYPOT SECTION ###############################
@@ -98,16 +103,17 @@ def normalize_dico_honeypot_infos(hp_infos):
     return hp_infos
 
 def honeypot(DB_connection, hp_infos):
-    # Normalize server_infos
+    # Normalize honeypot_infos
     hp_infos = normalize_dico_honeypot_infos(hp_infos)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request
     try:
-        # Insert values in Server table
-        cur.execute("INSERT INTO Honeypot (id,name,descr,port,parser,logs,source,id_container,state) VALUES (?,?,?,?,?,?,?,?,?)", (hp_infos["id"], hp_infos["name"], hp_infos["descr"],  hp_infos["port"], hp_infos["parser"],  hp_infos["logs"],  hp_infos["source"], hp_infos["id_container"], hp_infos["state"]))
-        # Then link the tags to the server
-        tag_list = hp_infos['tag'].split(_separator)
+        # Insert values in Honeypot table
+        cur.execute("INSERT INTO Honeypot (id,name,descr,port,parser,logs,source,port_container,state) VALUES (?,?,?,?,?,?,?,?,?)", (hp_infos["id"], hp_infos["name"], hp_infos["descr"],  hp_infos["port"], hp_infos["parser"],  hp_infos["logs"],  hp_infos["source"], hp_infos["port_container"], hp_infos["state"]))
+        DB_connection.commit()
+        # Then link the tags to the honeypot
+        tag_list = hp_infos['tags'].split(_separator)
         for a_tag in tag_list:
             answer = get_infos.tag(DB_connection, tag=a_tag)
             if answer != []:
@@ -119,10 +125,10 @@ def honeypot(DB_connection, hp_infos):
                 else:
                     sys.exit("Error trying to insert tag in internal database")
             hp_tags(DB_connection, tag_id, hp_infos["id"])
-            DB_connection.commit()
+        logging.info(f"Honeypot with the id '{hp_infos['id']}' has just been added in the table Honeypot of the internal database")
         return True
     except mariadb.Error as e:
-        print(f"Error inserting data in the database: {e}")
+        logging.error(f"Can't insert honeypot '{hp_infos['name']}' in the internal database : {e}")
         return False
 
 def hp_tags(DB_connection, tag_id, id_hp):
@@ -130,8 +136,122 @@ def hp_tags(DB_connection, tag_id, id_hp):
     try:
         cur.execute("INSERT INTO Hp_Tags (id_tag,id_hp) VALUES (?,?)", (tag_id,id_hp))
         DB_connection.commit()
+        logging.info(f"Honeypot with the id '{id_hp}' has just been added in the table Hp_Tags of the internal database")
         return True
     except mariadb.Error as e:
-        print(f"Error inserting data in the database: {e}")
+        logging.error(f"Can't insert hp_tag '{tag_id} -- {id_hp}' in the internal database : {e}")
         return False
 
+############################### LINK SECTION ###############################
+
+def normalize_dico_link_infos(lk_infos):
+    default_lk_infos = config['link_infos_default']
+    for key, value in default_lk_infos.items():
+        if value == 'NOT NULL':
+            if not(key in lk_infos):
+                sys.exit("Database error: you must fill this field: "+key)
+            elif(lk_infos[key] == '' or lk_infos[key] == 0):
+                sys.exit("Database error: you must fill this field: "+key)
+        else:
+            if not(key in lk_infos):
+                lk_infos[key] = value
+    return lk_infos
+
+def link(DB_connection, lk_infos):
+    # Normalize link_infos
+    lk_infos = normalize_dico_link_infos(lk_infos)
+    # Get MariaDB cursor
+    cur = DB_connection.cursor()
+    # Execute SQL request
+    try:
+        # Insert values in Link table
+        cur.execute("INSERT INTO Link (id,nb_hp,nb_serv) VALUES (?,?,?)", (lk_infos["id"], lk_infos["nb_hp"], lk_infos["nb_serv"]))
+        DB_connection.commit()
+        # Then link the tags to the link
+        tag_hp_list = lk_infos['tags_hp'].split(_separator)
+        tag_serv_list = lk_infos['tags_serv'].split(_separator)
+        # Work on tag_hp_list
+        for a_tag_hp in tag_hp_list:
+            answer = get_infos.tag(DB_connection, tag=a_tag_hp)
+            if answer != []:
+                tag_id = answer[0]['id']
+            # if it is a new tag -> add it in the Tags table
+            else:
+                if tag(DB_connection, a_tag_hp):
+                    answer = get_infos.tag(DB_connection, tag=a_tag_hp)
+                    tag_id = answer[0]['id']
+                else:
+                    sys.exit("Error trying to insert tag_hp in internal database")
+            link_tags_hp(DB_connection, tag_id, lk_infos["id"])
+        # work on tag_serv_list
+        for a_tag_serv in tag_serv_list:
+            answer = get_infos.tag(DB_connection, tag=a_tag_serv)
+            if answer != []:
+                tag_id = answer[0]['id']
+            # if it is a new tag -> add it in the Tags table
+            else:
+                if tag(DB_connection, a_tag_serv):
+                    answer = get_infos.tag(DB_connection, tag=a_tag_serv)
+                    tag_id = answer[0]['id']
+                else:
+                    sys.exit("Error trying to insert tag_serv in internal database")
+            link_tags_serv(DB_connection, tag_id, lk_infos["id"])
+        logging.info(f"Link with the id '{lk_infos['id']}' has just been added in the table Link of the internal database")
+        return True
+    except mariadb.Error as e:
+        logging.error(f"Can't insert link '{lk_infos['id']}' in the internal database : {e}")
+        return False
+
+def link_tags_hp(DB_connection, tag_id, id_lk):
+    cur = DB_connection.cursor()
+    try:
+        cur.execute("INSERT INTO Link_Tags_hp (id_tag,id_link) VALUES (?,?)", (tag_id,id_lk))
+        DB_connection.commit()
+        logging.info(f"Link-Tags-hp with the id '{tag_id} -- {id_lk}' has just been added in the table Link_Tags_hp of the internal database")
+        return True
+    except mariadb.Error as e:
+        logging.error(f"Can't insert link_tags_hp '{tag_id} -- {id_lk}' in the internal database : {e}")
+        return False
+    
+def link_tags_serv(DB_connection, tag_id, id_lk):
+    cur = DB_connection.cursor()
+    try:
+        cur.execute("INSERT INTO Link_Tags_serv (id_tag,id_link) VALUES (?,?)", (tag_id,id_lk))
+        DB_connection.commit()
+        logging.info(f"Link-Tags-serv with the id '{tag_id} -- {id_lk}' has just been added in the table Link_Tags_serv of the internal database")
+        return True
+    except mariadb.Error as e:
+        logging.error(f"Can't insert link_tags_serv '{tag_id} -- {id_lk}' in the internal database : {e}")
+        return False
+
+
+############################### LHS SECTION ###############################
+
+def normalize_dico_lhs_infos(lhs_infos):
+    default_lhs_infos = {"id_lk":"NOT NULL","id_hp":"NOT NULL","id_serv":"NOT NULL","port":"NOT NULL"}
+    for key, value in default_lhs_infos.items():
+        if value == 'NOT NULL':
+            if not(key in lhs_infos):
+                sys.exit("Database error: you must fill this field: "+key)
+            elif(lhs_infos[key] == '' or lhs_infos[key] == 0):
+                sys.exit("Database error: you must fill this field: "+key)
+        else:
+            if not(key in lhs_infos):
+                lhs_infos[key] = value
+    return lhs_infos
+
+def link_hp_serv(DB_connection, lhs_infos):
+    # Normalize lhs_infos
+    lhs_infos = normalize_dico_lhs_infos(lhs_infos)
+    # Get MariaDB cursor
+    cur = DB_connection.cursor()
+    # Execute SQL request
+    try:
+        # Insert values in Link_Hp_Serv table
+        cur.execute("INSERT INTO Link_Hp_Serv (id_link,id_hp,id_serv,port) VALUES (?,?,?,?)", (lhs_infos["id_lk"], lhs_infos["id_hp"], lhs_infos["id_serv"], lhs_infos["port"]))
+        DB_connection.commit()
+        logging.info(f"Link-Honeypot-Server with the id '{lhs_infos['id_lk']} -- {lhs_infos['id_hp']} -- {lhs_infos['id_serv']}' has just been added in the table Link_Hp_Serv of the internal database")
+        return True
+    except mariadb.Error as e:
+        logging.error(f"Can't insert link_hp_serv '{lhs_infos['id_lk']} -- {lhs_infos['id_hp']} -- {lhs_infos['id_serv']}' in the internal database : {e}")
+        return False
