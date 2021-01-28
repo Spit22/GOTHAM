@@ -348,11 +348,11 @@ def remove_link_DB(DB_settings, id):
         logging.error(f"You tried to remove a link that doesn't exists with the id = {id}")
         sys.exit(1)
     # Check if the link is used (if it links any server tags with any honeypots tags)
-    if not(result[0]['nb_hp'] == '0' and result[0]['nb_serv'] == '0'):
-        logging.error(f"You tried to remove a running honeypot with the id = {id}")
-        sys.exit(1)
+    #if not(result[0]['link_nb_hp'] == '0' and result[0]['link_nb_serv'] == '0'):
+    #    logging.error(f"You tried to remove a running link with the id = {id}")
+    #    sys.exit(1)
     # If everything is OK, we remove the server
-    result = remove_in_IDB.honeypot(DB_connection, id)
+    result = remove_in_IDB.link(DB_connection, id)
     DB_connection.close()
     logging.debug(f"[-] Connection to the internal database closed")
     return result
