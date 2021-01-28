@@ -72,6 +72,9 @@ Pxg06Ro4Vozajsjrg+EoL8MxpK0VdRLt95s/w0DdotMvLkfpPcwwNae8+VILZjQSd/lxJG
 otmBlmJPbHljWt2JWympm3wVI24J0Ag4nRbSff5tDgH/5WsnaBTJKsohAUuc3Ut3LmAkCe
 Lojn7XZi11UAAAARcm9vdEBkZWJpYW4xMC1ubXMBAg==
 -----END OPENSSH PRIVATE KEY-----""")
+# Path to store object's data
+store_path = "/data"
+
 ###################################################################################################
 
 @app.route('/', methods=['GET'])
