@@ -110,17 +110,18 @@ def add_honeypot():
         
 
         # First find an available port to map on datacenter
-        #for mapped_port in dc_ports_list:
-        #    if Gotham_check.is_dc_port_available(mapped_port):
-        #        available_port = True
-        #        break
-        #    available_port = False
+        used_ports = Gotham_check.check_used_port(db_settings)
+        available_port = False
+
+        for mapped_port in dc_ports_list:
+            if mapped_port not in used_ports:
+                available_port = True
+                break
 
         # Check if an available port was found
-        #if not available_port:
-        #    return "Datacenter : no port available for mapping"
-        # TEMP
-        mapped_port = "2200"
+        if not available_port:
+            return "Datacenter : no port available for mapping"
+
         # Generate honeypot's id
         id = 'hp-'+str(uuid.uuid4().hex)
 
@@ -138,12 +139,13 @@ def add_honeypot():
         add_hp.generate_dockercompose(id, dockerfile_path, logs, port, mapped_port)
         
         # Deploy the hp's container on datacenter
-        dc_connect = add_hp.deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path)
-        if not dc_connect:
+        try:
+            add_hp.deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id)
+        except Exception as e:
             return "An error occured in the ssh connection"
 
         # Store new hp and tags in the database
-        sql_data = {'id':str(id),'name':str(name),'descr':str(descr),'tag':str(tags),'port':str(port),'parser':str(parser),'logs':str(logs),'source':str(dockerfile_path),'state':'INACTIVE','id_container':'NULL'}
+        sql_data = {'id':str(id),'name':str(name),'descr':str(descr),'tag':str(tags),'port_container':str(port),'parser':str(parser),'logs':str(logs),'source':str(dockerfile_path),'state':'INACTIVE','port':mapped_port}
         Gotham_link_BDD.add_honeypot_DB(db_settings, sql_data)
 
         # If all operations succeed

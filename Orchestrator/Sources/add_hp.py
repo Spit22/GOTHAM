@@ -35,23 +35,26 @@ def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_
     # Close file
     dockercompose.close()
 
-def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path):
+def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id_hp):
     # Install and deploy an Nginx Reverse-Proxy on a given server
     #
-    # ip (string): ip of remote server
-    # ssh_port (int) : port the ssh service listen
-    # used_ssh_key (file-like object) : ssh key used to connect to server
+    # ip_dc (string): ip of remote server
+    # dc_ssh_port (int) : port the ssh service listen
+    # dc_ssh_key (file-like object) : ssh key used to connect to server
+    # dockerfile_paht (string) : local path of the dockerfile
+    # id_hp (string) : id of the hp we are deploying
     #
     # Return True if succeed, False in the other case
     dockerfile_path = [ dockerfile_path+"/Dockerfile", dockerfile_path+"/docker-compose.yml" ]
     print(dockerfile_path)
     # Declare local vars
     docker_dest = "/data/tmp/"
-    command_exec_compose = ["cd "+str(docker_dest),"docker-compose -f "+str(docker_dest)+"/docker-compose.yml  up -d"]
-
+    command_exec_compose = ["cd "+str(docker_dest),"docker-compose -f "+str(docker_dest)+"/docker-compose.yml  --project-name "+id_hp+" up -d"]
+    print(command_exec_compose)
     # Copy docker files on datacenter, and execute docker-compose
     try:
         send_file_and_execute_commands(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, docker_dest, command_exec_compose)
+        print("deployed remotely")
     except Exception as e:
         print(e)
         return False
