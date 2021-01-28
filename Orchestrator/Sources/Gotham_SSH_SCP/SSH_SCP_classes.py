@@ -1,6 +1,13 @@
-import os
 import paramiko
 import scp
+import sys
+
+# Logging components
+import os
+import logging
+GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+
 
 class GothamServer:
     '''
@@ -42,6 +49,7 @@ class GothamServer:
             )
             # Init an SCP session using the SSH session just created
             self.scp_session = scp.SCPClient(self.ssh_session.get_transport())
+        logging.info(f"[+] SSH connection to the remote server {self.hostname} has just started")
         return self.ssh_session
 
     def disconnect(self):
@@ -50,10 +58,9 @@ class GothamServer:
         '''
         if self.ssh_session:
             self.ssh_session.close()
-            print("[+] SSH Session closed")
+            logging.info(f"[-] SSH connection to the remote server {self.hostname} has just been closed")
         if self.scp_session:
             self.scp_session.close()
-            print("[+] SCP Session closed")
         
     def upload_files(self, file_paths, remote_file_path):
         '''
@@ -68,7 +75,7 @@ class GothamServer:
                 recursive = True,
                 remote_path = remote_file_path
             )
-            print("[+] File Uploaded !")
+            logging.info(f"The file {file_paths} has just been uploaded on the server {self.hostname} in the directory {remote_file_path}")
         
     def commands_execution(self, commands):
         '''
@@ -83,4 +90,5 @@ class GothamServer:
             for line in stdout.read().splitlines():
                 print(line)
 
-            print("[+] Command executed !")
+            logging.info(f"The commands {commands} has just been executed on the server {self.hostname}")
+

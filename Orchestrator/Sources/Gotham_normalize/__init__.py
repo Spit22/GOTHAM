@@ -31,8 +31,16 @@ def normalize_link_infos(lk_infos):
       lk_infos[key]=normalize_key(value)
   return lk_infos
 
+########## NORMALIZE ID SECTION ##########
+
 def normalize_id_server(id):
   return normalization_functions.normalize_id('sv', id)
+
+def normalize_id_honeypot(id):
+  return normalization_functions.normalize_id('hp', id)
+
+def normalize_id_link(id):
+  return normalization_functions.normalize_id('lk', id)
 
 # method_to_call = getattr(foo, 'bar')
 # result = method_to_call()

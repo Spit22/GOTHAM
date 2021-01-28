@@ -25,6 +25,7 @@ def tag(DB_connection, tag):
     try:
         cur.execute("INSERT INTO Tags (tag) VALUES (?)",(tag,))
         DB_connection.commit()
+        logging.info(f"Tag '{tag}' has just been added in the table Tags of the internal database")
         return True
     except mariadb.Error as e:
         logging.error(f"Can't insert tag '{tag}' in the internal database : {e}")
@@ -69,9 +70,10 @@ def server(DB_connection, server_infos):
                 else:
                     sys.exit("Error trying to insert tag in internal database")
             serv_tags(DB_connection, tag_id, server_infos["id"])
+        logging.info(f"Server with the id '{server_infos['id']}' has just been added in the table Server of the internal database")
         return True
     except mariadb.Error as e:
-        logging.error(f"Can't insert server '{server_infos['ip']}' in the internal database : {e}")
+        logging.error(f"Can't insert server with the id '{server_infos['id']}' in the internal database : {e}")
         return False
 
 def serv_tags(DB_connection, tag_id, id_serv):
@@ -79,6 +81,7 @@ def serv_tags(DB_connection, tag_id, id_serv):
     try:
         cur.execute("INSERT INTO Serv_Tags (id_tag,id_serv) VALUES (?,?)", (tag_id,id_serv))
         DB_connection.commit()
+        logging.info(f"Server with the id '{tag_id}' has just been added in the table Serv_Tags of the internal database")
         return True
     except mariadb.Error as e:
         logging.error(f"Can't insert serv_tag '{tag_id} -- {id_serv}' in the internal database : {e}")
@@ -122,6 +125,7 @@ def honeypot(DB_connection, hp_infos):
                 else:
                     sys.exit("Error trying to insert tag in internal database")
             hp_tags(DB_connection, tag_id, hp_infos["id"])
+        logging.info(f"Honeypot with the id '{hp_infos['id']}' has just been added in the table Honeypot of the internal database")
         return True
     except mariadb.Error as e:
         logging.error(f"Can't insert honeypot '{hp_infos['name']}' in the internal database : {e}")
@@ -132,6 +136,7 @@ def hp_tags(DB_connection, tag_id, id_hp):
     try:
         cur.execute("INSERT INTO Hp_Tags (id_tag,id_hp) VALUES (?,?)", (tag_id,id_hp))
         DB_connection.commit()
+        logging.info(f"Honeypot with the id '{id_hp}' has just been added in the table Hp_Tags of the internal database")
         return True
     except mariadb.Error as e:
         logging.error(f"Can't insert hp_tag '{tag_id} -- {id_hp}' in the internal database : {e}")
@@ -191,6 +196,7 @@ def link(DB_connection, lk_infos):
                 else:
                     sys.exit("Error trying to insert tag_serv in internal database")
             link_tags_serv(DB_connection, tag_id, lk_infos["id"])
+        logging.info(f"Link with the id '{lk_infos['id']}' has just been added in the table Link of the internal database")
         return True
     except mariadb.Error as e:
         logging.error(f"Can't insert link '{lk_infos['id']}' in the internal database : {e}")
@@ -201,6 +207,7 @@ def link_tags_hp(DB_connection, tag_id, id_lk):
     try:
         cur.execute("INSERT INTO Link_Tags_hp (id_tag,id_link) VALUES (?,?)", (tag_id,id_lk))
         DB_connection.commit()
+        logging.info(f"Link-Tags-hp with the id '{tag_id} -- {id_lk}' has just been added in the table Link_Tags_hp of the internal database")
         return True
     except mariadb.Error as e:
         logging.error(f"Can't insert link_tags_hp '{tag_id} -- {id_lk}' in the internal database : {e}")
@@ -211,6 +218,7 @@ def link_tags_serv(DB_connection, tag_id, id_lk):
     try:
         cur.execute("INSERT INTO Link_Tags_serv (id_tag,id_link) VALUES (?,?)", (tag_id,id_lk))
         DB_connection.commit()
+        logging.info(f"Link-Tags-serv with the id '{tag_id} -- {id_lk}' has just been added in the table Link_Tags_serv of the internal database")
         return True
     except mariadb.Error as e:
         logging.error(f"Can't insert link_tags_serv '{tag_id} -- {id_lk}' in the internal database : {e}")
@@ -242,6 +250,7 @@ def link_hp_serv(DB_connection, lhs_infos):
         # Insert values in Link_Hp_Serv table
         cur.execute("INSERT INTO Link_Hp_Serv (id_link,id_hp,id_serv,port) VALUES (?,?,?,?)", (lhs_infos["id_lk"], lhs_infos["id_hp"], lhs_infos["id_serv"], lhs_infos["port"]))
         DB_connection.commit()
+        logging.info(f"Link-Honeypot-Server with the id '{lhs_infos['id_lk']} -- {lhs_infos['id_hp']} -- {lhs_infos['id_serv']}' has just been added in the table Link_Hp_Serv of the internal database")
         return True
     except mariadb.Error as e:
         logging.error(f"Can't insert link_hp_serv '{lhs_infos['id_lk']} -- {lhs_infos['id_hp']} -- {lhs_infos['id_serv']}' in the internal database : {e}")

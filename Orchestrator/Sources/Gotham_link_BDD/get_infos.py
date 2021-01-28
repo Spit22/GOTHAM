@@ -42,6 +42,7 @@ def normalize_tags_arguments(mode, column, tags):
     else:
         request=column+" like '%'"
     return request
+
 ############################### TAG SECTION ###############################
 
 def tag(DB_connection, mode=False, tag='%', id='%'):

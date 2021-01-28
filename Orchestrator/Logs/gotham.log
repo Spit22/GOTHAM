@@ -1,14 +1,168 @@
-2021-01-27 14:50:47,123 -- root -- ERROR -- Can't connect to the internal database : Access denied for user 'gotha'@'archfire.home'
-2021-01-27 14:51:13,515 -- root -- ERROR -- Can't insert server '98.254.99.99' in the internal database : Duplicate entry 'sv-62323F6F323F38F42d656DF86466666F' for key 'PRIMARY'
-2021-01-27 14:51:13,551 -- root -- ERROR -- Can't insert honeypot 'hp-test-6' in the internal database : Duplicate entry 'hp-1F5B3AFE32EE71EFB1D25EFFFC2CA69F' for key 'PRIMARY'
-2021-01-27 14:51:13,585 -- root -- ERROR -- Can't insert link 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F' in the internal database : Duplicate entry 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F' for key 'PRIMARY'
-2021-01-27 15:21:34,571 -- root -- ERROR -- Can't execute commands on 192.168.1.16 : 'str' object has no attribute 'readlines'
-2021-01-27 15:21:38,503 -- root -- ERROR -- Can't execute commands on 192.168.1.16 : 'str' object has no attribute 'readlines'
-2021-01-27 15:21:51,085 -- root -- ERROR -- Can't execute commands on 192.168.1.16 : 'str' object has no attribute 'readlines'
-2021-01-27 15:24:42,710 -- root -- ERROR -- Can't execute commands on 192.168.1.16 : 'str' object has no attribute 'readlines'
-2021-01-27 21:31:03,661 -- root -- ERROR -- You tried to remove a running server with the id = sv-62323F6F323F38F42d65666666666666
-2021-01-27 21:31:11,964 -- root -- ERROR -- You tried to remove a running server with the id = sv-62323F6F323F38F42d65666666666666
-2021-01-27 21:31:46,659 -- root -- ERROR -- You tried to remove a running server with the id = sv-62323F6F323F38F42d65666666666666
-2021-01-27 21:32:42,742 -- root -- ERROR -- You tried to remove a running server with the id = sv-7AE1ADA833CD11EBBB2C46E0FB2CA371
-2021-01-27 21:34:21,667 -- root -- WARNING -- id type doesn't match: hp-62323F6F323F38F42d65666666666666
-2021-01-27 21:34:21,681 -- root -- INFO -- You tried to remove a server that doesn't exists with the id = hp-62323F6F323F38F42d65666666666666
+2021-01-28 15:24:42,715 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:24:42,728 -- root -- ERROR -- Can't insert server with the id 'sv-62323F6F323F38F42d656DF861566666' in the internal database : Duplicate entry '98.254.99.99' for key 'ip'
+2021-01-28 15:24:42,728 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:24:42,750 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:24:42,760 -- root -- ERROR -- Can't insert honeypot 'hp-test-6' in the internal database : Duplicate entry 'hp-1F5B3AFE32EE71EFB1D25EFFFC2CA69F' for key 'PRIMARY'
+2021-01-28 15:24:42,760 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:24:42,780 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:24:42,800 -- root -- ERROR -- Can't insert link 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F' in the internal database : Duplicate entry 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F' for key 'PRIMARY'
+2021-01-28 15:24:42,800 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:24:42,833 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:24:42,842 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:24:42,869 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:24:42,879 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:24:42,905 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:24:42,918 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:24:42,964 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:24:42,971 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:24:43,007 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:24:43,020 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:24:43,046 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:24:43,056 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:24:43,077 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:24:43,098 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:24:43,117 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:24:43,138 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:24:43,168 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:24:43,175 -- root -- ERROR -- You tried to remove a server that doesn't exists with the id = sv-71F6EFA6F2FF11EB830EF9FEFD2CA37F
+2021-01-28 15:27:13,527 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:27:13,537 -- root -- ERROR -- Can't insert server with the id 'sv-62323F6F323F38F42d656DF861566666' in the internal database : Duplicate entry '98.254.99.99' for key 'ip'
+2021-01-28 15:27:13,537 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:27:13,560 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:27:13,571 -- root -- ERROR -- Can't insert honeypot 'hp-test-6' in the internal database : Duplicate entry 'hp-1F5B3AFE32EE71EFB1D25EFFFC2CA69F' for key 'PRIMARY'
+2021-01-28 15:27:13,571 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:27:13,593 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:27:13,603 -- root -- ERROR -- Can't insert link 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F' in the internal database : Duplicate entry 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F' for key 'PRIMARY'
+2021-01-28 15:27:13,603 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:27:13,628 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:27:13,638 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:27:13,659 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:27:13,669 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:27:13,689 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:27:13,699 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:27:13,723 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:27:13,727 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:27:13,747 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:27:13,755 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:27:13,776 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:27:13,786 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:27:13,806 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:27:13,825 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:27:13,849 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:27:13,864 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:27:13,895 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:27:13,904 -- root -- ERROR -- You tried to remove a server that doesn't exists with the id = sv-71F6EFA6F2FF11EB830EF9FEFD2CA37F
+2021-01-28 15:32:39,093 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:32:39,106 -- root -- ERROR -- Can't insert server with the id 'sv-62323F6F323F38F42d656DF861566666' in the internal database : Duplicate entry '98.254.99.99' for key 'ip'
+2021-01-28 15:32:39,106 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:32:39,158 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:32:39,167 -- root -- ERROR -- Can't insert honeypot 'hp-test-6' in the internal database : Duplicate entry 'hp-1F5B3AFE32EE71EFB1D25EFFFC2CA69F' for key 'PRIMARY'
+2021-01-28 15:32:39,167 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:32:39,187 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:32:39,198 -- root -- ERROR -- Can't insert link 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F' in the internal database : Duplicate entry 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F' for key 'PRIMARY'
+2021-01-28 15:32:39,199 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:32:39,218 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:32:39,231 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:32:39,252 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:32:39,262 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:32:39,285 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:32:39,295 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:32:39,319 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:32:39,324 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:32:39,348 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:32:39,358 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:32:39,381 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:32:39,392 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:32:39,414 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:32:39,434 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:32:39,459 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:32:39,474 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:32:39,500 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:32:39,507 -- root -- ERROR -- You tried to remove a server that doesn't exists with the id = sv-71F6EFA6F2FF11EB830EF9FEFD2CA37F
+2021-01-28 15:34:13,898 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:34:13,915 -- root -- ERROR -- Can't insert server with the id 'sv-62323F6F323F38F42d656DF861566666' in the internal database : Duplicate entry '98.254.99.99' for key 'ip'
+2021-01-28 15:34:13,916 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:34:13,951 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:34:13,963 -- root -- ERROR -- Can't insert honeypot 'hp-test-6' in the internal database : Duplicate entry 'hp-1F5B3AFE32EE71EFB1D25EFFFC2CA69F' for key 'PRIMARY'
+2021-01-28 15:34:13,964 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:34:13,985 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:34:13,996 -- root -- ERROR -- Can't insert link 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F' in the internal database : Duplicate entry 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F' for key 'PRIMARY'
+2021-01-28 15:34:13,996 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:34:14,027 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:34:14,037 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:34:14,064 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:34:14,078 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:34:14,106 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:34:14,142 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:34:14,166 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:34:14,175 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:34:14,205 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:34:14,215 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:34:14,240 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:34:14,250 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:34:14,277 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:34:14,297 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:34:14,320 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:34:14,340 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:34:14,379 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:34:14,390 -- root -- ERROR -- You tried to remove a server that doesn't exists with the id = sv-71F6EFA6F2FF11EB830EF9FEFD2CA37F
+2021-01-28 15:35:11,477 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:11,501 -- root -- ERROR -- Can't insert server with the id 'sv-62323F6F323F38F42d656DF861566666' in the internal database : Duplicate entry '98.254.99.99' for key 'ip'
+2021-01-28 15:35:11,502 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:11,528 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:11,540 -- root -- ERROR -- Can't insert honeypot 'hp-test-6' in the internal database : Duplicate entry 'hp-1F5B3AFE32EE71EFB1D25EFFFC2CA69F' for key 'PRIMARY'
+2021-01-28 15:35:11,540 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:11,582 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:11,592 -- root -- ERROR -- Can't insert link 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F' in the internal database : Duplicate entry 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F' for key 'PRIMARY'
+2021-01-28 15:35:11,593 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:11,613 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:11,625 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:11,646 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:11,659 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:11,687 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:11,698 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:11,728 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:11,734 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:11,757 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:11,767 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:11,790 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:11,808 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:11,854 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:11,904 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:11,932 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:11,949 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:11,978 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:11,986 -- root -- ERROR -- You tried to remove a server that doesn't exists with the id = sv-71F6EFA6F2FF11EB830EF9FEFD2CA37F
+2021-01-28 15:35:12,014 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:12,014 -- root -- WARNING -- id type doesn't match: sv-71F6EFA6F2FF11EB830EF9FEFD2CA37F
+2021-01-28 15:35:12,024 -- root -- ERROR -- You tried to remove a honeypot that doesn't exists with the id = sv-71F6EFA6F2FF11EB830EF9FEFD2CA37F
+2021-01-28 15:35:22,705 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:22,722 -- root -- ERROR -- Can't insert server with the id 'sv-62323F6F323F38F42d656DF861566666' in the internal database : Duplicate entry '98.254.99.99' for key 'ip'
+2021-01-28 15:35:22,722 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:22,773 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:22,783 -- root -- ERROR -- Can't insert honeypot 'hp-test-6' in the internal database : Duplicate entry 'hp-1F5B3AFE32EE71EFB1D25EFFFC2CA69F' for key 'PRIMARY'
+2021-01-28 15:35:22,783 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:22,806 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:22,815 -- root -- ERROR -- Can't insert link 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F' in the internal database : Duplicate entry 'lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F' for key 'PRIMARY'
+2021-01-28 15:35:22,816 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:22,837 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:22,847 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:22,869 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:22,884 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:22,905 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:22,915 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:22,939 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:22,945 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:22,967 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:22,978 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:23,003 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:23,012 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:23,035 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:23,052 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:23,074 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:23,093 -- root -- DEBUG -- [-] Connection to the internal database closed
+2021-01-28 15:35:23,122 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:23,129 -- root -- ERROR -- You tried to remove a server that doesn't exists with the id = sv-71F6EFA6F2FF11EB830EF9FEFD2CA37F
+2021-01-28 15:35:23,149 -- root -- DEBUG -- [+] Connection to the internal database started
+2021-01-28 15:35:23,149 -- root -- WARNING -- id type doesn't match: sv-71F6EFA6F2FF11EB830EF9FEFD2CA37F
+2021-01-28 15:35:23,155 -- root -- ERROR -- You tried to remove a honeypot that doesn't exists with the id = sv-71F6EFA6F2FF11EB830EF9FEFD2CA37F
