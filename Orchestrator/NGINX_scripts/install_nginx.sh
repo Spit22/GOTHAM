@@ -60,15 +60,15 @@ make
 
 make install
 
+# Create directory for links configurations
+mkdir -p /etc/nginx/conf.d/links
+
 # Edit nginx.conf
 rm /etc/nginx/nginx.conf
 
 echo "events {}
 stream{
-    server {
-        listen     $1;
-        proxy_pass $2:$3;
-    }
+    include conf.d/links/*.conf
 }" > /etc/nginx/nginx.conf
 
 # Apply the configuration
