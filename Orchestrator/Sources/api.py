@@ -253,6 +253,8 @@ def add_lk():
 
         # Choose best servers (the best scored)
 
+        # Generate NGINX configurations for redirection
+
         # Deploy new reverse-proxies's configurations
 
         # Check redirection is effective
