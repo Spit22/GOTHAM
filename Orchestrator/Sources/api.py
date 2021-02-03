@@ -7,11 +7,15 @@ import os
 from flask import request, jsonify
 from io import StringIO # a suppr
 
-# GOTHAM'S LIBS
+# GOTHAM'S Scripts
 import add_server  
+import add_hp
+import add_link
+
+# GOTHAM'S LIB
 import Gotham_link_BDD
 import Gotham_check
-import add_hp
+
 
 app = flask.Flask(__name__)
 
@@ -249,17 +253,33 @@ def add_lk():
         #   # If we don't have enough but we have one or more
         #   #   # Choose one of available honeypots (the best scored), and obtain informations
         #   #   # Duplicate this honeypot
-        # If having enough honeypots, choose best honeypots (the bests scored)
+        # If having enough honeypots, choose best honeypots (the lower scored)
+        for honeypot in honeypots:
+            hp_score[honeypot] = 0
+            # Add 10 pts per servers redirecting to the honeypot
+            if nb_mapping > 0:
+                hp_score[honeypot] += 10 * nb_mapping
 
-        # Choose best servers (the best scored)
-
-        # Generate NGINX configurations for redirection
-
-        # Deploy new reverse-proxies's configurations
-
-        # Check redirection is effective
+        # Choose best servers (the lower scored)
+        for server in servers:
+            srv_score[server] = 0
+            # Add 10 pts per links already configured on server
+            if nb_linked > 0:
+                srv_score[server] += 10 * nb_link
+        
+        # Generate the dict servers associating ip and exposed_port
 
         # Create link id
+        id = 'lk-'+str(uuid.uuid4().hex)
+
+        # Generate NGINX configurations for each redirection on a specific exposed_port
+        for exposed_port in exposed_ports:
+            add_link.generate_nginxConf(db_settings, id, dc_ip, honeypots, exposed_port)
+
+        # Deploy new reverse-proxies's configurations on servers
+        add_link.deploy_nginxConf(db_settings, id, servers)
+        
+        # Check redirection is effective
 
         # Insert new link object in database
 
