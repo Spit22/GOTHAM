@@ -165,7 +165,7 @@ def link(DB_connection, lk_infos):
     # Execute SQL request
     try:
         # Insert values in Link table
-        cur.execute("INSERT INTO Link (id,nb_hp,nb_serv) VALUES (?,?,?)", (lk_infos["id"], lk_infos["nb_hp"], lk_infos["nb_serv"]))
+        cur.execute("INSERT INTO Link (id,nb_hp,nb_serv,ports) VALUES (?,?,?,?)", (lk_infos["id"], lk_infos["nb_hp"], lk_infos["nb_serv"], lk_infos["ports"]))
         DB_connection.commit()
         # Then link the tags to the link
         tag_hp_list = lk_infos['tags_hp'].split(_separator)
