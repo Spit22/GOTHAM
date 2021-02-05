@@ -151,10 +151,12 @@ def add_server_DB(DB_settings, server_infos):
     except mariadb.Error as e:
         logging.error(f"Can't connect to the internal database : {e}")
         sys.exit(1)
-    result = add_in_IDB.server(DB_connection, server_infos)
-    DB_connection.close()
-    logging.debug(f"[-] Connection to the internal database closed")
-    return result
+    try:
+        add_in_IDB.server(DB_connection, server_infos)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database closed")
+    except:
+        sys.exit(1)
 
 
 def add_honeypot_DB(DB_settings, hp_infos):
@@ -177,10 +179,12 @@ def add_honeypot_DB(DB_settings, hp_infos):
     except mariadb.Error as e:
         logging.error(f"Can't connect to the internal database : {e}")
         sys.exit(1)
-    result = add_in_IDB.honeypot(DB_connection, hp_infos)
-    DB_connection.close()
-    logging.debug(f"[-] Connection to the internal database closed")
-    return result
+    try:
+        add_in_IDB.honeypot(DB_connection, hp_infos)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database closed")
+    except:
+        sys.exit(1)
 
 def add_link_DB(DB_settings, lk_infos):
     '''
@@ -202,11 +206,12 @@ def add_link_DB(DB_settings, lk_infos):
     except mariadb.Error as e:
         logging.error(f"Can't connect to the internal database : {e}")
         sys.exit(1)
-    result = add_in_IDB.link(DB_connection, lk_infos)
-    DB_connection.close()
-    logging.debug(f"[-] Connection to the internal database closed")
-    return result
-
+    try:
+        add_in_IDB.link(DB_connection, lk_infos)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database closed")
+    except:
+        sys.exit(1)
 
 def add_lhs_DB(DB_settings, lhs_infos):
     '''
@@ -228,10 +233,12 @@ def add_lhs_DB(DB_settings, lhs_infos):
     except mariadb.Error as e:
         logging.error(f"Can't connect to the internal database : {e}")
         sys.exit(1)
-    result = add_in_IDB.link_hp_serv(DB_connection, lhs_infos)
-    DB_connection.close()
-    logging.debug(f"[-] Connection to the internal database closed")
-    return result
+    try:
+        add_in_IDB.link_hp_serv(DB_connection, lhs_infos)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database closed")
+    except:
+        sys.exit(1)
 
 ########## REMOVE IN THE INTERNAL DATABASE ##########
 def remove_server_DB(DB_settings, id):
