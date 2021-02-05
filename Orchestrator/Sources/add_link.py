@@ -13,7 +13,7 @@ def generate_nginxConf(db_settings, link_id, dc_ip, honeypots, exposed_port):
     # honeypots (list): list of honeypots id
     # exposed_port (int): port to listen on the server
     
-    nginxRedirectionPath = "/data/template/"+ str(link_id) +"-"+str(server_id)+".conf"
+    nginxRedirectionPath = "/data/template/"+ str(link_id) +"-"+str(exposed_port)+".conf"
     nginxRedirectionFile = open(nginxRedirectionPath, 'w')
 
     nginxRedirectionFile.write("upstream "+ link_id +" {\n")
@@ -22,7 +22,7 @@ def generate_nginxConf(db_settings, link_id, dc_ip, honeypots, exposed_port):
     # Adding each honeypot in upstream
     for honeypot in honeypots:
         # Get the corresponding mapped port for this honeypot
-        honeypot_infos = get_honeypot_infos(db_settings, id=honeypot)[0]
+        honeypot_infos = get_honeypot_infos(db_settings, id=honeypot["hp_id"])[0]
         honeypot_port = honeypot_infos["hp_port"] 
         nginxRedirectionFile.write("  # "+ str(honeypot) +"\n")
         nginxRedirectionFile.write("  server "+ str(dc_ip) +":"+ str(honeypot_port) +";\n")
@@ -45,10 +45,11 @@ def deploy_nginxConf(db_settings, link_id, servers):
     linkConf_dest = "/etc/nginx/conf.d/links/"
 
     for server in servers:
+        print(server)
         exposed_port = servers[server]
         linkConf_path = ["/data/template/"+str(link_id)+"-"+str(exposed_port)+".conf"]
         # Get stored auth info of the server
-        server_infos = get_server_infos(db_settings, id=server)[0]
+        server_infos = get_server_infos(db_settings, ip=server)[0]
         srv_ip = server_infos["serv_ip"]
         srv_ssh_port = server_infos["serv_ssh_port"]
         srv_ssh_key = StringIO(server_infos["serv_ssh_key"])

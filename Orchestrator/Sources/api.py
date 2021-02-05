@@ -219,71 +219,117 @@ def add_srv():
 def add_lk():
         # Creates a link object
         # 
-        # tag_srv (list) : tag du/des serveurs ciblés
-        # tag_hp (list) : tag du/des hp ciblés
+        # tags_serv (list) : tag du/des serveurs ciblés
+        # tags_hp (list) : tag du/des hp ciblés
         # nb_srv (int) : nombre de serveurs ciblés
         # nb_hp (int) : nombre de hp ciblés
+        # exposed_port (list): list des ports à utiliser
 
         # Get POST data on JSON format
-        data = request.json
+        data = request.get_json()
 
-        # Make sure all data are in JSON
-        data = json.loads(data)
 
         # Get all function's parameters
-        tag_srv = data["tag_srv"]
-        tag_hp = data["tag_hp"]
-        nb_srv = data["nb_srv"]
-        nb_hp = data["nb_hp"]
-        exposed_ports = data["exposed_ports"]
+        tags_serv = str(data["tags_serv"])
+        tags_hp = str(data["tags_hp"])
+        nb_srv = int(data["nb_srv"])
+        nb_hp = int(data["nb_hp"])
+        exposed_ports = str(data["exposed_ports"])
+        exposed_ports_list = exposed_ports.split(',')
+
+        print("DEBUG : vars ok")
 
         # We check that no link exists with same tags, otherwise return error
-        
-        # We check all provided tags exists, otherwise return error
+        existingLinks = Gotham_link_BDD.get_link_infos(db_settings, tags_hp=tags_hp, tags_serv=tags_serv)
+        if existingLinks != []:
+            return "A link is already configured for this tags"
+        print(existingLinks)
 
-        # Get the number of honeypots corresponding to tags
+        print("DEBUG : links already configured ? ok")
 
-        # Get the number of servers corresponding to tags with one of possible ports open
+        # We check all provided server tags exists, otherwise return error
+        for tag_serv in tags_serv:
+            existingServTag = Gotham_link_BDD.get_tag_infos(db_settings, tag=tag_serv)
+            if existingServTag == []:
+                return "Error with tag "+str(tag_serv)+": tag does not exists"
+            print(existingServTag)
+
+        print("DEBUG : tags exists ok")
+
+        # We check all provided hp tags exists, otherwise return error
+        for tag_hp in tags_hp:
+            existingHpTag = Gotham_link_BDD.get_tag_infos(db_settings, tag_hp)
+            if existingHpTag == []:
+                return "Error with tag "+str(tag_hp)+": tag does not exists"
+            print(existingHpTag)
+
+        print("DEBUG : tags exists 2 ok")
+
+        # Get all honeypots corresponding to tags
+        honeypots = Gotham_link_BDD.get_honeypot_infos(db_settings, tags=tags_hp)
+
+        print("Get all hp OK")
+
+        # Get all servers corresponding to tags
+        servers = Gotham_link_BDD.get_server_infos(db_settings, tags=tags_serv)
+
+        print("Get all srv ok")
+
+        # Filter servers in those who have one of ports open
+        #for server in servers:
+        #    if server[""]
 
         # Checking we have enough servers for the nb_srv directive, otherwise return error
-
+        if len(servers) < nb_srv:
+            return "Can't deploy link on "+str(nb_srv)+" servers while there is only "+str(len(servers))+" servers available"
         # Checking we have enough honeypots for the nb_hp directive
-
-        #   # If we don't have any honeypots corresponding, just return error,
-        #   # If we don't have enough but we have one or more
-        #   #   # Choose one of available honeypots (the best scored), and obtain informations
-        #   #   # Duplicate this honeypot
+        if len(honeypots) < nb_hp:
+            # If we don't have any honeypots corresponding, just return error,
+            if len(honeypots) < 1:
+                return "Can't configure link if there is no at least one hp corresponding to request"
+            # If we don't have enough but we have one or more
+            # Choose one of available honeypots (the best scored), and obtain informations
+            # Duplicate this honeypot
+        print("DEBUG : check nb ok")        
         # If having enough honeypots, choose best honeypots (the lower scored)
-        for honeypot in honeypots:
-            hp_score[honeypot] = 0
-            # Add 10 pts per servers redirecting to the honeypot
-            if nb_mapping > 0:
-                hp_score[honeypot] += 10 * nb_mapping
+        #for honeypot in honeypots:
+        #    hp_score[honeypot] = 0
+        #    # Add 10 pts per servers redirecting to the honeypot
+        #    if nb_mapping > 0:
+        #        hp_score[honeypot] += 10 * nb_mapping
 
         # Choose best servers (the lower scored)
-        for server in servers:
-            srv_score[server] = 0
-            # Add 10 pts per links already configured on server
-            if nb_linked > 0:
-                srv_score[server] += 10 * nb_link
+        #for server in servers:
+        #    srv_score[server] = 0
+        #    # Add 10 pts per links already configured on server
+        #    if nb_linked > 0:
+        #        srv_score[server] += 10 * nb_link
         
         # Generate the dict servers associating ip and exposed_port
-
+        avb_servers = {"172.16.2.201":"8080"}
         # Create link id
         id = 'lk-'+str(uuid.uuid4().hex)
 
         # Generate NGINX configurations for each redirection on a specific exposed_port
-        for exposed_port in exposed_ports:
+        for exposed_port in exposed_ports_list:
             add_link.generate_nginxConf(db_settings, id, dc_ip, honeypots, exposed_port)
-
+        print("DEBUG : gen config ok")
         # Deploy new reverse-proxies's configurations on servers
-        add_link.deploy_nginxConf(db_settings, id, servers)
-        
-        # Check redirection is effective
-
+        add_link.deploy_nginxConf(db_settings, id, avb_servers)
+        print("DEBUG : deploy conf ok")
+        # Check redirection is effective on all servers
+        for avb_server in avb_servers:
+            ip_srv = avb_server
+            exposed_port = avb_servers[avb_server]
+            connected = Gotham_check.check_server_redirects(ip_srv, exposed_port)
+            if not connected:
+                return "Error : link is not effective on server "+str(ip_srv)
+        print("DEBUG : check link ok")
         # Insert new link object in database
-
-        return "NOT IMPLEMENTED"
+        sql_data = {"id":id, "nb_hp": nb_hp, "nb_serv": nb_srv, "tags_hp":tags_hp, "tags_serv":tags_serv, "ports":exposed_ports}
+        Gotham_link_BDD.add_link_DB(db_settings, sql_data)
+        print("db write ok")
+        return "OK : "+str(id)
 
 @app.route('/edit/honeypot', methods=['POST'])
 def edit_hp():
