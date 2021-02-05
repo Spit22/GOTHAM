@@ -68,7 +68,7 @@ rm /etc/nginx/nginx.conf
 
 echo "events {}
 stream{
-    include conf.d/links/*.conf
+    include conf.d/links/*.conf;
 }" > /etc/nginx/nginx.conf
 
 # Apply the configuration
