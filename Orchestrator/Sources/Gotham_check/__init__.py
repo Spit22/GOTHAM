@@ -2,6 +2,7 @@ from . import check_SSH
 from . import check_PING
 from . import check_DOUBLON
 from . import check_USED_PORT
+from . import check_SERVER_REDIRECTS
 import mariadb
 import sys
 
@@ -66,4 +67,7 @@ def check_used_port(DB_settings):
     result = check_USED_PORT.get_used_port(DB_connection)
     DB_connection.close()
     return result
+
+def check_server_redirects(ip_srv, port):
+    return check_SERVER_REDIRECTS.main(ip_srv, port)
     
