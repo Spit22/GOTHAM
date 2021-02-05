@@ -1,6 +1,16 @@
 from Gotham_SSH_SCP import execute_commands
+from Gotham_normalize import normalize_id_server
+from Gotham_link_BDD import get_server_infos, remove_server_DB
 
-def remove_server(id_server,hostname, port, ssh_key):
+
+# Logging components
+import os
+import logging
+GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+
+
+def main(DB_settings, id_server, hostname, port, ssh_key):
     # Check id format
     try:
         id_server = normalize_id_server(id_server)

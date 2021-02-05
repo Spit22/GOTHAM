@@ -67,4 +67,4 @@ if __name__ == '__main__':
     log_path = "/var/log/syslog"
     honeypot_port = "22"
     mapped_port = "2200"
-    generate_compose(id, dockerfile_path, log_path, honeypot_port, mapped_port)
+    generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_port)

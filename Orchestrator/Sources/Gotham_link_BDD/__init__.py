@@ -254,28 +254,12 @@ def remove_server_DB(DB_settings, id):
     except mariadb.Error as e:
         logging.error(f"Can't connect to the internal database : {e}")
         sys.exit(1)
-    # Check id format
-    try:
-        id = normalize_id_server(id)
-    except:
-        logging.error(f"Can't remove the server : his id is invalid")
-        sys.exit(1)
-    # Check if the server exists
-    result = get_infos.server(DB_connection, id=id)
-    if result == []:
-        logging.error(f"You tried to remove a server that doesn't exists with the id = {id}")
-        sys.exit(1)
-    # Check if the server is running
-    if not(result[0]['link_id'] == None):
-        logging.error(f"You tried to remove a running server with the id = {id}")
-        sys.exit(1)
-    # If everything is OK, we remove the server
+    # Remove the server in the IDB
     result = remove_in_IDB.server(DB_connection, id)
     DB_connection.close()
     logging.debug(f"[-] Connection to the internal database closed")
     return result
 
-#def add_link_DB(DB_settings, ...):
 def remove_honeypot_DB(DB_settings, id):
     '''
     Remove a honeypot in the internal database and returns a boolean
@@ -296,22 +280,7 @@ def remove_honeypot_DB(DB_settings, id):
     except mariadb.Error as e:
         logging.error(f"Can't connect to the internal database : {e}")
         sys.exit(1)
-    # Check id format
-    try:
-        id = normalize_id_honeypot(id)
-    except:
-        logging.error(f"Can't remove the honeypot : its id is invalid")
-        sys.exit(1)
-    # Check if the honyepot exists
-    result = get_infos.honeypot(DB_connection, id=id)
-    if result == []:
-        logging.error(f"You tried to remove a honeypot that doesn't exists with the id = {id}")
-        sys.exit(1)
-    # Check if the honeypot is running
-    if not(result[0]['link_id'] == None):
-        logging.error(f"You tried to remove a running honeypot with the id = {id}")
-        sys.exit(1)
-    # If everything is OK, we remove the server
+    # Remove the Honeypot
     result = remove_in_IDB.honeypot(DB_connection, id)
     DB_connection.close()
     logging.debug(f"[-] Connection to the internal database closed")
@@ -337,22 +306,7 @@ def remove_link_DB(DB_settings, id):
     except mariadb.Error as e:
         logging.error(f"Can't connect to the internal database : {e}")
         sys.exit(1)
-    # Check id format
-    try:
-        id = normalize_id_link(id)
-    except:
-        logging.error(f"Can't remove the link : its id is invalid")
-        sys.exit(1)
-    # Check if the link exists
-    result = get_infos.link(DB_connection, id=id)
-    if result == []:
-        logging.error(f"You tried to remove a link that doesn't exists with the id = {id}")
-        sys.exit(1)
-    # Check if the link is used (if it links any server tags with any honeypots tags)
-    #if not(result[0]['link_nb_hp'] == '0' and result[0]['link_nb_serv'] == '0'):
-    #    logging.error(f"You tried to remove a running link with the id = {id}")
-    #    sys.exit(1)
-    # If everything is OK, we remove the server
+    # Remove the link
     result = remove_in_IDB.link(DB_connection, id)
     DB_connection.close()
     logging.debug(f"[-] Connection to the internal database closed")
