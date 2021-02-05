@@ -228,7 +228,6 @@ def add_lk():
         # Get POST data on JSON format
         data = request.get_json()
 
-
         # Get all function's parameters
         tags_serv = str(data["tags_serv"])
         tags_hp = str(data["tags_hp"])
@@ -237,15 +236,11 @@ def add_lk():
         exposed_ports = str(data["exposed_ports"])
         exposed_ports_list = exposed_ports.split(',')
 
-        print("DEBUG : vars ok")
-
         # We check that no link exists with same tags, otherwise return error
         existingLinks = Gotham_link_BDD.get_link_infos(db_settings, tags_hp=tags_hp, tags_serv=tags_serv)
         if existingLinks != []:
             return "A link is already configured for this tags"
         print(existingLinks)
-
-        print("DEBUG : links already configured ? ok")
 
         # We check all provided server tags exists, otherwise return error
         for tag_serv in tags_serv:
@@ -254,8 +249,6 @@ def add_lk():
                 return "Error with tag "+str(tag_serv)+": tag does not exists"
             print(existingServTag)
 
-        print("DEBUG : tags exists ok")
-
         # We check all provided hp tags exists, otherwise return error
         for tag_hp in tags_hp:
             existingHpTag = Gotham_link_BDD.get_tag_infos(db_settings, tag_hp)
@@ -263,17 +256,11 @@ def add_lk():
                 return "Error with tag "+str(tag_hp)+": tag does not exists"
             print(existingHpTag)
 
-        print("DEBUG : tags exists 2 ok")
-
         # Get all honeypots corresponding to tags
         honeypots = Gotham_link_BDD.get_honeypot_infos(db_settings, tags=tags_hp)
 
-        print("Get all hp OK")
-
         # Get all servers corresponding to tags
         servers = Gotham_link_BDD.get_server_infos(db_settings, tags=tags_serv)
-
-        print("Get all srv ok")
 
         # Filter servers in those who have one of ports open
         #for server in servers:
@@ -290,7 +277,6 @@ def add_lk():
             # If we don't have enough but we have one or more
             # Choose one of available honeypots (the best scored), and obtain informations
             # Duplicate this honeypot
-        print("DEBUG : check nb ok")        
         # If having enough honeypots, choose best honeypots (the lower scored)
         #for honeypot in honeypots:
         #    hp_score[honeypot] = 0
@@ -313,10 +299,10 @@ def add_lk():
         # Generate NGINX configurations for each redirection on a specific exposed_port
         for exposed_port in exposed_ports_list:
             add_link.generate_nginxConf(db_settings, id, dc_ip, honeypots, exposed_port)
-        print("DEBUG : gen config ok")
+
         # Deploy new reverse-proxies's configurations on servers
         add_link.deploy_nginxConf(db_settings, id, avb_servers)
-        print("DEBUG : deploy conf ok")
+
         # Check redirection is effective on all servers
         for avb_server in avb_servers:
             ip_srv = avb_server
@@ -324,11 +310,11 @@ def add_lk():
             connected = Gotham_check.check_server_redirects(ip_srv, exposed_port)
             if not connected:
                 return "Error : link is not effective on server "+str(ip_srv)
-        print("DEBUG : check link ok")
+
         # Insert new link object in database
         sql_data = {"id":id, "nb_hp": nb_hp, "nb_serv": nb_srv, "tags_hp":tags_hp, "tags_serv":tags_serv, "ports":exposed_ports}
         Gotham_link_BDD.add_link_DB(db_settings, sql_data)
-        print("db write ok")
+
         return "OK : "+str(id)
 
 @app.route('/edit/honeypot', methods=['POST'])
