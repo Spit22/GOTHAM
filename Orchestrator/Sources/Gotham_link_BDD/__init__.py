@@ -101,7 +101,6 @@ def get_link_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="%", tags
     logging.debug(f"[-] Connection to the internal database closed")
     return result
 
-
 def get_tag_infos(DB_settings, mode=False, tag="%", id="%"):
     '''
     Retrieve a JSON with all the data of one or several tags from the internal database
@@ -158,7 +157,6 @@ def add_server_DB(DB_settings, server_infos):
     except:
         sys.exit(1)
 
-
 def add_honeypot_DB(DB_settings, hp_infos):
     '''
     Add a honeypot in the internal database
@@ -202,15 +200,16 @@ def add_link_DB(DB_settings, lk_infos):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+] Connection to the internal database started")
+        logging.debug(f"[+++++] Connection to the internal database started")
     except mariadb.Error as e:
         logging.error(f"Can't connect to the internal database : {e}")
         sys.exit(1)
     try:
         add_in_IDB.link(DB_connection, lk_infos)
         DB_connection.close()
-        logging.debug(f"[-] Connection to the internal database closed")
+        logging.debug(f"[------] Connection to the internal database closed")
     except:
+        logging.error(f"Add link DB failed : {e}")
         sys.exit(1)
 
 def add_lhs_DB(DB_settings, lhs_infos):

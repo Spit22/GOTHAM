@@ -25,6 +25,10 @@ def main(DB_settings, id):
         logging.error(f"You tried to remove a honeypot that doesn't exists with the id = {id}")
         sys.exit(1)
     ##### REMOVE LINK ON SERVERS ###
+    # List server
+    # prendre serv_id dans result; split avec |||||| ; split avec |||| ; check doublon id -> liste des id des serveurs liés par le link
+    # For each servers, list the honeypots linked to it
+
     # Remove the Link from the IDB
     try:
         remove_link_DB(DB_settings,id)
@@ -32,3 +36,5 @@ def main(DB_settings, id):
         logging.error(f"Remove link failed : {e}")
         sys.exit(1)
     return True
+
+#def remove_links_on_servers():
