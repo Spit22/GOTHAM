@@ -1,7 +1,9 @@
 from . import check_SSH
 from . import check_PING
+from . import check_TAGS
 from . import check_DOUBLON
 from . import check_USED_PORT
+from . import check_SERVER_PORTS
 from . import check_SERVER_REDIRECTS
 import mariadb
 import sys
@@ -26,6 +28,19 @@ def check_ssh(ip, ssh_port, ssh_key):
 def check_ping(hostname):
     return check_PING.main(hostname)
 
+def check_tags(object_type, objects_infos, tags):
+    return check_TAGS.check_tags(object_type, objects_infos, tags)
+
+def check_server_ports_is_free(serv_infos, ports):
+    return check_SERVER_PORTS.check_server_ports(serv_infos, ports)
+
+def check_servers_ports_matching(servs_infos, ports):
+    result=[]
+    for serv_infos in servs_infos:
+        if check_server_ports_is_free(serv_infos, ports)!='':
+            result.append(serv_infos)
+    return result
+
 def check_doublon_server(DB_settings, ip):
     '''
     Check if a server doesn't already exists in the internal database
@@ -45,6 +60,19 @@ def check_doublon_tag(DB_settings, tag):
         tag (string) : name of the tag you want to check
     '''
     return check_DOUBLON.tag(DB_settings, tag)
+
+def check_doublon_tags(DB_settings, tags):
+    '''
+    Check if all tags already exists in the internal database
+
+    ARGUMENTS:
+        DB_settings (dict) : all the settings to connect to the internal database
+        tags (string) : tags you want to check
+    '''
+    try:
+        check_DOUBLON.tags(DB_settings, tags)
+    except:
+        sys.exit(1)
 
 def check_used_port(DB_settings):
     '''

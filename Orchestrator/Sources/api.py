@@ -262,28 +262,30 @@ def add_lk():
         print(existingLinks)
 
         # We check all provided server tags exists, otherwise return error
-        for tag_serv in tags_serv:
-            existingServTag = Gotham_link_BDD.get_tag_infos(db_settings, tag=tag_serv)
-            if existingServTag == []:
-                return "Error with tag "+str(tag_serv)+": tag does not exists"
-            print(existingServTag)
+        try:
+            Gotham_check.check_doublon_tags(db_settings, tags_serv)
+        except:
+            return "Error with tags: some server tags do not exists"
 
         # We check all provided hp tags exists, otherwise return error
-        for tag_hp in tags_hp:
-            existingHpTag = Gotham_link_BDD.get_tag_infos(db_settings, tag_hp)
-            if existingHpTag == []:
-                return "Error with tag "+str(tag_hp)+": tag does not exists"
-            print(existingHpTag)
+        try:
+            Gotham_check.check_doublon_tags(db_settings, tags_hp)
+        except:
+            return "Error with tags: some honeypot tags do not exists"
 
         # Get all honeypots corresponding to tags
-        honeypots = Gotham_link_BDD.get_honeypot_infos(db_settings, tags=tags_hp)
+        honeypots = Gotham_check.check_tags("hp", Gotham_link_BDD.get_honeypot_infos(db_settings, tags=tags_hp), tags_hp)
 
         # Get all servers corresponding to tags
-        servers = Gotham_link_BDD.get_server_infos(db_settings, tags=tags_serv)
+        servers = Gotham_check.check_tags("serv",Gotham_link_BDD.get_server_infos(db_settings, tags=tags_serv),tags_serv)
 
         # Filter servers in those who have one of ports open
-        #for server in servers:
-        #    if server[""]
+        servers = Gotham_check.check_servers_ports_matching(servers, exposed_ports):
+
+        # Filter servers in error
+        servers = [server for server in servers if server["serv_state"]!='ERROR']
+        # Filter honeypots in error
+        honeypots = [honeypot for honeypot in honeypots if honeypot["hp_state"]!='ERROR']
 
         # Checking we have enough servers for the nb_srv directive, otherwise return error
         if len(servers) < nb_srv:

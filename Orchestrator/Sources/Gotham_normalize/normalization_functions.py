@@ -126,7 +126,7 @@ def normalize_ports(ports):
     # Retrieve settings from config file
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
-    separator = config['tag']['separator']
+    separator = config['port']['separator']
     ports_list = ports.split(separator)
     res = ''
     for a_port in ports_list:
