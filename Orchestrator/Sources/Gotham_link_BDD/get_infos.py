@@ -1,3 +1,4 @@
+# Import external libs
 import mariadb
 import sys
 import configparser
@@ -99,7 +100,6 @@ def honeypot(DB_connection, mode=False, id="%", name="%", tags="%", state="%", d
         logs = normalize_used_arguments(logs, "%")
         source = normalize_used_arguments(source, "%")
         port_container = normalize_used_arguments(port_container, "%")
-
     tags_request=normalize_tags_arguments(mode,"hp_tags",tags)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
@@ -121,7 +121,6 @@ def link(DB_connection, mode=False, id="%", nb_hp="%", nb_serv="%", tags_hp="%",
         id = normalize_used_arguments(id, "%")
         nb_hp = normalize_used_arguments(nb_hp, "%")
         nb_serv = normalize_used_arguments(nb_serv, "%")
-    
     tags_hp_request=normalize_tags_arguments(mode,"link_tags_hp",tags_hp)
     tags_serv_request=normalize_tags_arguments(mode,"link_tags_serv",tags_serv)
     # Get MariaDB cursor
@@ -134,7 +133,6 @@ def link(DB_connection, mode=False, id="%", nb_hp="%", nb_serv="%", tags_hp="%",
     json_data=[]
     for result in rv:
        json_data.append(dict(zip(row_headers,result)))
-
     # Get MariaDB cursor
     cur2 = DB_connection.cursor()
     # Execute SQL request

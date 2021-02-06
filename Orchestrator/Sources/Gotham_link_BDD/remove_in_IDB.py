@@ -1,7 +1,9 @@
+# Import external libs
 import mariadb
 import sys
 import configparser
 
+# Import Gotham's libs
 from . import get_infos
 
 # Logging components
@@ -76,33 +78,63 @@ def honeypot_in_hp_tag(DB_connection, id):
         # Apply the changes
         DB_connection.commit()
         # Logs
-        logging.info(f"Honeypot with the id '{id}' has just been deleted from the table Hp_Tags of the internal database")
-        return True
+        logging.info(f"'{id}' deleted from the table 'Hp_Tags'")
     except mariadb.Error as e:
-        logging.error(f"Can't remove the relation between the honeypot and his tag with the id '{id}' in the internal database : {e}")
-        return False
+        logging.error(f"'{id}' removal from the table 'Hp_Tags' failed : {e}")
+        sys.exit(1)
 
 ############################### LINK SECTION ###############################
 
 def link(DB_connection, id):
+    # Remove the relation between the link and the serv_tag
+    try:
+        link_in_link_tags_serv(DB_connection, id)
+    except:
+        sys.exit(1)
+    # Remove the relation between the link and the hp_tag
+    try:
+        link_in_link_tags_hp(DB_connection, id)
+    except:
+        sys.exit(1)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request
     try :
-        # First, delete every relations between the link and the server tags it takes care
-        cur.execute("DELETE FROM Link_Tags_serv WHERE id_link = ?",(id,))
-        # Then, delete the relations between the link and the honeypot tags it takes care
-        cur.execute("DELETE FROM Link_Tags_hp WHERE id_link = ?",(id,))
         # Finally, delete the the link itself
         cur.execute("DELETE FROM Link WHERE id = ?",(id,))
         # Apply the changes
         DB_connection.commit()
         # Logs
-        logging.info(f"Link with the id '{id}' has just been deleted from the table Link_Tags_serv of the internal database")
-        logging.info(f"Link with the id '{id}' has just been deleted from the table Link_Tags_hp of the internal database")
-        logging.info(f"Link with the id '{id}' has just been deleted from the table Link of the internal database")
-        return True
+        logging.info(f"'{id}' deleted from the table 'Link'")
     except mariadb.Error as e:
         # If an error occurs, log it and return False
-        logging.error(f"Can't remove the link with the id '{id}' in the internal database : {e}")
-        return False
+        logging.error(f"'{id}' removal from the table 'Link' failed : {e}")
+        sys.exit(1)
+
+def link_in_link_tags_hp(DB_connection, id):
+    # Get MariaDB cursor
+    cur = DB_connection.cursor()
+    # Execute SQL request
+    try :
+        cur.execute("DELETE FROM Link_Tags_hp WHERE id_link = ?",(id,))
+        # Apply the changes
+        DB_connection.commit()
+        # Logs
+        logging.info(f"'{id}' deleted from the table 'Link_Tags_hp'")
+    except mariadb.Error as e:
+        logging.error(f"'{id}' removal from the table 'Link_Tags_hp' failed : {e}")
+        sys.exit(1)
+
+def link_in_link_tags_serv(DB_connection, id):
+    # Get MariaDB cursor
+    cur = DB_connection.cursor()
+    # Execute SQL request
+    try :
+        cur.execute("DELETE FROM Link_Tags_serv WHERE id_link = ?",(id,))
+        # Apply the changes
+        DB_connection.commit()
+        # Logs
+        logging.info(f"'{id}' deleted from the table 'Link_Tags_serv'")
+    except mariadb.Error as e:
+        logging.error(f"'{id}' removal from the table 'Link_Tags_serv' failed : {e}")
+        sys.exit(1)
