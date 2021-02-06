@@ -15,6 +15,7 @@ import add_link
 # GOTHAM'S LIB
 import Gotham_link_BDD
 import Gotham_check
+import Gotham_normalize
 
 
 app = flask.Flask(__name__)
@@ -99,19 +100,23 @@ def add_honeypot():
 
         # Get POST data on JSON format
         data = request.get_json()
-
-        # Get all function's parameters
-        name = data["name"]
-        descr = data["descr"]
-        tags = data["tags"]
-        logs = data["logs"]
-        parser = data["parser"]
-        dockerfile = data["dockerfile"]
-        dockerfile = base64.b64decode(dockerfile)
-        dockerfile = dockerfile.decode('ascii')
-        dockerfile = str(dockerfile)
-        port = data["port"]
-        
+        try:
+            # Normalize infos
+            hp_infos_received = {"name": data["name"],"descr": data["descr"],"tags": data["tags"],"logs": data["logs"],"parser": data["parser"],"port": data["port"]}
+            hp_infos_received = Gotham_normalize.normalize_honeypot_infos(hp_infos_received)
+            # Get all function's parameters
+            name = hp_infos_received["name"]
+            descr = hp_infos_received["descr"]
+            tags = hp_infos_received["tags"]
+            logs = hp_infos_received["logs"]
+            parser = hp_infos_received["parser"]
+            dockerfile = data["dockerfile"]
+            dockerfile = base64.b64decode(dockerfile)
+            dockerfile = dockerfile.decode('ascii')
+            dockerfile = str(dockerfile)
+            port = hp_infos_received["port"]
+        except Exception as e:
+            return "Invalid data sent "+str(e)
 
         # First find an available port to map on datacenter
         used_ports = Gotham_check.check_used_port(db_settings)
@@ -148,9 +153,12 @@ def add_honeypot():
         except Exception as e:
             return "An error occured in the ssh connection"
 
+        # Create hp_infos
+        hp_infos = {'id':str(id),'name':str(name),'descr':str(descr),'tag':str(tags),'port_container':port,'parser':str(parser),'logs':str(logs),'source':str(dockerfile_path),'state':'UNUSED','port':mapped_port}
+        # Normalize infos
+        hp_infos = Gotham_normalize.normalize_honeypot_infos(hp_infos)
         # Store new hp and tags in the database
-        sql_data = {'id':str(id),'name':str(name),'descr':str(descr),'tag':str(tags),'port_container':str(port),'parser':str(parser),'logs':str(logs),'source':str(dockerfile_path),'state':'INACTIVE','port':mapped_port}
-        Gotham_link_BDD.add_honeypot_DB(db_settings, sql_data)
+        Gotham_link_BDD.add_honeypot_DB(db_settings, hp_infos)
 
         # If all operations succeed
         return "OK : "+str(id)
@@ -171,46 +179,50 @@ def add_srv():
 
         # Get all function's parameters
         try:
-            name = data["name"]
-            descr = data["descr"]
-            tags = data["tags"]
-            ip = data["ip"]
+            # Normalize infos
+            serv_infos_received = {"name": data["name"],"descr": data["descr"],"tags": data["tags"],"ip": data["ip"],"ssh_port": data["ssh_port"]}
+            serv_infos_received = Gotham_normalize.normalize_honeypot_infos(serv_infos_received)
+            # Get all function's parameters
+            name = serv_infos_received["name"]
+            descr = serv_infos_received["descr"]
+            tags = serv_infos_received["tags"]
+            ip = serv_infos_received["ip"]
             encoded_ssh_key = data["ssh_key"]
             # Decode and format the ssh key
             ssh_key = base64.b64decode(encoded_ssh_key) # ssh_key is byte
             ssh_key = ssh_key.decode('ascii') # ssh_key is ascii string
             check_ssh_key = StringIO(ssh_key) # ssh_key for the check is a file-like object
             deploy_ssh_key = StringIO(ssh_key) # ssh_key for the deployment is a file-like object
-            ssh_port = data["ssh_port"]
-
+            ssh_port = serv_infos_received["ssh_port"]
         except Exception as e:
             return "Invalid data sent "+str(e)
 
-	# First check the ip not already exists in database
+	    # First check the ip not already exists in database
         exists = Gotham_check.check_doublon_server(db_settings, ip)
         if exists:
             return "Provided ip already exists in database"
 
-	# Check given auth information are ok
+	    # Check given auth information are ok
         connected = Gotham_check.check_ssh(ip, ssh_port, check_ssh_key)	
         if not connected:
             return "Provided ssh_key or ssh_port is wrong"
 
-	# If all checks are ok, we can generate an id for the new server
+	    # If all checks are ok, we can generate an id for the new server
         id = 'sv-'+str(uuid.uuid4().hex)
 
-	# Deploy the reverse-proxy service on the new server
+	    # Deploy the reverse-proxy service on the new server
         try:
             add_server.deploy(ip, ssh_port, deploy_ssh_key)
         except Exception as e:
             return "Something went wrong while deploying Reverse-Proxy"
 
-	# Store new server and tags in the internal database
-        try:
-            sql_data = {'id':str(id),'name':str(name),'descr':str(descr),'tag':str(tags),'ip':str(ip),'ssh_key':str(ssh_key),'ssh_port':str(ssh_port),'state':'INACTIVE'}
-            Gotham_link_BDD.add_server_DB(db_settings, sql_data)
-        except Exception as e:
-            return "Internal database error"
+	    # Create serv_infos
+        serv_infos = {'id':str(id),'name':str(name),'descr':str(descr),'tag':str(tags),'ip':str(ip),'ssh_key':str(ssh_key),'ssh_port':ssh_port,'state':'UNUSED'}
+        # Normalize infos
+        serv_infos = Gotham_normalize.normalize_server_infos(serv_infos)
+        # Store new server and tags in the internal database        
+        Gotham_link_BDD.add_server_DB(db_settings, serv_infos)
+        
 
         # If all operations succeed
         return "OK : "+str(id)
@@ -229,13 +241,20 @@ def add_lk():
         data = request.get_json()
 
         # Get all function's parameters
-        tags_serv = str(data["tags_serv"])
-        tags_hp = str(data["tags_hp"])
-        nb_srv = int(data["nb_srv"])
-        nb_hp = int(data["nb_hp"])
-        exposed_ports = str(data["exposed_ports"])
-        exposed_ports_list = exposed_ports.split(',')
-
+        try:
+            # Normalize infos
+            lk_infos_received = {"nb_hp": data["nb_hp"], "nb_serv": data["nb_srv"], "tags_hp":data["tags_hp"], "tags_serv":data["tags_serv"], "ports":data["exposed_ports"]}
+            lk_infos_received = Gotham_normalize.normalize_honeypot_infos(lk_infos_received)
+            # Get all function's parameters
+            tags_serv = lk_infos_received["tags_serv"]
+            tags_hp = lk_infos_received["tags_hp"]
+            nb_srv = lk_infos_received["nb_srv"]
+            nb_hp = lk_infos_received["nb_hp"]
+            exposed_ports = lk_infos_received["ports"]
+            exposed_ports_list = exposed_ports.split(',')
+        except Exception as e:
+            return "Invalid data sent "+str(e)
+       
         # We check that no link exists with same tags, otherwise return error
         existingLinks = Gotham_link_BDD.get_link_infos(db_settings, tags_hp=tags_hp, tags_serv=tags_serv)
         if existingLinks != []:
@@ -311,9 +330,13 @@ def add_lk():
             if not connected:
                 return "Error : link is not effective on server "+str(ip_srv)
 
-        # Insert new link object in database
-        sql_data = {"id":id, "nb_hp": nb_hp, "nb_serv": nb_srv, "tags_hp":tags_hp, "tags_serv":tags_serv, "ports":exposed_ports}
-        Gotham_link_BDD.add_link_DB(db_settings, sql_data)
+        # Create lk_infos
+        lk_infos = {"id":id, "nb_hp": nb_hp, "nb_serv": nb_srv, "tags_hp":tags_hp, "tags_serv":tags_serv, "ports":exposed_ports}
+        # Normalize infos
+        lk_infos = Gotham_normalize.normalize_link_infos(lk_infos)
+        # Store new link and tags in the internal database        
+        Gotham_link_BDD.add_link_DB(db_settings, lk_infos)
+
 
         return "OK : "+str(id)
 
