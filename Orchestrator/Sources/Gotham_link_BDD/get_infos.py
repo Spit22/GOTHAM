@@ -72,7 +72,6 @@ def server(DB_connection, mode=False, ip="%", id="%", name="%", tags="%", state=
         state = normalize_used_arguments(state, "%")
         descr = normalize_used_arguments(descr, "%")
         ssh_port = normalize_used_arguments(ssh_port, "%")
-
     tags_request=normalize_tags_arguments(mode,"serv_tags",tags)
     # Get MariaDB cursor
     cur = DB_connection.cursor()

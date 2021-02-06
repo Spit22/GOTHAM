@@ -14,23 +14,24 @@ logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',leve
 ############################### SERVER SECTION ###############################
 
 def server(DB_connection, id):
+    # First, remove the relation between the server and its tags
+    try:
+        server_in_serv_tag(DB_connection, id)
+    except:
+        sys.exit(1)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request
     try :
-        # First, delete the relations between the server and his tags
-        cur.execute("DELETE FROM Serv_Tags WHERE id_serv = ?",(id,))
-        # Then, delete the the server itself
+        # Delete the the server itself
         cur.execute("DELETE FROM Server WHERE id = ?",(id,))
         # Apply the changes
         DB_connection.commit()
         # Logs
-        logging.info(f"Server with the id '{id}' has just been deleted from the table Serv_Tags of the internal database")
-        logging.info(f"Server with the id '{id}' has just been deleted from the table Server of the internal database")
-        return True
+        logging.info(f"'{id}' deleted from the table 'Server'")
     except mariadb.Error as e:
-        logging.error(f"Can't remove the server with the id '{id}' in the internal database : {e}")
-        return False
+        logging.error(f"'{id}' removal from the table Server failed : {e}")
+        sys.exit(1)
 
 def server_in_serv_tag(DB_connection, id):
     # Get MariaDB cursor
@@ -41,33 +42,30 @@ def server_in_serv_tag(DB_connection, id):
         # Apply the changes
         DB_connection.commit()
         # Logs
-        logging.info(f"Server with the id '{id}' has just been deleted from the table Serv_Tags of the internal database")
-        return True
+        logging.info(f"'{id}' deleted from the table 'Serv_Tags'")
     except mariadb.Error as e:
-        logging.error(f"Can't remove the relation between the server and his tag with the id '{id}' in the internal database : {e}")
-        return False
+        logging.error(f"'{id}' removal from the table 'Serv_Tags' failed : {e}")
+        sys.exit(1)
 
 ############################### HONEYPOT SECTION ###############################
 
 def honeypot(DB_connection, id):
+    # First, delete the relations between the honeypot and its tags
+    honeypot_in_hp_tag(DB_connection, id)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request
     try :
-        # First, delete the relations between the honeypot and his tags
-        cur.execute("DELETE FROM Hp_Tags WHERE id_hp = ?",(id,))
-        # Then, delete the the honeypot itself
+        # Delete the the honeypot itself
         cur.execute("DELETE FROM Honeypot WHERE id = ?",(id,))
         # Apply the changes
         DB_connection.commit()
         # Logs
-        logging.info(f"Honeypot with the id '{id}' has just been deleted from the table Hp_Tags of the internal database")
-        logging.info(f"Honeypot with the id '{id}' has just been deleted from the table Honeypot of the internal database")
-        return True
+        logging.info(f"'{id}' deleted from the table 'Honeypot' of the internal database")
     except mariadb.Error as e:
-        # If an error occurs, log it and return False
-        logging.error(f"Can't remove the honeypot with the id '{id}' in the internal database : {e}")
-        return False
+        # If an error occurs, log it and exit
+        logging.error(f"'{id}' removal from the table 'Honeypot' : {e}")
+        sys.exit(1)
 
 def honeypot_in_hp_tag(DB_connection, id):
     # Get MariaDB cursor

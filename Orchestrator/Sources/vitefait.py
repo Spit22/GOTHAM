@@ -8,8 +8,10 @@ import mariadb
 
 from termcolor import colored, cprint
 
+import rm_server
+
 ##########-SETTINGS-##########
-DB_settings = {"username":"gotham", "password":"password", "hostname":"192.168.1.172", "port":"3306", "database":"GOTHAM"}
+DB_settings = {"username":"gotham", "password":"password", "hostname":"localhost", "port":"3306", "database":"GOTHAM"}
 
 lk_port_infos = {"id":"lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F", "nb_hp": 4, "nb_serv": 2, "tags_hp":"OpenSSH,SSH,Elasticsearch", "tags_serv":"Europe ,  suisse,  geneve,TagDeTest42,TagDeTest4254,TagDeTest427","ports":"22, 189  ,  469,6484,88"}
 
@@ -26,6 +28,7 @@ try:
 except:
     print(colored('[X] add_server_DB failed', 'red'))
 
+'''
 try:
     print(colored("########## Add Honeypot ##########", 'yellow'))
     print(add_honeypot_DB(DB_settings, honeypot_infos))
@@ -37,8 +40,9 @@ try:
     print(add_link_DB(DB_settings, lk_infos))
 except:
     print(colored('[X] add_link_DB failed', 'red'))
-
+'''
 print(colored("########## ########## GET INFOS SECTION ########## ##########", 'blue'))
+'''
 try:
     print(colored("########## Get Server Infos with tag (false mode) ##########", 'yellow'))
     print(get_server_infos(DB_settings, mode=False, tags=server_infos["tags"]))
@@ -50,13 +54,14 @@ try:
     print(get_server_infos(DB_settings, mode=True, tags=server_infos["tags"]))
 except:
     print(colored('[X] get_server_infos failed', 'red'))
-
+'''
 try:
     print(colored("########## Get Server Infos with ip (true mode) ##########", 'yellow'))
     print(get_server_infos(DB_settings, mode=True, ip=server_infos["ip"]))
 except:
     print(colored('[X] get_server_infos failed', 'red'))
 
+'''
 try:
     print(colored("########## Get Tag Infos with id ##########", 'yellow'))
     print(get_tag_infos(DB_settings, id="1"))
@@ -86,8 +91,8 @@ try:
     print(get_link_infos(DB_settings, mode=True, id=lk_infos["id"]))
 except:
     print(colored('[X] get_link_infos failed', 'red'))
-
-
+'''
+'''
 print(colored("########## ########## NORMALIZE SECTION ########## ##########", 'blue'))
 try:
     print(colored("########## Normalize Honeypot Infos ##########", 'yellow'))
@@ -106,15 +111,16 @@ try:
     print(normalize_link_infos(lk_infos))
 except:
     print(colored('[X] normalize_link_infos failed', 'red'))
-
+'''
 
 print(colored("########## ########## REMOVE SECTION ########## ##########", 'blue'))
 try:
     print(colored("########## Remove Server (with id) ##########", 'yellow'))
-    print(remove_server_DB(DB_settings, server_infos['id']))
+    #print(remove_server_DB(DB_settings, server_infos['id']))
+    print(rm_server.main(DB_settings, ip_server=server_infos['ip']))
 except:
     print(colored('[X] remove_server_DB failed', 'red'))
-
+'''
 try:
     print(colored("########## Remove Honeypot (with id) ##########", 'yellow'))
     print(remove_honeypot_DB(DB_settings, honeypot_infos['id']))
@@ -126,3 +132,4 @@ try:
     print(remove_link_DB(DB_settings, lk_infos['id']))
 except:
     print(colored('[X] remove_link_DB failed', 'red'))
+'''
