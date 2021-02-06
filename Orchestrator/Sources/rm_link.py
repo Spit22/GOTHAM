@@ -1,3 +1,7 @@
+# Import external libs
+import sys
+
+# Import GOTHAM's libs
 from Gotham_SSH_SCP import execute_commands
 from Gotham_link_BDD import remove_link_DB, get_link_infos
 from Gotham_normalize import normalize_id_link
@@ -8,23 +12,29 @@ import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
-def main(DB_settings, hostname, port, ssh_key, id_link):
+def main(DB_settings, id):
     # Check id format
     try:
-        id_link = normalize_id_link(id_link)
+        id = normalize_id_link(id)
     except:
         logging.error(f"Can't remove the honeypot : its id is invalid")
-        return False
+        sys.exit(1)
     # Check if the link exists in the IDB
-    result = get_link_infos(DB_settings, id=id_link)
+    result = get_link_infos(DB_settings, id=id)
     if result == []:
         logging.error(f"You tried to remove a honeypot that doesn't exists with the id = {id}")
-        return False
+        sys.exit(1)
     ##### REMOVE LINK ON SERVERS ###
+    # List server
+    # prendre serv_id dans result; split avec |||||| ; split avec |||| ; check doublon id -> liste des id des serveurs liés par le link
+    # For each servers, list the honeypots linked to it
+
     # Remove the Link from the IDB
     try:
-        remove_link_DB(DB_settings,id_link)
+        remove_link_DB(DB_settings,id)
     except Exception as e:
         logging.error(f"Remove link failed : {e}")
-        return False
+        sys.exit(1)
     return True
+
+#def remove_links_on_servers():
