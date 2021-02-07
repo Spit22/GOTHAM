@@ -4,6 +4,7 @@ import json
 import uuid
 import base64
 import os
+import random
 from flask import request, jsonify
 from io import StringIO # a suppr
 
@@ -120,16 +121,11 @@ def add_honeypot():
 
         # First find an available port to map on datacenter
         used_ports = Gotham_check.check_used_port(db_settings)
-        available_port = False
-
-        for mapped_port in dc_ports_list:
-            if mapped_port not in used_ports:
-                available_port = True
-                break
-
-        # Check if an available port was found
-        if not available_port:
+        available_ports=[port for port in dc_ports_list if not(port in used_port)]
+        if available_ports==[]:
             return "Datacenter : no port available for mapping"
+        else:
+            mapped_port=random.choice(available_ports)
 
         # Generate honeypot's id
         id = 'hp-'+str(uuid.uuid4().hex)

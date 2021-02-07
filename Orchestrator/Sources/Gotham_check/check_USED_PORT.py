@@ -6,10 +6,5 @@ def get_used_port(DB_connection):
     # Execute SQL request
     cur.execute("SELECT DISTINCT port FROM Honeypot")
     # Convert answer to JSON
-    rv = cur.fetchall()
-    res=[]
-    for result in rv:
-       res.append(result[0])
-    # Before the return, close the connection
+    res = [item[0] for item in cur.fetchall()]
     return res
-
