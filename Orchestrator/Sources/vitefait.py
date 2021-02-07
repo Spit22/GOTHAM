@@ -4,6 +4,7 @@ from Gotham_link_BDD import remove_server_DB,remove_honeypot_DB,remove_link_DB
 
 from Gotham_normalize import normalize_honeypot_infos,normalize_server_infos,normalize_link_infos
 from Gotham_check import check_used_port, check_ssh
+from Gotham_choose import choose_servers
 import mariadb
 
 from termcolor import colored, cprint
@@ -38,7 +39,7 @@ except:
 
 try:
     print(colored("########## Add Link ##########", 'yellow'))
-    print(add_link_DB(DB_settings, lk_infos))
+    # print(add_link_DB(DB_settings, lk_infos))
 except:
     print(colored('[X] add_link_DB failed', 'red'))
 
@@ -89,7 +90,7 @@ except:
 
 try:
     print(colored("########## Get Link Infos with id ##########", 'yellow'))
-    print(get_link_infos(DB_settings, id=lk_infos["id"])[0])
+    # print(get_link_infos(DB_settings, id=lk_infos["id"])[0])
 except:
     print(colored('[X] get_link_infos failed', 'red'))
 
@@ -128,6 +129,12 @@ except:
 
 try:
     print(colored("########## Remove Link (with id) ##########", 'yellow'))
-    print(remove_link_DB(DB_settings, lk_infos['id']))
+    # print(remove_link_DB(DB_settings, lk_infos['id']))
 except:
     print(colored('[X] remove_link_DB failed', 'red'))
+
+print(colored("########## Test weight serv ##########", 'yellow'))
+servs_infos = [{'serv_id': 'sv-62323F6F323F38F42d656DF861566696', 'serv_name': 'serveur-test-6', 'serv_descr': 'blabla', 'serv_ip': '42.254.99.99', 'serv_ssh_key': 'non', 'serv_ssh_port': 22, 'serv_state': 'HEALTHY', 'serv_tags': 'Europe||France||SSH||TagDeTest4TesTag666||TestTag', 'serv_created_at': 'datetime.datetime(2021, 2, 6, 17, 2, 53)', 'serv_updated_at': 'datetime.datetime(2021, 2, 6, 17, 2, 53)', 'link_id': 'lk-4FD58A38340111EBB0E722F1FB2CA371||||||lk-67C82EAC340111EB85FE89F2FB2CA371||||||lk-72660A46340111EBBAC118F3FB2CA371', 'link_nb_hp': '', 'link_nb_serv': '', 'link_ports': '', 'link_tags_hp': '', 'link_tags_serv': '', 'link_created_at': '', 'link_updated_at': '', 'lhs_port': '', 'hp_id': '', 'hp_name': '', 'hp_descr': '', 'hp_port': '', 'hp_parser': '', 'hp_logs': '', 'hp_source': '', 'hp_state': '', 'hp_port_container': '', 'hp_tags': '', 'hp_created_at': '', 'hp_updated_at': ''},{'serv_id': 'sv-62323F6F323F38F42d656DF861566696', 'serv_name': 'serveur-test-6', 'serv_descr': 'blabla', 'serv_ip': '42.254.99.99', 'serv_ssh_key': 'non', 'serv_ssh_port': 22, 'serv_state': 'ERROR', 'serv_tags': 'Europe||France||SSH||TagDeTest4TesTag666||TestTag||Truc', 'serv_created_at': 'datetime.datetime(2021, 2, 6, 17, 2, 53)', 'serv_updated_at': 'datetime.datetime(2021, 2, 6, 17, 2, 53)', 'link_id': 'lk-4FD58A38340111EBB0E722F1FB2CA371||||||lk-72660A46340111EBBAC118F3FB2CA371', 'link_nb_hp': '', 'link_nb_serv': '', 'link_ports': '', 'link_tags_hp': '', 'link_tags_serv': '', 'link_created_at': '', 'link_updated_at': '', 'lhs_port': '53||||||42||||4242||||||789', 'hp_id': '', 'hp_name': '', 'hp_descr': '', 'hp_port': '', 'hp_parser': '', 'hp_logs': '', 'hp_source': '', 'hp_state': '', 'hp_port_container': '', 'hp_tags': '', 'hp_created_at': '', 'hp_updated_at': ''},{'serv_id': 'sv-62323F6F323F38F42d656DF861566696', 'serv_name': 'serveur-test-6', 'serv_descr': 'blabla', 'serv_ip': '42.254.99.99', 'serv_ssh_key': 'non', 'serv_ssh_port': 22, 'serv_state': 'UNUSED', 'serv_tags': 'Europe||France||SSH||TagDeTest4TesTag666||TestTag||Truc||Hachis||Parmentier', 'serv_created_at': 'datetime.datetime(2021, 2, 6, 17, 2, 53)', 'serv_updated_at': 'datetime.datetime(2021, 2, 6, 17, 2, 53)', 'link_id': '', 'link_nb_hp': '', 'link_nb_serv': '', 'link_ports': '', 'link_tags_hp': '', 'link_tags_serv': '', 'link_created_at': '', 'link_updated_at': '', 'lhs_port': '1053', 'hp_id': '', 'hp_name': '', 'hp_descr': '', 'hp_port': '', 'hp_parser': '', 'hp_logs': '', 'hp_source': '', 'hp_state': '', 'hp_port_container': '', 'hp_tags': '', 'hp_created_at': '', 'hp_updated_at': ''}]
+tags="Europe,France,SSH,TagDeTest4TesTag666,TestTag"
+print(choose_servers(servs_infos, 2, tags))
+print(len(choose_servers(servs_infos, 2, tags)))
