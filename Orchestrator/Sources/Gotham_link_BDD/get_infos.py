@@ -143,3 +143,43 @@ def link(DB_connection, mode=False, id="%", nb_hp="%", nb_serv="%", tags_hp="%",
     for result in rv:
        json_data.append(dict(zip(row_headers,result)))
     return json_data
+
+def link_force_hp_serv(DB_connection, mode=False, id="%", nb_hp="%", nb_serv="%", tags_hp="%", tags_serv="%"):
+    # Frame used arguments with %
+    if mode:
+        id = normalize_used_arguments(id, "%")
+        nb_hp = normalize_used_arguments(nb_hp, "%")
+        nb_serv = normalize_used_arguments(nb_serv, "%")
+    tags_hp_request=normalize_tags_arguments(mode,"link_tags_hp",tags_hp)
+    tags_serv_request=normalize_tags_arguments(mode,"link_tags_serv",tags_serv)
+    # Get MariaDB cursor
+    cur = DB_connection.cursor()
+    # Execute SQL request
+    cur.execute("SELECT * FROM v_link_full_hp_serv WHERE link_id LIKE ? AND link_nb_hp LIKE ? AND link_nb_serv LIKE ? AND "+tags_hp_request+" AND "+tags_serv_request, (id,nb_hp,nb_serv))
+    # Convert answer to JSON
+    row_headers=[x[0] for x in cur.description]
+    rv = cur.fetchall()
+    json_data=[]
+    for result in rv:
+       json_data.append(dict(zip(row_headers,result)))
+    return json_data
+
+def link_force_serv_hp(DB_connection, mode=False, id="%", nb_hp="%", nb_serv="%", tags_hp="%", tags_serv="%"):
+    # Frame used arguments with %
+    if mode:
+        id = normalize_used_arguments(id, "%")
+        nb_hp = normalize_used_arguments(nb_hp, "%")
+        nb_serv = normalize_used_arguments(nb_serv, "%")
+    tags_hp_request=normalize_tags_arguments(mode,"link_tags_hp",tags_hp)
+    tags_serv_request=normalize_tags_arguments(mode,"link_tags_serv",tags_serv)
+    # Get MariaDB cursor
+    cur = DB_connection.cursor()
+    # Execute SQL request
+    cur.execute("SELECT * FROM v_link_full_serv_hp WHERE link_id LIKE ? AND link_nb_hp LIKE ? AND link_nb_serv LIKE ? AND "+tags_hp_request+" AND "+tags_serv_request, (id,nb_hp,nb_serv))
+    # Convert answer to JSON
+    row_headers=[x[0] for x in cur.description]
+    rv = cur.fetchall()
+    json_data=[]
+    for result in rv:
+       json_data.append(dict(zip(row_headers,result)))
+    return json_data
