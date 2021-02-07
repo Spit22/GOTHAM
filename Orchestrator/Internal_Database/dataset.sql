@@ -8,22 +8,22 @@
 -- Dumping data for table `Honeypot`
 --
 INSERT INTO `Honeypot` 
-( `id`,  `name`,  `descr`, `parser`, `logs` , `source`,`port_container`,`state`) 
+( `id`,  `name`,  `descr`, `port`, `parser`, `logs` , `source`,`port_container`,`state`) 
 VALUES
-('hp-1B5B3A1E32EE11EBB1F25E22FC2CA371','Honeypot_PythonSSH','Second Honeypot pour test','TO_ADD','/var/log/apache2/error.log','/data/hp-1B5B3A1E32EE11EBB1F25E22FC2CA371/dockerfile',22,'UNUSED'),
-('hp-1B5B3A1E32EE11EBB1F25E22FC2CA372','Honeypot_BASTIEN','Test db','TO_ADD','/var/log/syslog','/data/hp-1B5B3A1E32EE11EBB1F25E22FC2CA372',187,'HEALTHY'),
-('hp-1B5B3A1E32EE11EBB1F25E22FC2CA374','Honeypot_BASTIEN_2','Test db','TO_ADD','/var/log/syslog','/data/hp-1B5B3A1E32EE11EBB1F25E22FC2CA374',67,'DOWN'),
-('hp-5DED2C8A33C911EBADD59A1EFC2CA371','Honeypot_DNS','Hp for test','To Add','To add','To add',443,'ERROR'),
-('hp-649E604E33C911EB9D16EC24FC2CA371','Honeypot_imaps','Hp for test','To Add','To add','To add',8080,'UNUSED'),
-('hp-69AE80F033C911EBAD3B5E29FC2CA371','Honeypot_apache','Hp for test','To Add','To add','To add',53,'HEALTHY'),
-('hp-6EAB49BC33C911EBBC754E2EFC2CA371','Honeypot_ssh','Hp for test','To Add','To add','To add',468,'DOWN'),
-('hp-742F831232ED11EB8FA5D8F7FB2CA371','Honeypot_OpenSSH','Premier Honeypot pour test','TO_ADD','/var/log/honeypot.log','/data/hp-742F831232ED11EB8FA5D8F7FB2CA371/dockerfile',181,'ERROR'),
-('hp-75034A4E33C911EB9D009933FC2CA371','Honeypot_openssh','Hp for test','To Add','To add','To add',987,'UNUSED'),
-('hp-7A520CEC33C911EB9B00CE38FC2CA371','Honeypot_DNS-HD','Hp for test','To Add','To add','To add',6452,'HEALTHY'),
-('hp-7EA94F1233C911EB81E7613CFC2CA371','Honeypot_apache-deb','Hp for test','To Add','To add','To add',12534,'UNUSED'),
-('hp-85E3CABE33C911EB9E8E3843FC2CA371','Honeypot_DNS-deb','Hp for test','To Add','To add','To add',498,'HEALTHY'),
-('hp-8AB2525433C911EBB0F54247FC2CA371','Honeypot_imaps-deb','Hp for test','To Add','To add','To add',16,'DOWN'),
-('hp-8EADEF1C33C911EBB78CC74AFC2CA371','Honeypot_HD','Hp for test','To Add','To add','To add',4123,'ERROR');
+('hp-1B5B3A1E32EE11EBB1F25E22FC2CA371','Honeypot_PythonSSH','Second Honeypot pour test', 1658,'TO_ADD','/var/log/apache2/error.log','/data/hp-1B5B3A1E32EE11EBB1F25E22FC2CA371/dockerfile',22,'UNUSED'),
+('hp-1B5B3A1E32EE11EBB1F25E22FC2CA372','Honeypot_BASTIEN','Test db', 1321,'TO_ADD','/var/log/syslog','/data/hp-1B5B3A1E32EE11EBB1F25E22FC2CA372',187,'HEALTHY'),
+('hp-1B5B3A1E32EE11EBB1F25E22FC2CA374','Honeypot_BASTIEN_2','Test db', NULL,'TO_ADD','/var/log/syslog','/data/hp-1B5B3A1E32EE11EBB1F25E22FC2CA374',67,'DOWN'),
+('hp-5DED2C8A33C911EBADD59A1EFC2CA371','Honeypot_DNS','Hp for test', 1563,'To Add','To add','To add',443,'ERROR'),
+('hp-649E604E33C911EB9D16EC24FC2CA371','Honeypot_imaps','Hp for test', 2022,'To Add','To add','To add',8080,'UNUSED'),
+('hp-69AE80F033C911EBAD3B5E29FC2CA371','Honeypot_apache','Hp for test', 1995,'To Add','To add','To add',53,'HEALTHY'),
+('hp-6EAB49BC33C911EBBC754E2EFC2CA371','Honeypot_ssh','Hp for test', NULL,'To Add','To add','To add',468,'DOWN'),
+('hp-742F831232ED11EB8FA5D8F7FB2CA371','Honeypot_OpenSSH','Premier Honeypot pour test', 1994,'TO_ADD','/var/log/honeypot.log','/data/hp-742F831232ED11EB8FA5D8F7FB2CA371/dockerfile',181,'ERROR'),
+('hp-75034A4E33C911EB9D009933FC2CA371','Honeypot_openssh','Hp for test', 2001,'To Add','To add','To add',987,'UNUSED'),
+('hp-7A520CEC33C911EB9B00CE38FC2CA371','Honeypot_DNS-HD','Hp for test', 1963,'To Add','To add','To add',6452,'HEALTHY'),
+('hp-7EA94F1233C911EB81E7613CFC2CA371','Honeypot_apache-deb','Hp for test', 1987,'To Add','To add','To add',12534,'UNUSED'),
+('hp-85E3CABE33C911EB9E8E3843FC2CA371','Honeypot_DNS-deb','Hp for test', NULL,'To Add','To add','To add',498,'HEALTHY'),
+('hp-8AB2525433C911EBB0F54247FC2CA371','Honeypot_imaps-deb','Hp for test', 1028,'To Add','To add','To add',16,'DOWN'),
+('hp-8EADEF1C33C911EBB78CC74AFC2CA371','Honeypot_HD','Hp for test', NULL,'To Add','To add','To add',4123,'ERROR');
 
 --
 -- Dumping data for table `Server`
