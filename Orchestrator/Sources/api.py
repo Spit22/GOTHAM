@@ -252,7 +252,7 @@ def add_lk():
             return "Invalid data sent "+str(e)
        
         # We check that no link exists with same tags, otherwise return error
-        existingLinks = Gotham_link_BDD.get_link_infos(db_settings, tags_hp=tags_hp, tags_serv=tags_serv)
+        existingLinks = Gotham_check.check_tags("link", Gotham_link_BDD.get_link_infos(db_settings, tags_hp=tags_hp, tags_serv=tags_serv), tags_hp=tags_hp, tags_serv=tags_serv, mode=True)
         if existingLinks != []:
             return "A link is already configured for this tags"
         print(existingLinks)
@@ -270,10 +270,10 @@ def add_lk():
             return "Error with tags: some honeypot tags do not exists"
 
         # Get all honeypots corresponding to tags
-        honeypots = Gotham_check.check_tags("hp", Gotham_link_BDD.get_honeypot_infos(db_settings, tags=tags_hp), tags_hp)
+        honeypots = Gotham_check.check_tags("hp", Gotham_link_BDD.get_honeypot_infos(db_settings, tags=tags_hp), tags_hp=tags_hp)
 
         # Get all servers corresponding to tags
-        servers = Gotham_check.check_tags("serv",Gotham_link_BDD.get_server_infos(db_settings, tags=tags_serv),tags_serv)
+        servers = Gotham_check.check_tags("serv",Gotham_link_BDD.get_server_infos(db_settings, tags=tags_serv), tags_serv=tags_serv)
 
         # Filter servers in those who have one of ports open
         servers = Gotham_check.check_servers_ports_matching(servers, exposed_ports):
