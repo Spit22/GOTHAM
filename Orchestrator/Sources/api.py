@@ -193,26 +193,26 @@ def add_srv():
         except Exception as e:
             return "Invalid data sent "+str(e)
 
-	    # First check the ip not already exists in database
+        # First check the ip not already exists in database
         exists = Gotham_check.check_doublon_server(db_settings, ip)
         if exists:
             return "Provided ip already exists in database"
 
-	    # Check given auth information are ok
-        connected = Gotham_check.check_ssh(ip, ssh_port, check_ssh_key)	
+        # Check given auth information are ok
+        connected = Gotham_check.check_ssh(ip, ssh_port, check_ssh_key) 
         if not connected:
             return "Provided ssh_key or ssh_port is wrong"
 
-	    # If all checks are ok, we can generate an id for the new server
+        # If all checks are ok, we can generate an id for the new server
         id = 'sv-'+str(uuid.uuid4().hex)
 
-	    # Deploy the reverse-proxy service on the new server
+        # Deploy the reverse-proxy service on the new server
         try:
             add_server.deploy(ip, ssh_port, deploy_ssh_key)
         except Exception as e:
             return "Something went wrong while deploying Reverse-Proxy"
 
-	    # Create serv_infos
+        # Create serv_infos
         serv_infos = {'id':str(id),'name':str(name),'descr':str(descr),'tag':str(tags),'ip':str(ip),'ssh_key':str(ssh_key),'ssh_port':ssh_port,'state':'UNUSED'}
         # Normalize infos
         serv_infos = Gotham_normalize.normalize_server_infos(serv_infos)
@@ -252,7 +252,7 @@ def add_lk():
             return "Invalid data sent "+str(e)
        
         # We check that no link exists with same tags, otherwise return error
-        existingLinks = Gotham_link_BDD.get_link_infos(db_settings, tags_hp=tags_hp, tags_serv=tags_serv)
+        existingLinks = Gotham_check.check_tags("link", Gotham_link_BDD.get_link_infos(db_settings, tags_hp=tags_hp, tags_serv=tags_serv), tags_hp=tags_hp, tags_serv=tags_serv, mode=True)
         if existingLinks != []:
             return "A link is already configured for this tags"
         print(existingLinks)
@@ -270,10 +270,10 @@ def add_lk():
             return "Error with tags: some honeypot tags do not exists"
 
         # Get all honeypots corresponding to tags
-        honeypots = Gotham_check.check_tags("hp", Gotham_link_BDD.get_honeypot_infos(db_settings, tags=tags_hp), tags_hp)
+        honeypots = Gotham_check.check_tags("hp", Gotham_link_BDD.get_honeypot_infos(db_settings, tags=tags_hp), tags_hp=tags_hp)
 
         # Get all servers corresponding to tags
-        servers = Gotham_check.check_tags("serv",Gotham_link_BDD.get_server_infos(db_settings, tags=tags_serv),tags_serv)
+        servers = Gotham_check.check_tags("serv",Gotham_link_BDD.get_server_infos(db_settings, tags=tags_serv), tags_serv=tags_serv)
 
         # Filter servers in those who have one of ports open
         servers = Gotham_check.check_servers_ports_matching(servers, exposed_ports):
