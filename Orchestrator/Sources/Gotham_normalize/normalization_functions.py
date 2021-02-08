@@ -112,14 +112,10 @@ def normalize_tags(tags):
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     separator = config['tag']['separator']
     tags_list = tags.split(separator)
-    res = ''
-    for a_tag in tags_list:
-        a_tag=normalize_tag(a_tag)
-        if res == '':
-            res = res + a_tag
-        else:
-            res = res + separator + a_tag
-    return res
+
+    tags_list = [ normalize_tag(a_tag) for a_tag in tags_list]
+    tags_list = [ a_tag for n, a_tag in enumerate(tags_list) if a_tag.lower() not in separator.join(tags_list[:n]).lower().split(separator)]
+    return separator.join(tags_list)
 
 def normalize_ports(ports):
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
@@ -128,15 +124,9 @@ def normalize_ports(ports):
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     separator = config['port']['separator']
     ports_list = ports.split(separator)
-    res = ''
-    for a_port in ports_list:
-        a_port=normalize_port(a_port.strip())
-        a_port=str(a_port)
-        if res == '':
-            res = res + a_port
-        else:
-            res = res + separator + a_port
-    return res
+    ports_list = [ str(normalize_port(a_port.strip())) for a_port in ports_list]
+    ports_list = [ a_port for n, a_port in enumerate(ports_list) if a_port not in ports_list[:n]]
+    return separator.join(ports_list)
 
 def normalize_tag(tag):
     tag = tag.strip()
@@ -156,3 +146,11 @@ def normalize_tag(tag):
 #   else:
 #     lk_infos[key]=globals()['normalize_' + key](value)
 # print(lk_infos)
+
+### TEST SECTION ###
+if __name__ == '__main__':
+    ports="8978, 22   ,18  ,    8978,22,18  ,22,6851,22"
+    tags="  Europe ,  France    ,  SSH     ,TagDeTest4TesTag666  ,   TestTag,Europe ,  FrAnce   ,  SSH   ,TagDeTest4TesTag666 ,  TestTag"
+    
+    print(normalize_tags(tags))
+    
