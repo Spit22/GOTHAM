@@ -234,6 +234,12 @@ def add_lk():
         # nb_hp (int) : nombre de hp ciblés
         # exposed_port (list): list des ports à utiliser
 
+        GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+        # Retrieve settings from config file
+        config = configparser.ConfigParser()
+        config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+        ports_separator = config['port']['separator']
+
         # Get POST data on JSON format
         data = request.get_json()
 
@@ -248,7 +254,7 @@ def add_lk():
             nb_srv = lk_infos_received["nb_srv"]
             nb_hp = lk_infos_received["nb_hp"]
             exposed_ports = lk_infos_received["ports"]
-            exposed_ports_list = exposed_ports.split(',')
+            exposed_ports_list = exposed_ports.split(ports_separator)
         except Exception as e:
             return "Invalid data sent "+str(e)
        
