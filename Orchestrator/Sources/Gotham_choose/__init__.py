@@ -28,6 +28,11 @@ def choose_honeypots(hps_infos, nb_hp, tags_hp):
 	hps_infos=selection_function.weighting_nb_port(hps_infos)
 	hps_infos=selection_function.weighting_state(object_type, hps_infos)
 	hps_infos=selection_function.weighting_nb_useless_tags(object_type, hps_infos, tags_hp)
+	hps_infos=selection_function.weighting_time(object_type, hps_infos, "created_at")
+	hps_infos=selection_function.weighting_time(object_type, hps_infos, "updated_at")
+
+	if len(hps_infos)<nb_hp:
+		nb_hp=len(hps_infos)
 
 	return sorted(hps_infos, key=lambda k: k['weight'])[0:nb_hp] 
 
@@ -48,6 +53,8 @@ def choose_servers(servs_infos, nb_serv, tags_serv):
 	servs_infos=selection_function.weighting_nb_port(servs_infos)
 	servs_infos=selection_function.weighting_state(object_type, servs_infos)
 	servs_infos=selection_function.weighting_nb_useless_tags(object_type, servs_infos, tags_serv)
+	servs_infos=selection_function.weighting_time(object_type, servs_infos, "created_at")
+	servs_infos=selection_function.weighting_time(object_type, servs_infos, "updated_at")
 
 	return sorted(servs_infos, key=lambda k: k['weight'])[0:nb_serv]
 

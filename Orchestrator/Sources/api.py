@@ -16,6 +16,7 @@ import add_link
 # GOTHAM'S LIB
 import Gotham_link_BDD
 import Gotham_check
+import Gotham_choose
 import Gotham_normalize
 
 
@@ -286,27 +287,23 @@ def add_lk():
         # Checking we have enough servers for the nb_srv directive, otherwise return error
         if len(servers) < nb_srv:
             return "Can't deploy link on "+str(nb_srv)+" servers while there is only "+str(len(servers))+" servers available"
+        
+        # If we don't have any honeypots corresponding, just return error,
+        if len(honeypots) < 1:
+            return "Can't configure link if there is no at least one hp corresponding to request"
+        
+        # Choose best honeypots (the lower scored)
+        honeypots = Gotham_choose.choose_honeypots(honeypots, nb_hp, tags_hp)
+
         # Checking we have enough honeypots for the nb_hp directive
         if len(honeypots) < nb_hp:
-            # If we don't have any honeypots corresponding, just return error,
-            if len(honeypots) < 1:
-                return "Can't configure link if there is no at least one hp corresponding to request"
             # If we don't have enough but we have one or more
-            # Choose one of available honeypots (the best scored), and obtain informations
+            # Choose one or more of available honeypots (the best scored), and obtain informations
             # Duplicate this honeypot
-        # If having enough honeypots, choose best honeypots (the lower scored)
-        #for honeypot in honeypots:
-        #    hp_score[honeypot] = 0
-        #    # Add 10 pts per servers redirecting to the honeypot
-        #    if nb_mapping > 0:
-        #        hp_score[honeypot] += 10 * nb_mapping
+        
 
         # Choose best servers (the lower scored)
-        #for server in servers:
-        #    srv_score[server] = 0
-        #    # Add 10 pts per links already configured on server
-        #    if nb_linked > 0:
-        #        srv_score[server] += 10 * nb_link
+        servers = Gotham_choose.choose_servers(servers, nb_srv, tags_serv)
         
         # Generate the dict servers associating ip and exposed_port
         avb_servers = {"172.16.2.201":"8080"}
