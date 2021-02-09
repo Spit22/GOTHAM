@@ -151,7 +151,7 @@ def add_honeypot():
             return "An error occured in the ssh connection"
 
         # Create hp_infos
-        hp_infos = {'id':str(id),'name':str(name),'descr':str(descr),'tag':str(tags),'port_container':port,'parser':str(parser),'logs':str(logs),'source':str(dockerfile_path),'state':'UNUSED','port':mapped_port}
+        hp_infos = {'id':str(id),'name':str(name),'descr':str(descr),'tags':str(tags),'port_container':port,'parser':str(parser),'logs':str(logs),'source':str(dockerfile_path),'state':'UNUSED','port':mapped_port}
         # Normalize infos
         hp_infos = Gotham_normalize.normalize_honeypot_infos(hp_infos)
         # Store new hp and tags in the database
@@ -178,7 +178,7 @@ def add_srv():
         try:
             # Normalize infos
             serv_infos_received = {"name": data["name"],"descr": data["descr"],"tags": data["tags"],"ip": data["ip"],"ssh_port": data["ssh_port"]}
-            serv_infos_received = Gotham_normalize.normalize_honeypot_infos(serv_infos_received)
+            serv_infos_received = Gotham_normalize.normalize_server_infos(serv_infos_received)
             # Get all function's parameters
             name = serv_infos_received["name"]
             descr = serv_infos_received["descr"]
@@ -214,7 +214,7 @@ def add_srv():
             return "Something went wrong while deploying Reverse-Proxy"
 
         # Create serv_infos
-        serv_infos = {'id':str(id),'name':str(name),'descr':str(descr),'tag':str(tags),'ip':str(ip),'ssh_key':str(ssh_key),'ssh_port':ssh_port,'state':'UNUSED'}
+        serv_infos = {'id':str(id),'name':str(name),'descr':str(descr),'tags':str(tags),'ip':str(ip),'ssh_key':str(ssh_key),'ssh_port':ssh_port,'state':'UNUSED'}
         # Normalize infos
         serv_infos = Gotham_normalize.normalize_server_infos(serv_infos)
         # Store new server and tags in the internal database        
@@ -247,11 +247,11 @@ def add_lk():
         try:
             # Normalize infos
             lk_infos_received = {"nb_hp": data["nb_hp"], "nb_serv": data["nb_srv"], "tags_hp":data["tags_hp"], "tags_serv":data["tags_serv"], "ports":data["exposed_ports"]}
-            lk_infos_received = Gotham_normalize.normalize_honeypot_infos(lk_infos_received)
+            lk_infos_received = Gotham_normalize.normalize_link_infos(lk_infos_received)
             # Get all function's parameters
             tags_serv = lk_infos_received["tags_serv"]
             tags_hp = lk_infos_received["tags_hp"]
-            nb_srv = lk_infos_received["nb_srv"]
+            nb_srv = lk_infos_received["nb_serv"]
             nb_hp = lk_infos_received["nb_hp"]
             exposed_ports = lk_infos_received["ports"]
             exposed_ports_list = exposed_ports.split(ports_separator)
