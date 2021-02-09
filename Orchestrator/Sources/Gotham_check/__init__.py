@@ -28,8 +28,8 @@ def check_ssh(ip, ssh_port, ssh_key):
 def check_ping(hostname):
     return check_PING.main(hostname)
 
-def check_tags(object_type, objects_infos, tags):
-    return check_TAGS.check_tags(object_type, objects_infos, tags)
+def check_tags(object_type, objects_infos, tags_hp='', tags_serv='', mode=False):
+    return check_TAGS.check_tags(object_type, objects_infos, tags_hp, tags_serv, mode)
 
 def check_server_ports_is_free(serv_infos, ports):
     return check_SERVER_PORTS.check_server_ports(serv_infos, ports)
