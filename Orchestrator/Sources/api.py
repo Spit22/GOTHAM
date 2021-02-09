@@ -5,6 +5,7 @@ import uuid
 import base64
 import os
 import random
+import configparser
 from flask import request, jsonify
 from io import StringIO # a suppr
 
@@ -16,6 +17,7 @@ import add_link
 # GOTHAM'S LIB
 import Gotham_link_BDD
 import Gotham_check
+import Gotham_choose
 import Gotham_normalize
 
 
@@ -121,7 +123,7 @@ def add_honeypot():
 
         # First find an available port to map on datacenter
         used_ports = Gotham_check.check_used_port(db_settings)
-        available_ports=[port for port in dc_ports_list if not(port in used_port)]
+        available_ports=[port for port in dc_ports_list if not(port in used_ports)]
         if available_ports==[]:
             return "Datacenter : no port available for mapping"
         else:
@@ -150,7 +152,7 @@ def add_honeypot():
             return "An error occured in the ssh connection"
 
         # Create hp_infos
-        hp_infos = {'id':str(id),'name':str(name),'descr':str(descr),'tag':str(tags),'port_container':port,'parser':str(parser),'logs':str(logs),'source':str(dockerfile_path),'state':'UNUSED','port':mapped_port}
+        hp_infos = {'id':str(id),'name':str(name),'descr':str(descr),'tags':str(tags),'port_container':port,'parser':str(parser),'logs':str(logs),'source':str(dockerfile_path),'state':'UNUSED','port':mapped_port}
         # Normalize infos
         hp_infos = Gotham_normalize.normalize_honeypot_infos(hp_infos)
         # Store new hp and tags in the database
@@ -177,7 +179,7 @@ def add_srv():
         try:
             # Normalize infos
             serv_infos_received = {"name": data["name"],"descr": data["descr"],"tags": data["tags"],"ip": data["ip"],"ssh_port": data["ssh_port"]}
-            serv_infos_received = Gotham_normalize.normalize_honeypot_infos(serv_infos_received)
+            serv_infos_received = Gotham_normalize.normalize_server_infos(serv_infos_received)
             # Get all function's parameters
             name = serv_infos_received["name"]
             descr = serv_infos_received["descr"]
@@ -193,27 +195,28 @@ def add_srv():
         except Exception as e:
             return "Invalid data sent "+str(e)
 
-	    # First check the ip not already exists in database
+        # First check the ip not already exists in database
         exists = Gotham_check.check_doublon_server(db_settings, ip)
         if exists:
             return "Provided ip already exists in database"
 
-	    # Check given auth information are ok
-        connected = Gotham_check.check_ssh(ip, ssh_port, check_ssh_key)	
+        # Check given auth information are ok
+        connected = Gotham_check.check_ssh(ip, ssh_port, check_ssh_key) 
         if not connected:
             return "Provided ssh_key or ssh_port is wrong"
 
-	    # If all checks are ok, we can generate an id for the new server
+        # If all checks are ok, we can generate an id for the new server
         id = 'sv-'+str(uuid.uuid4().hex)
 
-	    # Deploy the reverse-proxy service on the new server
+        # Deploy the reverse-proxy service on the new server
         try:
-            add_server.deploy(ip, ssh_port, deploy_ssh_key)
+            print("bypassed")
+            #add_server.deploy(ip, ssh_port, deploy_ssh_key)
         except Exception as e:
             return "Something went wrong while deploying Reverse-Proxy"
 
-	    # Create serv_infos
-        serv_infos = {'id':str(id),'name':str(name),'descr':str(descr),'tag':str(tags),'ip':str(ip),'ssh_key':str(ssh_key),'ssh_port':ssh_port,'state':'UNUSED'}
+        # Create serv_infos
+        serv_infos = {'id':str(id),'name':str(name),'descr':str(descr),'tags':str(tags),'ip':str(ip),'ssh_key':str(ssh_key),'ssh_port':ssh_port,'state':'UNUSED'}
         # Normalize infos
         serv_infos = Gotham_normalize.normalize_server_infos(serv_infos)
         # Store new server and tags in the internal database        
@@ -239,18 +242,22 @@ def add_lk():
         config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
         ports_separator = config['port']['separator']
 
+<<<<<<< HEAD
         # Get POST data on JSON format
+=======
+        # Get POST data on JSON format
+>>>>>>> dev_V0_1_choose
         data = request.get_json()
 
         # Get all function's parameters
         try:
             # Normalize infos
             lk_infos_received = {"nb_hp": data["nb_hp"], "nb_serv": data["nb_srv"], "tags_hp":data["tags_hp"], "tags_serv":data["tags_serv"], "ports":data["exposed_ports"]}
-            lk_infos_received = Gotham_normalize.normalize_honeypot_infos(lk_infos_received)
+            lk_infos_received = Gotham_normalize.normalize_link_infos(lk_infos_received)
             # Get all function's parameters
             tags_serv = lk_infos_received["tags_serv"]
             tags_hp = lk_infos_received["tags_hp"]
-            nb_srv = lk_infos_received["nb_srv"]
+            nb_srv = lk_infos_received["nb_serv"]
             nb_hp = lk_infos_received["nb_hp"]
             exposed_ports = lk_infos_received["ports"]
             exposed_ports_list = exposed_ports.split(ports_separator)
@@ -280,9 +287,13 @@ def add_lk():
 
         # Get all servers corresponding to tags
         servers = Gotham_check.check_tags("serv",Gotham_link_BDD.get_server_infos(db_settings, tags=tags_serv), tags_serv=tags_serv)
+<<<<<<< HEAD
+=======
+        print(servers[0])
+>>>>>>> dev_V0_1_choose
 
         # Filter servers in those who have one of ports open
-        servers = Gotham_check.check_servers_ports_matching(servers, exposed_ports):
+        servers = Gotham_check.check_servers_ports_matching(servers, exposed_ports)
 
         # Filter servers in error
         servers = [server for server in servers if server["serv_state"]!='ERROR']
@@ -292,27 +303,23 @@ def add_lk():
         # Checking we have enough servers for the nb_srv directive, otherwise return error
         if len(servers) < nb_srv:
             return "Can't deploy link on "+str(nb_srv)+" servers while there is only "+str(len(servers))+" servers available"
+        
+        # If we don't have any honeypots corresponding, just return error,
+        if len(honeypots) < 1:
+            return "Can't configure link if there is no at least one hp corresponding to request"
+        
+        # Choose best honeypots (the lower scored)
+        honeypots = Gotham_choose.choose_honeypots(honeypots, nb_hp, tags_hp)
+
         # Checking we have enough honeypots for the nb_hp directive
-        if len(honeypots) < nb_hp:
-            # If we don't have any honeypots corresponding, just return error,
-            if len(honeypots) < 1:
-                return "Can't configure link if there is no at least one hp corresponding to request"
+        #if len(honeypots) < nb_hp:
             # If we don't have enough but we have one or more
-            # Choose one of available honeypots (the best scored), and obtain informations
+            # Choose one or more of available honeypots (the best scored), and obtain informations
             # Duplicate this honeypot
-        # If having enough honeypots, choose best honeypots (the lower scored)
-        #for honeypot in honeypots:
-        #    hp_score[honeypot] = 0
-        #    # Add 10 pts per servers redirecting to the honeypot
-        #    if nb_mapping > 0:
-        #        hp_score[honeypot] += 10 * nb_mapping
+        
 
         # Choose best servers (the lower scored)
-        #for server in servers:
-        #    srv_score[server] = 0
-        #    # Add 10 pts per links already configured on server
-        #    if nb_linked > 0:
-        #        srv_score[server] += 10 * nb_link
+        servers = Gotham_choose.choose_servers(servers, nb_srv, tags_serv)
         
         # Generate the dict servers associating ip and exposed_port
         avb_servers = {"172.16.2.201":"8080"}
