@@ -9,10 +9,15 @@ import configparser
 from flask import request, jsonify
 from io import StringIO # a suppr
 
-# GOTHAM'S Scripts
+# GOTHAM'S Add Scripts
 import add_server  
 import add_hp
 import add_link
+
+# GOTHAM's Remove Scripts
+import rm_hp
+import rm_server
+import rm_link
 
 # GOTHAM'S LIB
 import Gotham_link_BDD
@@ -242,11 +247,7 @@ def add_lk():
         config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
         ports_separator = config['port']['separator']
 
-<<<<<<< HEAD
-        # Get POST data on JSON format
-=======
         # Get POST data on JSON format
->>>>>>> dev_V0_1_choose
         data = request.get_json()
 
         # Get all function's parameters
@@ -287,10 +288,7 @@ def add_lk():
 
         # Get all servers corresponding to tags
         servers = Gotham_check.check_tags("serv",Gotham_link_BDD.get_server_infos(db_settings, tags=tags_serv), tags_serv=tags_serv)
-<<<<<<< HEAD
-=======
         print(servers[0])
->>>>>>> dev_V0_1_choose
 
         # Filter servers in those who have one of ports open
         servers = Gotham_check.check_servers_ports_matching(servers, exposed_ports)
@@ -352,7 +350,7 @@ def add_lk():
         return "OK : "+str(id)
 
 @app.route('/edit/honeypot', methods=['POST'])
-def edit_hp():
+def edit_honeypot():
         # Edits a honeypot object
         # 
         # id (string) : id du honeypot à modifier
@@ -378,7 +376,7 @@ def edit_hp():
         return "NOT IMPLEMENTED"
 
 @app.route('/edit/server', methods=['POST'])
-def edit_server():
+def edit_srv():
         # Edits a server object
         # 
         # id (string) : id du serveur à modifier
@@ -406,10 +404,8 @@ def edit_server():
 
         return "NOT IMPLEMENTED"
 
-
-
 @app.route('/edit/link', methods=['POST'])
-def edit_link():
+def edit_lk():
         # Edits a link object
         #
         # id (string) : id du lien à modifier
@@ -434,7 +430,7 @@ def edit_link():
         return "NOT IMPLEMENTED"
 
 @app.route('/delete/honeypot', methods=['POST'])
-def rm_hp():
+def rm_honeypot():
         # Removes a honeypot object
         # 
         # id (string) : id du honeypot à supprimer
@@ -448,10 +444,14 @@ def rm_hp():
         # Get all function's parameters
         id = data["id"]
 
-        return "NOT IMPLEMENTED"
+        try:
+            rm_hp.main(db_settings, id)
+        except:
+            return "An error occured during the deletion of the honeypot"
+        return "Deletion completed : " + str(id)
 
 @app.route('/delete/server', methods=['POST'])
-def rm_server():
+def rm_srv():
         # Removes a server object
         # 
         # id (string) : id du serveur à supprimer
@@ -464,12 +464,15 @@ def rm_server():
 
         # Get all function's parameters
         id = data["id"]
-
-        return "NOT IMPLEMENTED"
-
+        ##### ADD ABILITY TO DELETE WITH IP ######
+        try:
+            rm_server.main(db_settings, id=id)
+        except:
+            return "An error occured during the deletion of the server"
+        return "Deletion completed : " + str(id)
 
 @app.route('/delete/link', methods=['POST'])
-def rm_link():
+def rm_lk():
         # Removes a link object
         #
         # id (string) : id du lien à supprimer
@@ -483,10 +486,14 @@ def rm_link():
         # Get all function's parameters
         id = data["id"]
 
-        return "NOT IMPLEMENTED"
+        try:
+            rm_link.main(db_settings, id=id)
+        except:
+            return "An error occured during the deletion of the link"
+        return "Deletion completed : " + str(id)
 
 @app.route('/list/honeypot', methods=['GET'])
-def ls_hp():
+def ls_honeypot():
         # Gives information on honeypot object
         # 
         # id (string) : id du honeypot à afficher
@@ -497,7 +504,7 @@ def ls_hp():
         return "NOT IMPLEMENTED"
 
 @app.route('/list/server', methods=['GET'])
-def ls_server():
+def ls_srv():
         # Gives information on server object
         # 
         # id (string) : id du serveur à afficher
@@ -510,7 +517,7 @@ def ls_server():
 
 
 @app.route('/list/link', methods=['GET'])
-def ls_link():
+def ls_lk():
         # Gives information on link object
         #
         # id (string) : id du lien à afficher

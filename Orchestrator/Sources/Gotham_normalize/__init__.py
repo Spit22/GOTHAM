@@ -3,6 +3,12 @@ import configparser
 import os
 from . import normalization_functions
 
+# Logging components
+import os
+import logging
+GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+
 def normalize_honeypot_infos(hp_infos):
   for key, value in hp_infos.items():
     normalize_key=getattr(normalization_functions,'normalize_' + key)
@@ -98,20 +104,17 @@ def normalize_full_link_infos(lk_infos):
 
 ########## NORMALIZE DISPLAY SECTION ##########
 def normalize_display_object_infos(object_infos, obj_type, next_type=''):
-
   obj_types=["hp","serv","link"]
   if not(obj_type in obj_types and (next_type in obj_types or next_type=='')):
     logging.error(f" Wrong value of '{obj_type}'")
     sys.exit(1)
   if obj_type != "link":
     next_type= "link"
-  resultat=normalize_display(object_infos, obj_type, "||||||", next_type)
+  resultat = normalization_functions.normalize_display(object_infos, obj_type, "||||||", next_type)
   last_type=list(set(obj_types) - set([obj_type, next_type]))[0]
   for i in range(len(resultat[next_type+'s'])):
-    resultat[next_type+'s'][i]=normalize_display(resultat[next_type+'s'][i], next_type, "||||", last_type)
-
+    resultat[next_type+'s'][i] = normalization_functions.normalize_display(resultat[next_type+'s'][i], next_type, "||||", last_type)
   return resultat
-
 
 ########## NORMALIZE ID SECTION ##########
 
@@ -126,4 +129,3 @@ def normalize_id_link(id):
 
 # method_to_call = getattr(foo, 'bar')
 # result = method_to_call()
-
