@@ -33,6 +33,8 @@ def normalize_link_infos(lk_infos):
       lk_infos[key]=normalize_key(value)
   return lk_infos
 
+########## NORMALIZE WITH DEFAULT VALUES SECTION ##########
+
 def normalize_full_honeypot_infos(hp_infos):
     # Retrieve settings from config file
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
@@ -92,6 +94,23 @@ def normalize_full_link_infos(lk_infos):
             if not(key in lk_infos):
                 lk_infos[key] = value
     return normalize_link_infos(lk_infos)
+
+
+########## NORMALIZE DISPLAY SECTION ##########
+def normalize_display_object_infos(object_infos, obj_type, next_type=''):
+
+  obj_types=["hp","serv","link"]
+  if not(obj_type in obj_types and (next_type in obj_types or next_type=='')):
+    logging.error(f" Wrong value of '{obj_type}'")
+    sys.exit(1)
+  if obj_type != "link":
+    next_type= "link"
+  resultat=normalize_display(object_infos, obj_type, "||||||", next_type)
+  last_type=list(set(obj_types) - set([obj_type, next_type]))[0]
+  for i in range(len(resultat[next_type+'s'])):
+    resultat[next_type+'s'][i]=normalize_display(resultat[next_type+'s'][i], next_type, "||||", last_type)
+
+  return resultat
 
 
 ########## NORMALIZE ID SECTION ##########
