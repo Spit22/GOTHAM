@@ -5,6 +5,7 @@ import uuid
 import base64
 import os
 import random
+import configparser
 from flask import request, jsonify
 from io import StringIO # a suppr
 
@@ -122,7 +123,7 @@ def add_honeypot():
 
         # First find an available port to map on datacenter
         used_ports = Gotham_check.check_used_port(db_settings)
-        available_ports=[port for port in dc_ports_list if not(port in used_port)]
+        available_ports=[port for port in dc_ports_list if not(port in used_ports)]
         if available_ports==[]:
             return "Datacenter : no port available for mapping"
         else:
@@ -209,7 +210,8 @@ def add_srv():
 
         # Deploy the reverse-proxy service on the new server
         try:
-            add_server.deploy(ip, ssh_port, deploy_ssh_key)
+            print("bypassed")
+            #add_server.deploy(ip, ssh_port, deploy_ssh_key)
         except Exception as e:
             return "Something went wrong while deploying Reverse-Proxy"
 
@@ -281,9 +283,10 @@ def add_lk():
 
         # Get all servers corresponding to tags
         servers = Gotham_check.check_tags("serv",Gotham_link_BDD.get_server_infos(db_settings, tags=tags_serv), tags_serv=tags_serv)
+        print(servers[0])
 
         # Filter servers in those who have one of ports open
-        servers = Gotham_check.check_servers_ports_matching(servers, exposed_ports):
+        servers = Gotham_check.check_servers_ports_matching(servers, exposed_ports)
 
         # Filter servers in error
         servers = [server for server in servers if server["serv_state"]!='ERROR']
@@ -302,7 +305,7 @@ def add_lk():
         honeypots = Gotham_choose.choose_honeypots(honeypots, nb_hp, tags_hp)
 
         # Checking we have enough honeypots for the nb_hp directive
-        if len(honeypots) < nb_hp:
+        #if len(honeypots) < nb_hp:
             # If we don't have enough but we have one or more
             # Choose one or more of available honeypots (the best scored), and obtain informations
             # Duplicate this honeypot
