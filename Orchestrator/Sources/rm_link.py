@@ -3,7 +3,7 @@ import sys
 
 # Import GOTHAM's libs
 from Gotham_SSH_SCP import execute_commands
-from Gotham_link_BDD import remove_link_DB, get_link_infos, get_link_serv_hp_infos
+from Gotham_link_BDD import remove_link_DB, get_link_infos
 from Gotham_normalize import normalize_id_link
 
 # Logging components
@@ -20,15 +20,15 @@ def main(DB_settings, id):
         logging.error(f"Can't remove the honeypot : its id is invalid")
         sys.exit(1)
     # Check if the link exists in the IDB
-    infos = get_link_infos(DB_settings, id=id)
-    if infos == []:
+    result = get_link_infos(DB_settings, id=id)
+    if result == []:
         logging.error(f"You tried to remove a honeypot that doesn't exists with the id = {id}")
         sys.exit(1)
     ##### REMOVE LINK ON SERVERS ###
-    try:
-        remove_links_on_servers(DB_settings, id)
-    except:
-        sys.exit(1)
+    # List server
+    # prendre serv_id dans result; split avec |||||| ; split avec |||| ; check doublon id -> liste des id des serveurs liés par le link
+    # For each servers, list the honeypots linked to it
+
     # Remove the Link from the IDB
     try:
         remove_link_DB(DB_settings,id)
@@ -37,8 +37,4 @@ def main(DB_settings, id):
         sys.exit(1)
     return True
 
-# def remove_links_on_servers(DB_settings, id):
-    # List server
-    # prendre serv_id dans infos; split avec |||||| ; split avec |||| ; check doublon id -> liste des id des serveurs liés par le link
-    # For each servers, list the honeypots linked to it
-
+#def remove_links_on_servers():
