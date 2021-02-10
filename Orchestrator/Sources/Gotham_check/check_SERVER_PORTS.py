@@ -14,7 +14,7 @@ def check_server_ports(serv_infos, ports):
 	config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
 	separator = config['port']['separator']
 	ports_list = ports.split(separator)
-	serv_used_port=(list(filter(None,dict.fromkeys(serv_infos["lhs_port"].split("||")))))
+	serv_used_port=(list(filter(None,dict.fromkeys(serv_infos["lhs_port"].split("||"))))).append(serv_infos["serv_ssh_port"])
 	free_port=''
 	for port in ports_list:
 		if not(port in serv_used_port):

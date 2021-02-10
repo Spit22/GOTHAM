@@ -11,6 +11,9 @@ logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',leve
 
 
 def normalize_id(type, id):
+    if (id == '' or id == None):
+        logging.warning(f"id is undefined or empty")
+        sys.exit(1)
     if not(id[:3] == (type + '-')):
         logging.warning(f"id type doesn't match: {id}")
     try:
@@ -34,13 +37,16 @@ def normalize_descr(descr):
     return descr
 
 def normalize_port(port):
+    if (port == '' or port == None):
+        logging.warning(f"port is undefined or empty")
+        sys.exit(1)
     try:
         int(port)
     except:
         logging.warning(f"port has a invalid type : {port} : port must be an interger !")
     port = int(port)
-    if (port < 0) or (port > 65536):
-        logging.warning(f"id has a invalid value : {id} : port must be between 0 and 65536 !")
+    if (port < 1) or (port > 65536):
+        logging.warning(f"port has a invalid value : {port} : port must be between 1 and 65536 !")
     return port
 
 def normalize_parser(parser):
@@ -51,20 +57,25 @@ def normalize_logs(logs):
         logging.warning(f"log path has a invalid length : {logs} : log path length must be under 255 !")
     if not(re.match(r"^[a-zA-Z0-9_/:\"\-\s]*$", logs)):
         logging.warning(f"log path has a invalid syntax : {logs}")
+    return logs
     
 def normalize_source(source):
     if len(source) > 255:
         logging.warning(f"source path has a invalid length : {source} : source length must be under 255 !")
     if not(re.match(r"^[a-zA-Z0-9_/:\"\-\s]*$", source)):
         logging.warning(f"source has a invalid syntax : {source}")
+    return source
 
-def normalize_state(type, state):
+def normalize_state(obj_type, state):
+    if (obj_type != "hp" and obj_type != "sv"):
+        logging.error(f"'{obj_type}' is uncorrect")
+        sys.exit(1)
     state = state.upper()
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
     # Retrieve settings from config file
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
-    available_state_list = config['state'][type+'_state'].split(',')
+    available_state_list = config['state'][obj_type+'_state'].split(',')
     if len(state) > 10:
         logging.warning(f"state has a invalid length : {state} : state length must be under 10 !")
     if not(re.match(r"^[A-Z]*$", state)):
@@ -129,12 +140,20 @@ def normalize_ports(ports):
     return separator.join(ports_list)
 
 def normalize_tag(tag):
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    if (tag=='' or tag==None):
+        tag = config['tag']['default_value']
     tag = tag.strip()
     tag = tag[0].upper() + tag[1:]
     if not(re.match(r"^[a-zA-Z0-9_\-]*$", tag)):
         logging.warning(f"tag has a invalid syntax : {tag}")
     return tag
 
+def normalize_display(object_infos, obj_type, separator, next_type):
+    next_obj={key:(value.split(separator) if (separator in str(value)) else value) for (key,value) in object_infos.items() if key[:len(obj_type+"_")]!=obj_type+"_"}
+    resultat={**{key:value for (key,value) in object_infos.items() if key[:len(obj_type+"_")]==obj_type+"_"},**{next_type+"s": ([{key:value[i] for (key,value) in next_obj.items()} for i in range(len(next_obj[next_type+"_id"]))] if isinstance(next_obj[next_type+"_id"],list) else [next_obj])}} 
+    return resultat
 
 # lk_infos={"id":"lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F", "nb_hp": 4, "nb_serv": 2, "tags_hp":"OpenSSH,SSH,Elasticsearch", "tags_serv":"Europe ,  suisse,  geneve,TagDeTest42,TagDeTest4254,TagDeTest427","ports":"22, 189  ,  469,6484,88"}
 

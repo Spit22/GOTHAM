@@ -3,8 +3,8 @@ import sys
 
 # Import GOTHAM's libs
 from Gotham_SSH_SCP import execute_commands
-from Gotham_link_BDD import remove_link_DB, get_link_infos
-from Gotham_normalize import normalize_id_link
+from Gotham_link_BDD import remove_link_DB, get_link_infos, get_link_serv_hp_infos
+from Gotham_normalize import normalize_id_link, normalize_display_object_infos
 
 # Logging components
 import os
@@ -20,15 +20,15 @@ def main(DB_settings, id):
         logging.error(f"Can't remove the honeypot : its id is invalid")
         sys.exit(1)
     # Check if the link exists in the IDB
-    result = get_link_infos(DB_settings, id=id)
+    result = get_link_serv_hp_infos(DB_settings, id=id)
     if result == []:
         logging.error(f"You tried to remove a honeypot that doesn't exists with the id = {id}")
         sys.exit(1)
-    ##### REMOVE LINK ON SERVERS ###
-    # List server
-    # prendre serv_id dans result; split avec |||||| ; split avec |||| ; check doublon id -> liste des id des serveurs liés par le link
-    # For each servers, list the honeypots linked to it
-
+    # Remove link on the servers affected by the link
+    try:
+        remove_links_on_servers(DB_settings, result)
+    except:
+        sys.exit(1)
     # Remove the Link from the IDB
     try:
         remove_link_DB(DB_settings,id)
@@ -37,4 +37,22 @@ def main(DB_settings, id):
         sys.exit(1)
     return True
 
-#def remove_links_on_servers():
+def remove_links_on_servers(DB_settings, result):
+    try:
+        lk_display = normalize_display_object_infos(result, "link", "serv")
+    except Exception as e:
+        logging.error(f"Display object failed : {e}")
+        sys.exit(1)
+    servs = lk_display['servs']
+    # For each servers
+    for serv_dico in servs:
+        # Delete the configuration file of the link we want to delete
+        hostname = serv_dico['serv_ip']
+        port = serv_dico['serv_ssh_port']
+        ssh_key = serv_dico['serv_ssh_key']
+        commands = ["sudo rm /etc/nginx/conf.d/links/" + result['link_id'] +"-*.conf"]
+        try:
+            execute_commands(hostname, port, ssh_key, commands)
+        except Exception as e:
+            logging.error(f"{result['link_id']} removal on servers failed : {e}")
+            sys.exit(1)

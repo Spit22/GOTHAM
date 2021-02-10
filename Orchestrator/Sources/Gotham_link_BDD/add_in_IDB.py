@@ -5,6 +5,7 @@ import configparser
 
 # Import Gotham's libs
 from . import get_infos
+from Gotham_normalize import normalize_full_link_infos, normalize_full_server_infos, normalize_full_honeypot_infos
 
 # Logging components
 import os
@@ -33,25 +34,10 @@ def tag(DB_connection, tag):
 
 ############################### SERVER SECTION ###############################
 
-def normalize_dico_server_infos(server_infos):
-    default_server_infos = config['server_infos_default']
-    for key, value in default_server_infos.items():
-        if value == 'NOT NULL':
-            if not(key in server_infos):
-                logging.error(f" Missing value of '{key}'")
-                sys.exit(1)
-            elif(server_infos[key] == '' or server_infos[key] == 0):
-                logging.error(f" Missing value of '{key}'")
-                sys.exit(1)
-        else:
-            if not(key in server_infos):
-                server_infos[key] = value
-    return server_infos
-
 def server(DB_connection, server_infos):
     # Normalize server_infos
     try:
-        server_infos = normalize_dico_server_infos(server_infos)
+        server_infos = normalize_full_server_infos(server_infos)
     except:
         logging.error(f"Bad server_infos")
         sys.exit(1)
@@ -100,25 +86,10 @@ def serv_tags(DB_connection, tag_id, id_serv):
 
 ############################### HONEYPOT SECTION ###############################
 
-def normalize_dico_honeypot_infos(hp_infos):
-    default_hp_infos = config['honeypot_infos_default']
-    for key, value in default_hp_infos.items():
-        if value == 'NOT NULL':
-            if not(key in hp_infos):
-                logging.error(f" Missing value of '{key}'")
-                sys.exit(1)
-            elif(hp_infos[key] == '' or hp_infos[key] == 0):
-                logging.error(f" Missing value of '{key}'")
-                sys.exit(1)
-        else:
-            if not(key in hp_infos):
-                hp_infos[key] = value
-    return hp_infos
-
 def honeypot(DB_connection, hp_infos):
     # Normalize honeypot_infos
     try:
-        hp_infos = normalize_dico_honeypot_infos(hp_infos)
+        hp_infos = normalize_full_honeypot_infos(hp_infos)
     except:
         logging.error(f"Bad hp_infos")
         sys.exit(1)
@@ -167,25 +138,10 @@ def hp_tags(DB_connection, tag_id, id_hp):
 
 ############################### LINK SECTION ###############################
 
-def normalize_dico_link_infos(lk_infos):
-    default_lk_infos = config['link_infos_default']
-    for key, value in default_lk_infos.items():
-        if value == 'NOT NULL':
-            if not(key in lk_infos):
-                logging.error(f" Missing value of '{key}'")
-                sys.exit(1)
-            elif(lk_infos[key] == '' or lk_infos[key] == 0):
-                logging.error(f" Missing value of '{key}'")
-                sys.exit(1)
-        else:
-            if not(key in lk_infos):
-                lk_infos[key] = value
-    return lk_infos
-
 def link(DB_connection, lk_infos):
     # Normalize link_infos
     try:
-        lk_infos = normalize_dico_link_infos(lk_infos)
+        lk_infos = normalize_full_link_infos(lk_infos)
     except:
         logging.error(f"Bad lk_infos")
         sys.exit(1)

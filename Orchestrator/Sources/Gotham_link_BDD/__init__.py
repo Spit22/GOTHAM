@@ -101,6 +101,56 @@ def get_link_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="%", tags
     logging.debug(f"[-] Connection to the internal database closed")
     return result
 
+def get_link_hp_serv_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="%", tags_hp="%", tags_serv="%"):
+    '''
+    Retrieve a JSON with all the data of one or several servers from the internal database
+
+    ARGUMENTS:
+        DB_settings (dict) : all the settings to connect to the internal database
+       
+    '''
+    try:
+        DB_connection = mariadb.connect(
+            user=DB_settings["username"],
+            password=DB_settings["password"],
+            host=DB_settings["hostname"],
+            port=int(DB_settings["port"]),
+            database=DB_settings["database"]
+        )
+        logging.debug(f"[+] Connection to the internal database started")
+    except mariadb.Error as e:
+        logging.error(f"Can't connect to the internal database : {e}")
+        sys.exit(1)
+    result = get_infos.link_force_hp_serv(DB_connection, mode, id, nb_hp, nb_serv, tags_hp, tags_serv)
+    DB_connection.close()
+    logging.debug(f"[-] Connection to the internal database closed")
+    return result
+
+def get_link_serv_hp_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="%", tags_hp="%", tags_serv="%"):
+    '''
+    Retrieve a JSON with all the data of one or several servers from the internal database
+
+    ARGUMENTS:
+        DB_settings (dict) : all the settings to connect to the internal database
+       
+    '''
+    try:
+        DB_connection = mariadb.connect(
+            user=DB_settings["username"],
+            password=DB_settings["password"],
+            host=DB_settings["hostname"],
+            port=int(DB_settings["port"]),
+            database=DB_settings["database"]
+        )
+        logging.debug(f"[+] Connection to the internal database started")
+    except mariadb.Error as e:
+        logging.error(f"Can't connect to the internal database : {e}")
+        sys.exit(1)
+    result = get_infos.link_force_serv_hp(DB_connection, mode, id, nb_hp, nb_serv, tags_hp, tags_serv)
+    DB_connection.close()
+    logging.debug(f"[-] Connection to the internal database closed")
+    return result
+
 def get_tag_infos(DB_settings, mode=False, tag="%", id="%"):
     '''
     Retrieve a JSON with all the data of one or several tags from the internal database
