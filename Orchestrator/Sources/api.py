@@ -327,7 +327,7 @@ def add_lk():
                 with open(honeypots[i%len(honeypots)]["hp_source"], 'r') as file:
                     encoded_dockerfile = base64.b64encode(file.read().encode("ascii"))
                 name = (honeypots[i%len(honeypots)]["name"]+"_Duplicat" if len(honeypots[i%len(honeypots)]["name"]+"_Duplicat")<=128 else honeypots[i%len(honeypots)]["name"][:(128-len("_Duplicat"))]+"_Duplicat")
-                descr = "_Duplication of "+honeypots[i%len(honeypots)]["descr"]
+                descr = "Duplication of "+honeypots[i%len(honeypots)]["descr"]
                 duplicate_hp_infos={"name": name,"descr": descr,"tags": honeypots[i%len(honeypots)]["tags"].remplace("||",tags_separator),"logs": honeypots[i%len(honeypots)]["logs"],"parser": honeypots[i%len(honeypots)]["parser"],"port": honeypots[i%len(honeypots)]["port"], "dockerfile": encoded_dockerfile}
                 try:
                     added_hp.append(add_honeypot(duplicate_hp_infos))
