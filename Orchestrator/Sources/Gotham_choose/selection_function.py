@@ -107,6 +107,27 @@ def weighting_nb_useless_tags(object_type, objects_infos, tags):
 
         return objects_infos
 
+def weighting_nb_free_port(servs_infos):
+        '''
+        Add a weight corresponding to the number of useless tags associated with each object 
+
+        ARGUMENTS:
+                servs_infos (list of dict) : list of potentials servs
+        '''
+
+        GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+        # Retrieve settings from config file
+        config = configparser.ConfigParser()
+        config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+        
+        weight=int(config['serv_weight']["nb_free_port"])
+        
+        separator = config['port']['separator']
+        
+        servs_infos=[{**serv_infos, **{"weight":int(serv_infos["weight"])+(weight*int(len(serv_infos["free_ports"].split(separator))))}} for serv_infos in servs_infos]
+
+        return servs_infos
+
 
 def weighting_time(object_type, objects_infos, column):
         '''

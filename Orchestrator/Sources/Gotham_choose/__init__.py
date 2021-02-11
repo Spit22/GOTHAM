@@ -21,7 +21,7 @@ def choose_honeypots(hps_infos, nb_hp, tags_hp):
 		tags_hp (string) : Honeypot tags mentioned in the link
 	'''
 	
-	hps_infos=[dict(hp, **{'weight':0}) for hp in hps_infos]
+	hps_infos=[dict(hp, **{'weight':100}) for hp in hps_infos]
 	object_type="hp"
 
 	hps_infos=selection_function.weighting_nb_link(object_type, hps_infos)
@@ -46,13 +46,14 @@ def choose_servers(servs_infos, nb_serv, tags_serv):
 		tags_serv (string) : server tags mentioned in the link
 	'''
 
-	servs_infos=[dict(serv, **{'weight':0}) for serv in servs_infos]
+	servs_infos=[dict(serv, **{'weight':100}) for serv in servs_infos]
 	object_type="serv"
 
 	servs_infos=selection_function.weighting_nb_link(object_type, servs_infos)
 	servs_infos=selection_function.weighting_nb_port(servs_infos)
 	servs_infos=selection_function.weighting_state(object_type, servs_infos)
 	servs_infos=selection_function.weighting_nb_useless_tags(object_type, servs_infos, tags_serv)
+	servs_infos=selection_function.weighting_nb_free_port(servs_infos)
 	servs_infos=selection_function.weighting_time(object_type, servs_infos, "created_at")
 	servs_infos=selection_function.weighting_time(object_type, servs_infos, "updated_at")
 
