@@ -95,7 +95,7 @@ def index():
         return 'You\'re on the GOTHAM\'s API'
 
 @app.route('/add/honeypot', methods=['POST'])
-def add_honeypot():
+def add_honeypot(hp_infos_received={}):
         # Creates a honeypot object
         # 
         # name (string) : nom du honeypot
@@ -106,8 +106,15 @@ def add_honeypot():
         # dockerfile (string) : dockerfile to generate the honeypot on datacenter, base64 encoded
         # service_port (int) : port on which the honeypot will lcoally listen
 
-        # Get POST data on JSON format
-        data = request.get_json()
+
+        if hp_infos_received=={}:
+            # Get POST data on JSON format
+            data = request.get_json()
+            received=True
+        else:
+            data=hp_infos_received
+            received=False
+
         try:
             # Normalize infos
             hp_infos_received = {"name": data["name"],"descr": data["descr"],"tags": data["tags"],"logs": data["logs"],"parser": data["parser"],"port": data["port"]}
@@ -164,7 +171,10 @@ def add_honeypot():
         Gotham_link_BDD.add_honeypot_DB(db_settings, hp_infos)
 
         # If all operations succeed
-        return "OK : "+str(id)
+        if received==True:
+            return "OK : "+str(id)
+        else:
+            return str(id)
 
 @app.route('/add/server', methods=['POST'])
 def add_srv():
@@ -246,6 +256,7 @@ def add_lk():
         config = configparser.ConfigParser()
         config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
         ports_separator = config['port']['separator']
+        tags_separator = config['tag']['separator']
 
         # Get POST data on JSON format
         data = request.get_json()
@@ -311,7 +322,19 @@ def add_lk():
 
         # Checking we have enough honeypots for the nb_hp directive
         if len(honeypots) < nb_hp:
-            return ("Duplicate this honeypot")
+            added_hp=[]
+            for i in range(nb_hp-len(honeypots)):
+                with open(honeypots[i%len(honeypots)]["hp_source"], 'r') as file:
+                    encoded_dockerfile = base64.b64encode(file.read().encode("ascii"))
+                name = (honeypots[i%len(honeypots)]["name"]+"_Duplicat" if len(honeypots[i%len(honeypots)]["name"]+"_Duplicat")<=128 else honeypots[i%len(honeypots)]["name"][:(128-len("_Duplicat"))]+"_Duplicat")
+                descr = "_Duplication of "+honeypots[i%len(honeypots)]["descr"]
+                duplicate_hp_infos={"name": name,"descr": descr,"tags": honeypots[i%len(honeypots)]["tags"].remplace("||",tags_separator),"logs": honeypots[i%len(honeypots)]["logs"],"parser": honeypots[i%len(honeypots)]["parser"],"port": honeypots[i%len(honeypots)]["port"], "dockerfile": encoded_dockerfile}
+                try:
+                    added_hp.append(add_honeypot(duplicate_hp_infos))
+                except:
+                    return "Error with hp duplication"
+            for id in added_hp:
+                honeypots.append(Gotham_link_BDD.get_honeypot_infos(db_settings, id=id))
 
         # Choose best servers (the lower scored)
         servers = Gotham_choose.choose_servers(servers, nb_srv, tags_serv)
