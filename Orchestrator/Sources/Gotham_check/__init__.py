@@ -37,8 +37,9 @@ def check_server_ports_is_free(serv_infos, ports):
 def check_servers_ports_matching(servs_infos, ports):
     result=[]
     for serv_infos in servs_infos:
-        if check_server_ports_is_free(serv_infos, ports)!='':
-            result.append(serv_infos)
+        free_ports=check_server_ports_is_free(serv_infos, ports)
+        if free_ports!='':
+            result.append({**{serv_infos},**{"free_ports":free_ports}})
     return result
 
 def check_doublon_server(DB_settings, ip):

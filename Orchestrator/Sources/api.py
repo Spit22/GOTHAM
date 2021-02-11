@@ -310,32 +310,43 @@ def add_lk():
         honeypots = Gotham_choose.choose_honeypots(honeypots, nb_hp, tags_hp)
 
         # Checking we have enough honeypots for the nb_hp directive
-        #if len(honeypots) < nb_hp:
-            # If we don't have enough but we have one or more
-            # Choose one or more of available honeypots (the best scored), and obtain informations
-            # Duplicate this honeypot
-        
+        if len(honeypots) < nb_hp:
+            return ("Duplicate this honeypot")
 
         # Choose best servers (the lower scored)
         servers = Gotham_choose.choose_servers(servers, nb_srv, tags_serv)
         
-        # Generate the dict servers associating ip and exposed_port
-        avb_servers = {"172.16.2.201":"8080"}
+        count_exposed_ports={str(port):0 for port in exposed_ports_list}
+        # Associate servers and an port of exposition
+        for i in range(len(servers)):
+            port_available_only_for_this_server = list(set(servers[i]["free_ports"].split(ports_separator)).difference([(ports_separator.join([server["free_ports"] for server in servers])).split(ports_separator)]))
+            if len(servers[i]["free_ports"].split(ports_separator))==1 :
+                servers[i]["choosed_port"]=int(servers[i]["free_ports"])
+                count_exposed_ports[str(servers[i]["choosed_port"])]+=1
+            elif port_available_only_for_this_server!=[]:
+                servers[i]["choosed_port"]=int(port_available_only_for_this_server[0])
+                count_exposed_ports[str(servers[i]["choosed_port"])]+=1
+        for i in range(len(servers)):
+            if not("choosed_port" in servers[i].keys()):
+                free_ports_for_serv_with_weight={port:count_exposed_ports[port] for port in servers[i]["free_ports"].split(ports_separator)}
+                servers[i]["choosed_port"]=int(min(free_ports_for_serv_with_weight, key=free_ports_for_serv_with_weight.get))
+                count_exposed_ports[str(servers[i]["choosed_port"])]+=1
+
+        final_exposed_ports=list(filter(None,dict.fromkeys([server["choosed_port"] for server in servers])))
+
         # Create link id
         id = 'lk-'+str(uuid.uuid4().hex)
 
         # Generate NGINX configurations for each redirection on a specific exposed_port
-        for exposed_port in exposed_ports_list:
+        for exposed_port in final_exposed_ports:
             add_link.generate_nginxConf(db_settings, id, dc_ip, honeypots, exposed_port)
 
         # Deploy new reverse-proxies's configurations on servers
-        add_link.deploy_nginxConf(db_settings, id, avb_servers)
+        add_link.deploy_nginxConf(db_settings, id, servers)
 
         # Check redirection is effective on all servers
-        for avb_server in avb_servers:
-            ip_srv = avb_server
-            exposed_port = avb_servers[avb_server]
-            connected = Gotham_check.check_server_redirects(ip_srv, exposed_port)
+        for server in servers:
+            connected = Gotham_check.check_server_redirects(server["serv_ip"], server["choosed_port"])
             if not connected:
                 return "Error : link is not effective on server "+str(ip_srv)
 
@@ -346,6 +357,15 @@ def add_lk():
         # Store new link and tags in the internal database        
         Gotham_link_BDD.add_link_DB(db_settings, lk_infos)
 
+        # Insert data in Link_Hp_Serv
+        for server in servers:
+            for honeypot in honeypots:
+                # Create lhs_infos
+                lhs_infos = {"id_link":lk_infos["id"], "id_link": honeypot["hp_id"], "id_serv": server["serv_id"], "port":server["choosed_port"]}
+                # Normalize infos
+                lhs_infos = Gotham_normalize.normalize_lhs_infos(lhs_infos)
+                # Store new link and tags in the internal database        
+                Gotham_link_BDD.add_lhs_DB(db_settings, lhs_infos)
 
         return "OK : "+str(id)
 

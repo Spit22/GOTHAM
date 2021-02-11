@@ -5,7 +5,7 @@ import configparser
 
 # Import Gotham's libs
 from . import get_infos
-from Gotham_normalize import normalize_full_link_infos, normalize_full_server_infos, normalize_full_honeypot_infos
+from Gotham_normalize import normalize_full_link_infos, normalize_full_lhs_infos, normalize_full_server_infos, normalize_full_honeypot_infos
 
 # Logging components
 import os
@@ -217,25 +217,10 @@ def link_tags_serv(DB_connection, tag_id, id_lk):
 
 ############################### LHS SECTION ###############################
 
-def normalize_dico_lhs_infos(lhs_infos):
-    default_lhs_infos = {"id_lk":"NOT NULL","id_hp":"NOT NULL","id_serv":"NOT NULL","port":"NOT NULL"}
-    for key, value in default_lhs_infos.items():
-        if value == 'NOT NULL':
-            if not(key in lhs_infos):
-                logging.error(f" Missing value of '{key}'")
-                sys.exit(1)
-            elif(lhs_infos[key] == '' or lhs_infos[key] == 0):
-                logging.error(f" Missing value of '{key}'")
-                sys.exit(1)
-        else:
-            if not(key in lhs_infos):
-                lhs_infos[key] = value
-    return lhs_infos
-
 def link_hp_serv(DB_connection, lhs_infos):
     # Normalize lhs_infos
     try:
-        lhs_infos = normalize_dico_lhs_infos(lhs_infos)
+        lhs_infos = normalize_full_lhs_infos(lhs_infos)
     except:
         logging.error(f"Bad lhs_infos")
         sys.exit(1)
@@ -244,9 +229,9 @@ def link_hp_serv(DB_connection, lhs_infos):
     # Execute SQL request
     try:
         # Insert values in Link_Hp_Serv table
-        cur.execute("INSERT INTO Link_Hp_Serv (id_link,id_hp,id_serv,port) VALUES (?,?,?,?)", (lhs_infos["id_lk"], lhs_infos["id_hp"], lhs_infos["id_serv"], lhs_infos["port"]))
+        cur.execute("INSERT INTO Link_Hp_Serv (id_link,id_hp,id_serv,port) VALUES (?,?,?,?)", (lhs_infos["id_link"], lhs_infos["id_hp"], lhs_infos["id_serv"], lhs_infos["port"]))
         DB_connection.commit()
-        logging.info(f"'{lhs_infos['id_lk']} -- {lhs_infos['id_hp']} -- {lhs_infos['id_serv']}' added in the table 'Link_Hp_Serv'")
+        logging.info(f"'{lhs_infos['id_link']} -- {lhs_infos['id_hp']} -- {lhs_infos['id_serv']}' added in the table 'Link_Hp_Serv'")
     except mariadb.Error as e:
-        logging.error(f"'{lhs_infos['id_lk']} -- {lhs_infos['id_hp']} -- {lhs_infos['id_serv']}' insertion in the table 'Link_Hp_Serv' : {e}")
+        logging.error(f"'{lhs_infos['id_link']} -- {lhs_infos['id_hp']} -- {lhs_infos['id_serv']}' insertion in the table 'Link_Hp_Serv' : {e}")
         sys.exit(1)

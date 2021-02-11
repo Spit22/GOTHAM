@@ -37,7 +37,7 @@ def normalize_descr(descr):
     return descr
 
 def normalize_port(port):
-    if (port == '' or port == None):
+    if (port == '' or port == None or port==0):
         logging.warning(f"port is undefined or empty")
         sys.exit(1)
     try:
@@ -154,6 +154,8 @@ def normalize_display(object_infos, obj_type, separator, next_type):
     next_obj={key:(value.split(separator) if (separator in str(value)) else value) for (key,value) in object_infos.items() if key[:len(obj_type+"_")]!=obj_type+"_"}
     resultat={**{key:value for (key,value) in object_infos.items() if key[:len(obj_type+"_")]==obj_type+"_"},**{next_type+"s": ([{key:value[i] for (key,value) in next_obj.items()} for i in range(len(next_obj[next_type+"_id"]))] if isinstance(next_obj[next_type+"_id"],list) else [next_obj])}} 
     return resultat
+
+
 
 # lk_infos={"id":"lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F", "nb_hp": 4, "nb_serv": 2, "tags_hp":"OpenSSH,SSH,Elasticsearch", "tags_serv":"Europe ,  suisse,  geneve,TagDeTest42,TagDeTest4254,TagDeTest427","ports":"22, 189  ,  469,6484,88"}
 

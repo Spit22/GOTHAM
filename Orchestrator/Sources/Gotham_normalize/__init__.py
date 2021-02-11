@@ -39,6 +39,22 @@ def normalize_link_infos(lk_infos):
       lk_infos[key]=normalize_key(value)
   return lk_infos
 
+def normalize_lhs_infos(lhs_infos):
+  for key, value in lhs_infos.items():
+    if (key=="id_hp"):
+      normalize_key=getattr(normalization_functions,'normalize_id')
+      lhs_infos[key]=normalize_key("hp",value)
+    elif (key=="id_serv"):
+      normalize_key=getattr(normalization_functions,'normalize_id')
+      lhs_infos[key]=normalize_key("sv",value)
+    elif (key=="id_link"):
+      normalize_key=getattr(normalization_functions,'normalize_id')
+      lhs_infos[key]=normalize_key("lk",value)
+    else:
+      normalize_key=getattr(normalization_functions,'normalize_' + key)
+      lhs_infos[key]=normalize_key(value)
+  return lhs_infos
+
 ########## NORMALIZE WITH DEFAULT VALUES SECTION ##########
 
 def normalize_full_honeypot_infos(hp_infos):
@@ -102,6 +118,23 @@ def normalize_full_link_infos(lk_infos):
     return normalize_link_infos(lk_infos)
 
 
+def normalize_full_lhs_infos(lhs_infos):
+    default_lhs_infos = {"id_link":"NOT NULL","id_hp":"NOT NULL","id_serv":"NOT NULL","port":"NOT NULL"}
+    lhs_infos=normalize_lhs_infos(lhs_infos)
+    for key, value in default_lhs_infos.items():
+        if value == 'NOT NULL':
+            if not(key in lhs_infos):
+                logging.error(f" Missing value of '{key}'")
+                sys.exit(1)
+            elif(lhs_infos[key] == '' or lhs_infos[key] == 0):
+                logging.error(f" Missing value of '{key}'")
+                sys.exit(1)
+        else:
+            if not(key in lhs_infos):
+                lhs_infos[key] = value
+    return normalize_lhs_infos(lhs_infos)
+
+
 ########## NORMALIZE DISPLAY SECTION ##########
 def normalize_display_object_infos(object_infos, obj_type, next_type=''):
   obj_types=["hp","serv","link"]
@@ -127,5 +160,4 @@ def normalize_id_honeypot(id):
 def normalize_id_link(id):
   return normalization_functions.normalize_id('lk', id)
 
-# method_to_call = getattr(foo, 'bar')
-# result = method_to_call()
+

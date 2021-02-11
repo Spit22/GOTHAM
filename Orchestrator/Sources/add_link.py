@@ -13,7 +13,7 @@ def generate_nginxConf(db_settings, link_id, dc_ip, honeypots, exposed_port):
     ARGUMENTS:
         link_id (string): id of the link we are configuring nginx for
         dc_ip (string): ip of FQDN of the remote datacenter
-        honeypots (list): list of honeypots id
+        honeypots (list): list of honeypots
         exposed_port (int): port to listen on the server
     '''
     # Initialise the creation of the new nginx config file
@@ -24,9 +24,8 @@ def generate_nginxConf(db_settings, link_id, dc_ip, honeypots, exposed_port):
     # Adding each honeypot in upstream
     for honeypot in honeypots:
         # Get the corresponding mapped port for this honeypot
-        honeypot_infos = get_honeypot_infos(db_settings, id=honeypot["hp_id"])[0]
-        honeypot_port = honeypot_infos["hp_port"] 
-        nginxRedirectionFile.write("  # "+ str(honeypot) +"\n")
+        honeypot_port = honeypot["hp_port"] 
+        nginxRedirectionFile.write("  # "+ str(honeypot["hp_id"]) +"\n")
         nginxRedirectionFile.write("  server "+ str(dc_ip) +":"+ str(honeypot_port) +";\n")
     # Closing upstream
     nginxRedirectionFile.write("}\n")
@@ -42,23 +41,16 @@ def deploy_nginxConf(db_settings, link_id, servers):
     
     ARGUMENTS:
         link_id (string): id of the link we are configuring nginx for
-        servers (dict): list of ip of servers we want to deploy on associated with exposed ports
+        servers (dict): list of servers we want to deploy on associated with exposed ports
     '''
     # Initialize command and file
     checkAndReloadNginx_command = ["nginx -t; if [ $? -eq 0 ]; then; nginx -s reload; fi"]
     linkConf_dest = "/etc/nginx/conf.d/links/"
     # Deploy new configuration on each servers
     for server in servers:
-        print(server)
-        exposed_port = servers[server]
-        linkConf_path = ["/data/template/"+str(link_id)+"-"+str(exposed_port)+".conf"]
-        # Get stored auth info of the server
-        server_infos = get_server_infos(db_settings, ip=server)[0]
-        srv_ip = server_infos["serv_ip"]
-        srv_ssh_port = server_infos["serv_ssh_port"]
-        srv_ssh_key = StringIO(server_infos["serv_ssh_key"])
+        linkConf_path = ["/data/template/"+str(link_id)+"-"+str(server["choosed_port"])+".conf"]
         # Déploy configuration on the server and Reload nginx if ok
-        send_file_and_execute_commands(srv_ip, srv_ssh_port, srv_ssh_key, linkConf_path, linkConf_dest, checkAndReloadNginx_command)
+        send_file_and_execute_commands(server["serv_ip"], server["serv_ssh_port"], StringIO(server["serv_ssh_key"]), linkConf_path, linkConf_dest, checkAndReloadNginx_command)
 
 ### TEST SECTION ###
 if __name__ == '__main__':
