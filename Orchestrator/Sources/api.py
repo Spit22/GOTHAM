@@ -342,7 +342,7 @@ def add_lk():
         count_exposed_ports={str(port):0 for port in exposed_ports_list}
         # Associate servers and an port of exposition
         for i in range(len(servers)):
-            port_available_only_for_this_server = list(set(servers[i]["free_ports"].split(ports_separator)).difference([(ports_separator.join([server["free_ports"] for server in servers])).split(ports_separator)]))
+            port_available_only_for_this_server = list(set(servers[i]["free_ports"].split(ports_separator)).difference([(ports_separator.join([serv["free_ports"] for serv in servers if serv["serv_id"]!=servers[i]["serv_id"]])).split(ports_separator)]))
             if len(servers[i]["free_ports"].split(ports_separator))==1 :
                 servers[i]["choosed_port"]=int(servers[i]["free_ports"])
                 count_exposed_ports[str(servers[i]["choosed_port"])]+=1
