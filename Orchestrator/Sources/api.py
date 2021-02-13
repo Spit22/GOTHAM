@@ -159,7 +159,8 @@ def add_honeypot(hp_infos_received={}):
         
         # Deploy the hp's container on datacenter
         try:
-            add_hp.deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id)
+            print("bypassed")
+            #add_hp.deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id)
         except Exception as e:
             return "An error occured in the ssh connection"
 
@@ -216,9 +217,10 @@ def add_srv():
             return "Provided ip already exists in database"
 
         # Check given auth information are ok
-        connected = Gotham_check.check_ssh(ip, ssh_port, check_ssh_key) 
-        if not connected:
-            return "Provided ssh_key or ssh_port is wrong"
+        print("bypassed")
+        #connected = Gotham_check.check_ssh(ip, ssh_port, check_ssh_key) 
+        #if not connected:
+        #    return "Provided ssh_key or ssh_port is wrong"
 
         # If all checks are ok, we can generate an id for the new server
         id = 'sv-'+str(uuid.uuid4().hex)
@@ -280,7 +282,6 @@ def add_lk():
         existingLinks = Gotham_check.check_tags("link", Gotham_link_BDD.get_link_infos(db_settings, tags_hp=tags_hp, tags_serv=tags_serv), tags_hp=tags_hp, tags_serv=tags_serv, mode=True)
         if existingLinks != []:
             return "A link is already configured for this tags"
-        print(existingLinks)
 
         # We check all provided server tags exists, otherwise return error
         try:
@@ -299,11 +300,9 @@ def add_lk():
 
         # Get all servers corresponding to tags
         servers = Gotham_check.check_tags("serv",Gotham_link_BDD.get_server_infos(db_settings, tags=tags_serv), tags_serv=tags_serv)
-        print(servers[0])
 
         # Filter servers in those who have one of ports open
         servers = Gotham_check.check_servers_ports_matching(servers, exposed_ports)
-
         # Filter servers in error
         servers = [server for server in servers if server["serv_state"]!='ERROR']
         # Filter honeypots in error
@@ -342,7 +341,10 @@ def add_lk():
         count_exposed_ports={str(port):0 for port in exposed_ports_list}
         # Associate servers and an port of exposition
         for i in range(len(servers)):
-            port_available_only_for_this_server = list(set(servers[i]["free_ports"].split(ports_separator)).difference([(ports_separator.join([serv["free_ports"] for serv in servers if serv["serv_id"]!=servers[i]["serv_id"]])).split(ports_separator)]))
+            serv_i_free_ports=servers[i]["free_ports"].split(ports_separator)
+            servs_free_ports=(ports_separator.join([serv["free_ports"] for serv in servers if serv["serv_id"]!=servers[i]["serv_id"]])).split(ports_separator)
+            port_available_only_for_this_server=list(set(serv_i_free_ports).difference(servs_free_ports))
+
             if len(servers[i]["free_ports"].split(ports_separator))==1 :
                 servers[i]["choosed_port"]=int(servers[i]["free_ports"])
                 count_exposed_ports[str(servers[i]["choosed_port"])]+=1
@@ -365,13 +367,15 @@ def add_lk():
             add_link.generate_nginxConf(db_settings, id, dc_ip, honeypots, exposed_port)
 
         # Deploy new reverse-proxies's configurations on servers
-        add_link.deploy_nginxConf(db_settings, id, servers)
+        print("bypassed")
+        #add_link.deploy_nginxConf(db_settings, id, servers)
 
         # Check redirection is effective on all servers
         for server in servers:
-            connected = Gotham_check.check_server_redirects(server["serv_ip"], server["choosed_port"])
-            if not connected:
-                return "Error : link is not effective on server "+str(ip_srv)
+            print("bypassed")
+            #connected = Gotham_check.check_server_redirects(server["serv_ip"], server["choosed_port"])
+            #if not connected:
+            #    return "Error : link is not effective on server "+str(ip_srv)
 
         # Create lk_infos
         lk_infos = {"id":id, "nb_hp": nb_hp, "nb_serv": nb_srv, "tags_hp":tags_hp, "tags_serv":tags_serv, "ports":exposed_ports}
@@ -379,12 +383,11 @@ def add_lk():
         lk_infos = Gotham_normalize.normalize_link_infos(lk_infos)
         # Store new link and tags in the internal database        
         Gotham_link_BDD.add_link_DB(db_settings, lk_infos)
-
         # Insert data in Link_Hp_Serv
         for server in servers:
             for honeypot in honeypots:
                 # Create lhs_infos
-                lhs_infos = {"id_link":lk_infos["id"], "id_link": honeypot["hp_id"], "id_serv": server["serv_id"], "port":server["choosed_port"]}
+                lhs_infos = {"id_link":lk_infos["id"], "id_hp": honeypot["hp_id"], "id_serv": server["serv_id"], "port":server["choosed_port"]}
                 # Normalize infos
                 lhs_infos = Gotham_normalize.normalize_lhs_infos(lhs_infos)
                 # Store new link and tags in the internal database        

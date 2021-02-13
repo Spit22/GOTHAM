@@ -31,8 +31,8 @@ def generate_nginxConf(db_settings, link_id, dc_ip, honeypots, exposed_port):
     nginxRedirectionFile.write("}\n")
     # Configuring the redirection 
     nginxRedirectionFile.write("server {\n")
-    nginxRedirectionFile.write("  listen "+ exposed_port +";\n")
-    nginxRedirectionFile.write("  proxy_pass "+ link_id +";\n")
+    nginxRedirectionFile.write("  listen "+ str(exposed_port) +";\n")
+    nginxRedirectionFile.write("  proxy_pass "+ str(link_id) +";\n")
     nginxRedirectionFile.write("}\n")
 
 def deploy_nginxConf(db_settings, link_id, servers):
