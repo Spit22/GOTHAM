@@ -164,14 +164,14 @@ def normalize_id_link(id):
 ########## NORMALIZE EDIT SECTION ##########
 
 def normalize_modif_to_str(modifs):
-    replacement_dict= {"'":"",": ":"=","{":"","}":""}
+    replacement_dict= {"': ":"=","{'":"","}":"","', ":", "}
     result=str(modifs)
     for key, value in replacement_dict.items():
         result=result.replace(key,value)
     return result
 
 def normalize_conditions_to_str(conditions):
-    replacement_dict= {"'":"",": ":"=","{":"","}":"",",":" and"}
+    replacement_dict= {"': ":"=","{'":"","}":"",", '":" and "}
     result=str(conditions)
     for key, value in replacement_dict.items():
         result=result.replace(key,value)
