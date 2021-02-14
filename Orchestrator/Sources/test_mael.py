@@ -43,7 +43,7 @@ except:
 print(normalize_display_object_infos(infos[0], "serv", next_type=''))
 '''
 
-from Gotham_link_BDD import edit_lhs_DB
+from Gotham_link_BDD import remove_lhs, edit_lhs_DB
 
 server_infos = {'id':'sv-66623F6F323F38F42d656DF861566999','name':'serveur-test-edit-idb','descr':'blabla','tags':'TestEDIT','ip':'42.42.45.33','ssh_key':'non','ssh_port':'22','state':'ERROR'}
 lk_infos = {"id":"lk-666B3AFE3FEE1FEFB1D25E22FC2CA999", "nb_hp": 4, "nb_serv": 2, "tags_hp":"SSH", "tags_serv":"France, Europe", 'ports':'22,186,658'}
@@ -57,6 +57,9 @@ except:
     print("ADD KO")
 '''
 print(colored("########## ########## EDIT IN IDB SECTION ########## ##########", 'blue'))
-edit_lhs_DB(DB_settings, {'id_serv':server_infos['id']}, {'id_link':'lk-67C82EAC340111EB85FE89F2FB2CA371'})
+#edit_lhs_DB(DB_settings, {'id_serv':server_infos['id']}, {'id_link':'lk-67C82EAC340111EB85FE89F2FB2CA371'})
 #edit_lhs_DB(DB_settings, {'id_hp':honeypot_infos['id']}, {'id_link':'lk-4AAB119A340111EB84D6D6F0FB2CA371', 'id_serv':'sv-72D25FB833CD11EBAED4A458FC2CA371'})
 #edit_lhs_DB(DB_settings, {'id_link':lk_infos['id']}, {'id_hp':'hp-1B5B3A1E32EE11EBB1F25E22FC2CA372', 'id_serv':'sv-447831E032EE11EBB6D20248FC2CA371'})
+
+
+remove_lhs(DB_settings,id_link="lk-67C82EAC340111EB85FE89F2FB2CA371")

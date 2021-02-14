@@ -3,8 +3,6 @@ import mariadb
 import sys
 import configparser
 
-# Import Gotham's libs
-from . import get_infos
 
 # Logging components
 import os
@@ -96,6 +94,11 @@ def link(DB_connection, id):
         link_in_link_tags_hp(DB_connection, id)
     except:
         sys.exit(1)
+    #Remove the relations between the link, the honeypots and the servers
+    try:
+        lhs(DB_connection, id_link=id)
+    except:
+        sys.exit(1)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request
@@ -138,8 +141,6 @@ def link_in_link_tags_serv(DB_connection, id):
     except mariadb.Error as e:
         logging.error(f"'{id}' removal from the table 'Link_Tags_serv' failed : {e}")
         sys.exit(1)
-
-
 
 def lhs(DB_connection,id_link="%",id_hp="%",id_serv="%"):
     # Get MariaDB cursor

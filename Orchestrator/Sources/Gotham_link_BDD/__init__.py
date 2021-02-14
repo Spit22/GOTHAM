@@ -404,7 +404,7 @@ def remove_lhs(DB_settings,id_link="%",id_hp="%",id_serv="%"):
         sys.exit(1)
     # Remove the link
     try:
-        remove_in_IDB.lhs(DB_connection,id_link,id_hp,id_serv):
+        remove_in_IDB.lhs(DB_connection,id_link,id_hp,id_serv)
         DB_connection.close()
         logging.debug(f"[-] Connection to the internal database closed")
     except:
