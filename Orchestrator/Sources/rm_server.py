@@ -1,6 +1,6 @@
 from Gotham_SSH_SCP import execute_commands
-from Gotham_normalize import normalize_server_infos
-from Gotham_link_BDD import get_server_infos, remove_server_DB
+from Gotham_normalize import normalize_server_infos, normalize_display_object_infos
+from Gotham_link_BDD import get_server_infos, remove_server_DB, edit_lhs_DB, edit_link_DB, remove_lhs
 
 import sys
 
@@ -30,9 +30,29 @@ def main(DB_settings, id='sv-00000000000000000000000000000000', ip='255.255.255.
         logging.error(f"You tried to remove a server that doesn't exists with the id = {id}")
         sys.exit(1)
     # Check if the server is running
-    if not(result[0]['link_id'] == None):
-        logging.error(f"You tried to remove a running server with the id = {id}")
-        sys.exit(1)
+    if result[0]['link_id'] != None and result[0]['link_id'] !="NULL":
+        serv_infos=normalize_display_object_infos(result[0],"serv")
+        for i in range(len(serv_infos["links"])):
+            # Try to replace
+            success=replace_server(DB_settings,serv_infos,i)
+
+            # If we can't replace, just modify link to decrease nb serv
+            if not(success):
+                if serv_infos["links"][i]["link_nb_serv"]>1:
+                    try:
+                        remove_lhs(DB_settings,id_link=serv_infos["links"][i]["link_id"], id_serv=serv_infos["serv_id"])
+                    except:
+                        sys.exit(1)
+                    try:
+                        modifs={"nb_serv":int(serv_infos["links"][i]["link_nb_serv"])-1}
+                        conditions={"id":serv_infos["links"][i]["link_id"]}
+                        edit_link_DB(DB_settings, modifs, conditions)
+                    except:
+                        sys.exit(1)
+                else:        
+                    # If nb serv=1, error, we can't do nothing
+                    logging.error(f"You tried to remove a running server with the id = {id}, and it can't be replaced or deleted")
+                    sys.exit(1)
     # Remove Server from the server
     try:
         remove_nginx_on_server(result[0]['serv_ip'],result[0]['serv_ssh_port'],result[0]['serv_ssh_key'])
@@ -53,3 +73,56 @@ def remove_nginx_on_server(hostname, port, ssh_key):
     except Exception as e:
         logging.error(f"Remove server failed : {e}")
         sys.exit(1)
+
+
+def replace_server(DB_settings,serv_infos,num_link):
+
+    GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+    # Retrieve settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    tag_separator = config['tag']['separator']
+    port_separator = config['port']['separator']
+
+    link=serv_infos["links"][num_link]
+    link_tags_serv=tag_separator.join(link["link_tags_serv"].split("||"))
+
+    # Get all servers corresponding to tags
+    servers = Gotham_check.check_tags("serv",Gotham_link_BDD.get_server_infos(db_settings, tags=link_tags_serv), tags_serv=link_tags_serv)
+
+    # Filter servers in those who have one of ports open
+    servers = Gotham_check.check_servers_ports_matching(servers, link["link_port"])
+
+    # Filter servers in error
+    servers = [server for server in servers if not(server["serv_state"]=='ERROR' or link["link_id"] in server["link_id"] or server["serv_id"]==serv_infos["serv_id"])]
+    
+    if servers==[]:
+        return False
+
+    ports_used_ls=[hp["lhs_port"] for hp in link["hps"]]
+    ports_used_ls=list(set(ports_used_ls))
+
+    servers_same_port=[server for server in servers if all(port in server["free_ports"].split(port_separator) for port in ports_used_ls)]
+
+    if servers_same_port!=[]:
+        replacement_server=Gotham_choose.choose_servers(servers_same_port, 1, link_tags_serv)
+
+        if (len(ports_used_ls)==1):
+            replacement_server["choosed_port"]=int(ports_used_ls[0])
+            # Deploy new reverse-proxies's configurations on new server
+            print("bypassed")
+            #add_link.deploy_nginxConf(db_settings, link["link_id"], replacement_server)
+
+        for hp in link["hps"]:
+            modifs={"id_serv":replacement_server["serv_id"]}
+            conditions={"id_link":link["link_id"],"id_hp":hp["hp_id"],"id_serv":serv_infos["serv_id"]}
+            try:
+                edit_lhs_DB(DB_settings,modifs,conditions)
+            except:
+                sys.exit(1)
+        return True
+
+    else:
+        print("Not implemented")
+        return False
+
