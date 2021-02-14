@@ -6,6 +6,7 @@ import sys
 from . import get_infos
 from . import add_in_IDB
 from . import remove_in_IDB
+from . import edit_in_IDB
 from Gotham_normalize import normalize_id_server,normalize_id_honeypot,normalize_id_link
 
 # Logging components
@@ -376,3 +377,132 @@ def remove_link_DB(DB_settings, id):
         logging.debug(f"[-] Connection to the internal database closed")
     except:
         sys.exit(1)
+
+
+########## EDIT IN THE INTERNAL DATABASE ##########
+
+def edit_link_DB(DB_settings, modifs, conditions):
+    '''
+    Edit a link in the internal database from its id
+
+    ARGUMENTS:
+        DB_settings (dict) : all the settings to connect to the internal database
+        id (string) : the id of the link we want to remove in the internal database
+        modifs (dict) : dict of modifications with column:value syntax
+        conditions (dict) : dict of conditions with column:value syntax (put here the id of the link we want to edit)
+    '''
+    # Connect to the database
+    try:
+        DB_connection = mariadb.connect(
+            user=DB_settings["username"],
+            password=DB_settings["password"],
+            host=DB_settings["hostname"],
+            port=int(DB_settings["port"]),
+            database=DB_settings["database"]
+        )
+        logging.debug(f"[+] Connection to the internal database started")
+    except mariadb.Error as e:
+        logging.error(f"Can't connect to the internal database : {e}")
+        sys.exit(1)
+    # Edit the link
+    try:
+        edit_in_IDB.link(DB_connection, modifs, conditions)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database closed")
+    except:
+        sys.exit(1)
+
+
+def edit_lhs_DB(DB_settings, modifs, conditions):
+    '''
+    Edit Link_Hp_Serv table in the internal database
+
+    ARGUMENTS:
+        DB_settings (dict) : all the settings to connect to the internal database
+        modifs (dict) : dict of modifications with column:value syntax
+        conditions (dict) : dict of conditions with column:value syntax
+    '''
+    # Connect to the database
+    try:
+        DB_connection = mariadb.connect(
+            user=DB_settings["username"],
+            password=DB_settings["password"],
+            host=DB_settings["hostname"],
+            port=int(DB_settings["port"]),
+            database=DB_settings["database"]
+        )
+        logging.debug(f"[+] Connection to the internal database started")
+    except mariadb.Error as e:
+        logging.error(f"Can't connect to the internal database : {e}")
+        sys.exit(1)
+    # Edit the lhs
+    try:
+        edit_in_IDB.lhs(DB_connection, modifs, conditions)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database closed")
+    except:
+        sys.exit(1)
+
+
+def edit_honeypot_DB(DB_settings, modifs, conditions):
+    '''
+    Edit a honeypot in the internal database from its id
+
+    ARGUMENTS:
+        DB_settings (dict) : all the settings to connect to the internal database
+        modifs (dict) : dict of modifications with column:value syntax
+        conditions (dict) : dict of conditions with column:value syntax (put here the id of the honeypot we want to edit)
+    '''
+    # Connect to the database
+    try:
+        DB_connection = mariadb.connect(
+            user=DB_settings["username"],
+            password=DB_settings["password"],
+            host=DB_settings["hostname"],
+            port=int(DB_settings["port"]),
+            database=DB_settings["database"]
+        )
+        logging.debug(f"[+] Connection to the internal database started")
+    except mariadb.Error as e:
+        logging.error(f"Can't connect to the internal database : {e}")
+        sys.exit(1)
+    # Edit the honeypot
+    try:
+        edit_in_IDB.honeypot(DB_connection, modifs, conditions)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database closed")
+    except:
+        sys.exit(1)
+
+
+def edit_server_DB(DB_settings, modifs, conditions):
+    '''
+    Edit a server in the internal database from its id
+
+    ARGUMENTS:
+        DB_settings (dict) : all the settings to connect to the internal database
+        id (string) : the id of the server we want to remove in the internal database
+        modifs (dict) : dict of modifications with column:value syntax
+        conditions (dict) : dict of conditions with column:value syntax (put here the id of the server we want to edit)
+    '''
+    # Connect to the database
+    try:
+        DB_connection = mariadb.connect(
+            user=DB_settings["username"],
+            password=DB_settings["password"],
+            host=DB_settings["hostname"],
+            port=int(DB_settings["port"]),
+            database=DB_settings["database"]
+        )
+        logging.debug(f"[+] Connection to the internal database started")
+    except mariadb.Error as e:
+        logging.error(f"Can't connect to the internal database : {e}")
+        sys.exit(1)
+    # Edit the server
+    try:
+        edit_in_IDB.server(DB_connection, modifs, conditions)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database closed")
+    except:
+        sys.exit(1)
+
