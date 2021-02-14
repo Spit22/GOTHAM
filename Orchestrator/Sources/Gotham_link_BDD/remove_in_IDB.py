@@ -138,3 +138,20 @@ def link_in_link_tags_serv(DB_connection, id):
     except mariadb.Error as e:
         logging.error(f"'{id}' removal from the table 'Link_Tags_serv' failed : {e}")
         sys.exit(1)
+
+
+
+def lhs(DB_connection,id_link="%",id_hp="%",id_serv="%"):
+    # Get MariaDB cursor
+    cur = DB_connection.cursor()
+    # Execute SQL request
+    try :
+        cur.execute("DELETE FROM Link_Hp_Serv WHERE id_link LIKE ? AND id_hp LIKE ? AND id_serv LIKE ?",(id_link,id_hp,id_serv))
+        # Apply the changes
+        DB_connection.commit()
+        # Logs
+        logging.info(f"'{id}' deleted from the table 'Link_Hp_Serv'")
+    except mariadb.Error as e:
+        logging.error(f"'{id}' removal from the table 'Link_Hp_Serv' failed : {e}")
+        sys.exit(1)
+

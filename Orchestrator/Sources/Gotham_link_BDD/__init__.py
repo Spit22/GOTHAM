@@ -379,6 +379,38 @@ def remove_link_DB(DB_settings, id):
         sys.exit(1)
 
 
+def remove_lhs(DB_settings,id_link="%",id_hp="%",id_serv="%"):
+    '''
+    Remove a Link_Hp_Serv combinaison in the internal database from its id
+
+    ARGUMENTS:
+        DB_settings (dict) : all the settings to connect to the internal database
+        id_link (string) : the id of the link we want to remove in the internal database
+        id_hp (string) : the id of the hp we want to remove in the internal database
+        id_serv (string) : the id of the serv we want to remove in the internal database
+    '''
+    # Connect to the database
+    try:
+        DB_connection = mariadb.connect(
+            user=DB_settings["username"],
+            password=DB_settings["password"],
+            host=DB_settings["hostname"],
+            port=int(DB_settings["port"]),
+            database=DB_settings["database"]
+        )
+        logging.debug(f"[+] Connection to the internal database started")
+    except mariadb.Error as e:
+        logging.error(f"Can't connect to the internal database : {e}")
+        sys.exit(1)
+    # Remove the link
+    try:
+        remove_in_IDB.lhs(DB_connection,id_link,id_hp,id_serv):
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database closed")
+    except:
+        sys.exit(1)    
+
+
 ########## EDIT IN THE INTERNAL DATABASE ##########
 
 def edit_link_DB(DB_settings, modifs, conditions):
