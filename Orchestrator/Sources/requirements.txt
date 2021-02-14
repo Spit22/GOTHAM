@@ -2,3 +2,5 @@ flask
 paramiko
 scp
 mariadb
+logging
+configparser
