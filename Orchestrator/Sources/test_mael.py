@@ -62,4 +62,6 @@ print(colored("########## ########## EDIT IN IDB SECTION ########## ##########",
 #edit_lhs_DB(DB_settings, {'id_link':lk_infos['id']}, {'id_hp':'hp-1B5B3A1E32EE11EBB1F25E22FC2CA372', 'id_serv':'sv-447831E032EE11EBB6D20248FC2CA371'})
 
 
-remove_lhs(DB_settings,id_link="lk-67C82EAC340111EB85FE89F2FB2CA371")
+#remove_lhs(DB_settings,id_link="lk-67C82EAC340111EB85FE89F2FB2CA371")
+import rm_server
+rm_server.main(DB_settings, id='sv-7AE1ADA833CD11EBBB2C46E0FB2CA371')

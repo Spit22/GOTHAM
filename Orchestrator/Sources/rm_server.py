@@ -2,6 +2,9 @@ from Gotham_SSH_SCP import execute_commands
 from Gotham_normalize import normalize_server_infos, normalize_display_object_infos
 from Gotham_link_BDD import get_server_infos, remove_server_DB, edit_lhs_DB, edit_link_DB, remove_lhs
 
+import Gotham_check
+import Gotham_choose
+import configparser
 import sys
 
 # Logging components
@@ -38,7 +41,7 @@ def main(DB_settings, id='sv-00000000000000000000000000000000', ip='255.255.255.
 
             # If we can't replace, just modify link to decrease nb serv
             if not(success):
-                if serv_infos["links"][i]["link_nb_serv"]>1:
+                if int(serv_infos["links"][i]["link_nb_serv"]) > 1:
                     try:
                         remove_lhs(DB_settings,id_link=serv_infos["links"][i]["link_id"], id_serv=serv_infos["serv_id"])
                     except:
@@ -55,7 +58,8 @@ def main(DB_settings, id='sv-00000000000000000000000000000000', ip='255.255.255.
                     sys.exit(1)
     # Remove Server from the server
     try:
-        remove_nginx_on_server(result[0]['serv_ip'],result[0]['serv_ssh_port'],result[0]['serv_ssh_key'])
+        print("bypass")
+        #remove_nginx_on_server(result[0]['serv_ip'],result[0]['serv_ssh_port'],result[0]['serv_ssh_key'])
     except:
         sys.exit(1)
     # Remove Server from the IDB
@@ -88,10 +92,10 @@ def replace_server(DB_settings,serv_infos,num_link):
     link_tags_serv=tag_separator.join(link["link_tags_serv"].split("||"))
 
     # Get all servers corresponding to tags
-    servers = Gotham_check.check_tags("serv",Gotham_link_BDD.get_server_infos(db_settings, tags=link_tags_serv), tags_serv=link_tags_serv)
+    servers = Gotham_check.check_tags("serv",get_server_infos(DB_settings, tags=link_tags_serv), tags_serv=link_tags_serv)
 
     # Filter servers in those who have one of ports open
-    servers = Gotham_check.check_servers_ports_matching(servers, link["link_port"])
+    servers = Gotham_check.check_servers_ports_matching(servers, link["link_ports"])
 
     # Filter servers in error
     servers = [server for server in servers if not(server["serv_state"]=='ERROR' or link["link_id"] in server["link_id"] or server["serv_id"]==serv_infos["serv_id"])]
@@ -108,13 +112,13 @@ def replace_server(DB_settings,serv_infos,num_link):
         replacement_server=Gotham_choose.choose_servers(servers_same_port, 1, link_tags_serv)
 
         if (len(ports_used_ls)==1):
-            replacement_server["choosed_port"]=int(ports_used_ls[0])
+            replacement_server[0]["choosed_port"]=int(ports_used_ls[0])
             # Deploy new reverse-proxies's configurations on new server
             print("bypassed")
             #add_link.deploy_nginxConf(db_settings, link["link_id"], replacement_server)
 
         for hp in link["hps"]:
-            modifs={"id_serv":replacement_server["serv_id"]}
+            modifs={"id_serv":replacement_server[0]["serv_id"]}
             conditions={"id_link":link["link_id"],"id_hp":hp["hp_id"],"id_serv":serv_infos["serv_id"]}
             try:
                 edit_lhs_DB(DB_settings,modifs,conditions)
