@@ -302,10 +302,14 @@ def add_lk():
             return "Error with tags: some honeypot tags do not exists"
 
         # Get all honeypots corresponding to tags
-        honeypots = Gotham_check.check_tags("hp", Gotham_link_BDD.get_honeypot_infos(db_settings, tags=tags_hp), tags_hp=tags_hp)
+        honeypots = Gotham_link_BDD.get_honeypot_infos(db_settings, tags=tags_hp)
+        if tags_hp.lower()!="all"
+            honeypots = Gotham_check.check_tags("hp", honeypots, tags_hp=tags_hp)
 
         # Get all servers corresponding to tags
-        servers = Gotham_check.check_tags("serv",Gotham_link_BDD.get_server_infos(db_settings, tags=tags_serv), tags_serv=tags_serv)
+        servers = Gotham_link_BDD.get_server_infos(db_settings, tags=tags_serv)
+        if tags_serv.lower()!="all":
+            servers = Gotham_check.check_tags("serv",servers, tags_serv=tags_serv)
 
         # Filter servers in those who have one of ports open
         servers = Gotham_check.check_servers_ports_matching(servers, exposed_ports)
@@ -318,7 +322,7 @@ def add_lk():
             nb_srv=len(servers)
         if str(nb_hp).lower()=="all":
             nb_hp=len(honeypots)
-            
+
 
         # Checking we have enough servers for the nb_srv directive, otherwise return error
         if len(servers) < nb_srv:
