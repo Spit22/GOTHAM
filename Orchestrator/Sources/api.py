@@ -266,13 +266,19 @@ def add_lk():
         # Get all function's parameters
         try:
             # Normalize infos
-            lk_infos_received = {"nb_hp": data["nb_hp"], "nb_serv": data["nb_srv"], "tags_hp":data["tags_hp"], "tags_serv":data["tags_serv"], "ports":data["exposed_ports"]}
+            lk_infos_received = {"tags_hp":data["tags_hp"], "tags_serv":data["tags_serv"], "ports":data["exposed_ports"]}
+            
+            if str(data["nb_hp"]).lower() != "all":
+                lk_infos_received["nb_hp"]=data["nb_hp"]
+            if str(data["nb_srv"]).lower() != "all":
+                lk_infos_received["nb_serv"]=data["nb_srv"]
+                           
             lk_infos_received = Gotham_normalize.normalize_link_infos(lk_infos_received)
             # Get all function's parameters
             tags_serv = lk_infos_received["tags_serv"]
             tags_hp = lk_infos_received["tags_hp"]
-            nb_srv = lk_infos_received["nb_serv"]
-            nb_hp = lk_infos_received["nb_hp"]
+            nb_srv = lk_infos_received["nb_serv"] if "nb_serv" in lk_infos_received.keys() else data["nb_srv"]
+            nb_hp = lk_infos_received["nb_hp"] if "nb_hp" in lk_infos_received.keys() else data["nb_hp"]
             exposed_ports = lk_infos_received["ports"]
             exposed_ports_list = exposed_ports.split(ports_separator)
         except Exception as e:
@@ -307,6 +313,12 @@ def add_lk():
         servers = [server for server in servers if server["serv_state"]!='ERROR']
         # Filter honeypots in error
         honeypots = [honeypot for honeypot in honeypots if honeypot["hp_state"]!='ERROR']
+
+        if str(nb_srv).lower()=="all":
+            nb_srv=len(servers)
+        if str(nb_hp).lower()=="all":
+            nb_hp=len(honeypots)
+            
 
         # Checking we have enough servers for the nb_srv directive, otherwise return error
         if len(servers) < nb_srv:

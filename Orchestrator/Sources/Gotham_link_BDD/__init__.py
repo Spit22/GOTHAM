@@ -30,6 +30,9 @@ def get_server_infos(DB_settings, mode=False, ip="%", id="%", name="%", tags="%"
         tag (string, optional) : tag of the server whose data we want
         state (string, optional) : state of the server whose data we want
     '''
+    if tags.lower()=="all":
+        tags="%"
+
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -60,6 +63,10 @@ def get_honeypot_infos(DB_settings, mode=False, id="%", name="%", tags="%", stat
         tag (string, optional) : tag of the server whose data we want
         state (string, optional) : state of the server whose data we want
     '''
+
+    if tags.lower()=="all":
+        tags="%"
+
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -85,6 +92,13 @@ def get_link_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="%", tags
         DB_settings (dict) : all the settings to connect to the internal database
        
     '''
+
+    if tags_hp.lower()=="all":
+        tags_hp="%"
+
+    if tags_serv.lower()=="all":
+        tags_serv="%"
+
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -110,6 +124,14 @@ def get_link_hp_serv_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="
         DB_settings (dict) : all the settings to connect to the internal database
        
     '''
+
+    if tags_hp.lower()=="all":
+        tags_hp="%"
+
+    if tags_serv.lower()=="all":
+        tags_serv="%"
+
+
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -135,6 +157,13 @@ def get_link_serv_hp_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="
         DB_settings (dict) : all the settings to connect to the internal database
        
     '''
+
+    if tags_hp.lower()=="all":
+        tags_hp="%"
+
+    if tags_serv.lower()=="all":
+        tags_serv="%"
+
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -162,6 +191,11 @@ def get_tag_infos(DB_settings, mode=False, tag="%", id="%"):
         id (string, optional) : id of the tag whose data we want
         tag (string, optional) : name of the tag whose data we want
     '''
+
+    if tag.lower()=="all":
+        tag="%"
+
+
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -178,6 +212,10 @@ def get_tag_infos(DB_settings, mode=False, tag="%", id="%"):
     DB_connection.close()
     logging.debug(f"[-] Connection to the internal database closed")
     return result
+
+
+
+
 
 ########## ADD THINGS IN THE INTERNAL DATABASE ##########
 
