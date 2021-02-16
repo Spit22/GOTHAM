@@ -702,9 +702,9 @@ def ls_honeypot():
                 logging.error(f"You tried to list a honeypot that doesn't exists with the id = {id}")
                 return "Unknown id "+hp_infos_received["id"]+" for Honeypot"
         else:
-            honeypots = get_honeypot_infos(DB_settings)
+            honeypots = Gotham_link_BDD.get_honeypot_infos(DB_settings)
             if honeypots!=[]:
-                honeypots=[normalize_display_object_infos(honeypot,"hp") for honeypot in honeypots]
+                honeypots=[Gotham_normalize.normalize_display_object_infos(honeypot,"hp") for honeypot in honeypots]
                 return honeypots
             else:
                 logging.error(f"You tried to list honeypots but no one exists")
@@ -733,9 +733,9 @@ def ls_srv():
                 logging.error(f"You tried to list a server that doesn't exists with the id = {id}")
                 return "Unknown id "+serv_infos_received["id"]+" for server"
         else:
-            servers = get_server_infos(DB_settings)
+            servers = Gotham_link_BDD.get_server_infos(DB_settings)
             if servers!=[]:
-                servers=[normalize_display_object_infos(server,"serv") for server in servers]
+                servers=[Gotham_normalize.normalize_display_object_infos(server,"serv") for server in servers]
                 return servers
             else:
                 logging.error(f"You tried to list servers but no one exists")
@@ -764,9 +764,9 @@ def ls_lk():
                 logging.error(f"You tried to list a link that doesn't exists with the id = {id}")
                 return "Unknown id "+link_infos_received["id"]+" for link"
         else:
-            links = get_link_infos(DB_settings)
+            links = Gotham_link_BDD.get_link_infos(DB_settings)
             if links!=[]:
-                links=[normalize_display_object_infos(link,"link") for link in links]
+                links=[Gotham_normalize.normalize_display_object_infos(link,"link") for link in links]
                 return links
             else:
                 logging.error(f"You tried to list links but no one exists")
