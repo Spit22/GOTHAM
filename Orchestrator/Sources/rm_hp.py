@@ -4,14 +4,14 @@ import Gotham_choose
 import configparser
 import sys
 import fileinput
-
+import base64
 
 # Import GOTHAM's libs
 from Gotham_SSH_SCP import execute_commands
 from Gotham_link_BDD import remove_honeypot_DB, get_honeypot_infos, edit_lhs_DB, edit_link_DB, remove_lhs
 from Gotham_normalize import normalize_id_honeypot,normalize_honeypot_infos, normalize_display_object_infos
-from . import api
-from . import add_link
+import api
+import add_link
 
 # Logging components
 import os
@@ -32,7 +32,6 @@ def main(DB_settings, id):
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     tag_separator = config['tag']['separator']
-    port_separator = config['port']['separator']
 
     # Check id format
     try:
@@ -76,7 +75,7 @@ def main(DB_settings, id):
         else:
             # if not, just find a honeypot per link
             hp_infos=normalize_display_object_infos(result[0],"hp")
-            duplicate_hp=[]
+            duplicate_hp_list=[]
             for i in range(len(hp_infos["links"])):
                 # Try to replace
                 replaced=False
@@ -91,17 +90,17 @@ def main(DB_settings, id):
 
                 if honeypots!=[]:
                     already_duplicate_weight=int(config['hp_weight']["already_duplicate"])
-                    honeypots=[dict(hp, **{'weight':already_duplicate_weight}) if hp["hp_id"] in duplicate_hp else hp for hp in honeypots]
+                    honeypots=[dict(hp, **{'weight':already_duplicate_weight}) if hp["hp_id"] in duplicate_hp_list else hp for hp in honeypots]
                     # Choose best honeypots (the lower scored)
                     honeypots = Gotham_choose.choose_honeypots(honeypots, 1, link_tags_hp)
 
-                    if honeypots[0]["hp_id"] in duplicate_hp:
+                    if honeypots[0]["hp_id"] in duplicate_hp_list:
                         # Don't duplicate, just configure
                         honeypot=honeypots[0]
                     else:
                         # Duplicate, and configure
                         honeypot=duplicate_hp(DB_settings,honeypots)
-                        duplicate_hp.append(honeypot["hp_id"])
+                        duplicate_hp_list.append(honeypot["hp_id"])
                     try:
                         configure_honeypot_replacement(DB_settings,hp_infos,new_hp_infos=honeypot,num_link=i)
                     except:
@@ -164,10 +163,16 @@ def configure_honeypot_replacement(DB_settings,old_hp_infos,new_hp_infos={},num_
             for server in link["servs"]:
                 nginxRedirectionPath = "/data/template/"+ str(link["link_id"]) +"-"+str(server["lhs_port"])+".conf"
                 if not(nginxRedirectionPath in already_update):
-                    text_to_search="  # "+ str(old_hp_infos["hp_id"]) +"\n"+"  server "+ str(dc_ip) +":"+ str(old_hp_infos["hp_port"]) +";\n"
-                    replacement_text="  # "+ str(new_hp_infos["hp_id"]) +"\n"+"  server "+ str(dc_ip) +":"+ str(new_hp_infos["hp_port"]) +";\n"
+                    #text_to_search="  # "+ str(old_hp_infos["hp_id"]) +"\n"+"  server "+ str(dc_ip) +":"+ str(old_hp_infos["hp_port"]) +";\n"
+                    #replacement_text="  # "+ str(new_hp_infos["hp_id"]) +"\n"+"  server "+ str(dc_ip) +":"+ str(new_hp_infos["hp_port"]) +";\n"
                     with fileinput.FileInput(nginxRedirectionPath, inplace=True, backup='.bak') as file:
-                        file.replace(text_to_search, replacement_text)
+                        first_line = False
+                        for line in file:
+                            if ("  # "+ str(old_hp_infos["hp_id"])) in line:
+                                line.replace(str(old_hp_infos["hp_id"]), str(new_hp_infos["hp_id"]))
+                                first_line = True
+                            elif first_line:
+                                line.replace(str(old_hp_infos["hp_port"]), str(new_hp_infos["hp_port"]))
                     already_update.append(nginxRedirectionPath)
                 server["choosed_port"]=server["lhs_port"]
                 servers.append(server)
@@ -179,10 +184,16 @@ def configure_honeypot_replacement(DB_settings,old_hp_infos,new_hp_infos={},num_
         for server in old_hp_infos["links"][num_link]["servs"]:
             nginxRedirectionPath = "/data/template/"+ str(old_hp_infos["links"][num_link]["link_id"]) +"-"+str(server["lhs_port"])+".conf"
             if not(nginxRedirectionPath in already_update):
-                text_to_search="  # "+ str(old_hp_infos["hp_id"]) +"\n"+"  server "+ str(dc_ip) +":"+ str(old_hp_infos["hp_port"]) +";\n"
-                replacement_text="  # "+ str(new_hp_infos["hp_id"]) +"\n"+"  server "+ str(dc_ip) +":"+ str(new_hp_infos["hp_port"]) +";\n"
+                #text_to_search="  # "+ str(old_hp_infos["hp_id"]) +"\n"+"  server "+ str(dc_ip) +":"+ str(old_hp_infos["hp_port"]) +";\n"
+                #replacement_text="  # "+ str(new_hp_infos["hp_id"]) +"\n"+"  server "+ str(dc_ip) +":"+ str(new_hp_infos["hp_port"]) +";\n"
                 with fileinput.FileInput(nginxRedirectionPath, inplace=True, backup='.bak') as file:
-                    file.replace(text_to_search, replacement_text)
+                    first_line = False
+                    for line in file:
+                        if ("  # "+ str(old_hp_infos["hp_id"])) in line:
+                            line.replace(str(old_hp_infos["hp_id"]), str(new_hp_infos["hp_id"]))
+                            first_line = True
+                        elif first_line:
+                            line.replace(str(old_hp_infos["hp_port"]), str(new_hp_infos["hp_port"]))
                 already_update.append(nginxRedirectionPath)
             server["choosed_port"]=server["lhs_port"]
             servers.append(server)
@@ -195,10 +206,16 @@ def configure_honeypot_replacement(DB_settings,old_hp_infos,new_hp_infos={},num_
         for server in old_hp_infos["links"][num_link]["servs"]:
             nginxRedirectionPath = "/data/template/"+ str(old_hp_infos["links"][num_link]["link_id"]) +"-"+str(server["lhs_port"])+".conf"
             if not(nginxRedirectionPath in already_update):
-                text_to_search="  # "+ str(old_hp_infos["hp_id"]) +"\n"+"  server "+ str(dc_ip) +":"+ str(old_hp_infos["hp_port"]) +";\n"
-                replacement_text=""
+                #text_to_search="  # "+ str(old_hp_infos["hp_id"]) +"\n"+"  server "+ str(dc_ip) +":"+ str(old_hp_infos["hp_port"]) +";\n"
+                #replacement_text=""
                 with fileinput.FileInput(nginxRedirectionPath, inplace=True, backup='.bak') as file:
-                    file.replace(text_to_search, replacement_text)
+                    first_line = False
+                    for line in file:
+                        if ("  # "+ str(old_hp_infos["hp_id"])) in line:
+                            line.replace("  # "+ str(old_hp_infos["hp_id"]) +"\n", "")
+                            first_line = True
+                        elif first_line:
+                            line.replace("  server "+ str(dc_ip) +":"+ str(old_hp_infos["hp_port"]) +";\n", "")
                 already_update.append(nginxRedirectionPath)
             server["choosed_port"]=server["lhs_port"]
             servers.append(server)
@@ -208,16 +225,20 @@ def configure_honeypot_replacement(DB_settings,old_hp_infos,new_hp_infos={},num_
         sys.exit(1)
 
 
-
 def duplicate_hp(DB_settings,honeypots):
+    GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+    # Retrieve settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    tag_separator = config['tag']['separator']
     with open(honeypots[0]["hp_source"], 'r') as file:
         encoded_dockerfile = base64.b64encode(file.read().encode("ascii"))
     name = (honeypots[0]["name"]+"_Duplicat" if len(honeypots[0]["name"]+"_Duplicat")<=128 else honeypots[0]["name"][:(128-len("_Duplicat"))]+"_Duplicat")
     descr = "Duplication of "+honeypots[0]["descr"]
-    duplicate_hp_infos={"name": name,"descr": descr,"tags": honeypots[0]["tags"].remplace("||",tags_separator),"logs": honeypots[0]["logs"],"parser": honeypots[0]["parser"],"port": honeypots[0]["port"], "dockerfile": encoded_dockerfile}
+    duplicate_hp_infos={"name": name,"descr": descr,"tags": honeypots[0]["tags"].remplace("||",tag_separator),"logs": honeypots[0]["logs"],"parser": honeypots[0]["parser"],"port": honeypots[0]["port"], "dockerfile": encoded_dockerfile}
     try:
         id_hp=api.add_honeypot(duplicate_hp_infos)
     except:
         logging.error(f"Error with hp duplication : {honeypots[0]['hp_id']}")
-
-    return get_honeypot_infos(DB_settings, id=id_hp)
+    result = get_honeypot_infos(DB_settings, id=id_hp)
+    return result[0]

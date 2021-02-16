@@ -28,13 +28,17 @@ import Gotham_normalize
 
 app = flask.Flask(__name__)
 
-# Get environment variable
+# Logging components
+import os
+import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+
 
 # Cette section remplace temporairement le fichier de configuration /etc/gotham/orchestrator.conf #
 app.config["DEBUG"] = True
 version = "0.0"
-db_settings = {"username":"root", "password":"password", "hostname":"localhost", "port":"3306", "database":"GOTHAM"}
+DB_settings = {"username":"root", "password":"password", "hostname":"localhost", "port":"3306", "database":"GOTHAM"}
 dc_ports_list = range(1024,2048)
 dockerfile_storage = "/data/"
 # Path to store object's data
@@ -96,7 +100,7 @@ def add_honeypot(hp_infos_received={}):
         dc_ssh_port = config['datacenter']['ssh_port']
 
         # First find an available port to map on datacenter
-        used_ports = Gotham_check.check_used_port(db_settings)
+        used_ports = Gotham_check.check_used_port(DB_settings)
         available_ports=[port for port in dc_ports_list if not(port in used_ports)]
         if available_ports==[]:
             return "Datacenter : no port available for mapping"
@@ -130,7 +134,7 @@ def add_honeypot(hp_infos_received={}):
         # Normalize infos
         hp_infos = Gotham_normalize.normalize_honeypot_infos(hp_infos)
         # Store new hp and tags in the database
-        Gotham_link_BDD.add_honeypot_DB(db_settings, hp_infos)
+        Gotham_link_BDD.add_honeypot_DB(DB_settings, hp_infos)
 
         # If all operations succeed
         if received==True:
@@ -173,7 +177,7 @@ def add_srv():
             return "Invalid data sent "+str(e)
 
         # First check the ip not already exists in database
-        exists = Gotham_check.check_doublon_server(db_settings, ip)
+        exists = Gotham_check.check_doublon_server(DB_settings, ip)
         if exists:
             return "Provided ip already exists in database"
 
@@ -196,7 +200,7 @@ def add_srv():
         # Normalize infos
         serv_infos = Gotham_normalize.normalize_server_infos(serv_infos)
         # Store new server and tags in the internal database        
-        Gotham_link_BDD.add_server_DB(db_settings, serv_infos)
+        Gotham_link_BDD.add_server_DB(DB_settings, serv_infos)
         
 
         # If all operations succeed
@@ -217,6 +221,7 @@ def add_lk():
         config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
         ports_separator = config['port']['separator']
         tags_separator = config['tag']['separator']
+        dc_ip = config['datacenter']['ip']
 
         # Get POST data on JSON format
         data = request.get_json()
@@ -243,29 +248,29 @@ def add_lk():
             return "Invalid data sent "+str(e)
        
         # We check that no link exists with same tags, otherwise return error
-        existingLinks = Gotham_check.check_tags("link", Gotham_link_BDD.get_link_infos(db_settings, tags_hp=tags_hp, tags_serv=tags_serv), tags_hp=tags_hp, tags_serv=tags_serv, mode=True)
+        existingLinks = Gotham_check.check_tags("link", Gotham_link_BDD.get_link_infos(DB_settings, tags_hp=tags_hp, tags_serv=tags_serv), tags_hp=tags_hp, tags_serv=tags_serv, mode=True)
         if existingLinks != []:
             return "A link is already configured for this tags"
 
         # We check all provided server tags exists, otherwise return error
         try:
-            Gotham_check.check_doublon_tags(db_settings, tags_serv)
+            Gotham_check.check_doublon_tags(DB_settings, tags_serv)
         except:
             return "Error with tags: some server tags do not exists"
 
         # We check all provided hp tags exists, otherwise return error
         try:
-            Gotham_check.check_doublon_tags(db_settings, tags_hp)
+            Gotham_check.check_doublon_tags(DB_settings, tags_hp)
         except:
             return "Error with tags: some honeypot tags do not exists"
 
         # Get all honeypots corresponding to tags
-        honeypots = Gotham_link_BDD.get_honeypot_infos(db_settings, tags=tags_hp)
-        if tags_hp.lower()!="all"
+        honeypots = Gotham_link_BDD.get_honeypot_infos(DB_settings, tags=tags_hp)
+        if tags_hp.lower()!="all":
             honeypots = Gotham_check.check_tags("hp", honeypots, tags_hp=tags_hp)
 
         # Get all servers corresponding to tags
-        servers = Gotham_link_BDD.get_server_infos(db_settings, tags=tags_serv)
+        servers = Gotham_link_BDD.get_server_infos(DB_settings, tags=tags_serv)
         if tags_serv.lower()!="all":
             servers = Gotham_check.check_tags("serv",servers, tags_serv=tags_serv)
 
@@ -307,7 +312,7 @@ def add_lk():
                 except:
                     return "Error with hp duplication"
             for id in added_hp:
-                honeypots.append(Gotham_link_BDD.get_honeypot_infos(db_settings, id=id))
+                honeypots.append(Gotham_link_BDD.get_honeypot_infos(DB_settings, id=id))
 
         # Choose best servers (the lower scored)
         servers = Gotham_choose.choose_servers(servers, nb_srv, tags_serv)
@@ -338,11 +343,11 @@ def add_lk():
 
         # Generate NGINX configurations for each redirection on a specific exposed_port
         for exposed_port in final_exposed_ports:
-            add_link.generate_nginxConf(db_settings, id, dc_ip, honeypots, exposed_port)
+            add_link.generate_nginxConf(DB_settings, id, dc_ip, honeypots, exposed_port)
 
         # Deploy new reverse-proxies's configurations on servers
         print("bypassed")
-        #add_link.deploy_nginxConf(db_settings, id, servers)
+        #add_link.deploy_nginxConf(DB_settings, id, servers)
 
         # Check redirection is effective on all servers
         for server in servers:
@@ -356,7 +361,7 @@ def add_lk():
         # Normalize infos
         lk_infos = Gotham_normalize.normalize_link_infos(lk_infos)
         # Store new link and tags in the internal database        
-        Gotham_link_BDD.add_link_DB(db_settings, lk_infos)
+        Gotham_link_BDD.add_link_DB(DB_settings, lk_infos)
         # Insert data in Link_Hp_Serv
         for server in servers:
             for honeypot in honeypots:
@@ -365,7 +370,7 @@ def add_lk():
                 # Normalize infos
                 lhs_infos = Gotham_normalize.normalize_lhs_infos(lhs_infos)
                 # Store new link and tags in the internal database        
-                Gotham_link_BDD.add_lhs_DB(db_settings, lhs_infos)
+                Gotham_link_BDD.add_lhs_DB(DB_settings, lhs_infos)
 
         return "OK : "+str(id)
 
@@ -393,17 +398,17 @@ def edit_honeypot():
             hp_infos_received["id"] = data["id"]
         else:
             return "Need to specify an honeypot id"
-        if name in data.keys():
+        if "name" in data.keys():
             hp_infos_received["name"] = data["name"]
-        if descr in data.keys():
+        if "descr" in data.keys():
             hp_infos_received["descr"] = data["descr"]
-        if tags in data.keys():
+        if "tags" in data.keys():
             hp_infos_received["tags"] = data["tags"]
-        if logs in data.keys():
+        if "logs" in data.keys():
             hp_infos_received["logs"] = data["logs"]
-        if parser in data.keys():
+        if "parser" in data.keys():
             hp_infos_received["parser"] = data["parser"]
-        if port in data.keys():
+        if "port" in data.keys():
             hp_infos_received["port"] = data["port"]
 
         try:
@@ -413,40 +418,40 @@ def edit_honeypot():
             return "Invalid data sent "+str(e)
 
         # Check if the honyepot exists in the IDB
-        honeypots = get_honeypot_infos(DB_settings, id=hp_infos_received["id"])
+        honeypots = Gotham_link_BDD.get_honeypot_infos(DB_settings, id=hp_infos_received["id"])
         if honeypots == []:
             logging.error(f"You tried to edit a honeypot that doesn't exists with the id = {id}")
             return "Unknown id "+hp_infos_received["id"]+" for Honeypot"
         honeypot= honeypots[0]
         modifs={}
         conditions={"id":honeypot["hp_id"]}
-        if name in hp_infos_received.keys():
+        if "name" in hp_infos_received.keys():
             if hp_infos_received["name"]!= honeypot["hp_name"]:
                 modifs["name"]=hp_infos_received["name"]
-        if descr in hp_infos_received.keys():
+        if "descr" in hp_infos_received.keys():
             if hp_infos_received["descr"]!= honeypot["hp_descr"]:
                 modifs["descr"]=hp_infos_received["descr"]
-        if tags in hp_infos_received.keys():
+        if "tags" in hp_infos_received.keys():
             if hp_infos_received["tags"]!= honeypot["hp_tags"]:
                 return "Edit tags not IMPLEMENTED"
                 modifs["tags"]=hp_infos_received["tags"]
-        if logs in hp_infos_received.keys():
+        if "logs" in hp_infos_received.keys():
             if hp_infos_received["logs"]!= honeypot["hp_logs"]:
                 return "Edit logs not IMPLEMENTED"
                 modifs["logs"]=hp_infos_received["logs"]
-        if parser in hp_infos_received.keys():
+        if "parser" in hp_infos_received.keys():
             if hp_infos_received["parser"]!= honeypot["hp_parser"]:
                 return "Edit parser not IMPLEMENTED"
                 modifs["parser"]=hp_infos_received["parser"]
-        if port in hp_infos_received.keys():
+        if "port" in hp_infos_received.keys():
             if hp_infos_received["port"]!= honeypot["hp_port"]:
                 return "Edit port not IMPLEMENTED"
                 modifs["port"]=hp_infos_received["port"]
         if modifs != {}:
-            edit_honeypot_DB(DB_settings, modifs, conditions)
+            Gotham_link_BDD.edit_honeypot_DB(DB_settings, modifs, conditions)
 
-            honeypots = get_honeypot_infos(DB_settings, id=hp_infos_received["id"])
-            honeypot=normalize_display_object_infos(honeypots[0],"hp")
+            honeypots = Gotham_link_BDD.get_honeypot_infos(DB_settings, id=hp_infos_received["id"])
+            honeypot=Gotham_normalize.normalize_display_object_infos(honeypots[0],"hp")
 
             return honeypot
         return "Nothing to change"
@@ -475,17 +480,17 @@ def edit_srv():
             serv_infos_received["id"] = data["id"]
         else:
             return "Need to specify a server id"
-        if name in data.keys():
+        if "name" in data.keys():
             serv_infos_received["name"] = data["name"]
-        if descr in data.keys():
+        if "descr" in data.keys():
             serv_infos_received["descr"] = data["descr"]
-        if tags in data.keys():
+        if "tags" in data.keys():
             serv_infos_received["tags"] = data["tags"]
-        if ip in data.keys():
+        if "ip" in data.keys():
             serv_infos_received["ip"] = data["ip"]
-        if ssh_key in data.keys():
+        if "ssh_key" in data.keys():
             serv_infos_received["ssh_key"] = data["ssh_key"]
-        if ssh_port in data.keys():
+        if "ssh_port" in data.keys():
             serv_infos_received["ssh_port"] = data["ssh_port"]
 
         try:
@@ -495,40 +500,40 @@ def edit_srv():
             return "Invalid data sent "+str(e)
 
         # Check if the honyepot exists in the IDB
-        servers = get_server_infos(DB_settings, id=serv_infos_received["id"])
+        servers = Gotham_link_BDD.get_server_infos(DB_settings, id=serv_infos_received["id"])
         if servers == []:
             logging.error(f"You tried to edit a server that doesn't exists with the id = {id}")
             return "Unknown id "+serv_infos_received["id"]+" for server"
         server= servers[0]
         modifs={}
         conditions={"id":server["serv_id"]}
-        if name in serv_infos_received.keys():
+        if "name" in serv_infos_received.keys():
             if serv_infos_received["name"]!= server["serv_name"]:
                 modifs["name"]=serv_infos_received["name"]
-        if descr in serv_infos_received.keys():
+        if "descr" in serv_infos_received.keys():
             if serv_infos_received["descr"]!= server["serv_descr"]:
                 modifs["descr"]=serv_infos_received["descr"]
-        if tags in serv_infos_received.keys():
+        if "tags" in serv_infos_received.keys():
             if serv_infos_received["tags"]!= server["serv_tags"]:
                 return "Edit tags not IMPLEMENTED"
                 modifs["tags"]=serv_infos_received["tags"]
-        if ip in serv_infos_received.keys():
+        if "ip" in serv_infos_received.keys():
             if serv_infos_received["ip"]!= server["serv_ip"]:
                 return "Edit ip not IMPLEMENTED"
                 modifs["ip"]=serv_infos_received["ip"]
-        if ssh_key in serv_infos_received.keys():
+        if "ssh_key" in serv_infos_received.keys():
             if serv_infos_received["ssh_key"]!= server["serv_ssh_key"]:
                 return "Edit ssh_key not IMPLEMENTED"
                 modifs["ssh_key"]=serv_infos_received["ssh_key"]
-        if ssh_port in serv_infos_received.keys():
+        if "ssh_port" in serv_infos_received.keys():
             if serv_infos_received["ssh_port"]!= server["serv_ssh_port"]:
                 return "Edit ssh_port not IMPLEMENTED"
                 modifs["ssh_port"]=serv_infos_received["ssh_port"]
         if modifs != {}:
-            edit_server_DB(DB_settings, modifs, conditions)
+            Gotham_link_BDD.edit_server_DB(DB_settings, modifs, conditions)
 
-            servers = get_server_infos(DB_settings, id=serv_infos_received["id"])
-            server=normalize_display_object_infos(servers[0],"serv")
+            servers = Gotham_link_BDD.get_server_infos(DB_settings, id=serv_infos_received["id"])
+            server = Gotham_normalize.normalize_display_object_infos(servers[0],"serv")
 
             return server
         return "Nothing to change"
@@ -556,15 +561,15 @@ def edit_lk():
             link_infos_received["id"] = data["id"]
         else:
             return "Need to specify a link id"
-        if tag_srv in data.keys():
+        if "tag_srv" in data.keys():
             link_infos_received["tag_srv"] = data["tag_srv"]
-        if tag_hp in data.keys():
+        if "tag_hp" in data.keys():
             link_infos_received["tag_hp"] = data["tag_hp"]
-        if nb_srv in data.keys():
+        if "nb_srv" in data.keys():
             link_infos_received["nb_srv"] = data["nb_srv"]
-        if nb_hp in data.keys():
+        if "nb_hp" in data.keys():
             link_infos_received["nb_hp"] = data["nb_hp"]
-        if ports in data.keys():
+        if "ports" in data.keys():
             link_infos_received["ports"] = data["ports"]
         
         try:
@@ -574,39 +579,39 @@ def edit_lk():
             return "Invalid data sent "+str(e)
 
         # Check if the link exists in the IDB
-        links = get_link_infos(DB_settings, id=link_infos_received["id"])
+        links = Gotham_link_BDD.get_link_infos(DB_settings, id=link_infos_received["id"])
         if links == []:
             logging.error(f"You tried to edit a link that doesn't exists with the id = {id}")
             return "Unknown id "+link_infos_received["id"]+" for link"
         link= links[0]
         modifs={}
         conditions={"id":link["link_id"]}
-        if tag_srv in link_infos_received.keys():
+        if "tag_srv" in link_infos_received.keys():
             if link_infos_received["tag_srv"]!= link["link_tag_srv"]:
                 return "Edit tag_srv not IMPLEMENTED"
                 modifs["tag_srv"]=link_infos_received["tag_srv"]
-        if tag_hp in link_infos_received.keys():
+        if "tag_hp" in link_infos_received.keys():
             if link_infos_received["tag_hp"]!= link["link_tag_hp"]:
                 return "Edit tag_hp not IMPLEMENTED"
                 modifs["tag_hp"]=link_infos_received["tag_hp"]
-        if nb_srv in link_infos_received.keys():
+        if "nb_srv" in link_infos_received.keys():
             if link_infos_received["nb_srv"]!= link["link_nb_serv"]:
                 return "Edit nb_srv not IMPLEMENTED"
                 modifs["nb_serv"]=link_infos_received["nb_srv"]
-        if nb_hp in link_infos_received.keys():
+        if "nb_hp" in link_infos_received.keys():
             if link_infos_received["nb_hp"]!= link["link_nb_hp"]:
                 return "Edit nb_hp not IMPLEMENTED"
                 modifs["nb_hp"]=link_infos_received["nb_hp"]
-        if ports in link_infos_received.keys():
+        if "ports" in link_infos_received.keys():
             if link_infos_received["ports"]!= link["link_ports"]:
                 return "Edit ports not IMPLEMENTED"
                 modifs["ports"]=link_infos_received["ports"]
         
         if modifs != {}:
-            edit_link_DB(DB_settings, modifs, conditions)
+            Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
 
-            links = get_link_infos(DB_settings, id=link_infos_received["id"])
-            link=normalize_display_object_infos(links[0],"link")
+            links = Gotham_link_BDD.get_link_infos(DB_settings, id=link_infos_received["id"])
+            link = Gotham_normalize.normalize_display_object_infos(links[0],"link")
 
             return link
         return "Nothing to change"
@@ -627,7 +632,7 @@ def rm_honeypot():
         id = data["id"]
 
         try:
-            rm_hp.main(db_settings, id)
+            rm_hp.main(DB_settings, id)
         except:
             return "An error occured during the deletion of the honeypot"
         return "Deletion completed : " + str(id)
@@ -648,7 +653,7 @@ def rm_srv():
         id = data["id"]
         ##### ADD ABILITY TO DELETE WITH IP ######
         try:
-            rm_server.main(db_settings, id=id)
+            rm_server.main(DB_settings, id=id)
         except:
             return "An error occured during the deletion of the server"
         return "Deletion completed : " + str(id)
@@ -669,7 +674,7 @@ def rm_lk():
         id = data["id"]
 
         try:
-            rm_link.main(db_settings, id=id)
+            rm_link.main(DB_settings, id=id)
         except:
             return "An error occured during the deletion of the link"
         return "Deletion completed : " + str(id)
@@ -680,6 +685,8 @@ def ls_honeypot():
         # 
         # id (string) : id du honeypot à afficher
 
+        hp_infos_received={}
+
         if (id):
             hp_infos_received["id"] = id
             try:
@@ -687,13 +694,13 @@ def ls_honeypot():
                 hp_infos_received = Gotham_normalize.normalize_honeypot_infos(hp_infos_received)            
             except Exception as e:
                 return "Invalid data sent "+str(e)
-            honeypots = get_honeypot_infos(DB_settings, id=hp_infos_received["id"])
+            honeypots = Gotham_link_BDD.get_honeypot_infos(DB_settings, id=hp_infos_received["id"])
             if honeypots!=[]:
-                honeypot=normalize_display_object_infos(honeypots[0],"hp")
+                honeypot = Gotham_normalize.normalize_display_object_infos(honeypots[0],"hp")
                 return honeypot
             else:
                 logging.error(f"You tried to edit a honeypot that doesn't exists with the id = {id}")
-                return "Unknown id "+hp_infos_received["id"]+" for Honeypot"
+                return "Unknown id " + hp_infos_received["id"]+" for Honeypot"
 
         return "NOT IMPLEMENTED"
 
@@ -703,6 +710,8 @@ def ls_srv():
         # 
         # id (string) : id du serveur à afficher
 
+        serv_infos_received = {}
+
         if (id):
             serv_infos_received["id"] = id
             try:
@@ -710,9 +719,9 @@ def ls_srv():
                 serv_infos_received = Gotham_normalize.normalize_server_infos(serv_infos_received)            
             except Exception as e:
                 return "Invalid data sent "+str(e)
-            servers = get_server_infos(DB_settings, id=serv_infos_received["id"])
+            servers = Gotham_link_BDD.get_server_infos(DB_settings, id=serv_infos_received["id"])
             if servers!=[]:
-                server=normalize_display_object_infos(servers[0],"serv")
+                server = Gotham_normalize.normalize_display_object_infos(servers[0],"serv")
                 return server
             else:
                 logging.error(f"You tried to edit a server that doesn't exists with the id = {id}")
@@ -727,6 +736,8 @@ def ls_lk():
         #
         # id (string) : id du lien à afficher
 
+        link_infos_received = {}
+
         if (id):
             link_infos_received["id"] = id
             try:
@@ -734,9 +745,9 @@ def ls_lk():
                 link_infos_received = Gotham_normalize.normalize_link_infos(link_infos_received)            
             except Exception as e:
                 return "Invalid data sent "+str(e)
-            links = get_link_infos(DB_settings, id=link_infos_received["id"])
+            links = Gotham_link_BDD.get_link_infos(DB_settings, id=link_infos_received["id"])
             if links!=[]:
-                link=normalize_display_object_infos(links[0],"link")
+                link = Gotham_normalize.normalize_display_object_infos(links[0],"link")
                 return link
             else:
                 logging.error(f"You tried to edit a link that doesn't exists with the id = {id}")

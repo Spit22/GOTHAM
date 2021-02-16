@@ -43,20 +43,8 @@ except:
 print(normalize_display_object_infos(infos[0], "serv", next_type=''))
 '''
 
-from Gotham_link_BDD import remove_lhs, edit_lhs_DB
-
-server_infos = {'id':'sv-66623F6F323F38F42d656DF861566999','name':'serveur-test-edit-idb','descr':'blabla','tags':'TestEDIT','ip':'42.42.45.33','ssh_key':'non','ssh_port':'22','state':'ERROR'}
-lk_infos = {"id":"lk-666B3AFE3FEE1FEFB1D25E22FC2CA999", "nb_hp": 4, "nb_serv": 2, "tags_hp":"SSH", "tags_serv":"France, Europe", 'ports':'22,186,658'}
-honeypot_infos = {"id":"hp-666B3AFE32EE71EFB1D25EFFFC2CA999", 'name':'hp-test-6','tags':'TesTag666,Tess', 'port':22,'parser':'TO_ADD','logs':'TO_ADD','source':"TO_ADD", "port_container":22,'state':'UNUSED'}
-'''
-try:
-    add_server_DB(DB_settings, server_infos)
-    add_honeypot_DB(DB_settings, honeypot_infos)
-    add_link_DB(DB_settings, lk_infos)
-except:
-    print("ADD KO")
-'''
-print(colored("########## ########## EDIT IN IDB SECTION ########## ##########", 'blue'))
+from Gotham_link_BDD import add_server_DB, add_honeypot_DB, add_link_DB
+#print(colored("########## ########## EDIT IN IDB SECTION ########## ##########", 'blue'))
 #edit_lhs_DB(DB_settings, {'id_serv':server_infos['id']}, {'id_link':'lk-67C82EAC340111EB85FE89F2FB2CA371'})
 #edit_lhs_DB(DB_settings, {'id_hp':honeypot_infos['id']}, {'id_link':'lk-4AAB119A340111EB84D6D6F0FB2CA371', 'id_serv':'sv-72D25FB833CD11EBAED4A458FC2CA371'})
 #edit_lhs_DB(DB_settings, {'id_link':lk_infos['id']}, {'id_hp':'hp-1B5B3A1E32EE11EBB1F25E22FC2CA372', 'id_serv':'sv-447831E032EE11EBB6D20248FC2CA371'})
@@ -64,4 +52,26 @@ print(colored("########## ########## EDIT IN IDB SECTION ########## ##########",
 
 #remove_lhs(DB_settings,id_link="lk-67C82EAC340111EB85FE89F2FB2CA371")
 import rm_server
-rm_server.main(DB_settings, id='sv-7AE1ADA833CD11EBBB2C46E0FB2CA371')
+#import rm_hp
+import rm_link
+
+import add_server
+import add_hp
+import add_link
+
+server_infos = {'id':'sv-66623F6F323F38F42d656DF861566999','name':'serveur-test-edit-idb','descr':'blabla','tags':'TagTag,France,TagParticulier','ip':'42.42.22.22','ssh_key':'non','ssh_port':'22','state':'UNUSED'}
+
+honeypot_infos = {"id":"hp-666B3AFE32EE71EFB1D25EFFFC2CA999", 'name':'hp-test-6','tags':'TesTag666,Tess', 'port':22,'parser':'TO_ADD','logs':'TO_ADD','source':"TO_ADD", "port_container":22,'state':'UNUSED'}
+
+
+lk_infos1 = {"id":"lk-111B3AFE3FEE1FEFB1D25E22FC2CA999", "nb_hp": 2, "nb_serv": 1, "tags_hp":"SSH", "tags_serv":"TagParticulier", 'ports':'22,186,658'}
+lk_infos2 = {"id":"lk-222B3AFE3FEE1FEFB1D25E22FC2CA999", "nb_hp": 2, "nb_serv": 6, "tags_hp":"Apache", "tags_serv":"France", 'ports':'22,186,658'}
+lk_infos3 = {"id":"lk-333B3AFE3FEE1FEFB1D25E22FC2CA999", "nb_hp": 2, "nb_serv": 2, "tags_hp":"DNS", "tags_serv":"TagTag", 'ports':'22,186,658'}
+
+
+print(colored("########## ########## RM SERVER ########## ##########", 'blue'))
+add_server_DB(DB_settings, server_infos)
+add_link_DB(DB_settings, lk_infos1)
+add_link_DB(DB_settings, lk_infos2)
+add_link_DB(DB_settings, lk_infos3)
+#rm_server.main(DB_settings, id='sv-66623F6F323F38F42d656DF861566999')

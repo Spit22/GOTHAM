@@ -21,14 +21,14 @@ def choose_honeypots(hps_infos, nb_hp, tags_hp):
 		tags_hp (string) : Honeypot tags mentioned in the link
 	'''
 	GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-    # Retrieve settings from config file
-    config = configparser.ConfigParser()
-    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
-        
-    base_weight=int(config['weight_base']["hp"])
+	# Retrieve settings from config file
+	config = configparser.ConfigParser()
+	config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+		
+	base_weight=int(config['weight_base']["hp"])
 
-    weighted_hps_infos=[]
-    for hp_infos in hps_infos
+	weighted_hps_infos=[]
+	for hp_infos in hps_infos:
 		if not('weight' in hp_infos.keys()):
 			weighted_hps_infos.append(dict(hp_infos, **{'weight':base_weight}))
 		else:
@@ -59,14 +59,14 @@ def choose_servers(servs_infos, nb_serv, tags_serv):
 		tags_serv (string) : server tags mentioned in the link
 	'''
 	GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-    # Retrieve settings from config file
-    config = configparser.ConfigParser()
-    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
-        
-    base_weight=int(config['weight_base']["serv"])
+	# Retrieve settings from config file
+	config = configparser.ConfigParser()
+	config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+		
+	base_weight=int(config['weight_base']["serv"])
 
 	weighted_servs_infos=[]
-    for serv_infos in servs_infos
+	for serv_infos in servs_infos:
 		if not('weight' in serv_infos.keys()):
 			weighted_servs_infos.append(dict(serv_infos, **{'weight':base_weight}))
 		else:
