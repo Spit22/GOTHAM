@@ -421,6 +421,7 @@ def edit_honeypot():
         # tags (list) : liste des tags du honeypot
         # logs (string) : path des logs à monitorer
         # parser (string) : règle de parsing des logs monitorés
+        # service_port (int) : port on which the honeypot will lcoally listen
 
         # Get POST data on JSON format
         data = request.json
@@ -428,14 +429,69 @@ def edit_honeypot():
         # Make sure all data are in JSON
         data = json.loads(data)
 
+        hp_infos_received={}
         # Get all function's parameters
-        id = data["id"]
-        name = data["name"]
-        descr = data["descr"]
-        tags = data["tags"]
-        logs = data["parser"]
+        if id in data.keys():
+            hp_infos_received["id"] = data["id"]
+        else:
+            return "Need to specify an honeypot id"
+        if name in data.keys():
+            hp_infos_received["name"] = data["name"]
+        if descr in data.keys():
+            hp_infos_received["descr"] = data["descr"]
+        if tags in data.keys():
+            hp_infos_received["tags"] = data["tags"]
+        if logs in data.keys():
+            hp_infos_received["logs"] = data["logs"]
+        if parser in data.keys():
+            hp_infos_received["parser"] = data["parser"]
+        if port in data.keys():
+            hp_infos_received["port"] = data["port"]
 
-        return "NOT IMPLEMENTED"
+        try:
+            # Normalize infos
+            hp_infos_received = Gotham_normalize.normalize_honeypot_infos(hp_infos_received)            
+        except Exception as e:
+            return "Invalid data sent "+str(e)
+
+        # Check if the honyepot exists in the IDB
+        honeypots = get_honeypot_infos(DB_settings, id=hp_infos_received["id"])
+        if honeypots == []:
+            logging.error(f"You tried to edit a honeypot that doesn't exists with the id = {id}")
+            return "Unknown id "+hp_infos_received["id"]+" for Honeypot"
+        honeypot= honeypots[0]
+        modifs={}
+        conditions={"id":honeypot["hp_id"]}
+        if name in hp_infos_received.keys():
+            if hp_infos_received["name"]!= honeypot["hp_name"]:
+                modifs["name"]=hp_infos_received["name"]
+        if descr in hp_infos_received.keys():
+            if hp_infos_received["descr"]!= honeypot["hp_descr"]:
+                modifs["descr"]=hp_infos_received["descr"]
+        if tags in hp_infos_received.keys():
+            if hp_infos_received["tags"]!= honeypot["hp_tags"]:
+                return "Edit tags not IMPLEMENTED"
+                modifs["tags"]=hp_infos_received["tags"]
+        if logs in hp_infos_received.keys():
+            if hp_infos_received["logs"]!= honeypot["hp_logs"]:
+                return "Edit logs not IMPLEMENTED"
+                modifs["logs"]=hp_infos_received["logs"]
+        if parser in hp_infos_received.keys():
+            if hp_infos_received["parser"]!= honeypot["hp_parser"]:
+                return "Edit parser not IMPLEMENTED"
+                modifs["parser"]=hp_infos_received["parser"]
+        if port in hp_infos_received.keys():
+            if hp_infos_received["port"]!= honeypot["hp_port"]:
+                return "Edit port not IMPLEMENTED"
+                modifs["port"]=hp_infos_received["port"]
+        if modifs != {}:
+            edit_honeypot_DB(DB_settings, modifs, conditions)
+
+            honeypots = get_honeypot_infos(DB_settings, id=hp_infos_received["id"])
+            honeypot=normalize_display_object_infos(honeypots[0],"hp")
+
+            return honeypot
+        return "Nothing to change"
 
 @app.route('/edit/server', methods=['POST'])
 def edit_srv():
@@ -455,16 +511,69 @@ def edit_srv():
         # Make sure all data are in JSON
         data = json.loads(data)
 
+        serv_infos_received={}
         # Get all function's parameters
-        id = data["id"]
-        name = data["name"]
-        descr = data["descr"]
-        tags = data["tags"]
-        ip = data["ip"]
-        ssh_key = data["ssh_key"]
-        ssh_port = data["ssh_port"]
+        if id in data.keys():
+            serv_infos_received["id"] = data["id"]
+        else:
+            return "Need to specify a server id"
+        if name in data.keys():
+            serv_infos_received["name"] = data["name"]
+        if descr in data.keys():
+            serv_infos_received["descr"] = data["descr"]
+        if tags in data.keys():
+            serv_infos_received["tags"] = data["tags"]
+        if ip in data.keys():
+            serv_infos_received["ip"] = data["ip"]
+        if ssh_key in data.keys():
+            serv_infos_received["ssh_key"] = data["ssh_key"]
+        if ssh_port in data.keys():
+            serv_infos_received["ssh_port"] = data["ssh_port"]
 
-        return "NOT IMPLEMENTED"
+        try:
+            # Normalize infos
+            serv_infos_received = Gotham_normalize.normalize_server_infos(serv_infos_received)            
+        except Exception as e:
+            return "Invalid data sent "+str(e)
+
+        # Check if the honyepot exists in the IDB
+        servers = get_server_infos(DB_settings, id=serv_infos_received["id"])
+        if servers == []:
+            logging.error(f"You tried to edit a server that doesn't exists with the id = {id}")
+            return "Unknown id "+serv_infos_received["id"]+" for server"
+        server= servers[0]
+        modifs={}
+        conditions={"id":server["serv_id"]}
+        if name in serv_infos_received.keys():
+            if serv_infos_received["name"]!= server["serv_name"]:
+                modifs["name"]=serv_infos_received["name"]
+        if descr in serv_infos_received.keys():
+            if serv_infos_received["descr"]!= server["serv_descr"]:
+                modifs["descr"]=serv_infos_received["descr"]
+        if tags in serv_infos_received.keys():
+            if serv_infos_received["tags"]!= server["serv_tags"]:
+                return "Edit tags not IMPLEMENTED"
+                modifs["tags"]=serv_infos_received["tags"]
+        if ip in serv_infos_received.keys():
+            if serv_infos_received["ip"]!= server["serv_ip"]:
+                return "Edit ip not IMPLEMENTED"
+                modifs["ip"]=serv_infos_received["ip"]
+        if ssh_key in serv_infos_received.keys():
+            if serv_infos_received["ssh_key"]!= server["serv_ssh_key"]:
+                return "Edit ssh_key not IMPLEMENTED"
+                modifs["ssh_key"]=serv_infos_received["ssh_key"]
+        if ssh_port in serv_infos_received.keys():
+            if serv_infos_received["ssh_port"]!= server["serv_ssh_port"]:
+                return "Edit ssh_port not IMPLEMENTED"
+                modifs["ssh_port"]=serv_infos_received["ssh_port"]
+        if modifs != {}:
+            edit_server_DB(DB_settings, modifs, conditions)
+
+            servers = get_server_infos(DB_settings, id=serv_infos_received["id"])
+            server=normalize_display_object_infos(servers[0],"serv")
+
+            return server
+        return "Nothing to change"
 
 @app.route('/edit/link', methods=['POST'])
 def edit_lk():
@@ -475,6 +584,7 @@ def edit_lk():
         # tag_hp (list) : tag du/des hp ciblés
         # nb_srv (int) : nombre de serveurs ciblés
         # nb_hp (int) : nombre de hp ciblés
+        # ports (string) : exposed ports
 
         # Get POST data on JSON format
         data = request.json
@@ -482,14 +592,66 @@ def edit_lk():
         # Make sure all data are in JSON
         data = json.loads(data)
 
+        link_infos_received={}
         # Get all function's parameters
-        id = data["id"]
-        tag_srv = data["tag_srv"]
-        tag_hp = data["tag_hp"]
-        nb_srv = data["nb_srv"]
-        nb_hp = data["nb_hp"]
+        if id in data.keys():
+            link_infos_received["id"] = data["id"]
+        else:
+            return "Need to specify a link id"
+        if tag_srv in data.keys():
+            link_infos_received["tag_srv"] = data["tag_srv"]
+        if tag_hp in data.keys():
+            link_infos_received["tag_hp"] = data["tag_hp"]
+        if nb_srv in data.keys():
+            link_infos_received["nb_srv"] = data["nb_srv"]
+        if nb_hp in data.keys():
+            link_infos_received["nb_hp"] = data["nb_hp"]
+        if ports in data.keys():
+            link_infos_received["ports"] = data["ports"]
+        
+        try:
+            # Normalize infos
+            link_infos_received = Gotham_normalize.normalize_link_infos(link_infos_received)            
+        except Exception as e:
+            return "Invalid data sent "+str(e)
 
-        return "NOT IMPLEMENTED"
+        # Check if the link exists in the IDB
+        links = get_link_infos(DB_settings, id=link_infos_received["id"])
+        if links == []:
+            logging.error(f"You tried to edit a link that doesn't exists with the id = {id}")
+            return "Unknown id "+link_infos_received["id"]+" for link"
+        link= links[0]
+        modifs={}
+        conditions={"id":link["link_id"]}
+        if tag_srv in link_infos_received.keys():
+            if link_infos_received["tag_srv"]!= link["link_tag_srv"]:
+                return "Edit tag_srv not IMPLEMENTED"
+                modifs["tag_srv"]=link_infos_received["tag_srv"]
+        if tag_hp in link_infos_received.keys():
+            if link_infos_received["tag_hp"]!= link["link_tag_hp"]:
+                return "Edit tag_hp not IMPLEMENTED"
+                modifs["tag_hp"]=link_infos_received["tag_hp"]
+        if nb_srv in link_infos_received.keys():
+            if link_infos_received["nb_srv"]!= link["link_nb_serv"]:
+                return "Edit nb_srv not IMPLEMENTED"
+                modifs["nb_serv"]=link_infos_received["nb_srv"]
+        if nb_hp in link_infos_received.keys():
+            if link_infos_received["nb_hp"]!= link["link_nb_hp"]:
+                return "Edit nb_hp not IMPLEMENTED"
+                modifs["nb_hp"]=link_infos_received["nb_hp"]
+        if ports in link_infos_received.keys():
+            if link_infos_received["ports"]!= link["link_ports"]:
+                return "Edit ports not IMPLEMENTED"
+                modifs["ports"]=link_infos_received["ports"]
+        
+        if modifs != {}:
+            edit_link_DB(DB_settings, modifs, conditions)
+
+            links = get_link_infos(DB_settings, id=link_infos_received["id"])
+            link=normalize_display_object_infos(links[0],"link")
+
+            return link
+        return "Nothing to change"
 
 @app.route('/delete/honeypot', methods=['POST'])
 def rm_honeypot():
@@ -561,7 +723,19 @@ def ls_honeypot():
         # id (string) : id du honeypot à afficher
 
         if (id):
-            return "/info like, NOT IMPLEMENTED"
+            hp_infos_received["id"] = id
+            try:
+                # Normalize infos
+                hp_infos_received = Gotham_normalize.normalize_honeypot_infos(hp_infos_received)            
+            except Exception as e:
+                return "Invalid data sent "+str(e)
+            honeypots = get_honeypot_infos(DB_settings, id=hp_infos_received["id"])
+            if honeypots!=[]:
+                honeypot=normalize_display_object_infos(honeypots[0],"hp")
+                return honeypot
+            else:
+                logging.error(f"You tried to edit a honeypot that doesn't exists with the id = {id}")
+                return "Unknown id "+hp_infos_received["id"]+" for Honeypot"
 
         return "NOT IMPLEMENTED"
 
@@ -572,8 +746,19 @@ def ls_srv():
         # id (string) : id du serveur à afficher
 
         if (id):
-            return "/info like, NOT IMPLEMENTED"
-
+            serv_infos_received["id"] = id
+            try:
+                # Normalize infos
+                serv_infos_received = Gotham_normalize.normalize_server_infos(serv_infos_received)            
+            except Exception as e:
+                return "Invalid data sent "+str(e)
+            servers = get_server_infos(DB_settings, id=serv_infos_received["id"])
+            if servers!=[]:
+                server=normalize_display_object_infos(servers[0],"serv")
+                return server
+            else:
+                logging.error(f"You tried to edit a server that doesn't exists with the id = {id}")
+                return "Unknown id "+serv_infos_received["id"]+" for server"
 
         return "NOT IMPLEMENTED"
 
@@ -585,8 +770,19 @@ def ls_lk():
         # id (string) : id du lien à afficher
 
         if (id):
-            return "/info like, NOT IMPLEMENTED"
-
+            link_infos_received["id"] = id
+            try:
+                # Normalize infos
+                link_infos_received = Gotham_normalize.normalize_link_infos(link_infos_received)            
+            except Exception as e:
+                return "Invalid data sent "+str(e)
+            links = get_link_infos(DB_settings, id=link_infos_received["id"])
+            if links!=[]:
+                link=normalize_display_object_infos(links[0],"link")
+                return link
+            else:
+                logging.error(f"You tried to edit a link that doesn't exists with the id = {id}")
+                return "Unknown id "+link_infos_received["id"]+" for link"
 
         return "NOT IMPLEMENTED"
 
