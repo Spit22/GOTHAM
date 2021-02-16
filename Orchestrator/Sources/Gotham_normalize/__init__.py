@@ -143,6 +143,11 @@ def normalize_display_object_infos(object_infos, obj_type, next_type=''):
     sys.exit(1)
   if obj_type != "link":
     next_type= "link"
+  elif next_type=='':
+    if object_infos["link_nb_hp"] <= object_infos["link_nb_serv"]:
+      next_type="hp"
+    else:
+      next_type="serv"
   resultat = normalization_functions.normalize_display(object_infos, obj_type, "||||||", next_type)
   last_type=list(set(obj_types) - set([obj_type, next_type]))[0]
   for i in range(len(resultat[next_type+'s'])):

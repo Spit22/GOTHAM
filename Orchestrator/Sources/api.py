@@ -699,10 +699,16 @@ def ls_honeypot():
                 honeypot = Gotham_normalize.normalize_display_object_infos(honeypots[0],"hp")
                 return honeypot
             else:
-                logging.error(f"You tried to edit a honeypot that doesn't exists with the id = {id}")
-                return "Unknown id " + hp_infos_received["id"]+" for Honeypot"
-
-        return "NOT IMPLEMENTED"
+                logging.error(f"You tried to list a honeypot that doesn't exists with the id = {id}")
+                return "Unknown id "+hp_infos_received["id"]+" for Honeypot"
+        else:
+            honeypots = get_honeypot_infos(DB_settings)
+            if honeypots!=[]:
+                honeypots=[normalize_display_object_infos(honeypot,"hp") for honeypot in honeypots]
+                return honeypots
+            else:
+                logging.error(f"You tried to list honeypots but no one exists")
+                return "No honeypot in database"
 
 @app.route('/list/server', methods=['GET'])
 def ls_srv():
@@ -724,11 +730,16 @@ def ls_srv():
                 server = Gotham_normalize.normalize_display_object_infos(servers[0],"serv")
                 return server
             else:
-                logging.error(f"You tried to edit a server that doesn't exists with the id = {id}")
+                logging.error(f"You tried to list a server that doesn't exists with the id = {id}")
                 return "Unknown id "+serv_infos_received["id"]+" for server"
-
-        return "NOT IMPLEMENTED"
-
+        else:
+            servers = get_server_infos(DB_settings)
+            if servers!=[]:
+                servers=[normalize_display_object_infos(server,"serv") for server in servers]
+                return servers
+            else:
+                logging.error(f"You tried to list servers but no one exists")
+                return "No server in database"
 
 @app.route('/list/link', methods=['GET'])
 def ls_lk():
@@ -750,10 +761,17 @@ def ls_lk():
                 link = Gotham_normalize.normalize_display_object_infos(links[0],"link")
                 return link
             else:
-                logging.error(f"You tried to edit a link that doesn't exists with the id = {id}")
+                logging.error(f"You tried to list a link that doesn't exists with the id = {id}")
                 return "Unknown id "+link_infos_received["id"]+" for link"
-
-        return "NOT IMPLEMENTED"
+        else:
+            links = get_link_infos(DB_settings)
+            if links!=[]:
+                links=[normalize_display_object_infos(link,"link") for link in links]
+                return links
+            else:
+                logging.error(f"You tried to list links but no one exists")
+                return "No link in database"
+        
 
 @app.route('/version', methods=['GET'])
 def get_version():
