@@ -347,15 +347,13 @@ def add_lk():
             add_link.generate_nginxConf(DB_settings, id, dc_ip, honeypots, exposed_port)
 
         # Deploy new reverse-proxies's configurations on servers
-        print("bypassed")
-        #add_link.deploy_nginxConf(DB_settings, id, servers)
+        add_link.deploy_nginxConf(DB_settings, id, servers)
 
         # Check redirection is effective on all servers
         for server in servers:
-            print("bypassed")
-            #connected = Gotham_check.check_server_redirects(server["serv_ip"], server["choosed_port"])
-            #if not connected:
-            #    return "Error : link is not effective on server "+str(ip_srv)
+            connected = Gotham_check.check_server_redirects(server["serv_ip"], server["choosed_port"])
+            if not connected:
+                return "Error : link is not effective on server "+str(server["serv_ip"])
 
         # Create lk_infos
         lk_infos = {"id":id, "nb_hp": nb_hp, "nb_serv": nb_srv, "tags_hp":tags_hp, "tags_serv":tags_serv, "ports":exposed_ports}

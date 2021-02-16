@@ -163,8 +163,6 @@ def configure_honeypot_replacement(DB_settings,old_hp_infos,new_hp_infos={},num_
             for server in link["servs"]:
                 nginxRedirectionPath = "/data/template/"+ str(link["link_id"]) +"-"+str(server["lhs_port"])+".conf"
                 if not(nginxRedirectionPath in already_update):
-                    #text_to_search="  # "+ str(old_hp_infos["hp_id"]) +"\n"+"  server "+ str(dc_ip) +":"+ str(old_hp_infos["hp_port"]) +";\n"
-                    #replacement_text="  # "+ str(new_hp_infos["hp_id"]) +"\n"+"  server "+ str(dc_ip) +":"+ str(new_hp_infos["hp_port"]) +";\n"
                     with fileinput.FileInput(nginxRedirectionPath, inplace=True, backup='.bak') as file:
                         first_line = False
                         for line in file:
@@ -184,8 +182,6 @@ def configure_honeypot_replacement(DB_settings,old_hp_infos,new_hp_infos={},num_
         for server in old_hp_infos["links"][num_link]["servs"]:
             nginxRedirectionPath = "/data/template/"+ str(old_hp_infos["links"][num_link]["link_id"]) +"-"+str(server["lhs_port"])+".conf"
             if not(nginxRedirectionPath in already_update):
-                #text_to_search="  # "+ str(old_hp_infos["hp_id"]) +"\n"+"  server "+ str(dc_ip) +":"+ str(old_hp_infos["hp_port"]) +";\n"
-                #replacement_text="  # "+ str(new_hp_infos["hp_id"]) +"\n"+"  server "+ str(dc_ip) +":"+ str(new_hp_infos["hp_port"]) +";\n"
                 with fileinput.FileInput(nginxRedirectionPath, inplace=True, backup='.bak') as file:
                     first_line = False
                     for line in file:
@@ -206,8 +202,6 @@ def configure_honeypot_replacement(DB_settings,old_hp_infos,new_hp_infos={},num_
         for server in old_hp_infos["links"][num_link]["servs"]:
             nginxRedirectionPath = "/data/template/"+ str(old_hp_infos["links"][num_link]["link_id"]) +"-"+str(server["lhs_port"])+".conf"
             if not(nginxRedirectionPath in already_update):
-                #text_to_search="  # "+ str(old_hp_infos["hp_id"]) +"\n"+"  server "+ str(dc_ip) +":"+ str(old_hp_infos["hp_port"]) +";\n"
-                #replacement_text=""
                 with fileinput.FileInput(nginxRedirectionPath, inplace=True, backup='.bak') as file:
                     first_line = False
                     for line in file:

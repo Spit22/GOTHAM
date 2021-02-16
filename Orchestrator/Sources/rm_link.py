@@ -27,14 +27,12 @@ def main(DB_settings, id):
         sys.exit(1)
     # Remove link on the servers affected by the link
     try:
-        print("bypass")
-        #remove_links_on_servers(DB_settings, result[0])
+        remove_links_on_servers(DB_settings, result[0])
     except:
         sys.exit(1)
     # Remove NGINX file of the link on the Orchestrator
     try:
-        print("bypass")
-        #subprocess.check_call(["sudo rm /data/template/"+str(id)+"-*.conf"], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        subprocess.check_call(["sudo rm /data/template/"+str(id)+"-*.conf"], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
     except Exception as e:
         logging.error(f"Remove NGINX scripts of link failed : {e}")
         sys.exit(1)

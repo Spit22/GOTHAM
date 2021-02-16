@@ -6,6 +6,7 @@ import Gotham_check
 import Gotham_choose
 import configparser
 import sys
+import add_link
 
 # Logging components
 import os
@@ -58,8 +59,7 @@ def main(DB_settings, id='sv-00000000000000000000000000000000', ip='255.255.255.
                     sys.exit(1)
     # Remove Server from the server
     try:
-        print("bypass")
-        #remove_nginx_on_server(result[0]['serv_ip'],result[0]['serv_ssh_port'],result[0]['serv_ssh_key'])
+        remove_nginx_on_server(result[0]['serv_ip'],result[0]['serv_ssh_port'],result[0]['serv_ssh_key'])
     except:
         sys.exit(1)
     # Remove Server from the IDB
@@ -114,8 +114,7 @@ def replace_server(DB_settings,serv_infos,num_link):
         if (len(ports_used_ls)==1):
             replacement_server[0]["choosed_port"]=int(ports_used_ls[0])
             # Deploy new reverse-proxies's configurations on new server
-            print("bypassed")
-            #add_link.deploy_nginxConf(db_settings, link["link_id"], replacement_server)
+            add_link.deploy_nginxConf(DB_settings, link["link_id"], replacement_server)
 
         for hp in link["hps"]:
             modifs={"id_serv":replacement_server[0]["serv_id"]}
