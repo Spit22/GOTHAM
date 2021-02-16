@@ -39,7 +39,7 @@ def main(DB_settings, id='sv-00000000000000000000000000000000', ip='255.255.255.
             # Try to replace
             success=replace_server(DB_settings,serv_infos,i)
 
-            # If we can't replace, just modify link to decrease nb serv
+            # If we can't replace, just edit link to decrease nb serv
             if not(success):
                 if int(serv_infos["links"][i]["link_nb_serv"]) > 1:
                     try:
@@ -97,7 +97,7 @@ def replace_server(DB_settings,serv_infos,num_link):
     # Filter servers in those who have one of ports open
     servers = Gotham_check.check_servers_ports_matching(servers, link["link_ports"])
 
-    # Filter servers in error
+    # Filter servers in error, with same link, and original server by id
     servers = [server for server in servers if not(server["serv_state"]=='ERROR' or link["link_id"] in server["link_id"] or server["serv_id"]==serv_infos["serv_id"])]
     
     if servers==[]:
