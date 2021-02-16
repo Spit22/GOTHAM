@@ -54,7 +54,7 @@ def main(DB_settings, id='sv-00000000000000000000000000000000', ip='255.255.255.
                         sys.exit(1)
                 else:        
                     # If nb serv=1, error, we can't do nothing
-                    logging.error(f"You tried to remove a running server with the id = {id}, and it can't be replaced or deleted")
+                    logging.warning(f"You tried to remove a running server with the id = {id}, and it can't be replaced or deleted")
                     sys.exit(1)
     # Remove Server from the server
     try:

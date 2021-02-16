@@ -71,7 +71,7 @@ lk_infos3 = {"id":"lk-333B3AFE3FEE1FEFB1D25E22FC2CA999", "nb_hp": 2, "nb_serv": 
 
 print(colored("########## ########## RM SERVER ########## ##########", 'blue'))
 add_server_DB(DB_settings, server_infos)
-add_link_DB(DB_settings, lk_infos1)
-add_link_DB(DB_settings, lk_infos2)
-add_link_DB(DB_settings, lk_infos3)
+#add_link_DB(DB_settings, lk_infos1)
+#add_link_DB(DB_settings, lk_infos2)
+#add_link_DB(DB_settings, lk_infos3)
 #rm_server.main(DB_settings, id='sv-66623F6F323F38F42d656DF861566999')

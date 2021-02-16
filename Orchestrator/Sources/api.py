@@ -38,7 +38,7 @@ logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',leve
 # Cette section remplace temporairement le fichier de configuration /etc/gotham/orchestrator.conf #
 app.config["DEBUG"] = True
 version = "0.0"
-DB_settings = {"username":"root", "password":"password", "hostname":"localhost", "port":"3306", "database":"GOTHAM"}
+DB_settings = {"username":"gotham", "password":"password", "hostname":"localhost", "port":"3306", "database":"GOTHAM"}
 dc_ports_list = range(1024,2048)
 dockerfile_storage = "/data/"
 # Path to store object's data
@@ -342,6 +342,7 @@ def add_lk():
         id = 'lk-'+str(uuid.uuid4().hex)
 
         # Generate NGINX configurations for each redirection on a specific exposed_port
+        
         for exposed_port in final_exposed_ports:
             add_link.generate_nginxConf(DB_settings, id, dc_ip, honeypots, exposed_port)
 
@@ -623,7 +624,7 @@ def rm_honeypot():
         # id (string) : id du honeypot à supprimer
 
         # Get POST data on JSON format
-        data = request.json
+        data = request.get_json()
 
         # Make sure all data are in JSON
         data = json.loads(data)
@@ -644,10 +645,10 @@ def rm_srv():
         # id (string) : id du serveur à supprimer
 
         # Get POST data on JSON format
-        data = request.json
+        data = request.get_json()
 
         # Make sure all data are in JSON
-        data = json.loads(data)
+        #data = json.loads(data)
 
         # Get all function's parameters
         id = data["id"]
@@ -665,10 +666,11 @@ def rm_lk():
         # id (string) : id du lien à supprimer
 
         # Get POST data on JSON format
-        data = request.json
+        
+        data = request.get_json()
 
         # Make sure all data are in JSON
-        data = json.loads(data)
+        #data = json.loads(data)
 
         # Get all function's parameters
         id = data["id"]
