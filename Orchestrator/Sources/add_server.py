@@ -23,7 +23,7 @@ def deploy(ip, ssh_port, used_ssh_key):
     Return True if succeed, False in the other case
     '''
     # Declare local vars
-    installNginx_file = ["/data/scripts/install_nginx.sh"]
+    installNginx_file = [GOTHAM_HOME+"/Orchestrator/NGINX_scripts/install_nginx.sh"]
     installNginx_dest = "/tmp/"
     command_exec_install = ["/bin/sh /tmp/install_nginx.sh"]
     # Send and execute the nginx installation script on the server

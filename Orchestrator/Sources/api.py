@@ -28,63 +28,15 @@ import Gotham_normalize
 
 app = flask.Flask(__name__)
 
+# Get environment variable
+GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+
 # Cette section remplace temporairement le fichier de configuration /etc/gotham/orchestrator.conf #
 app.config["DEBUG"] = True
 version = "0.0"
 db_settings = {"username":"root", "password":"password", "hostname":"localhost", "port":"3306", "database":"GOTHAM"}
 dc_ports_list = range(1024,2048)
 dockerfile_storage = "/data/"
-dc_ip = "172.16.2.250"
-dc_ssh_port = "22"
-dc_ssh_key = StringIO("""-----BEGIN OPENSSH PRIVATE KEY-----
-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
------END OPENSSH PRIVATE KEY-----""")
 # Path to store object's data
 store_path = "/data"
 
@@ -133,6 +85,16 @@ def add_honeypot(hp_infos_received={}):
         except Exception as e:
             return "Invalid data sent "+str(e)
 
+        # Retrieve settings from config file
+        config = configparser.ConfigParser()
+        config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+        dc_ip = config['datacenter']['ip']
+        dc_ssh_key = config['datacenter']['ssh_key']
+        dc_ssh_key = base64.b64decode(dc_ssh_key) # ssh_key is byte
+        dc_ssh_key = dc_ssh_key.decode('ascii') # ssh_key is ascii string
+        dc_ssh_key = StringIO(dc_ssh_key) # ssh_key is a file-like object
+        dc_ssh_port = config['datacenter']['ssh_port']
+
         # First find an available port to map on datacenter
         used_ports = Gotham_check.check_used_port(db_settings)
         available_ports=[port for port in dc_ports_list if not(port in used_ports)]
@@ -159,8 +121,7 @@ def add_honeypot(hp_infos_received={}):
         
         # Deploy the hp's container on datacenter
         try:
-            print("bypassed")
-            #add_hp.deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id)
+            add_hp.deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id)
         except Exception as e:
             return "An error occured in the ssh connection"
 
@@ -217,18 +178,16 @@ def add_srv():
             return "Provided ip already exists in database"
 
         # Check given auth information are ok
-        print("bypassed")
-        #connected = Gotham_check.check_ssh(ip, ssh_port, check_ssh_key) 
-        #if not connected:
-        #    return "Provided ssh_key or ssh_port is wrong"
+        connected = Gotham_check.check_ssh(ip, ssh_port, check_ssh_key) 
+        if not connected:
+            return "Provided ssh_key or ssh_port is wrong"
 
         # If all checks are ok, we can generate an id for the new server
         id = 'sv-'+str(uuid.uuid4().hex)
 
         # Deploy the reverse-proxy service on the new server
         try:
-            print("bypassed")
-            #add_server.deploy(ip, ssh_port, deploy_ssh_key)
+            add_server.deploy(ip, ssh_port, deploy_ssh_key)
         except Exception as e:
             return "Something went wrong while deploying Reverse-Proxy"
 
@@ -253,7 +212,6 @@ def add_lk():
         # nb_hp (int) : nombre de hp ciblés
         # exposed_port (list): list des ports à utiliser
 
-        GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
         # Retrieve settings from config file
         config = configparser.ConfigParser()
         config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
