@@ -32,7 +32,7 @@ def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_
     dockercompose.write('    ports:\n')
     dockercompose.write('      - \"'+str(mapped_port)+':'+str(honeypot_port)+"\"\n")
     # Add a TTY
-    dockercompose.write('    tty: true')
+    dockercompose.write('    tty: true\n')
     # Close file
     dockercompose.close()
 

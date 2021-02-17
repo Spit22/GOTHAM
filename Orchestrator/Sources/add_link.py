@@ -24,7 +24,7 @@ def generate_nginxConf(db_settings, link_id, dc_ip, honeypots, exposed_port):
     # Adding each honeypot in upstream
     for honeypot in honeypots:
         # Get the corresponding mapped port for this honeypot
-        honeypot_port = honeypot["hp_port"] 
+        honeypot_port = int(honeypot["hp_port"])
         nginxRedirectionFile.write("  # "+ str(honeypot["hp_id"]) +"\n")
         nginxRedirectionFile.write("  server "+ str(dc_ip) +":"+ str(honeypot_port) +";\n")
     # Closing upstream

@@ -93,7 +93,7 @@ def add_honeypot(hp_infos_received={}):
         dc_ssh_key = base64.b64decode(dc_ssh_key) # ssh_key is byte
         dc_ssh_key = dc_ssh_key.decode('ascii') # ssh_key is ascii string
         dc_ssh_key = StringIO(dc_ssh_key) # ssh_key is a file-like object
-        dc_ssh_port = config['datacenter']['ssh_port']
+        dc_ssh_port = int(config['datacenter']['ssh_port'])
 
         # First find an available port to map on datacenter
         used_ports = Gotham_check.check_used_port(db_settings)
@@ -187,7 +187,8 @@ def add_srv():
 
         # Deploy the reverse-proxy service on the new server
         try:
-            add_server.deploy(ip, ssh_port, deploy_ssh_key)
+            print("bypassed")
+            #add_server.deploy(ip, ssh_port, deploy_ssh_key)
         except Exception as e:
             return "Something went wrong while deploying Reverse-Proxy"
 
@@ -217,6 +218,12 @@ def add_lk():
         config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
         ports_separator = config['port']['separator']
         tags_separator = config['tag']['separator']
+        dc_ip = config['datacenter']['ip']
+        dc_ssh_key = config['datacenter']['ssh_key']
+        dc_ssh_key = base64.b64decode(dc_ssh_key) # ssh_key is byte
+        dc_ssh_key = dc_ssh_key.decode('ascii') # ssh_key is ascii string
+        dc_ssh_key = StringIO(dc_ssh_key) # ssh_key is a file-like object
+        dc_ssh_port = int(config['datacenter']['ssh_port'])
 
         # Get POST data on JSON format
         data = request.get_json()
@@ -261,7 +268,7 @@ def add_lk():
 
         # Get all honeypots corresponding to tags
         honeypots = Gotham_link_BDD.get_honeypot_infos(db_settings, tags=tags_hp)
-        if tags_hp.lower()!="all"
+        if tags_hp.lower()!="all":
             honeypots = Gotham_check.check_tags("hp", honeypots, tags_hp=tags_hp)
 
         # Get all servers corresponding to tags
@@ -297,11 +304,12 @@ def add_lk():
         if len(honeypots) < nb_hp:
             added_hp=[]
             for i in range(nb_hp-len(honeypots)):
-                with open(honeypots[i%len(honeypots)]["hp_source"], 'r') as file:
+                print(honeypots[i%len(honeypots)])
+                with open(honeypots[i%len(honeypots)]["hp_source"]+"/Dockerfile", 'r') as file:
                     encoded_dockerfile = base64.b64encode(file.read().encode("ascii"))
-                name = (honeypots[i%len(honeypots)]["name"]+"_Duplicat" if len(honeypots[i%len(honeypots)]["name"]+"_Duplicat")<=128 else honeypots[i%len(honeypots)]["name"][:(128-len("_Duplicat"))]+"_Duplicat")
-                descr = "Duplication of "+honeypots[i%len(honeypots)]["descr"]
-                duplicate_hp_infos={"name": name,"descr": descr,"tags": honeypots[i%len(honeypots)]["tags"].remplace("||",tags_separator),"logs": honeypots[i%len(honeypots)]["logs"],"parser": honeypots[i%len(honeypots)]["parser"],"port": honeypots[i%len(honeypots)]["port"], "dockerfile": encoded_dockerfile}
+                name = (honeypots[i%len(honeypots)]["hp_name"]+"_Duplicat" if len(honeypots[i%len(honeypots)]["hp_name"]+"_Duplicat")<=128 else honeypots[i%len(honeypots)]["hp_name"][:(128-len("_Duplicat"))]+"_Duplicat")
+                descr = "Duplication of "+honeypots[i%len(honeypots)]["hp_descr"]
+                duplicate_hp_infos={"name": name,"descr": descr,"tags": honeypots[i%len(honeypots)]["hp_tags"].replace("||",tags_separator),"logs": honeypots[i%len(honeypots)]["hp_logs"],"parser": honeypots[i%len(honeypots)]["hp_parser"],"port": honeypots[i%len(honeypots)]["hp_port"], "dockerfile": encoded_dockerfile}
                 try:
                     added_hp.append(add_honeypot(duplicate_hp_infos))
                 except:
@@ -341,15 +349,13 @@ def add_lk():
             add_link.generate_nginxConf(db_settings, id, dc_ip, honeypots, exposed_port)
 
         # Deploy new reverse-proxies's configurations on servers
-        print("bypassed")
-        #add_link.deploy_nginxConf(db_settings, id, servers)
+        add_link.deploy_nginxConf(db_settings, id, servers)
 
         # Check redirection is effective on all servers
         for server in servers:
-            print("bypassed")
-            #connected = Gotham_check.check_server_redirects(server["serv_ip"], server["choosed_port"])
-            #if not connected:
-            #    return "Error : link is not effective on server "+str(ip_srv)
+            connected = Gotham_check.check_server_redirects(server["serv_ip"], server["choosed_port"])
+            if not connected:
+                return "Error : link is not effective on server "+str(server["serv_ip"])
 
         # Create lk_infos
         lk_infos = {"id":id, "nb_hp": nb_hp, "nb_serv": nb_srv, "tags_hp":tags_hp, "tags_serv":tags_serv, "ports":exposed_ports}
