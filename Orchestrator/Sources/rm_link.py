@@ -27,7 +27,7 @@ def main(DB_settings, id):
         sys.exit(1)
     # Remove link on the servers affected by the link
     try:
-        remove_links_on_servers(DB_settings, result)
+        remove_links_on_servers(DB_settings, result[0])
     except:
         sys.exit(1)
     # Remove NGINX file of the link on the Orchestrator
