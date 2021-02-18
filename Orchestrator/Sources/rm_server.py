@@ -111,12 +111,12 @@ def replace_server(DB_settings,serv_infos,num_link):
     if servers_same_port!=[]:
         replacement_server=Gotham_choose.choose_servers(servers_same_port, 1, link_tags_serv)
 
-        if (len(ports_used_ls)==1):
-            replacement_server[0]["choosed_port"]=int(ports_used_ls[0])
-            # Deploy new reverse-proxies's configurations on new server
-            add_link.deploy_nginxConf(DB_settings, link["link_id"], replacement_server)
-
+        already_deployed=[]
         for hp in link["hps"]:
+            if not(int(hp["lhs_port"]) in already_deployed):
+                replacement_server[0]["choosed_port"]=int(hp["lhs_port"])
+                add_link.deploy_nginxConf(DB_settings, link["link_id"], replacement_server)
+                already_deployed.append(int(replacement_server[0]["choosed_port"]))
             modifs={"id_serv":replacement_server[0]["serv_id"]}
             conditions={"id_link":link["link_id"],"id_hp":hp["hp_id"],"id_serv":serv_infos["serv_id"]}
             try:
