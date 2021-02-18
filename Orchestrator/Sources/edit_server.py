@@ -39,11 +39,7 @@ def edit_tags(DB_settings, server, tags):
                 link_tags_serv=tags_separator.join(link["link_tags_serv"].split("||"))
 
                 # Get all servers corresponding to tags
-<<<<<<< HEAD
-                servers = Gotham_check.check_tags("serv", Gotham_link_BDD.get_server_infos(DB_settings, tags=link_tags_serv), tags_serv=link_tags_serv)
-=======
                 servers = Gotham_check.check_tags("serv",Gotham_link_BDD.get_server_infos(DB_settings, tags=link_tags_serv), tags_serv=link_tags_serv)
->>>>>>> b1878fc768f82cb2b16b336df8e2c539446da89e
 
                 # Filter servers in those who have one of ports open
                 servers = Gotham_check.check_servers_ports_matching(servers, link["link_ports"])
@@ -81,21 +77,12 @@ def edit_tags(DB_settings, server, tags):
                 if succes==False:
                     if int(link["link_nb_serv"]) > 1:
                         try:
-<<<<<<< HEAD
                             Gotham_link_BDD.remove_lhs(DB_settings,id_link=link["link_id"], id_serv=server["serv_id"])
                         except:
                             sys.exit(1)
                         try:
                             modifs={"nb_serv":int(link["link_nb_serv"])-1}
                             conditions={"id":link["link_id"]}
-=======
-                            Gotham_link_BDD.remove_lhs(DB_settings,id_link=server["links"][i]["link_id"], id_serv=server["serv_id"])
-                        except:
-                            sys.exit(1)
-                        try:
-                            modifs={"nb_serv":int(server["links"][i]["link_nb_serv"])-1}
-                            conditions={"id":server["links"][i]["link_id"]}
->>>>>>> b1878fc768f82cb2b16b336df8e2c539446da89e
                             Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
                             succes=True
                         except:
