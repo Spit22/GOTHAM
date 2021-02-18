@@ -398,6 +398,11 @@ def edit_honeypot():
         # parser (string) : règle de parsing des logs monitorés
         # service_port (int) : port on which the honeypot will lcoally listen
 
+        config = configparser.ConfigParser()
+        config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+        ports_separator = config['port']['separator']
+        tags_separator = config['tag']['separator']
+
         # Get POST data on JSON format
         data = request.json
 
@@ -444,7 +449,7 @@ def edit_honeypot():
             if hp_infos_received["descr"]!= honeypot["hp_descr"]:
                 modifs["descr"]=hp_infos_received["descr"]
         if "tags" in hp_infos_received.keys():
-            if hp_infos_received["tags"]!= honeypot["hp_tags"]:
+            if set(hp_infos_received["tags"].split(tags_separator))!= set(honeypot["hp_tags"].split("||")):
                 succes=True
                 if honeypot['link_id'] != None and honeypot['link_id'] !="NULL":
                     succes=False
@@ -485,6 +490,12 @@ def edit_srv():
         # ip (string) : adresse IP publique du serveur
         # ssh_key (string) : clé SSH à utiliser pour la connexion
         # ssh_port (int) : port d'écoute du service SSH 
+
+        config = configparser.ConfigParser()
+        config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+        ports_separator = config['port']['separator']
+        tags_separator = config['tag']['separator']
+
 
         # Get POST data on JSON format
         data = request.json
@@ -532,7 +543,7 @@ def edit_srv():
             if serv_infos_received["descr"]!= server["serv_descr"]:
                 modifs["descr"]=serv_infos_received["descr"]
         if "tags" in serv_infos_received.keys():
-            if serv_infos_received["tags"]!= server["serv_tags"]:
+            if set(serv_infos_received["tags"].split(tags_separator))!= set(server["serv_tags"].split("||")):
                 succes=True
                 if server['link_id'] != None and server['link_id'] !="NULL":
                     succes=False
@@ -582,6 +593,12 @@ def edit_lk():
         # nb_hp (int) : nombre de hp ciblés
         # ports (string) : exposed ports
 
+        config = configparser.ConfigParser()
+        config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+        ports_separator = config['port']['separator']
+        tags_separator = config['tag']['separator']
+
+
         # Get POST data on JSON format
         data = request.json
 
@@ -620,11 +637,11 @@ def edit_lk():
         modifs={}
         conditions={"id":link["link_id"]}
         if "tag_srv" in link_infos_received.keys():
-            if link_infos_received["tag_srv"]!= link["link_tag_srv"]:
+            if set(link_infos_received["tag_srv"].split(tags_separator))!= set(link["link_tag_srv"].split("||")):
                 return "Edit tag_srv not IMPLEMENTED"
                 modifs["tag_srv"]=link_infos_received["tag_srv"]
         if "tag_hp" in link_infos_received.keys():
-            if link_infos_received["tag_hp"]!= link["link_tag_hp"]:
+            if set(link_infos_received["tag_hp"].split(tags_separator))!= set(link["link_tag_hp"].split("||")):
                 return "Edit tag_hp not IMPLEMENTED"
                 modifs["tag_hp"]=link_infos_received["tag_hp"]
         if "nb_srv" in link_infos_received.keys():
