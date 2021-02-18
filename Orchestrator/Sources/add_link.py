@@ -23,6 +23,7 @@ def generate_nginxConf(db_settings, link_id, dc_ip, honeypots, exposed_port):
     nginxRedirectionFile.write("  hash $remote_addr;\n")
     # Adding each honeypot in upstream
     for honeypot in honeypots:
+        print(honeypot)
         # Get the corresponding mapped port for this honeypot
         honeypot_port = int(honeypot["hp_port"])
         nginxRedirectionFile.write("  # "+ str(honeypot["hp_id"]) +"\n")
@@ -44,7 +45,7 @@ def deploy_nginxConf(db_settings, link_id, servers):
         servers (dict): list of servers we want to deploy on associated with exposed ports
     '''
     # Initialize command and file
-    checkAndReloadNginx_command = ["nginx -t; if [ $? -eq 0 ]; then; nginx -s reload; fi"]
+    checkAndReloadNginx_command = ["nginx -t; if [ $? -eq 0 ]; then; nginx -s reload; echo 'test' > /tmp/test; fi"]
     linkConf_dest = "/etc/nginx/conf.d/links/"
     # Deploy new configuration on each servers
     for server in servers:

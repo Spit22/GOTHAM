@@ -140,7 +140,7 @@ def main(DB_settings, id):
 
 
     # Remove the Honeypot from the datacenter
-    commands=[f"sudo docker container stop {id}",f"sudo docker container rm {id}"]
+    commands=[f"docker container stop {id}",f"docker container rm {id}"]
     try:
         execute_commands(datacenter_settings['hostname'],datacenter_settings['ssh_port'],datacenter_settings['ssh_key'],commands)
     except Exception as e:

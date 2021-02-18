@@ -71,7 +71,7 @@ def main(DB_settings, id='sv-00000000000000000000000000000000', ip='255.255.255.
     return True
 
 def remove_nginx_on_server(hostname, port, ssh_key):
-    commands=["sudo rm -r /etc/nginx","sudo rm -r /usr/sbin/nginx","sudo rm -r /usr/lib/nginx/modules","sudo rm -r /etc/nginx/nginx.conf","sudo rm -r /var/log/nginx/error.log", "sudo rm -r /var/log/nginx/access.log", "sudo rm -r /run/nginx.pid","sudo rm -r /var/lock/nginx.lock"]
+    commands=["rm -r /etc/nginx","rm -r /usr/sbin/nginx","rm -r /usr/lib/nginx/modules","rm -r /etc/nginx/nginx.conf","rm -r /var/log/nginx/error.log", "rm -r /var/log/nginx/access.log", "rm -r /run/nginx.pid","rm -r /var/lock/nginx.lock"]
     try:
         execute_commands(hostname,port,ssh_key,commands)
     except Exception as e:

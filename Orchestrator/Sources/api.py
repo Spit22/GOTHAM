@@ -38,7 +38,7 @@ logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',leve
 # Cette section remplace temporairement le fichier de configuration /etc/gotham/orchestrator.conf #
 app.config["DEBUG"] = True
 version = "0.0"
-DB_settings = {"username":"gotham", "password":"password", "hostname":"localhost", "port":"3306", "database":"GOTHAM"}
+DB_settings = {"username":"root", "password":"password", "hostname":"localhost", "port":"3306", "database":"GOTHAM"}
 dc_ports_list = range(1024,2048)
 dockerfile_storage = "/data/"
 # Path to store object's data
@@ -309,12 +309,11 @@ def add_lk():
         if len(honeypots) < nb_hp:
             added_hp=[]
             for i in range(nb_hp-len(honeypots)):
-                print(honeypots[i%len(honeypots)])
                 with open(honeypots[i%len(honeypots)]["hp_source"]+"/Dockerfile", 'r') as file:
                     encoded_dockerfile = base64.b64encode(file.read().encode("ascii"))
                 name = (honeypots[i%len(honeypots)]["hp_name"]+"_Duplicat" if len(honeypots[i%len(honeypots)]["hp_name"]+"_Duplicat")<=128 else honeypots[i%len(honeypots)]["hp_name"][:(128-len("_Duplicat"))]+"_Duplicat")
                 descr = "Duplication of "+honeypots[i%len(honeypots)]["hp_descr"]
-                duplicate_hp_infos={"name": name,"descr": descr,"tags": honeypots[i%len(honeypots)]["hp_tags"].replace("||",tags_separator),"logs": honeypots[i%len(honeypots)]["hp_logs"],"parser": honeypots[i%len(honeypots)]["hp_parser"],"port": honeypots[i%len(honeypots)]["hp_port"], "dockerfile": encoded_dockerfile}
+                duplicate_hp_infos={"name": name,"descr": descr,"tags": honeypots[i%len(honeypots)]["hp_tags"].replace("||",tags_separator),"logs": honeypots[i%len(honeypots)]["hp_logs"],"parser": honeypots[i%len(honeypots)]["hp_parser"],"port": honeypots[i%len(honeypots)]["hp_port_container"], "dockerfile": encoded_dockerfile}
                 try:
                     added_hp.append(add_honeypot(duplicate_hp_infos))
                 except:
@@ -632,16 +631,13 @@ def rm_honeypot():
         # Get POST data on JSON format
         data = request.get_json()
 
-        # Make sure all data are in JSON
-        data = json.loads(data)
-
         # Get all function's parameters
         id = data["id"]
 
         try:
             rm_hp.main(DB_settings, id)
-        except:
-            return "An error occured during the deletion of the honeypot"
+        except Exception as e:
+            return "An error occured during the deletion of the honeypot : "+str(e)
         return "Deletion completed : " + str(id)
 
 @app.route('/delete/server', methods=['POST'])
@@ -653,16 +649,13 @@ def rm_srv():
         # Get POST data on JSON format
         data = request.get_json()
 
-        # Make sure all data are in JSON
-        #data = json.loads(data)
-
         # Get all function's parameters
         id = data["id"]
         ##### ADD ABILITY TO DELETE WITH IP ######
         try:
             rm_server.main(DB_settings, id=id)
-        except:
-            return "An error occured during the deletion of the server"
+        except Exception as e:
+            return "An error occured during the deletion of the server : "+str(e)
         return "Deletion completed : " + str(id)
 
 @app.route('/delete/link', methods=['POST'])
@@ -672,20 +665,16 @@ def rm_lk():
         # id (string) : id du lien à supprimer
 
         # Get POST data on JSON format
-        
         data = request.get_json()
-
-        # Make sure all data are in JSON
-        #data = json.loads(data)
 
         # Get all function's parameters
         id = data["id"]
 
-        try:
-            rm_link.main(DB_settings, id=id)
-        except:
-            return "An error occured during the deletion of the link"
-        return "Deletion completed : " + str(id)
+        #try:
+        rm_link.main(DB_settings, id=id)
+        #except Exception as e:
+        #    return "An error occured during the deletion of the link : "+str(e)
+        #return "Deletion completed : " + str(id)
 
 @app.route('/list/honeypot', methods=['GET'])
 def ls_honeypot():
