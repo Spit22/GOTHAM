@@ -4,7 +4,7 @@ import sys
 import configparser
 
 # Import Gotham's libs
-from . import get_infos
+from . import get_infos, remove_in_IDB, add_in_IDB
 from Gotham_normalize import normalize_honeypot_infos, normalize_server_infos, normalize_link_infos, normalize_lhs_infos, normalize_modif_to_str, normalize_conditions_to_str
 
 # Logging components
@@ -34,11 +34,46 @@ def server(DB_connection, modifs, conditions):
         modifs (dict) : dict of modifications with column:value syntax
         conditions (dict) : dict of conditions with column:value syntax
     '''
-    if [val for key, val in modifs.items() if 'tag' in key]!=[]:
-        logging.error(f"Tags modification not implemented")
-        sys.exit(1)
+    GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+    # Retrieve settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    tag_separator = config['tag']['separator']
+    port_separator = config['port']['separator']
 
-    if [val for key, val in conditions.items() if 'tag' in key]!=[]:
+    if "tags" in modifs.items():
+        if "id" in conditions.items():
+            tags=modifs.pop("tags")
+            new_tag_list=tags.split(tag_separator)
+            servers=Gotham_link_BDD.get_server_infos(DB_settings, id=conditions["id"])
+            old_tag_list=servers[0]["serv_tags"].split("||")
+            deleted_tags=list(set(old_tag_list)-set(new_tag_list))
+            added_tags=list(set(new_tag_list)-set(old_tag_list))
+            for tag in deleted_tags:
+                remove_in_IDB.server_in_serv_tag(DB_connection, id=servers[0]["serv_id"], tag=tag)
+            for tag in added_tags:
+                answer = get_infos.tag(DB_connection, tag=tag)
+                if answer != []:
+                    tag_id = answer[0]['id']
+                else:
+                    # Add the tag in the IDB
+                    try:
+                        add_in_IDB.tag(DB_connection, tag)
+                    except:
+                        sys.exit(1)
+                    # Then retrieve tag id
+                    answer = get_infos.tag(DB_connection, tag=tag)
+                    tag_id = answer[0]['id']
+                # Add the relation between server and tag in Serv_Tags table
+                try:
+                    add_in_IDB.serv_tags(DB_connection, tag_id, servers[0]["serv_id"])
+                except:
+                    sys.exit(1)
+        else:
+            logging.error(f"Tags modification without id in conditions not implemented")
+            sys.exit(1)
+
+    if [val for key, val in conditions.items() if 'tags' in key]!=[]:
         logging.error(f"Modification by tag not implemented")
         sys.exit(1)
 
@@ -99,11 +134,46 @@ def honeypot(DB_connection, modifs, conditions):
         modifs (dict) : dict of modifications with column:value syntax
         conditions (dict) : dict of conditions with column:value syntax
     '''
-    if [val for key, val in modifs.items() if 'tag' in key]!=[]:
-        logging.error(f"Tags modification not implemented")
-        sys.exit(1)
+    GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+    # Retrieve settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    tag_separator = config['tag']['separator']
+    port_separator = config['port']['separator']
 
-    if [val for key, val in conditions.items() if 'tag' in key]!=[]:
+    if "tags" in modifs.items():
+        if "id" in conditions.items():
+            tags=modifs.pop("tags")
+            new_tag_list=tags.split(tag_separator)
+            honeypots=Gotham_link_BDD.get_honeypot_infos(DB_settings, id=conditions["id"])
+            old_tag_list=honeypots[0]["hp_tags"].split("||")
+            deleted_tags=list(set(old_tag_list)-set(new_tag_list))
+            added_tags=list(set(new_tag_list)-set(old_tag_list))
+            for tag in deleted_tags:
+                remove_in_IDB.honeypot_in_hp_tag(DB_connection, id=honeypots[0]["hp_id"], tag=tag)
+            for tag in added_tags:
+                answer = get_infos.tag(DB_connection, tag=tag)
+                if answer != []:
+                    tag_id = answer[0]['id']
+                else:
+                    # Add the tag in the IDB
+                    try:
+                        add_in_IDB.tag(DB_connection, tag)
+                    except:
+                        sys.exit(1)
+                    # Then retrieve tag id
+                    answer = get_infos.tag(DB_connection, tag=tag)
+                    tag_id = answer[0]['id']
+                # Add the relation between honeypot and tag in hp_Tags table
+                try:
+                    add_in_IDB.hp_tags(DB_connection, tag_id, honeypots[0]["hp_id"])
+                except:
+                    sys.exit(1)
+        else:
+            logging.error(f"Tags modification without id in conditions not implemented")
+            sys.exit(1)
+
+    if [val for key, val in conditions.items() if 'tags' in key]!=[]:
         logging.error(f"Modification by tag not implemented")
         sys.exit(1)
 

@@ -19,6 +19,11 @@ import rm_hp
 import rm_server
 import rm_link
 
+# GOTHAM's Edit Scripts
+import edit_hp
+import edit_server
+import edit_link
+
 # GOTHAM'S LIB
 import Gotham_link_BDD
 import Gotham_check
@@ -401,7 +406,7 @@ def edit_honeypot():
 
         hp_infos_received={}
         # Get all function's parameters
-        if id in data.keys():
+        if "id" in data.keys():
             hp_infos_received["id"] = data["id"]
         else:
             return "Need to specify an honeypot id"
@@ -440,8 +445,14 @@ def edit_honeypot():
                 modifs["descr"]=hp_infos_received["descr"]
         if "tags" in hp_infos_received.keys():
             if hp_infos_received["tags"]!= honeypot["hp_tags"]:
-                return "Edit tags not IMPLEMENTED"
-                modifs["tags"]=hp_infos_received["tags"]
+                succes=True
+                if honeypot['link_id'] != None and honeypot['link_id'] !="NULL":
+                    succes=False
+                    succes=edit_hp.edit_tags(DB_settings, honeypot, hp_infos_received["tags"])
+                if succes==True :
+                    modifs["tags"]=hp_infos_received["tags"]
+                else:
+                    return "Error in tag edition"
         if "logs" in hp_infos_received.keys():
             if hp_infos_received["logs"]!= honeypot["hp_logs"]:
                 return "Edit logs not IMPLEMENTED"
@@ -483,7 +494,7 @@ def edit_srv():
 
         serv_infos_received={}
         # Get all function's parameters
-        if id in data.keys():
+        if "id" in data.keys():
             serv_infos_received["id"] = data["id"]
         else:
             return "Need to specify a server id"
@@ -522,20 +533,35 @@ def edit_srv():
                 modifs["descr"]=serv_infos_received["descr"]
         if "tags" in serv_infos_received.keys():
             if serv_infos_received["tags"]!= server["serv_tags"]:
-                return "Edit tags not IMPLEMENTED"
-                modifs["tags"]=serv_infos_received["tags"]
-        if "ip" in serv_infos_received.keys():
-            if serv_infos_received["ip"]!= server["serv_ip"]:
-                return "Edit ip not IMPLEMENTED"
-                modifs["ip"]=serv_infos_received["ip"]
-        if "ssh_key" in serv_infos_received.keys():
-            if serv_infos_received["ssh_key"]!= server["serv_ssh_key"]:
-                return "Edit ssh_key not IMPLEMENTED"
-                modifs["ssh_key"]=serv_infos_received["ssh_key"]
-        if "ssh_port" in serv_infos_received.keys():
-            if serv_infos_received["ssh_port"]!= server["serv_ssh_port"]:
-                return "Edit ssh_port not IMPLEMENTED"
-                modifs["ssh_port"]=serv_infos_received["ssh_port"]
+                succes=True
+                if server['link_id'] != None and server['link_id'] !="NULL":
+                    succes=False
+                    succes=edit_server.edit_tags(DB_settings, server, serv_infos_received["tags"])
+                if succes==True :
+                    modifs["tags"]=serv_infos_received["tags"]
+                else:
+                    return "Error in tag edition"
+        if "ip" in serv_infos_received.keys() or "ssh_key" in serv_infos_received.keys() or "ssh_port" in serv_infos_received.keys():
+            ip=server["serv_ip"]
+            ssh_port=server["serv_ssh_port"]
+            ssh_key=server["serv_ssh_key"]
+            if "ip" in serv_infos_received.keys():
+                if serv_infos_received["ip"]!= server["serv_ip"]:
+                    modifs["ip"]=serv_infos_received["ip"]
+                    ip=serv_infos_received["ip"]
+            if "ssh_key" in serv_infos_received.keys():
+                if serv_infos_received["ssh_key"]!= server["serv_ssh_key"]:
+                    modifs["ssh_key"]=serv_infos_received["ssh_key"]
+                    ssh_key=serv_infos_received["ssh_key"]
+            if "ssh_port" in serv_infos_received.keys():
+                if serv_infos_received["ssh_port"]!= server["serv_ssh_port"]:
+                    modifs["ssh_port"]=serv_infos_received["ssh_port"]
+                    ssh_port=serv_infos_received["ssh_port"]
+            try:
+                edit_connection(DB_settings, server, ip, ssh_port, ssh_key)
+            except:
+                return "Error in connection edition"
+
         if modifs != {}:
             Gotham_link_BDD.edit_server_DB(DB_settings, modifs, conditions)
 
@@ -564,7 +590,7 @@ def edit_lk():
 
         link_infos_received={}
         # Get all function's parameters
-        if id in data.keys():
+        if "id" in data.keys():
             link_infos_received["id"] = data["id"]
         else:
             return "Need to specify a link id"
