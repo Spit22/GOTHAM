@@ -684,25 +684,58 @@ def ls_honeypot():
 
         hp_infos_received={}
 
-        if (id):
-            hp_infos_received["id"] = id
-            try:
-                # Normalize infos
-                hp_infos_received = Gotham_normalize.normalize_honeypot_infos(hp_infos_received)            
-            except Exception as e:
-                return "Invalid data sent "+str(e)
-            honeypots = Gotham_link_BDD.get_honeypot_infos(DB_settings, id=hp_infos_received["id"])
-            if honeypots!=[]:
-                honeypot = Gotham_normalize.normalize_display_object_infos(honeypots[0],"hp")
-                return honeypot
+        id = request.args.get('id')
+        tags = request.args.get('tags')
+        name = request.args.get('name')
+        descr = request.args.get('descr')
+        port = request.args.get('port')
+        state = request.args.get('state')
+
+
+        if (id) or (tags) or (name) or (descr) or (port) or (state):
+            if (id):
+                hp_infos_received["id"] = id
             else:
-                logging.error(f"You tried to list a honeypot that doesn't exists with the id = {id}")
-                return "Unknown id "+hp_infos_received["id"]+" for Honeypot"
+                hp_infos_received["id"] = "%"
+            if (tags):
+                hp_infos_received["tags"] = tags
+            else:
+                hp_infos_received["tags"] = "%"
+            if (name):
+                hp_infos_received["name"] = name
+            else:
+                hp_infos_received["name"] = "%"
+            if (descr):
+                hp_infos_received["descr"] = descr
+            else:
+                hp_infos_received["descr"] = "%"
+            if (port):
+                hp_infos_received["port"] = port
+            else:
+                hp_infos_received["port"] = "%"
+            if (state):
+                hp_infos_received["state"] = state
+            else:
+                hp_infos_received["state"] = "%"
+            
+
+            honeypots_exact = Gotham_link_BDD.get_honeypot_infos(DB_settings, mode=False, id=hp_infos_received["id"], name=hp_infos_received["name"], tags=hp_infos_received["tags"], state=hp_infos_received["state"], descr=hp_infos_received["descr"], port=hp_infos_received["port"])
+            honeypots_others = Gotham_link_BDD.get_honeypot_infos(DB_settings, mode=True, id=hp_infos_received["id"], name=hp_infos_received["name"], tags=hp_infos_received["tags"], state=hp_infos_received["state"], descr=hp_infos_received["descr"], port=hp_infos_received["port"])
+            if honeypots_exact!=[] or honeypots_others != []:
+                set_exact={ frozenset(row.items()) for row in honeypots_exact}
+                set_others={ frozenset(row.items()) for row in honeypots_others}
+                honeypots_others=[dict(i) for i in set_others - set_exact]
+                honeypots_exact = [Gotham_normalize.normalize_display_object_infos(honeypot,"hp") for honeypot in honeypots_exact]
+                honeypots_others = [Gotham_normalize.normalize_display_object_infos(honeypot,"hp") for honeypot in honeypots_others]
+                return {"exact":honeypots_exact,"others":honeypots_others}
+            else:
+                logging.error(f"No honeypot found with given arguments : {hp_infos_received}")
+                return "No honeypot found with given arguments"
         else:
             honeypots = Gotham_link_BDD.get_honeypot_infos(DB_settings)
             if honeypots!=[]:
                 honeypots=[Gotham_normalize.normalize_display_object_infos(honeypot,"hp") for honeypot in honeypots]
-                return honeypots
+                return {"honeypots":honeypots}
             else:
                 logging.error(f"You tried to list honeypots but no one exists")
                 return "No honeypot in database"
@@ -715,25 +748,63 @@ def ls_srv():
 
         serv_infos_received = {}
 
-        if (id):
-            serv_infos_received["id"] = id
-            try:
-                # Normalize infos
-                serv_infos_received = Gotham_normalize.normalize_server_infos(serv_infos_received)            
-            except Exception as e:
-                return "Invalid data sent "+str(e)
-            servers = Gotham_link_BDD.get_server_infos(DB_settings, id=serv_infos_received["id"])
-            if servers!=[]:
-                server = Gotham_normalize.normalize_display_object_infos(servers[0],"serv")
-                return server
+        id = request.args.get("id")
+        ip = request.args.get("ip")
+        name = request.args.get("name")
+        tags = request.args.get("tags")
+        state = request.args.get("state")
+        descr = request.args.get("descr")
+        ssh_port = request.args.get("ssh_port")
+
+        if (id) or (ip) or (name) or (tags) or (state) or (descr) or (ssh_port):
+            if (id):
+                serv_infos_received["id"] = id
             else:
-                logging.error(f"You tried to list a server that doesn't exists with the id = {id}")
-                return "Unknown id "+serv_infos_received["id"]+" for server"
+                serv_infos_received["id"] = "%"
+            if (ip):
+                serv_infos_received["ip"] = ip
+            else:
+                serv_infos_received["ip"] = "%"
+            if (tags):
+                serv_infos_received["tags"] = tags
+            else:
+                serv_infos_received["tags"] = "%"
+            if (name):
+                serv_infos_received["name"] = name
+            else:
+                serv_infos_received["name"] = "%"
+            if (descr):
+                serv_infos_received["descr"] = descr
+            else:
+                serv_infos_received["descr"] = "%"
+            if (ssh_port):
+                serv_infos_received["ssh_port"] = ssh_port
+            else:
+                serv_infos_received["ssh_port"] = "%"
+            if (state):
+                serv_infos_received["state"] = state
+            else:
+                serv_infos_received["state"] = "%"
+            
+            
+            servers_exact = Gotham_link_BDD.get_server_infos(DB_settings, mode=False, id=serv_infos_received["id"], ip=serv_infos_received["ip"],  name=serv_infos_received["name"], tags=serv_infos_received["tags"], state=serv_infos_received["state"], descr=serv_infos_received["descr"], ssh_port=serv_infos_received["ssh_port"])
+            servers_others = Gotham_link_BDD.get_server_infos(DB_settings, mode=True, id=serv_infos_received["id"], ip=serv_infos_received["ip"],  name=serv_infos_received["name"], tags=serv_infos_received["tags"], state=serv_infos_received["state"], descr=serv_infos_received["descr"], ssh_port=serv_infos_received["ssh_port"])
+            
+            if servers_exact!=[] or servers_others!=[]:
+                set_exact={ frozenset(row.items()) for row in servers_exact}
+                set_others={ frozenset(row.items()) for row in servers_others}
+                servers_others=[dict(i) for i in set_others - set_exact]
+                servers_exact = [Gotham_normalize.normalize_display_object_infos(server,"serv") for server in servers_exact]
+                servers_others = [Gotham_normalize.normalize_display_object_infos(server,"serv") for server in servers_others]
+                return {"exact":servers_exact,"others":servers_others}
+            else:
+                logging.error(f"No server found with given arguments : {hp_infos_received}")
+                return "No server found with given arguments"
         else:
             servers = Gotham_link_BDD.get_server_infos(DB_settings)
             if servers!=[]:
                 servers=[Gotham_normalize.normalize_display_object_infos(server,"serv") for server in servers]
-                return servers
+                return {"servers":servers}
             else:
                 logging.error(f"You tried to list servers but no one exists")
                 return "No server in database"
@@ -746,29 +817,84 @@ def ls_lk():
 
         link_infos_received = {}
 
-        if (id):
-            link_infos_received["id"] = id
-            try:
-                # Normalize infos
-                link_infos_received = Gotham_normalize.normalize_link_infos(link_infos_received)            
-            except Exception as e:
-                return "Invalid data sent "+str(e)
-            links = Gotham_link_BDD.get_link_infos(DB_settings, id=link_infos_received["id"])
-            if links!=[]:
-                link = Gotham_normalize.normalize_display_object_infos(links[0],"link")
-                return link
+        id = request.args.get("id")
+        nb_hp = request.args.get("nb_hp")
+        nb_serv = request.args.get("nb_serv")
+        tags_hp = request.args.get("tags_hp")
+        tags_serv = request.args.get("tags_serv")
+
+        if (id) or (nb_hp) or (nb_serv) or (tags_hp) or (tags_serv):
+            if (id):
+                link_infos_received["id"] = id
             else:
-                logging.error(f"You tried to list a link that doesn't exists with the id = {id}")
-                return "Unknown id "+link_infos_received["id"]+" for link"
+                link_infos_received["id"] = "%"
+            if (nb_hp):
+                link_infos_received["nb_hp"] = nb_hp
+            else:
+                link_infos_received["nb_hp"] = "%"
+            if (nb_serv):
+                link_infos_received["nb_serv"] = nb_serv
+            else:
+                link_infos_received["nb_serv"] = "%"
+            if (tags_hp):
+                link_infos_received["tags_hp"] = tags_hp
+            else:
+                link_infos_received["tags_hp"] = "%"
+            if (tags_serv):
+                link_infos_received["tags_serv"] = tags_serv
+            else:
+                link_infos_received["tags_serv"] = "%"
+        
+            links_exact = Gotham_link_BDD.get_link_infos(DB_settings, mode=False, id=link_infos_received["id"], nb_hp=link_infos_received["nb_hp"], nb_serv=link_infos_received["nb_serv"], tags_hp=link_infos_received["tags_hp"], tags_serv=link_infos_received["tags_serv"])
+            links_others = Gotham_link_BDD.get_link_infos(DB_settings, mode=True, id=link_infos_received["id"], nb_hp=link_infos_received["nb_hp"], nb_serv=link_infos_received["nb_serv"], tags_hp=link_infos_received["tags_hp"], tags_serv=link_infos_received["tags_serv"])
+            
+            if links_exact!=[] or links_others!=[]:
+                set_exact={ frozenset(row.items()) for row in links_exact}
+                set_others={ frozenset(row.items()) for row in links_others}
+                links_others=[dict(i) for i in set_others - set_exact]
+                links_exact = [Gotham_normalize.normalize_display_object_infos(link,"link") for link in links_exact]
+                links_others = [Gotham_normalize.normalize_display_object_infos(link,"link") for link in links_others]
+                return {"exact":links_exact,"others":links_others}
+            else:
+                logging.error(f"No link found with given arguments : {hp_infos_received}")
+                return "No link found with given arguments"
+
         else:
             links = Gotham_link_BDD.get_link_infos(DB_settings)
             if links!=[]:
                 links=[Gotham_normalize.normalize_display_object_infos(link,"link") for link in links]
-                return links
+                return {"links":links}
             else:
                 logging.error(f"You tried to list links but no one exists")
                 return "No link in database"
+   
+
+@app.route('/list/all', methods=['GET'])
+def ls_all():
+        # Gives information on all objects
         
+        honeypots = Gotham_link_BDD.get_honeypot_infos(DB_settings)
+        if honeypots!=[]:
+            honeypots=[Gotham_normalize.normalize_display_object_infos(honeypot,"hp") for honeypot in honeypots]
+        else:
+            honeypots="No honeypot in database"   
+
+        servers = Gotham_link_BDD.get_server_infos(DB_settings)
+        if servers!=[]:
+            servers=[Gotham_normalize.normalize_display_object_infos(server,"serv") for server in servers]
+        else:
+            servers="No server in database"
+
+        links = Gotham_link_BDD.get_link_infos(DB_settings)
+        if links!=[]:
+            links=[Gotham_normalize.normalize_display_object_infos(link,"link") for link in links]
+        else:
+            links="No link in database"
+
+        
+        return {"honeypots":honeypots,"servers":servers,"links":links}
+        
+
 
 @app.route('/version', methods=['GET'])
 def get_version():
