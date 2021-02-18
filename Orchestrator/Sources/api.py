@@ -22,7 +22,7 @@ import rm_link
 # GOTHAM's Edit Scripts
 import edit_hp
 import edit_server
-import edit_link
+#import edit_link
 
 # GOTHAM'S LIB
 import Gotham_link_BDD
@@ -443,27 +443,31 @@ def edit_honeypot():
         modifs={}
         conditions={"id":honeypot["hp_id"]}
         if "name" in hp_infos_received.keys():
-            if hp_infos_received["name"]!= honeypot["hp_name"]:
+            if hp_infos_received["name"] != honeypot["hp_name"]:
                 modifs["name"]=hp_infos_received["name"]
         if "descr" in hp_infos_received.keys():
-            if hp_infos_received["descr"]!= honeypot["hp_descr"]:
-                modifs["descr"]=hp_infos_received["descr"]
+            if hp_infos_received["descr"] != honeypot["hp_descr"]:
+                modifs["descr"] = hp_infos_received["descr"]
         if "tags" in hp_infos_received.keys():
-            if set(hp_infos_received["tags"].split(tags_separator))!= set(honeypot["hp_tags"].split("||")):
-                succes=True
+            if set(hp_infos_received["tags"].split(tags_separator)) != set(honeypot["hp_tags"].split("||")):
+                succes = True
                 if honeypot['link_id'] != None and honeypot['link_id'] !="NULL":
-                    succes=False
-                    succes=edit_hp.edit_tags(DB_settings, honeypot, hp_infos_received["tags"])
-                if succes==True :
-                    modifs["tags"]=hp_infos_received["tags"]
+                    succes = False
+                    try:
+                        edit_hp.edit_tags(DB_settings, honeypot, hp_infos_received["tags"])
+                        success = True
+                    except:
+                        success = False
+                if succes:
+                    modifs["tags"] = hp_infos_received["tags"]
                 else:
                     return "Error in tag edition"
         if "logs" in hp_infos_received.keys():
-            if hp_infos_received["logs"]!= honeypot["hp_logs"]:
+            if hp_infos_received["logs"] != honeypot["hp_logs"]:
                 return "Edit logs not IMPLEMENTED"
-                modifs["logs"]=hp_infos_received["logs"]
+                modifs["logs"] = hp_infos_received["logs"]
         if "parser" in hp_infos_received.keys():
-            if hp_infos_received["parser"]!= honeypot["hp_parser"]:
+            if hp_infos_received["parser"] != honeypot["hp_parser"]:
                 return "Edit parser not IMPLEMENTED"
                 modifs["parser"]=hp_infos_received["parser"]
         if "port" in hp_infos_received.keys():
@@ -569,7 +573,7 @@ def edit_srv():
                     modifs["ssh_port"]=serv_infos_received["ssh_port"]
                     ssh_port=serv_infos_received["ssh_port"]
             try:
-                edit_connection(DB_settings, server, ip, ssh_port, ssh_key)
+                edit_server.edit_connection(DB_settings, server, ip, ssh_port, ssh_key)
             except:
                 return "Error in connection edition"
 
@@ -852,7 +856,7 @@ def ls_srv():
                 servers_others = [Gotham_normalize.normalize_display_object_infos(server,"serv") for server in servers_others]
                 return {"exact":servers_exact,"others":servers_others}
             else:
-                logging.error(f"No server found with given arguments : {hp_infos_received}")
+                logging.error(f"No server found with given arguments : {serv_infos_received}")
                 return "No server found with given arguments"
         else:
             servers = Gotham_link_BDD.get_server_infos(DB_settings)
@@ -910,7 +914,7 @@ def ls_lk():
                 links_others = [Gotham_normalize.normalize_display_object_infos(link,"link") for link in links_others]
                 return {"exact":links_exact,"others":links_others}
             else:
-                logging.error(f"No link found with given arguments : {hp_infos_received}")
+                logging.error(f"No link found with given arguments : {link_infos_received}")
                 return "No link found with given arguments"
 
         else:

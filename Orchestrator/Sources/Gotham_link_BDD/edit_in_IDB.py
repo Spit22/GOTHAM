@@ -7,6 +7,7 @@ import configparser
 from . import get_infos, remove_in_IDB, add_in_IDB
 from Gotham_normalize import normalize_honeypot_infos, normalize_server_infos, normalize_link_infos, normalize_lhs_infos, normalize_modif_to_str, normalize_conditions_to_str
 
+
 # Logging components
 import os
 import logging
@@ -43,12 +44,12 @@ def server(DB_connection, modifs, conditions):
 
     if "tags" in modifs.items():
         if "id" in conditions.items():
-            tags=modifs.pop("tags")
-            new_tag_list=tags.split(tag_separator)
-            servers=Gotham_link_BDD.get_server_infos(DB_settings, id=conditions["id"])
-            old_tag_list=servers[0]["serv_tags"].split("||")
-            deleted_tags=list(set(old_tag_list)-set(new_tag_list))
-            added_tags=list(set(new_tag_list)-set(old_tag_list))
+            tags = modifs.pop("tags")
+            new_tag_list = tags.split(tag_separator)
+            servers = get_infos.server(DB_connection, id=conditions["id"])
+            old_tag_list = servers[0]["serv_tags"].split("||")
+            deleted_tags = list(set(old_tag_list)-set(new_tag_list))
+            added_tags = list(set(new_tag_list)-set(old_tag_list))
             for tag in deleted_tags:
                 remove_in_IDB.server_in_serv_tag(DB_connection, id=servers[0]["serv_id"], tag=tag)
             for tag in added_tags:
@@ -145,7 +146,7 @@ def honeypot(DB_connection, modifs, conditions):
         if "id" in conditions.items():
             tags=modifs.pop("tags")
             new_tag_list=tags.split(tag_separator)
-            honeypots=Gotham_link_BDD.get_honeypot_infos(DB_settings, id=conditions["id"])
+            honeypots=get_infos.honeypot(DB_connection, id=conditions["id"])
             old_tag_list=honeypots[0]["hp_tags"].split("||")
             deleted_tags=list(set(old_tag_list)-set(new_tag_list))
             added_tags=list(set(new_tag_list)-set(old_tag_list))

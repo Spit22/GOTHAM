@@ -2,13 +2,15 @@
 # Import external libs
 from io import StringIO
 import base64
+import sys
+import configparser
 
 # GOTHAM'S LIB
 import Gotham_link_BDD
 import Gotham_check
 import Gotham_choose
 import Gotham_normalize
-from . import rm_hp
+import rm_hp
 
 # Logging components
 import os
@@ -24,9 +26,10 @@ def edit_tags(DB_settings, honeypot, tags):
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     tags_separator = config['tag']['separator']
-    port_separator = config['port']['separator']
-
-    mod_honeypot=honeypot
+    
+    #port_separator = config['port']['separator']
+    #mod_honeypot=honeypot
+    
     old_tags=honeypot["hp_tags"].split("||")
     new_tags=tags.split(tags_separator)
 
@@ -36,12 +39,13 @@ def edit_tags(DB_settings, honeypot, tags):
 
     for deleted_tag in deleted_tags:
         duplicate_hp_list=[]
+        i = 0
         for link in dsp_honeypot["links"]:
-            if deleted_tags in link["link_tags_hp"].split("||"):
+            if deleted_tag in link["link_tags_hp"].split("||"):
                 
                 
                     replaced=False
-                    link_tags_hp=tag_separator.join(link["link_tags_hp"].split("||"))
+                    link_tags_hp=tags_separator.join(link["link_tags_hp"].split("||"))
 
                     # Get all honeypots corresponding to tags
                     honeypots = Gotham_check.check_tags("hp",Gotham_link_BDD.get_honeypot_infos(DB_settings, tags=link_tags_hp), tags_hp=link_tags_hp)
@@ -63,7 +67,7 @@ def edit_tags(DB_settings, honeypot, tags):
                             honeypot=rm_hp.duplicate_hp(DB_settings,honeypots)
                             duplicate_hp_list.append(honeypot["hp_id"])
                         try:
-                            rm_hp.configure_honeypot_replacement(DB_settings,dsp_honeypot,new_dsp_honeypot=honeypot,num_link=i)
+                            rm_hp.configure_honeypot_replacement(DB_settings,dsp_honeypot, new_hp_infos=honeypot, num_link=i)
                         except:
                             sys.exit(1)
                             
@@ -77,7 +81,7 @@ def edit_tags(DB_settings, honeypot, tags):
 
                     # If we can't replace, just edit link to decrease nb hp
                     if replaced==False:
-                        if int(dsp_honeypot["links"][i]["link_nb_hp"]) > 1:
+                        if int(link["link_nb_hp"]) > 1:
                             # Configure all server to not redirect on hp
                             try:
                                 rm_hp.configure_honeypot_replacement(DB_settings,dsp_honeypot,num_link=i)
@@ -85,7 +89,7 @@ def edit_tags(DB_settings, honeypot, tags):
                                 sys.exit(1)
 
                             try:
-                                Gotham_link_BDD.remove_lhs(DB_settings,id_link=dsp_honeypot["links"][i]["link_id"], id_hp=dsp_honeypot["hp_id"])
+                                Gotham_link_BDD.remove_lhs(DB_settings,id_link=link["link_id"], id_hp=dsp_honeypot["hp_id"])
                             except:
                                 sys.exit(1)
                             try:
@@ -98,3 +102,4 @@ def edit_tags(DB_settings, honeypot, tags):
                             # If nb hp=1, error, we can't do nothing
                             logging.error(f"You tried to remove a running honeypot with the id = {id}, and it can't be replaced or deleted")
                             sys.exit(1)
+            i = i + 1
