@@ -65,6 +65,40 @@ def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id_hp):
     # If deployment is OK, return True
     return True
 
+########### RSYSLOG SECTION ############
+
+def generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, id_hp):
+    # Vars
+    rsyslog_conf_datacenter_local_path = "/rsyslog/datacenter/"
+    remote_hp_log_file_path = "TO BE DEFINED"
+    # Create the configuration file
+    rsyslog_conf_file = open(rsyslog_conf_datacenter_local_path + id_hp + ".conf", "a")
+    # Monitor the log file of the honeypot
+    rsyslog_conf_file.write('input(Type="imfile" File="' + remote_hp_log_file_path + '" Tag="' + id_hp + '")\n')
+    # Apply parsing rules
+    rsyslog_conf_file.write('action(Type="mmnormalize" ruleBase="' + str(rulebase_path) + '")\n')
+    # Send to orchestrator in JSON format
+    rsyslog_conf_file.write('action(Type="omfwd" Target="' + str(orch_ip) + '" Port="' + str(orch_rsyslog_port) + '" Protocol="tcp" Template="JSON_template")\n')
+    # Stop dealing with these logs
+    rsyslog_conf_file.write('stop\n')
+
+def generate_orchestrator_rsyslog_conf(id_hp):
+    # Vars
+    rsyslog_conf_orchestrator_local_path = "/rsyslog/orchestrator/"
+    local_hp_log_file_path = "TO BE DEFINED"
+    # Create the configuration file
+    rsyslog_conf_file = open(rsyslog_conf_orchestrator_local_path + id_hp + ".conf", "a")
+    # Filter the logs with honeypot tag
+    rsyslog_conf_file.write(':msg, contains, "' + id_hp + '"\n')
+    # Dump the logs in local log file
+    rsyslog_conf_file.write('action(type="omfile" File="' + local_hp_log_file_path + '")\n')
+    # Stop dealing with these logs
+    rsyslog_conf_file.write('stop\n')
+
+#def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_port, rulebase_path, id_hp):
+
+    
+
 #### TEST SECTION ####
 if __name__ == '__main__':
     id = "sv-test"
@@ -73,3 +107,4 @@ if __name__ == '__main__':
     honeypot_port = "22"
     mapped_port = "2200"
     generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_port)
+
