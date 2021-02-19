@@ -104,12 +104,15 @@ def generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_pa
         logging.error(f"Fail to create rsyslog configuration for orchestrator : {e}")
         sys.exit(1)
 
-def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_port, local_rulebase_path, remote_rulebase_path, id_hp):
+def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_port, id_hp):
+    # Vars
     rsyslog_conf_datacenter_local_path = "/rsyslog/datacenter/"
     rsyslog_conf_orchestrator_local_path = "/rsyslog/orchestrator/"
     rsyslog_conf_datacenter_remote_path = "/rsyslog/"
     remote_hp_log_file_path = "TO BE DEFINED"
-    local_hp_log_file_path = "/rsyslog/log"
+    local_hp_log_file_path = "/rsyslog/log/"
+    local_rulebase_path = "/rsyslog/rulebase/"
+    remote_rulebase_path = "/rsyslog/rulebase/"
     # Generate configuration files
     try:
         generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, local_rulebase_path, id_hp, rsyslog_conf_datacenter_local_path, remote_hp_log_file_path)
@@ -119,7 +122,7 @@ def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_po
     # Send datacenter rsyslog configuration to the datacenter
     try:
         print("bypass")
-        #send_file(dc_ip, dc_ssh_port, dc_ssh_key, local_rulebase_path, remote_rulebase_path)
+        #send_file(dc_ip, dc_ssh_port, dc_ssh_key, local_rulebase_path + id_hp + ".rb", remote_rulebase_path)
         #send_file(dc_ip, dc_ssh_port, dc_ssh_key, rsyslog_conf_datacenter_local_path + id_hp + ".conf", rsyslog_conf_datacenter_remote_path)
         #execute_commands(dc_ip, dc_ssh_port, dc_ssh_key, "systemctl restart rsyslog")
     except:

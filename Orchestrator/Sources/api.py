@@ -170,7 +170,7 @@ def add_honeypot(hp_infos_received={}):
         
         # Create and deploy rsyslog configuration on the datacenter and the orchestrator
         try:
-            add_hp.deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_port, local_rulebase_path, remote_rulebase_path, id_hp)
+            add_hp.deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_port, id)
         except:
             return "Rsyslog configuration failed"
 

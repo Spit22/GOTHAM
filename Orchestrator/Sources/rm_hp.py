@@ -243,3 +243,27 @@ def duplicate_hp(DB_settings,honeypots):
         sys.exit(1)
     result = get_honeypot_infos(DB_settings, id=id_hp)
     return result[0]
+
+######### RSYSLOG SECTION ###########
+
+def remove_rsyslog_configuration(datacenter_settings, id_hp, ):
+    # Vars
+    rsyslog_conf_datacenter_local_path = "/rsyslog/datacenter/"
+    rsyslog_conf_orchestrator_local_path = "/rsyslog/orchestrator/"
+    rsyslog_conf_datacenter_remote_path = "/rsyslog/"
+    remote_hp_log_file_path = "TO BE DEFINED"
+    local_hp_log_file_path = "/rsyslog/log/"
+    local_rulebase_path = "/rsyslog/rulebase/"
+    remote_rulebase_path = "/rsyslog/rulebase/"
+    # Remove RSYSLOG configuration on the datacenter
+    try:
+        commands = ["sudo rm " + remote_rulebase_path + ".rb", "sudo rm " + remote_hp_log_file_path + id_hp + ".log", "sudo rm " + rsyslog_conf_datacenter_remote_path + id_hp + ".conf"]
+        execute_commands(datacenter_settings["hostname"], datacenter_settings["ssh_port"], datacenter_settings["ssh_key"], commands)
+    except:
+        sys.exit(1)
+    # Remove local RSYSLOG configuration
+    try:
+        commands = ["sudo rm " + local_rulebase_path + ".rb", "sudo rm " + local_hp_log_file_path + id_hp + ".log", "sudo rm " + rsyslog_conf_datacenter_local_path + id_hp + ".conf", "sudo rm " + rsyslog_conf_orchestrator_local_path + id_hp + ".conf"]
+        execute_commands(datacenter_settings["hostname"], datacenter_settings["ssh_port"], datacenter_settings["ssh_key"], commands)
+    except:
+        sys.exit(1)
