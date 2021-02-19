@@ -235,7 +235,7 @@ def duplicate_hp(DB_settings,honeypots):
 
 ######### RSYSLOG SECTION ###########
 
-def remove_rsyslog_configuration(datacenter_settings, id_hp, ):
+def remove_rsyslog_configuration(datacenter_settings, id_hp):
     # Vars
     rsyslog_conf_datacenter_local_path = "/rsyslog/datacenter/"
     rsyslog_conf_orchestrator_local_path = "/rsyslog/orchestrator/"

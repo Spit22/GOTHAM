@@ -805,6 +805,11 @@ def rm_honeypot():
         except Exception as e:
             return "An error occured during the deletion of the honeypot : "+str(e)
         
+        try:
+            rm_hp.remove_rsyslog_configuration(datacenter_settings, id)
+        except:
+            return "An error occured during the deletion of the rsyslog configuration"
+        
         return "Deletion completed : " + str(id)
 
 @app.route('/delete/server', methods=['POST'])
@@ -815,17 +820,13 @@ def rm_srv():
 
         # Get POST data on JSON format
         data = request.get_json()
-
         # Get all function's parameters
         id = data["id"]
-
-        ##### TODO : ADD ABILITY TO DELETE WITH IP ######
+        ##### TODO ??? : ADD ABILITY TO DELETE WITH IP ######
         try:
             rm_server.main(DB_settings, id=id)
-        
         except Exception as e:
             return "An error occured during the deletion of the server : "+str(e)
-        
         return "Deletion completed : " + str(id)
 
 @app.route('/delete/link', methods=['POST'])
@@ -836,16 +837,13 @@ def rm_lk():
 
         # Get POST data on JSON format
         data = request.get_json()
-
         # Get all function's parameters
         id = data["id"]
-
+        # Remove the honeypot
         try:
             rm_link.main(DB_settings, id=id)
-        
         except Exception as e:
             return "An error occured during the deletion of the link : "+str(e)
-        
         return "Deletion completed : " + str(id)
 
 @app.route('/list/honeypot', methods=['GET'])
