@@ -10,7 +10,7 @@ import base64
 from Gotham_SSH_SCP import execute_commands
 from Gotham_link_BDD import remove_honeypot_DB, get_honeypot_infos, edit_lhs_DB, edit_link_DB, remove_lhs
 from Gotham_normalize import normalize_id_honeypot,normalize_honeypot_infos, normalize_display_object_infos
-import api
+#import api
 import add_link
 
 # Logging components

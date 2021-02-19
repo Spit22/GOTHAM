@@ -35,7 +35,7 @@ def main(DB_settings, id):
         sys.exit(1)
     # Remove NGINX file of the link on the Orchestrator
     try:
-        subprocess.check_call(["rm /data/template/"+str(id)+"-*.conf"], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        subprocess.check_call(["rm /data/template/"+str(id)+"*"], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
     except Exception as e:
         logging.error(f"Remove NGINX scripts of link failed : {e}")
         sys.exit(1)
@@ -62,7 +62,7 @@ def remove_links_on_servers(DB_settings, result):
         ssh_key = StringIO(serv_dico['serv_ssh_key'])
         try:
             print("rm "+str(result['link_id']))
-            commands = ["rm /etc/nginx/conf.d/links/" + result['link_id'] +"-*.conf"]
+            commands = ["rm /etc/nginx/conf.d/links/" + result['link_id'] +"-*.conf", "nginx -s reload"]
             execute_commands(hostname, port, ssh_key, commands)
         except Exception as e:
             logging.error(f"{result['link_id']} removal on servers failed : {e}")

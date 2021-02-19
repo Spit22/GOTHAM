@@ -38,8 +38,13 @@ logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',leve
 # Cette section remplace temporairement le fichier de configuration /etc/gotham/orchestrator.conf #
 app.config["DEBUG"] = True
 version = "0.0"
-DB_settings = {"username":"root", "password":"password", "hostname":"localhost", "port":"3306", "database":"GOTHAM"}
-dc_ports_list = range(1024,2048)
+# Retrieve settings from config file
+config = configparser.ConfigParser()
+config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+DB_settings = {"username":config['internaldb']['username'], "password":config['internaldb']['password'], "hostname":config['internaldb']['hostname'], "port":config['internaldb']['port'], "database": config['internaldb']['database']}
+#DB_settings = {"username":"root", "password":"password", "hostname":"localhost", "port":"3306", "database":"GOTHAM"}
+dc_ports_list = range(int(config['datacenter']['min_port']), int(config['datacenter']['max_port']))
+#dc_ports_list = range(1024,2048)
 dockerfile_storage = "/data/"
 # Path to store object's data
 store_path = "/data"
@@ -634,10 +639,10 @@ def rm_honeypot():
         # Get all function's parameters
         id = data["id"]
 
-        try:
-            rm_hp.main(DB_settings, id)
-        except Exception as e:
-            return "An error occured during the deletion of the honeypot : "+str(e)
+        #try:
+        rm_hp.main(DB_settings, id)
+        #except Exception as e:
+        #    return "An error occured during the deletion of the honeypot : "+str(e)
         return "Deletion completed : " + str(id)
 
 @app.route('/delete/server', methods=['POST'])
@@ -670,11 +675,11 @@ def rm_lk():
         # Get all function's parameters
         id = data["id"]
 
-        #try:
-        rm_link.main(DB_settings, id=id)
-        #except Exception as e:
-        #    return "An error occured during the deletion of the link : "+str(e)
-        #return "Deletion completed : " + str(id)
+        try:
+            rm_link.main(DB_settings, id=id)
+        except Exception as e:
+            return "An error occured during the deletion of the link : "+str(e)
+        return "Deletion completed : " + str(id)
 
 @app.route('/list/honeypot', methods=['GET'])
 def ls_honeypot():
@@ -798,7 +803,7 @@ def ls_srv():
                 servers_others = [Gotham_normalize.normalize_display_object_infos(server,"serv") for server in servers_others]
                 return {"exact":servers_exact,"others":servers_others}
             else:
-                logging.error(f"No server found with given arguments : {hp_infos_received}")
+                logging.error(f"No server found with given arguments : {serv_infos_received}")
                 return "No server found with given arguments"
         else:
             servers = Gotham_link_BDD.get_server_infos(DB_settings)
@@ -856,7 +861,7 @@ def ls_lk():
                 links_others = [Gotham_normalize.normalize_display_object_infos(link,"link") for link in links_others]
                 return {"exact":links_exact,"others":links_others}
             else:
-                logging.error(f"No link found with given arguments : {hp_infos_received}")
+                logging.error(f"No link found with given arguments : {link_infos_received}")
                 return "No link found with given arguments"
 
         else:

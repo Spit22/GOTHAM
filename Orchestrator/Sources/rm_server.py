@@ -11,6 +11,8 @@ import add_link
 # Logging components
 import os
 import logging
+from io import StringIO
+
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
@@ -59,7 +61,7 @@ def main(DB_settings, id='sv-00000000000000000000000000000000', ip='255.255.255.
                     sys.exit(1)
     # Remove Server from the server
     try:
-        remove_nginx_on_server(result[0]['serv_ip'],result[0]['serv_ssh_port'],result[0]['serv_ssh_key'])
+        remove_nginx_on_server(result[0]['serv_ip'],result[0]['serv_ssh_port'],StringIO(result[0]['serv_ssh_key']))
     except:
         sys.exit(1)
     # Remove Server from the IDB
