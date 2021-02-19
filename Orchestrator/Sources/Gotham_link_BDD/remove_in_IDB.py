@@ -33,12 +33,17 @@ def server(DB_connection, id):
         logging.error(f"'{id}' removal from the table Server failed : {e}")
         sys.exit(1)
 
-def server_in_serv_tag(DB_connection, id):
+def server_in_serv_tag(DB_connection, id="", tag=""):
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request
     try :
-        cur.execute("DELETE FROM Serv_Tags WHERE id_serv = ?",(id,))
+        if tag=="":
+            cur.execute("DELETE FROM Serv_Tags WHERE id_serv = ?",(id,))
+        elif id=="":
+            cur.execute("DELETE FROM Serv_Tags LEFT JOIN Tags on Serv_Tags.id_tag=Tags.id WHERE tag = ?",(tag,))
+        else :
+            cur.execute("DELETE FROM Serv_Tags LEFT JOIN Tags on Serv_Tags.id_tag=Tags.id WHERE id_serv = ? and tag = ?",(id,tag))
         # Apply the changes
         DB_connection.commit()
         # Logs
@@ -67,12 +72,18 @@ def honeypot(DB_connection, id):
         logging.error(f"'{id}' removal from the table 'Honeypot' : {e}")
         sys.exit(1)
 
-def honeypot_in_hp_tag(DB_connection, id):
+def honeypot_in_hp_tag(DB_connection, id="", tag=""):
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request
     try :
-        cur.execute("DELETE FROM Hp_Tags WHERE id_hp = ?",(id,))
+        if tag=="":
+            cur.execute("DELETE FROM Hp_Tags WHERE id_hp = ?",(id,))
+        elif id=="":
+            cur.execute("DELETE FROM Hp_Tags LEFT JOIN Tags on Hp_Tags.id_tag=Tags.id WHERE tag = ?",(tag,))
+        else :
+            cur.execute("DELETE FROM Hp_Tags LEFT JOIN Tags on Hp_Tags.id_tag=Tags.id WHERE id_hp = ? and tag = ?",(id,tag))
+        
         # Apply the changes
         DB_connection.commit()
         # Logs

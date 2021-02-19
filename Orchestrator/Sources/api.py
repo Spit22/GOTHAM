@@ -19,6 +19,11 @@ import rm_hp
 import rm_server
 import rm_link
 
+# GOTHAM's Edit Scripts
+import edit_hp
+import edit_server
+#import edit_link
+
 # GOTHAM'S LIB
 import Gotham_link_BDD
 import Gotham_check
@@ -397,6 +402,11 @@ def edit_honeypot():
         # parser (string) : règle de parsing des logs monitorés
         # service_port (int) : port on which the honeypot will lcoally listen
 
+        config = configparser.ConfigParser()
+        config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+        ports_separator = config['port']['separator']
+        tags_separator = config['tag']['separator']
+
         # Get POST data on JSON format
         data = request.json
 
@@ -405,7 +415,7 @@ def edit_honeypot():
 
         hp_infos_received={}
         # Get all function's parameters
-        if id in data.keys():
+        if "id" in data.keys():
             hp_infos_received["id"] = data["id"]
         else:
             return "Need to specify an honeypot id"
@@ -437,21 +447,31 @@ def edit_honeypot():
         modifs={}
         conditions={"id":honeypot["hp_id"]}
         if "name" in hp_infos_received.keys():
-            if hp_infos_received["name"]!= honeypot["hp_name"]:
+            if hp_infos_received["name"] != honeypot["hp_name"]:
                 modifs["name"]=hp_infos_received["name"]
         if "descr" in hp_infos_received.keys():
-            if hp_infos_received["descr"]!= honeypot["hp_descr"]:
-                modifs["descr"]=hp_infos_received["descr"]
+            if hp_infos_received["descr"] != honeypot["hp_descr"]:
+                modifs["descr"] = hp_infos_received["descr"]
         if "tags" in hp_infos_received.keys():
-            if hp_infos_received["tags"]!= honeypot["hp_tags"]:
-                return "Edit tags not IMPLEMENTED"
-                modifs["tags"]=hp_infos_received["tags"]
+            if set(hp_infos_received["tags"].split(tags_separator)) != set(honeypot["hp_tags"].split("||")):
+                succes = True
+                if honeypot['link_id'] != None and honeypot['link_id'] !="NULL":
+                    succes = False
+                    try:
+                        edit_hp.edit_tags(DB_settings, honeypot, hp_infos_received["tags"])
+                        success = True
+                    except:
+                        success = False
+                if succes:
+                    modifs["tags"] = hp_infos_received["tags"]
+                else:
+                    return "Error in tag edition"
         if "logs" in hp_infos_received.keys():
-            if hp_infos_received["logs"]!= honeypot["hp_logs"]:
+            if hp_infos_received["logs"] != honeypot["hp_logs"]:
                 return "Edit logs not IMPLEMENTED"
-                modifs["logs"]=hp_infos_received["logs"]
+                modifs["logs"] = hp_infos_received["logs"]
         if "parser" in hp_infos_received.keys():
-            if hp_infos_received["parser"]!= honeypot["hp_parser"]:
+            if hp_infos_received["parser"] != honeypot["hp_parser"]:
                 return "Edit parser not IMPLEMENTED"
                 modifs["parser"]=hp_infos_received["parser"]
         if "port" in hp_infos_received.keys():
@@ -479,6 +499,12 @@ def edit_srv():
         # ssh_key (string) : clé SSH à utiliser pour la connexion
         # ssh_port (int) : port d'écoute du service SSH 
 
+        config = configparser.ConfigParser()
+        config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+        ports_separator = config['port']['separator']
+        tags_separator = config['tag']['separator']
+
+
         # Get POST data on JSON format
         data = request.json
 
@@ -487,7 +513,7 @@ def edit_srv():
 
         serv_infos_received={}
         # Get all function's parameters
-        if id in data.keys():
+        if "id" in data.keys():
             serv_infos_received["id"] = data["id"]
         else:
             return "Need to specify a server id"
@@ -525,21 +551,36 @@ def edit_srv():
             if serv_infos_received["descr"]!= server["serv_descr"]:
                 modifs["descr"]=serv_infos_received["descr"]
         if "tags" in serv_infos_received.keys():
-            if serv_infos_received["tags"]!= server["serv_tags"]:
-                return "Edit tags not IMPLEMENTED"
-                modifs["tags"]=serv_infos_received["tags"]
-        if "ip" in serv_infos_received.keys():
-            if serv_infos_received["ip"]!= server["serv_ip"]:
-                return "Edit ip not IMPLEMENTED"
-                modifs["ip"]=serv_infos_received["ip"]
-        if "ssh_key" in serv_infos_received.keys():
-            if serv_infos_received["ssh_key"]!= server["serv_ssh_key"]:
-                return "Edit ssh_key not IMPLEMENTED"
-                modifs["ssh_key"]=serv_infos_received["ssh_key"]
-        if "ssh_port" in serv_infos_received.keys():
-            if serv_infos_received["ssh_port"]!= server["serv_ssh_port"]:
-                return "Edit ssh_port not IMPLEMENTED"
-                modifs["ssh_port"]=serv_infos_received["ssh_port"]
+            if set(serv_infos_received["tags"].split(tags_separator))!= set(server["serv_tags"].split("||")):
+                succes=True
+                if server['link_id'] != None and server['link_id'] !="NULL":
+                    succes=False
+                    succes=edit_server.edit_tags(DB_settings, server, serv_infos_received["tags"])
+                if succes==True :
+                    modifs["tags"]=serv_infos_received["tags"]
+                else:
+                    return "Error in tag edition"
+        if "ip" in serv_infos_received.keys() or "ssh_key" in serv_infos_received.keys() or "ssh_port" in serv_infos_received.keys():
+            ip=server["serv_ip"]
+            ssh_port=server["serv_ssh_port"]
+            ssh_key=server["serv_ssh_key"]
+            if "ip" in serv_infos_received.keys():
+                if serv_infos_received["ip"]!= server["serv_ip"]:
+                    modifs["ip"]=serv_infos_received["ip"]
+                    ip=serv_infos_received["ip"]
+            if "ssh_key" in serv_infos_received.keys():
+                if serv_infos_received["ssh_key"]!= server["serv_ssh_key"]:
+                    modifs["ssh_key"]=serv_infos_received["ssh_key"]
+                    ssh_key=serv_infos_received["ssh_key"]
+            if "ssh_port" in serv_infos_received.keys():
+                if serv_infos_received["ssh_port"]!= server["serv_ssh_port"]:
+                    modifs["ssh_port"]=serv_infos_received["ssh_port"]
+                    ssh_port=serv_infos_received["ssh_port"]
+            try:
+                edit_server.edit_connection(DB_settings, server, ip, ssh_port, ssh_key)
+            except:
+                return "Error in connection edition"
+
         if modifs != {}:
             Gotham_link_BDD.edit_server_DB(DB_settings, modifs, conditions)
 
@@ -560,6 +601,12 @@ def edit_lk():
         # nb_hp (int) : nombre de hp ciblés
         # ports (string) : exposed ports
 
+        config = configparser.ConfigParser()
+        config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+        ports_separator = config['port']['separator']
+        tags_separator = config['tag']['separator']
+
+
         # Get POST data on JSON format
         data = request.json
 
@@ -568,7 +615,7 @@ def edit_lk():
 
         link_infos_received={}
         # Get all function's parameters
-        if id in data.keys():
+        if "id" in data.keys():
             link_infos_received["id"] = data["id"]
         else:
             return "Need to specify a link id"
@@ -598,11 +645,11 @@ def edit_lk():
         modifs={}
         conditions={"id":link["link_id"]}
         if "tag_srv" in link_infos_received.keys():
-            if link_infos_received["tag_srv"]!= link["link_tag_srv"]:
+            if set(link_infos_received["tag_srv"].split(tags_separator))!= set(link["link_tag_srv"].split("||")):
                 return "Edit tag_srv not IMPLEMENTED"
                 modifs["tag_srv"]=link_infos_received["tag_srv"]
         if "tag_hp" in link_infos_received.keys():
-            if link_infos_received["tag_hp"]!= link["link_tag_hp"]:
+            if set(link_infos_received["tag_hp"].split(tags_separator))!= set(link["link_tag_hp"].split("||")):
                 return "Edit tag_hp not IMPLEMENTED"
                 modifs["tag_hp"]=link_infos_received["tag_hp"]
         if "nb_srv" in link_infos_received.keys():

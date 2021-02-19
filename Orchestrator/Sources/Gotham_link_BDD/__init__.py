@@ -358,6 +358,34 @@ def remove_server_DB(DB_settings, id):
     except:
         sys.exit(1)
 
+def remove_server_tags_DB(DB_settings, id="", tag=""):
+    '''
+    Remove a server in the internal database from its id
+    ARGUMENTS:
+        DB_settings (dict) : all the settings to connect to the internal database
+        id (string) : the id of the server we want to remove in the internal database
+    '''
+    # Connect to the database
+    try:
+        DB_connection = mariadb.connect(
+            user=DB_settings["username"],
+            password=DB_settings["password"],
+            host=DB_settings["hostname"],
+            port=int(DB_settings["port"]),
+            database=DB_settings["database"]
+        )
+        logging.debug(f"[+] Connection to the internal database started")
+    except mariadb.Error as e:
+        logging.error(f"Can't connect to the internal database : {e}")
+        sys.exit(1)
+    # Remove the server in the IDB
+    try:
+        remove_in_IDB.server_in_serv_tag(DB_connection, id, tag)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database closed")
+    except:
+        sys.exit(1)
+
 def remove_honeypot_DB(DB_settings, id):
     '''
     Remove a honeypot in the internal database from its id
