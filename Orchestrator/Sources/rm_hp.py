@@ -5,6 +5,8 @@ import configparser
 import sys
 import fileinput
 import base64
+import json
+import requests
 
 # Import GOTHAM's libs
 from Gotham_SSH_SCP import execute_commands
@@ -22,11 +24,11 @@ logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',leve
 
 
 # TO RETRIEVE FROM SECRET FILE !!!
-datacenter_settings = {'hostname':'42.42.42.42', 'ssh_port':22, 'ssh_key':'usidbvyr$pqsi'}
-dc_ip = "172.16.2.250"
+#datacenter_settings = {'hostname':'42.42.42.42', 'ssh_port':22, 'ssh_key':'usidbvyr$pqsi'}
+#dc_ip = "172.16.2.250"
 
 
-def main(DB_settings, id):
+def main(DB_settings, datacenter_settings, id):
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
     # Retrieve settings from config file
     config = configparser.ConfigParser()
@@ -140,7 +142,7 @@ def main(DB_settings, id):
 
 
     # Remove the Honeypot from the datacenter
-    commands=[f"docker container stop {id}",f"docker container rm {id}"]
+    commands=[f"docker container stop {id}",f"docker container rm {id}", "docker network prune -f"]
     try:
         execute_commands(datacenter_settings['hostname'],datacenter_settings['ssh_port'],datacenter_settings['ssh_key'],commands)
     except Exception as e:
@@ -154,7 +156,7 @@ def main(DB_settings, id):
         sys.exit(1)
     return True
 
-def configure_honeypot_replacement(DB_settings,old_hp_infos,new_hp_infos={},num_link=None):
+def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_infos,new_hp_infos={},num_link=None):
 
     if old_hp_infos!={} and new_hp_infos!={} and num_link==None :
         for link in old_hp_infos["links"]:
@@ -209,7 +211,7 @@ def configure_honeypot_replacement(DB_settings,old_hp_infos,new_hp_infos={},num_
                             line.replace("  # "+ str(old_hp_infos["hp_id"]) +"\n", "")
                             first_line = True
                         elif first_line:
-                            line.replace("  server "+ str(dc_ip) +":"+ str(old_hp_infos["hp_port"]) +";\n", "")
+                            line.replace("  server "+ str(datacenter_settings["hostname"]) +":"+ str(old_hp_infos["hp_port"]) +";\n", "")
                 already_update.append(nginxRedirectionPath)
             server["choosed_port"]=server["lhs_port"]
             servers.append(server)
@@ -225,14 +227,19 @@ def duplicate_hp(DB_settings,honeypots):
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     tag_separator = config['tag']['separator']
-    with open(honeypots[0]["hp_source"], 'r') as file:
+    with open(honeypots[0]["hp_source"]+"/Dockerfile", 'r') as file:
         encoded_dockerfile = base64.b64encode(file.read().encode("ascii"))
-    name = (honeypots[0]["name"]+"_Duplicat" if len(honeypots[0]["name"]+"_Duplicat")<=128 else honeypots[0]["name"][:(128-len("_Duplicat"))]+"_Duplicat")
-    descr = "Duplication of "+honeypots[0]["descr"]
-    duplicate_hp_infos={"name": name,"descr": descr,"tags": honeypots[0]["tags"].remplace("||",tag_separator),"logs": honeypots[0]["logs"],"parser": honeypots[0]["parser"],"port": honeypots[0]["port"], "dockerfile": encoded_dockerfile}
+    name = (honeypots[0]["hp_name"]+"_Duplicat" if len(honeypots[0]["hp_name"]+"_Duplicat")<=128 else honeypots[0]["hp_name"][:(128-len("_Duplicat"))]+"_Duplicat")
+    descr = "Duplication of "+honeypots[0]["hp_descr"]
+    duplicate_hp_infos={"name": str(name),"descr": str(descr),"tags": str(honeypots[0]["hp_tags"].replace("||",tag_separator)),"logs": str(honeypots[0]["hp_logs"]),"parser": str(honeypots[0]["hp_parser"]),"port": str(honeypots[0]["hp_port"]), "dockerfile": str(encoded_dockerfile.decode("utf-8"))}
     try:
-        id_hp=api.add_honeypot(duplicate_hp_infos)
-    except:
-        logging.error(f"Error with hp duplication : {honeypots[0]['hp_id']}")
+        jsondata = json.dumps(duplicate_hp_infos)
+        url = "http://localhost:5000/add/honeypot"
+        headers = {'Content-type': 'application/json'}
+        r = requests.post(url, data=jsondata, headers=headers)
+        id_hp = r.text.split()[2]
+    except Exception as e:
+        logging.error(f"Error with hp duplication : {honeypots[0]['hp_id']} - "+str(e))
+        sys.exit(1)
     result = get_honeypot_infos(DB_settings, id=id_hp)
     return result[0]

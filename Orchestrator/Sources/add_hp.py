@@ -50,17 +50,14 @@ def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id_hp):
     Return True if succeed, False in the other case
     '''
     dockerfile_path = [ dockerfile_path+"/Dockerfile", dockerfile_path+"/docker-compose.yml" ]
-    print(dockerfile_path)
     # Declare local vars
     docker_dest = "/data/tmp/"
     command_exec_compose = ["cd "+str(docker_dest),"docker-compose -f "+str(docker_dest)+"/docker-compose.yml  --project-name "+id_hp+" up -d"]
-    print(command_exec_compose)
     # Copy docker files on datacenter, and execute docker-compose
     try:
         send_file_and_execute_commands(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, docker_dest, command_exec_compose)
-        print("deployed remotely")
+        print(command_exec_compose)
     except Exception as e:
-        print(e)
         return False
     # If deployment is OK, return True
     return True

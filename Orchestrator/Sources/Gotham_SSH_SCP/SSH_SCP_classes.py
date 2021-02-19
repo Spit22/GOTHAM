@@ -83,12 +83,13 @@ class GothamServer:
         '''
         # Start an SSH connection
         self.is_connected = self.connect()
+        
         # Execute all of the commands
         for cmd in commands:
             stdin, stdout, stderr = self.ssh_session.exec_command(cmd)
-
             for line in stdout.read().splitlines():
-                print(line)
+                print("Command return : "+str(line))
 
-            logging.info(f"The commands {commands} has just been executed on the server {self.hostname}")
+        logging.info(f"The commands {commands} has just been executed on the server {self.hostname}")
 
+           
