@@ -62,7 +62,7 @@ def main(DB_settings, datacenter_settings, id):
             honeypot=duplicate_hp(DB_settings,honeypots)
             hp_infos=normalize_display_object_infos(result[0],"hp")
             try:
-                configure_honeypot_replacement(DB_settings,hp_infos,new_hp_infos=honeypot)
+                configure_honeypot_replacement(DB_settings, datacenter_settings, hp_infos,new_hp_infos=honeypot)
             except:
                 sys.exit(1)
 
@@ -104,7 +104,7 @@ def main(DB_settings, datacenter_settings, id):
                         honeypot=duplicate_hp(DB_settings,honeypots)
                         duplicate_hp_list.append(honeypot["hp_id"])
                     try:
-                        configure_honeypot_replacement(DB_settings,hp_infos,new_hp_infos=honeypot,num_link=i)
+                        configure_honeypot_replacement(DB_settings, datacenter_settings, hp_infos, new_hp_infos = honeypot, num_link = i)
                     except:
                         sys.exit(1)
                         
@@ -121,7 +121,7 @@ def main(DB_settings, datacenter_settings, id):
                     if int(hp_infos["links"][i]["link_nb_hp"]) > 1:
                         # Configure all server to not redirect on hp
                         try:
-                            configure_honeypot_replacement(DB_settings,hp_infos,num_link=i)
+                            configure_honeypot_replacement(DB_settings, datacenter_settings, hp_infos, num_link = i)
                         except:
                             sys.exit(1)
 
@@ -156,7 +156,7 @@ def main(DB_settings, datacenter_settings, id):
         sys.exit(1)
     return True
 
-def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_infos,new_hp_infos={},num_link=None):
+def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_infos, new_hp_infos = {}, num_link = None):
 
     if old_hp_infos!={} and new_hp_infos!={} and num_link==None :
         for link in old_hp_infos["links"]:
