@@ -58,6 +58,7 @@ import rm_link
 import add_server
 import add_hp
 import add_link
+import add_hp
 
 server_infos = {'id':'sv-66623F6F323F38F42d656DF861566999','name':'serveur-test-edit-idb','descr':'blabla','tags':'TagTag,France,TagParticulier','ip':'42.42.22.22','ssh_key':'non','ssh_port':'22','state':'UNUSED'}
 
@@ -70,8 +71,17 @@ lk_infos3 = {"id":"lk-333B3AFE3FEE1FEFB1D25E22FC2CA999", "nb_hp": 2, "nb_serv": 
 
 
 print(colored("########## ########## RM SERVER ########## ##########", 'blue'))
-add_server_DB(DB_settings, server_infos)
+#add_server_DB(DB_settings, server_infos)
 #add_link_DB(DB_settings, lk_infos1)
 #add_link_DB(DB_settings, lk_infos2)
 #add_link_DB(DB_settings, lk_infos3)
 #rm_server.main(DB_settings, id='sv-66623F6F323F38F42d656DF861566999')
+dc_ip = "192.168.1.22"
+dc_ssh_port = "22"
+dc_ssh_key="idh"
+orch_ip = "192.168.1.23"
+orch_rsyslog_port = "1514"
+local_rulebase_path = "/rsyslog/rulebase"
+remote_rulebase_path = "/rsyslog/rulebase"
+id_hp = "hp-7846514"
+add_hp.deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_port, local_rulebase_path, remote_rulebase_path, id_hp)

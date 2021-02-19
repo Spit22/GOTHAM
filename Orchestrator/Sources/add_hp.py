@@ -4,6 +4,13 @@ from Gotham_SSH_SCP import send_file_and_execute_commands, send_file, execute_co
 
 import sys
 
+# Logging components
+import os
+import logging
+GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+
+
 def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_port):
     '''
     Generates a docker-compose.yml file  from given information
@@ -67,41 +74,54 @@ def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id_hp):
 ########### RSYSLOG SECTION ############
 
 def generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, id_hp, rsyslog_conf_datacenter_local_path, remote_hp_log_file_path):
-    # Create the configuration file
-    rsyslog_conf_file = open(rsyslog_conf_datacenter_local_path + id_hp + ".conf", "a")
-    # Monitor the log file of the honeypot
-    rsyslog_conf_file.write('input(Type="imfile" File="' + remote_hp_log_file_path + '" Tag="' + id_hp + '")\n')
-    # Apply parsing rules
-    rsyslog_conf_file.write('action(Type="mmnormalize" ruleBase="' + str(rulebase_path) + '")\n')
-    # Send to orchestrator in JSON format
-    rsyslog_conf_file.write('action(Type="omfwd" Target="' + str(orch_ip) + '" Port="' + str(orch_rsyslog_port) + '" Protocol="tcp" Template="JSON_template")\n')
-    # Stop dealing with these logs
-    rsyslog_conf_file.write('stop\n')
+    try:
+        # Create the configuration file
+        rsyslog_conf_file = open(rsyslog_conf_datacenter_local_path + id_hp + ".conf", "a")
+        # Monitor the log file of the honeypot
+        rsyslog_conf_file.write('input(Type="imfile" File="' + remote_hp_log_file_path + '" Tag="' + id_hp + '")\n')
+        # Apply parsing rules
+        rsyslog_conf_file.write('action(Type="mmnormalize" ruleBase="' + str(rulebase_path) + '")\n')
+        # Send to orchestrator in JSON format
+        rsyslog_conf_file.write('action(Type="omfwd" Target="' + str(orch_ip) + '" Port="' + str(orch_rsyslog_port) + '" Protocol="tcp" Template="JSON_template")\n')
+        # Stop dealing with these logs
+        rsyslog_conf_file.write('stop\n')
+    except Exception as e:
+        logging.error(f"Fail to create rsyslog configuration for datacenter : {e}")
+        sys.exit(1)
+
 
 def generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_path, local_hp_log_file_path):
-    # Create the configuration file
-    rsyslog_conf_file = open(rsyslog_conf_orchestrator_local_path + id_hp + ".conf", "a")
-    # Filter the logs with honeypot tag
-    rsyslog_conf_file.write(':msg, contains, "' + id_hp + '"\n')
-    # Dump the logs in local log file
-    rsyslog_conf_file.write('action(type="omfile" File="' + local_hp_log_file_path + '")\n')
-    # Stop dealing with these logs
-    rsyslog_conf_file.write('stop\n')
+    try:
+        # Create the configuration file
+        rsyslog_conf_file = open(rsyslog_conf_orchestrator_local_path + id_hp + ".conf", "a")
+        # Filter the logs with honeypot tag
+        rsyslog_conf_file.write(':msg, contains, "' + id_hp + '"\n')
+        # Dump the logs in local log file
+        rsyslog_conf_file.write('action(type="omfile" File="' + local_hp_log_file_path + '")\n')
+        # Stop dealing with these logs
+        rsyslog_conf_file.write('stop\n')
+    except Exception as e:
+        logging.error(f"Fail to create rsyslog configuration for orchestrator : {e}")
+        sys.exit(1)
 
 def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_port, local_rulebase_path, remote_rulebase_path, id_hp):
     rsyslog_conf_datacenter_local_path = "/rsyslog/datacenter/"
     rsyslog_conf_orchestrator_local_path = "/rsyslog/orchestrator/"
     rsyslog_conf_datacenter_remote_path = "/rsyslog/"
     remote_hp_log_file_path = "TO BE DEFINED"
-    local_hp_log_file_path = "TO BE DEFINED"
+    local_hp_log_file_path = "/rsyslog/log"
     # Generate configuration files
-    generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, local_rulebase_path, id_hp, rsyslog_conf_datacenter_local_path, remote_hp_log_file_path)
-    generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_path, local_hp_log_file_path)
+    try:
+        generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, local_rulebase_path, id_hp, rsyslog_conf_datacenter_local_path, remote_hp_log_file_path)
+        generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_path, local_hp_log_file_path)
+    except:
+        sys.exit(1)
     # Send datacenter rsyslog configuration to the datacenter
     try:
-        send_file(dc_ip, dc_ssh_port, dc_ssh_key, local_rulebase_path, remote_rulebase_path)
-        send_file(dc_ip, dc_ssh_port, dc_ssh_key, rsyslog_conf_datacenter_local_path + id_hp + ".conf", rsyslog_conf_datacenter_remote_path)
-        execute_commands(dc_ip, dc_ssh_port, dc_ssh_key, "systemctl restart rsyslog")
+        print("bypass")
+        #send_file(dc_ip, dc_ssh_port, dc_ssh_key, local_rulebase_path, remote_rulebase_path)
+        #send_file(dc_ip, dc_ssh_port, dc_ssh_key, rsyslog_conf_datacenter_local_path + id_hp + ".conf", rsyslog_conf_datacenter_remote_path)
+        #execute_commands(dc_ip, dc_ssh_port, dc_ssh_key, "systemctl restart rsyslog")
     except:
         sys.exit(1)
     

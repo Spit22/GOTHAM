@@ -167,6 +167,12 @@ def add_honeypot(hp_infos_received={}):
         
         except Exception as e:
             return "An error occured in the ssh connection"
+        
+        # Create and deploy rsyslog configuration on the datacenter and the orchestrator
+        try:
+            add_hp.deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_port, local_rulebase_path, remote_rulebase_path, id_hp)
+        except:
+            return "Rsyslog configuration failed"
 
         # Create hp_infos
         hp_infos = {'id':str(id),'name':str(name),'descr':str(descr),'tags':str(tags),'port_container':port,'parser':str(parser),'logs':str(logs),'source':str(dockerfile_path),'state':'UNUSED','port':mapped_port}
@@ -524,10 +530,10 @@ def edit_honeypot():
                     succes = False
                     try:
                         edit_hp.edit_tags(DB_settings, honeypot, hp_infos_received["tags"])
-                        success = True
+                        succes = True
                     
                     except:
-                        success = False
+                        succes = False
                 if succes:
                     modifs["tags"] = hp_infos_received["tags"]
                 
