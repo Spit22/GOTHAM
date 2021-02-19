@@ -201,7 +201,7 @@ def add_srv():
 
         # Deploy the reverse-proxy service on the new server
         try:
-            print("bypassed")
+            print("bypassed server")
             #add_server.deploy(ip, ssh_port, deploy_ssh_key)
         except Exception as e:
             return "Something went wrong while deploying Reverse-Proxy"
@@ -685,11 +685,20 @@ def rm_honeypot():
 
         # Get all function's parameters
         id = data["id"]
-
-        #try:
-        rm_hp.main(DB_settings, id)
-        #except Exception as e:
-        #    return "An error occured during the deletion of the honeypot : "+str(e)
+        # Retrieve settings from config file
+        config = configparser.ConfigParser()
+        config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+        dc_ip = config['datacenter']['ip']
+        dc_ssh_key = config['datacenter']['ssh_key']
+        dc_ssh_key = base64.b64decode(dc_ssh_key) # ssh_key is byte
+        dc_ssh_key = dc_ssh_key.decode('ascii') # ssh_key is ascii string
+        dc_ssh_key = StringIO(dc_ssh_key) # ssh_key is a file-like object
+        dc_ssh_port = int(config['datacenter']['ssh_port'])
+        datacenter_settings = {"hostname": dc_ip, "ssh_key": dc_ssh_key, "ssh_port": dc_ssh_port}
+        try:
+            rm_hp.main(DB_settings, datacenter_settings, id)
+        except Exception as e:
+            return "An error occured during the deletion of the honeypot : "+str(e)
         return "Deletion completed : " + str(id)
 
 @app.route('/delete/server', methods=['POST'])
