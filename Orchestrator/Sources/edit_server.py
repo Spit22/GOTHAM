@@ -35,7 +35,7 @@ def edit_tags(DB_settings, server, tags):
 
     for deleted_tag in deleted_tags:
         for link in dsp_server["links"]:
-            if deleted_tags in link["link_tags_serv"].split("||"):
+            if deleted_tag in link["link_tags_serv"].split("||"):
                 link_tags_serv=tags_separator.join(link["link_tags_serv"].split("||"))
 
                 # Get all servers corresponding to tags
