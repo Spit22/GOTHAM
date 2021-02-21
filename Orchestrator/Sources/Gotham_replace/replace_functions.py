@@ -1,0 +1,265 @@
+import sys
+import re
+import configparser
+import os
+
+from Gotham_normalize import normalize_id_honeypot,normalize_honeypot_infos,normalize_server_infos, normalize_display_object_infos
+from Gotham_link_BDD import remove_honeypot_DB, get_honeypot_infos, get_server_infos, remove_server_DB, edit_lhs_DB, edit_link_DB, remove_lhs
+
+import Gotham_check
+import Gotham_choose
+import add_link
+
+
+# Logging components
+import os
+import logging
+GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+
+
+
+def replace_honeypot_all_link(DB_settings, datacenter_settings, hp_infos):
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    tag_separator = config['tag']['separator']
+    # Find a honeypot with same tags
+    hp_tags = tag_separator.join(hp_infos["hp_tags"].split("||"))
+    honeypots = Gotham_check.check_tags("hp", get_honeypot_infos(DB_settings, tags=hp_tags), tags_hp=hp_tags)
+    # Filter honeypots in error, and original hp by id
+    honeypots = [hp for hp in honeypots if not(hp["hp_state"] == 'ERROR' or hp["hp_id"] == hp_infos["hp_id"])]
+    if honeypots!=[]:
+        # Choose best honeypots (the lower scored)
+        honeypots = Gotham_choose.choose_honeypots(honeypots, 1, hp_tags)
+        # Duplicate, and configure
+        honeypot = duplicate_hp(DB_settings, honeypots)
+        try:
+            configure_honeypot_replacement(DB_settings, datacenter_settings, hp_infos, new_hp_infos = honeypot)
+        except:
+            sys.exit(1)
+
+        modifs={"id_hp":honeypot["hp_id"]}
+        conditions={"id_hp":hp_infos["hp_id"]}
+        try:
+            edit_lhs_DB(DB_settings, modifs, conditions)
+        except:
+            sys.exit(1)
+        return True
+    
+    return False
+
+
+def replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, duplicate_hp_list):
+    # Retrieve settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    tag_separator = config['tag']['separator']
+    # Try to replace
+    replaced = False
+    link_tags_hp = tag_separator.join(link["link_tags_hp"].split("||"))
+
+    # Get all honeypots corresponding to tags
+    honeypots = Gotham_check.check_tags("hp", get_honeypot_infos(DB_settings, tags = link_tags_hp), tags_hp = link_tags_hp)
+
+    # Filter honeypots in error, and original hp by id
+    honeypots = [hp for hp in honeypots if not(hp["hp_state"] == 'ERROR' or hp["hp_id"] == hp_infos["hp_id"])]
+
+    if honeypots != []:
+        already_duplicate_weight = int(config['hp_weight']["already_duplicate"])
+        honeypots = [dict(hp, **{'weight':already_duplicate_weight}) if hp["hp_id"] in duplicate_hp_list else hp for hp in honeypots]
+        # Choose best honeypots (the lower scored)
+        honeypots = Gotham_choose.choose_honeypots(honeypots, 1, link_tags_hp)
+
+        if honeypots[0]["hp_id"] in duplicate_hp_list:
+            # Don't duplicate, just configure
+            honeypot = honeypots[0]
+        else:
+            # Duplicate, and configure
+            honeypot = duplicate_hp(DB_settings, honeypots)
+            duplicate_hp_list.append(honeypot["hp_id"])
+        try:
+            configure_honeypot_replacement(DB_settings, datacenter_settings, hp_infos, new_hp_infos = honeypot, link = link)
+        except:
+            sys.exit(1)
+            
+        modifs = {"id_hp":honeypot["hp_id"]}
+        conditions = {"id_link":link["link_id"], "id_hp":honeypot["hp_id"]}
+        try:
+            edit_lhs_DB(DB_settings, modifs, conditions)
+        except:
+            sys.exit(1)
+        replaced = True
+
+    return {"replaced":replaced, "duplicate_hp_list":duplicate_hp_list}
+
+
+
+def decrease_link(DB_settings, datacenter_settings, object_infos, link, type_obj):
+    if type_obj != "hp" and type_obj != "serv":
+        logging.error(f"Error on type object")
+        sys.exit(1)
+    if int(link["link_nb_"+type_obj]) > 1:
+        if type_obj=="hp":
+            # Configure all server to not redirect on hp
+            try:
+                configure_honeypot_replacement(DB_settings, datacenter_settings, object_infos, link = link)
+            except:
+                sys.exit(1)
+        try:
+            if type_obj == "hp":
+                remove_lhs(DB_settings, id_link = link["link_id"], id_hp = object_infos["hp_id"])
+            elif type_obj == "serv":
+                remove_lhs(DB_settings, id_link = link["link_id"], id_serv = object_infos["serv_id"])
+        except:
+            sys.exit(1)
+        try:
+            modifs={"nb_"+type_obj:int(link["link_nb_"+type_obj])-1}
+            conditions={"id":link["link_id"]}
+            edit_link_DB(DB_settings, modifs, conditions)
+        except:
+            sys.exit(1)
+    else:        
+        # If nb=1, error, we can't do nothing
+        logging.error(f"You tried to remove a running {type_obj} with the id = {id}, and it can't be replaced or deleted")
+        sys.exit(1)
+
+
+def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_infos, new_hp_infos = {}, link = None):
+    #COMMENTAIRE
+    if old_hp_infos != {} and new_hp_infos != {} and link == None :
+        for link in old_hp_infos["links"]:
+            already_update = []
+            servers = []
+            for server in link["servs"]:
+                nginxRedirectionPath = "/data/template/" + str(link["link_id"]) + "-" + str(server["lhs_port"]) + ".conf"
+                if not(nginxRedirectionPath in already_update):
+                    with fileinput.FileInput(nginxRedirectionPath, inplace = True, backup = '.bak') as file:
+                        first_line = False
+                        for line in file:
+                            if ("  # " + str(old_hp_infos["hp_id"])) in line:
+                                line.replace(str(old_hp_infos["hp_id"]), str(new_hp_infos["hp_id"]))
+                                first_line = True
+                            elif first_line:
+                                line.replace(str(old_hp_infos["hp_port"]), str(new_hp_infos["hp_port"]))
+                                first_line = False
+                    already_update.append(nginxRedirectionPath)
+                server["choosed_port"] = server["lhs_port"]
+                servers.append(server)
+            add_link.deploy_nginxConf(DB_settings, link["link_id"], servers)
+    #COMMENTAIRE
+    elif old_hp_infos != {} and new_hp_infos != {} and link != None :
+        already_update = []
+        servers = []
+        for server in link["servs"]:
+            nginxRedirectionPath = "/data/template/" + str(link["link_id"]) + "-"+str(server["lhs_port"]) + ".conf"
+            if not(nginxRedirectionPath in already_update):
+                with fileinput.FileInput(nginxRedirectionPath, inplace = True, backup = '.bak') as file:
+                    first_line = False
+                    for line in file:
+                        if ("  # " + str(old_hp_infos["hp_id"])) in line:
+                            line.replace(str(old_hp_infos["hp_id"]), str(new_hp_infos["hp_id"]))
+                            first_line = True
+                        elif first_line:
+                            line.replace(str(old_hp_infos["hp_port"]), str(new_hp_infos["hp_port"]))
+                            first_line = False
+                already_update.append(nginxRedirectionPath)
+            server["choosed_port"] = server["lhs_port"]
+            servers.append(server)
+        add_link.deploy_nginxConf(DB_settings, link["link_id"], servers)
+    #COMMENTAIRE
+    elif old_hp_infos != {} and new_hp_infos == {} and link != None :
+        already_update = []
+        servers = []
+        for server in link["servs"]:
+            nginxRedirectionPath = "/data/template/" + str(link["link_id"]) + "-"+str(server["lhs_port"]) + ".conf"
+            if not(nginxRedirectionPath in already_update):
+                with fileinput.FileInput(nginxRedirectionPath, inplace = True, backup = '.bak') as file:
+                    first_line = False
+                    for line in file:
+                        if ("  # " + str(old_hp_infos["hp_id"])) in line:
+                            line.replace("  # " + str(old_hp_infos["hp_id"]) + "\n", "")
+                            first_line = True
+                        elif first_line:
+                            line.replace("  server " + str(datacenter_settings["hostname"]) + ":" + str(old_hp_infos["hp_port"]) + ";\n", "")
+                            first_line = False
+                already_update.append(nginxRedirectionPath)
+            server["choosed_port"] = server["lhs_port"]
+            servers.append(server)
+        add_link.deploy_nginxConf(DB_settings, link["link_id"], servers)
+    else:
+        logging.error(f"Honeypot replacement configuration failed")
+        sys.exit(1)
+
+def duplicate_hp(DB_settings,honeypot_infos):
+    GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+    # Retrieve settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    tag_separator = config['tag']['separator']
+    with open(honeypot_infos["hp_source"] + "/Dockerfile", 'r') as file:
+        encoded_dockerfile = base64.b64encode(file.read().encode("ascii"))
+    name = (honeypot_infos["hp_name"]+"_Duplicat" if len(honeypot_infos["hp_name"]+"_Duplicat")<=128 else honeypot_infos["hp_name"][:(128-len("_Duplicat"))]+"_Duplicat")
+    descr = "Duplication of " + honeypot_infos["hp_descr"]
+    duplicate_hp_infos={"name": str(name),"descr": str(descr),"tags": str(honeypot_infos["hp_tags"].replace("||", tag_separator)),"logs": str(honeypot_infos["hp_logs"]),"parser": str(honeypot_infos["hp_parser"]),"port": str(honeypot_infos["hp_port"]), "dockerfile": str(encoded_dockerfile.decode("utf-8"))}
+    try:
+        jsondata = json.dumps(duplicate_hp_infos)
+        url = "http://localhost:5000/add/honeypot"
+        headers = {'Content-type': 'application/json'}
+        r = requests.post(url, data=jsondata, headers=headers)
+        id_hp = r.text.split()[2]
+    except Exception as e:
+        logging.error(f"Error with hp duplication : {honeypot_infos['hp_id']} - " + str(e))
+        sys.exit(1)
+    result = get_honeypot_infos(DB_settings, id = id_hp)
+    return result[0]
+
+
+def replace_server_in_link(DB_settings,serv_infos,link):
+
+    GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+    # Retrieve settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    tag_separator = config['tag']['separator']
+    port_separator = config['port']['separator']
+
+    
+    link_tags_serv=tag_separator.join(link["link_tags_serv"].split("||"))
+
+    # Get all servers corresponding to tags
+    servers = Gotham_check.check_tags("serv",get_server_infos(DB_settings, tags=link_tags_serv), tags_serv=link_tags_serv)
+
+    # Filter servers in those who have one of ports open
+    servers = Gotham_check.check_servers_ports_matching(servers, link["link_ports"])
+
+    # Filter servers in error, with same link, and original server by id
+    servers = [server for server in servers if not(server["serv_state"]=='ERROR' or link["link_id"] in server["link_id"] or server["serv_id"]==serv_infos["serv_id"])]
+    
+    if servers==[]:
+        return False
+
+    ports_used_ls=[hp["lhs_port"] for hp in link["hps"]]
+    ports_used_ls=list(set(ports_used_ls))
+
+    servers_same_port=[server for server in servers if all(port in server["free_ports"].split(port_separator) for port in ports_used_ls)]
+
+    if servers_same_port!=[]:
+        replacement_server=Gotham_choose.choose_servers(servers_same_port, 1, link_tags_serv)
+
+        already_deployed=[]
+        for hp in link["hps"]:
+            if not(int(hp["lhs_port"]) in already_deployed):
+                replacement_server[0]["choosed_port"]=int(hp["lhs_port"])
+                add_link.deploy_nginxConf(DB_settings, link["link_id"], replacement_server)
+                already_deployed.append(int(replacement_server[0]["choosed_port"]))
+            modifs={"id_serv":replacement_server[0]["serv_id"]}
+            conditions={"id_link":link["link_id"],"id_hp":hp["hp_id"],"id_serv":serv_infos["serv_id"]}
+            try:
+                edit_lhs_DB(DB_settings,modifs,conditions)
+            except:
+                sys.exit(1)
+        return True
+
+    else:
+        print("Not implemented")
+        return False
