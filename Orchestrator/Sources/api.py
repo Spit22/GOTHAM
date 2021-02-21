@@ -57,6 +57,15 @@ dc_ports_list = range(int(config['datacenter']['min_port']), int(config['datacen
 # Retrieve datacenter settings from config file
 dc_ip = config['datacenter']['ip']
 dc_ssh_port = int(config['datacenter']['ssh_port'])
+try:
+    dc_ssh_key = config['datacenter']['ssh_key']
+    dc_ssh_key = base64.b64decode(dc_ssh_key) # ssh_key is byte
+    dc_ssh_key = dc_ssh_key.decode('ascii') # ssh_key is ascii string
+    dc_ssh_key = StringIO(dc_ssh_key) # ssh_key is a file-like object
+except Exception as e:
+    print("Error loading datacenter's SSH key")
+# Put datacenter settings in a dictionary
+datacenter_settings = {"hostname": dc_ip, "ssh_key": dc_ssh_key, "ssh_port": dc_ssh_port}
 
 # Retreive separators
 ports_separator = config['port']['separator']
@@ -122,16 +131,6 @@ def add_honeypot(hp_infos_received={}):
             port = hp_infos_received["port"]
         except Exception as e:
             return "Invalid data sent "+str(e)
-
-        # Retrieve datacenter's SSH key from config file
-        try:
-            dc_ssh_key = config['datacenter']['ssh_key']
-            dc_ssh_key = base64.b64decode(dc_ssh_key) # ssh_key is byte
-            dc_ssh_key = dc_ssh_key.decode('ascii') # ssh_key is ascii string
-            dc_ssh_key = StringIO(dc_ssh_key) # ssh_key is a file-like object
-
-        except Exception as e:
-            print("Error loading datacenter's SSH key")
 
         # First find an available port to map on datacenter
         used_ports = Gotham_check.check_used_port(DB_settings)
@@ -270,16 +269,6 @@ def add_lk():
         # nb_srv (int) : nombre de serveurs ciblés
         # nb_hp (int) : nombre de hp ciblés
         # exposed_port (list): list des ports à utiliser
-
-        # Retrieve datacenter's SSH key from config file
-        try:
-            dc_ssh_key = config['datacenter']['ssh_key']
-            dc_ssh_key = base64.b64decode(dc_ssh_key) # ssh_key is byte
-            dc_ssh_key = dc_ssh_key.decode('ascii') # ssh_key is ascii string
-            dc_ssh_key = StringIO(dc_ssh_key) # ssh_key is a file-like object
-
-        except Exception as e:
-            print("Error loading datacenter's SSH key")
 
         # Get POST data on JSON format
         data = request.get_json()
@@ -531,7 +520,7 @@ def edit_honeypot():
                 if honeypot['link_id'] != None and honeypot['link_id'] !="NULL":
                     succes = False
                     try:
-                        edit_hp.edit_tags(DB_settings, honeypot, hp_infos_received["tags"])
+                        edit_hp.edit_tags(DB_settings, datacenter_settings, honeypot, hp_infos_received["tags"])
                         succes = True
                     
                     except:
@@ -642,9 +631,12 @@ def edit_srv():
             if set(serv_infos_received["tags"].split(tags_separator))!= set(server["serv_tags"].split("||")):
                 succes=True
                 if server['link_id'] != None and server['link_id'] !="NULL":
-                    succes=False
-                    succes=edit_server.edit_tags(DB_settings, server, serv_infos_received["tags"])
-                if succes==True :
+                    try:
+                        edit_server.edit_tags(DB_settings, datacenter_settings, server, serv_infos_received["tags"])
+                        succes = True
+                    except:
+                        succes = False
+                if succes:
                     modifs["tags"]=serv_infos_received["tags"]
                 
                 else:
@@ -787,18 +779,6 @@ def rm_honeypot():
         # Get all function's parameters
         id = data["id"]
         
-        # Retrieve datacenter's SSH key from config file
-        try:
-            dc_ssh_key = config['datacenter']['ssh_key']
-            dc_ssh_key = base64.b64decode(dc_ssh_key) # ssh_key is byte
-            dc_ssh_key = dc_ssh_key.decode('ascii') # ssh_key is ascii string
-            dc_ssh_key = StringIO(dc_ssh_key) # ssh_key is a file-like object
-
-        except Exception as e:
-            print("Error loading datacenter's SSH key")
-
-        datacenter_settings = {"hostname": dc_ip, "ssh_key": dc_ssh_key, "ssh_port": dc_ssh_port}
-        
         try:
             rm_hp.main(DB_settings, datacenter_settings, id)
         
@@ -824,7 +804,7 @@ def rm_srv():
         id = data["id"]
         ##### TODO ??? : ADD ABILITY TO DELETE WITH IP ######
         try:
-            rm_server.main(DB_settings, id=id)
+            rm_server.main(DB_settings, datacenter_settings, id=id)
         except Exception as e:
             return "An error occured during the deletion of the server : "+str(e)
         return "Deletion completed : " + str(id)

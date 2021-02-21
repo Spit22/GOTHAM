@@ -22,7 +22,7 @@ logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',leve
 # Import Gotham's libs
 from Gotham_SSH_SCP import send_file_and_execute_commands
 
-def edit_tags(DB_settings, honeypot, tags):
+def edit_tags(DB_settings, datacenter_settings, honeypot, tags):
 
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
