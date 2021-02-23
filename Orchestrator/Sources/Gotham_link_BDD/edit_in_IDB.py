@@ -42,6 +42,21 @@ def server(DB_connection, modifs, conditions):
     tag_separator = config['tag']['separator']
     port_separator = config['port']['separator']
 
+    # Normalize modifs
+    try:
+        modifs = normalize_server_infos(modifs)
+    except:
+        logging.error(f"Bad server modification")
+        sys.exit(1)
+
+    # Normalize conditions
+    try:
+        conditions = normalize_server_infos(conditions)
+    except:
+        logging.error(f"Bad server modif's conditions")
+        sys.exit(1)
+
+
     if "tags" in modifs.items():
         if "id" in conditions.items():
             tags = modifs.pop("tags")
@@ -78,19 +93,7 @@ def server(DB_connection, modifs, conditions):
         logging.error(f"Modification by tag not implemented")
         sys.exit(1)
 
-
-    # Normalize modifs
-    try:
-        modifs = normalize_server_infos(modifs)
-    except:
-        logging.error(f"Bad server modification")
-        sys.exit(1)
-    # Normalize conditions
-    try:
-        conditions = normalize_server_infos(conditions)
-    except:
-        logging.error(f"Bad server modif's conditions")
-        sys.exit(1)
+    
 
     # Prepare query
     ## Prepare modifs
@@ -142,6 +145,21 @@ def honeypot(DB_connection, modifs, conditions):
     tag_separator = config['tag']['separator']
     port_separator = config['port']['separator']
 
+    # Normalize modifs
+    try:
+        modifs = normalize_honeypot_infos(modifs)
+    except:
+        logging.error(f"Bad honeypot modification")
+        sys.exit(1)
+
+    # Normalize conditions
+    try:
+        conditions = normalize_honeypot_infos(conditions)
+    except:
+        logging.error(f"Bad honeypot modif's conditions")
+        sys.exit(1)
+
+
     if "tags" in modifs.items():
         if "id" in conditions.items():
             tags=modifs.pop("tags")
@@ -179,18 +197,6 @@ def honeypot(DB_connection, modifs, conditions):
         sys.exit(1)
 
 
-    # Normalize modifs
-    try:
-        modifs = normalize_honeypot_infos(modifs)
-    except:
-        logging.error(f"Bad honeypot modification")
-        sys.exit(1)
-    # Normalize conditions
-    try:
-        conditions = normalize_honeypot_infos(conditions)
-    except:
-        logging.error(f"Bad honeypot modif's conditions")
-        sys.exit(1)
 
     # Prepare query
     ## Prepare modifs
@@ -233,15 +239,6 @@ def link(DB_connection, modifs, conditions):
         modifs (dict) : dict of modifications with column:value syntax
         conditions (dict) : dict of conditions with column:value syntax
     '''
-    if [val for key, val in modifs.items() if 'tag' in key]!=[]:
-        logging.error(f"Tags modification not implemented")
-        sys.exit(1)
-
-    if [val for key, val in conditions.items() if 'tag' in key]!=[]:
-        logging.error(f"Modification by tag not implemented")
-        sys.exit(1)
-
-
     # Normalize modifs
     try:
         modifs = normalize_link_infos(modifs)
@@ -254,6 +251,66 @@ def link(DB_connection, modifs, conditions):
     except:
         logging.error(f"Bad link modif's conditions")
         sys.exit(1)
+
+
+    if "tags_hp" in modifs.items():
+        if "id" in conditions.items():
+            tags=modifs.pop("tags_hp")
+            new_tag_list=tags.split(tag_separator)
+            links=get_infos.link(DB_connection, id=conditions["id"])
+            old_tag_list=links[0]["link_tags_hp"].split("||")
+            deleted_tags=list(set(old_tag_list)-set(new_tag_list))
+            added_tags=list(set(new_tag_list)-set(old_tag_list))
+            for tag in deleted_tags:
+                remove_in_IDB.link_in_link_tags_hp(DB_connection, id=links[0]["link_id"], tag=tag)
+            for tag in added_tags:
+                answer = get_infos.tag(DB_connection, tag=tag)
+                if answer != []:
+                    tag_id = answer[0]['id']
+                else:
+                    logging.error(f"Error with tags: some honeypot tags do not exists")
+                    sys.exit(1)
+                # Add the relation between link and tag in hp_Tags table
+                try:
+                    add_in_IDB.link_tags_hp(DB_connection, tag_id, links[0]["link_id"])
+                except:
+                    sys.exit(1)
+        else:
+            logging.error(f"Tags modification without id in conditions not implemented")
+            sys.exit(1)
+
+    if "tags_serv" in modifs.items():
+        if "id" in conditions.items():
+            tags=modifs.pop("tags_serv")
+            new_tag_list=tags.split(tag_separator)
+            links=get_infos.link(DB_connection, id=conditions["id"])
+            old_tag_list=links[0]["link_tags_serv"].split("||")
+            deleted_tags=list(set(old_tag_list)-set(new_tag_list))
+            added_tags=list(set(new_tag_list)-set(old_tag_list))
+            for tag in deleted_tags:
+                remove_in_IDB.link_in_link_tags_serv(DB_connection, id=links[0]["link_id"], tag=tag)
+            for tag in added_tags:
+                answer = get_infos.tag(DB_connection, tag=tag)
+                if answer != []:
+                    tag_id = answer[0]['id']
+                else:
+                    logging.error(f"Error with tags: some server tags do not exists")
+                    sys.exit(1)
+                # Add the relation between link and tag in hp_Tags table
+                try:
+                    add_in_IDB.link_tags_serv(DB_connection, tag_id, links[0]["link_id"])
+                except:
+                    sys.exit(1)
+        else:
+            logging.error(f"Tags modification without id in conditions not implemented")
+            sys.exit(1)
+
+    if [val for key, val in conditions.items() if 'tag' in key]!=[]:
+        logging.error(f"Modification by tag not implemented")
+        sys.exit(1)
+
+
+    
 
     # Prepare query
     ## Prepare modifs
