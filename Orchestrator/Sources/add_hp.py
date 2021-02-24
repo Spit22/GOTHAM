@@ -151,7 +151,7 @@ def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_po
     try:
         #print("bypass")
         # Send the rulebase
-        send_file(dc_ip, dc_ssh_port, dc_ssh_key, local_rulebase_path, remote_rulebase_path)
+        send_file(dc_ip, dc_ssh_port, dc_ssh_key, local_rulebase_path + id_hp + ".rb", remote_rulebase_path)
         # Send rsyslog configuration
         send_file_and_execute_commands(dc_ip, dc_ssh_port, dc_ssh_key, rsyslog_conf_datacenter_local_path + id_hp + ".conf", rsyslog_conf_datacenter_remote_path, exec_restart_rsyslog)
     except Exception as e:
