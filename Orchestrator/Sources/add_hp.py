@@ -104,22 +104,45 @@ def generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_pa
         logging.error(f"Fail to create rsyslog configuration for orchestrator : {e}")
         sys.exit(1)
 
-def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_port, id_hp):
-    # Vars
-    rsyslog_conf_datacenter_local_path = "/data/"+str(id_hp)+"/"
-    rsyslog_conf_orchestrator_local_path = "/data/"+str(id_hp)+"/"
-    remote_path = "/data/"+str(id_hp)+"/"
-    rsyslog_conf_datacenter_remote_path = "/data/"
+def generate_rulebase(id_hp, rules, rulebase_path):
+    try:
+        # Create the rulebase
+        rulebase = open(rulebase_path + id_hp + ".rb", "a")
+        # Specify the liblognorm version
+        rulebase.write('version=2\n')
+        # Write each rule in the rulebase
+        for rule in rules:
+            rulebase.write(str(rule) + '\n')
+    except Exception as e:
+        logging.error(f"Fail to create rulebase : {e}")
+        sys.exit(1)
+
+def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_port, id_hp, rules):
+    # PATH ON ORCHESTRATOR
+    ### Configuration
+    rsyslog_conf_datacenter_local_path = "/data/rsyslog/datacenter-configuration/"
+    rsyslog_conf_orchestrator_local_path = "/data/rsyslog/"
+    ### Log files
+    local_hp_log_file_path = "/data/honeypot-log/"
+    # Rulebase
+    local_rulebase_path = "/data/rsyslog/rulebase/"
+
+    # PATH ON DATACENTER
+    ### Configuration
+    #remote_path = "/data/"+str(id_hp)+"/"
+    rsyslog_conf_datacenter_remote_path = "/data/rsyslog/"
+    ## Log files
     remote_hp_log_file_path = "TO BE DEFINED"
-    local_hp_log_file_path = "/data/"+str(id_hp)+"/"
-    local_rulebase_path = "/data/"+str(id_hp)+"/"
-    remote_rulebase_path = "/data/"+str(id_hp)+"/" 
-    rsyslog_conf = [local_rulebase_path + id_hp + ".rb", rsyslog_conf_datacenter_local_path + id_hp + ".conf"]
+    ## Rulebase
+    remote_rulebase_path = "/data/rsyslog/rulebase/" 
+
+    ### SSH SCP ARGUMENTS
     exec_restart_rsyslog = ["service rsyslog restart"]
 
-    # Generate configuration files
+    # Generate configuration files and rulebase
     try:
-        generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, local_rulebase_path, id_hp, rsyslog_conf_datacenter_local_path, remote_hp_log_file_path)
+        generate_rulebase(id_hp, rules, local_rulebase_path)
+        generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, remote_rulebase_path, id_hp, rsyslog_conf_datacenter_local_path, remote_hp_log_file_path)
         generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_path, local_hp_log_file_path)
     except Exception as e:
         logging.error(f"Fail to generate rsyslog configuration : {e}")
@@ -127,7 +150,10 @@ def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_po
     # Send datacenter rsyslog configuration to the datacenter
     try:
         #print("bypass")
-        send_file_and_execute_commands(dc_ip, dc_ssh_port, dc_ssh_key, rsyslog_conf, remote_path, exec_restart_rsyslog)
+        # Send the rulebase
+        send_file(dc_ip, dc_ssh_port, dc_ssh_key, local_rulebase_path, remote_rulebase_path)
+        # Send rsyslog configuration
+        send_file_and_execute_commands(dc_ip, dc_ssh_port, dc_ssh_key, rsyslog_conf_datacenter_local_path + id_hp + ".conf", rsyslog_conf_datacenter_remote_path, exec_restart_rsyslog)
     except Exception as e:
         logging.error(f"Fail to deploy rsyslog configuration: {e}")
         sys.exit(1)
