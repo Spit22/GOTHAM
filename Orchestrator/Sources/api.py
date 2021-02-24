@@ -172,7 +172,7 @@ def add_honeypot(hp_infos_received={}):
         orch_ip = config["orchestrator"]["ip"]
         orch_rsyslog_port = config["orchestrator"]["syslog_port"]
         #try:
-        add_hp.deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key_rsyslog, orch_ip, orch_rsyslog_port, id)
+        #add_hp.deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key_rsyslog, orch_ip, orch_rsyslog_port, id)
         #except:
         #    return "Rsyslog configuration failed"
 
