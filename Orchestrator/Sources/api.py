@@ -22,7 +22,7 @@ import rm_link
 # GOTHAM's Edit Scripts
 import edit_hp
 import edit_server
-#import edit_link
+import edit_link
 
 # GOTHAM'S LIB
 import Gotham_link_BDD
@@ -754,8 +754,10 @@ def edit_lk():
                         Gotham_check.check_doublon_tags(DB_settings, link_infos_received["tags_serv"])
                     except:
                         return "Error with tags: some server tags do not exists"
-                
-                return "Edit tags_serv not IMPLEMENTED"
+                    try:
+                        edit_link.edit_tags(DB_settings, link_serv_hp, link_infos_received["tags_serv"], "serv")
+                    except:
+                        sys.exit(1)
                 modifs["tags_serv"]=link_infos_received["tags_serv"]
         
         if "tags_hp" in link_infos_received.keys():
@@ -766,8 +768,10 @@ def edit_lk():
                         Gotham_check.check_doublon_tags(DB_settings, link_infos_received["tags_hp"])
                     except:
                         return "Error with tags: some honeypot tags do not exists"
-                    
-                return "Edit tags_hp not IMPLEMENTED"
+                    try:
+                        edit_link.edit_tags(DB_settings, link_hp_serv, link_infos_received["tags_hp"], "hp")
+                    except:
+                        sys.exit(1)
                 modifs["tags_hp"]=link_infos_received["tags_hp"]
         
         if "ports" in link_infos_received.keys():

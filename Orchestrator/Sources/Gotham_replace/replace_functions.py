@@ -154,7 +154,8 @@ def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_info
     elif old_hp_infos != {} and new_hp_infos != {} and link != None :
         already_update = []
         servers = []
-        for server in link["servs"]:
+        interable_servs = link["servs"] if "servs" in link.keys() else old_hp_infos["servs"]
+        for server in interable_servs:
             nginxRedirectionPath = "/data/template/" + str(link["link_id"]) + "-"+str(server["lhs_port"]) + ".conf"
             if not(nginxRedirectionPath in already_update):
                 with fileinput.FileInput(nginxRedirectionPath, inplace = True, backup = '.bak') as file:
@@ -174,7 +175,8 @@ def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_info
     elif old_hp_infos != {} and new_hp_infos == {} and link != None :
         already_update = []
         servers = []
-        for server in link["servs"]:
+        interable_servs = link["servs"] if "servs" in link.keys() else old_hp_infos["servs"]
+        for server in interable_servs:
             nginxRedirectionPath = "/data/template/" + str(link["link_id"]) + "-"+str(server["lhs_port"]) + ".conf"
             if not(nginxRedirectionPath in already_update):
                 with fileinput.FileInput(nginxRedirectionPath, inplace = True, backup = '.bak') as file:
