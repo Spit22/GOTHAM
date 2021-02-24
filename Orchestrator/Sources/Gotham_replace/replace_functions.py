@@ -53,14 +53,14 @@ def replace_honeypot_all_link(DB_settings, datacenter_settings, hp_infos):
     return False
 
 
-def replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, duplicate_hp_list):
+def replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, duplicate_hp_list=[], new_tags=""):
     # Retrieve settings from config file
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     tag_separator = config['tag']['separator']
     # Try to replace
     replaced = False
-    link_tags_hp = tag_separator.join(link["link_tags_hp"].split("||"))
+    link_tags_hp = tag_separator.join(link["link_tags_hp"].split("||")) if new_tags=="" else new_tags
 
     # Get all honeypots corresponding to tags
     honeypots = Gotham_check.check_tags("hp", get_honeypot_infos(DB_settings, tags = link_tags_hp), tags_hp = link_tags_hp)
@@ -218,7 +218,7 @@ def duplicate_hp(DB_settings,honeypot_infos):
     return result[0]
 
 
-def replace_server_in_link(DB_settings,serv_infos,link):
+def replace_server_in_link(DB_settings,serv_infos,link, new_tags="", already_used=[]):
 
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
     # Retrieve settings from config file
@@ -228,7 +228,7 @@ def replace_server_in_link(DB_settings,serv_infos,link):
     port_separator = config['port']['separator']
 
     
-    link_tags_serv=tag_separator.join(link["link_tags_serv"].split("||"))
+    link_tags_serv=tag_separator.join(link["link_tags_serv"].split("||")) if new_tags=="" else new_tags
 
     # Get all servers corresponding to tags
     servers = Gotham_check.check_tags("serv",get_server_infos(DB_settings, tags=link_tags_serv), tags_serv=link_tags_serv)
@@ -237,12 +237,18 @@ def replace_server_in_link(DB_settings,serv_infos,link):
     servers = Gotham_check.check_servers_ports_matching(servers, link["link_ports"])
 
     # Filter servers in error, with same link, and original server by id
-    servers = [server for server in servers if not(server["serv_state"]=='ERROR' or link["link_id"] in server["link_id"] or server["serv_id"]==serv_infos["serv_id"])]
+    servers = [server for server in servers if not(server["serv_state"]=='ERROR' or link["link_id"] in server["link_id"] or server["serv_id"] in already_used or server["serv_id"]==serv_infos["serv_id"])]
     
     if servers==[]:
         return False
 
-    ports_used_ls=[hp["lhs_port"] for hp in link["hps"]]
+    if "hps" in link.items():
+        ports_used_ls=[hp["lhs_port"] for hp in link["hps"]]
+    elif "hps" in serv_infos.items():
+        ports_used_ls=[hp["lhs_port"] for hp in serv_infos["hps"]]
+    else:
+        logging.error(f"Hps not find in objects items")
+        sys.exit(1)
     ports_used_ls=list(set(ports_used_ls))
 
     servers_same_port=[server for server in servers if all(port in server["free_ports"].split(port_separator) for port in ports_used_ls)]
@@ -251,18 +257,39 @@ def replace_server_in_link(DB_settings,serv_infos,link):
         replacement_server=Gotham_choose.choose_servers(servers_same_port, 1, link_tags_serv)
 
         already_deployed=[]
-        for hp in link["hps"]:
-            if not(int(hp["lhs_port"]) in already_deployed):
-                replacement_server[0]["choosed_port"]=int(hp["lhs_port"])
-                add_link.deploy_nginxConf(DB_settings, link["link_id"], replacement_server)
-                already_deployed.append(int(replacement_server[0]["choosed_port"]))
-            modifs={"id_serv":replacement_server[0]["serv_id"]}
-            conditions={"id_link":link["link_id"],"id_hp":hp["hp_id"],"id_serv":serv_infos["serv_id"]}
-            try:
-                edit_lhs_DB(DB_settings,modifs,conditions)
-            except:
-                sys.exit(1)
-        return True
+        if "hps" in link.items():
+            for hp in link["hps"]:
+                if not(int(hp["lhs_port"]) in already_deployed):
+                    replacement_server[0]["choosed_port"]=int(hp["lhs_port"])
+                    add_link.deploy_nginxConf(DB_settings, link["link_id"], replacement_server)
+                    already_deployed.append(int(replacement_server[0]["choosed_port"]))
+                modifs={"id_serv":replacement_server[0]["serv_id"]}
+                conditions={"id_link":link["link_id"],"id_hp":hp["hp_id"],"id_serv":serv_infos["serv_id"]}
+                try:
+                    edit_lhs_DB(DB_settings,modifs,conditions)
+                except:
+                    sys.exit(1)
+        elif "hps" in serv_infos.items():
+            for hp in serv_infos["hps"]:
+                if not(int(hp["lhs_port"]) in already_deployed):
+                    replacement_server[0]["choosed_port"]=int(hp["lhs_port"])
+                    add_link.deploy_nginxConf(DB_settings, link["link_id"], replacement_server)
+                    already_deployed.append(int(replacement_server[0]["choosed_port"]))
+                modifs={"id_serv":replacement_server[0]["serv_id"]}
+                conditions={"id_link":link["link_id"],"id_hp":hp["hp_id"],"id_serv":serv_infos["serv_id"]}
+                try:
+                    edit_lhs_DB(DB_settings,modifs,conditions)
+                except:
+                    sys.exit(1)
+        else:
+            logging.error(f"Hps not find in objects items")
+            sys.exit(1)
+        
+        if already_used==[]:
+            return True
+        else:
+            already_used.append(replacement_server[0]["serv_id"])
+            return already_used
 
     else:
         print("Not implemented")

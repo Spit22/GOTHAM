@@ -306,18 +306,19 @@ def add_lk():
             return "A link is already configured for this tags"
 
         # We check all provided server tags exists, otherwise return error
-        try:
-            Gotham_check.check_doublon_tags(DB_settings, tags_serv)
-        
-        except:
-            return "Error with tags: some server tags do not exists"
+        if tags_serv.lower() != "all":
+            try:
+                Gotham_check.check_doublon_tags(DB_settings, tags_serv)
+            except:
+                return "Error with tags: some server tags do not exists"
 
         # We check all provided hp tags exists, otherwise return error
-        try:
-            Gotham_check.check_doublon_tags(DB_settings, tags_hp)
-        
-        except:
-            return "Error with tags: some honeypot tags do not exists"
+        if tags_hp.lower() != "all":
+            try:
+                Gotham_check.check_doublon_tags(DB_settings, tags_hp)
+            
+            except:
+                return "Error with tags: some honeypot tags do not exists"
 
         # Get all honeypots corresponding to tags
         honeypots = Gotham_link_BDD.get_honeypot_infos(DB_settings, tags=tags_hp)
@@ -704,13 +705,13 @@ def edit_lk():
             return "Need to specify a link id"
         
         if "tag_srv" in data.keys():
-            link_infos_received["tag_srv"] = data["tag_srv"]
+            link_infos_received["tags_serv"] = data["tag_srv"]
         
         if "tag_hp" in data.keys():
-            link_infos_received["tag_hp"] = data["tag_hp"]
+            link_infos_received["tags_hp"] = data["tag_hp"]
         
         if "nb_srv" in data.keys():
-            link_infos_received["nb_srv"] = data["nb_srv"]
+            link_infos_received["nb_serv"] = data["nb_srv"]
         
         if "nb_hp" in data.keys():
             link_infos_received["nb_hp"] = data["nb_hp"]
@@ -732,42 +733,76 @@ def edit_lk():
             logging.error(f"You tried to edit a link that doesn't exists with the id = {id}")
             return "Unknown id "+link_infos_received["id"]+" for link"
         
-        link= links[0]
+        link = links[0]
+
+        links = Gotham_link_BDD.get_link_hp_serv_infos(DB_settings, id=link_infos_received["id"])
+        link_hp_serv = links[0]
+
+        links = Gotham_link_BDD.get_link_serv_hp_infos(DB_settings, id=link_infos_received["id"])
+        link_serv_hp = links[0]
+        
+        modifications=False
         modifs={}
         conditions={"id":link["link_id"]}
         
-        if "tag_srv" in link_infos_received.keys():
-            if set(link_infos_received["tag_srv"].split(tags_separator))!= set(link["link_tag_srv"].split("||")):
-                return "Edit tag_srv not IMPLEMENTED"
-                modifs["tag_srv"]=link_infos_received["tag_srv"]
+        if "tags_serv" in link_infos_received.keys():
+            if set(link_infos_received["tags_serv"].split(tags_separator))!= set(link["link_tags_serv"].split("||")):
+                # We check all provided server tags exists, otherwise return error
+                if link_infos_received["tags_serv"].lower() != "all":
+                    try:
+                        Gotham_check.check_doublon_tags(DB_settings, link_infos_received["tags_serv"])
+                    except:
+                        return "Error with tags: some server tags do not exists"
+                
+                return "Edit tags_serv not IMPLEMENTED"
+                modifs["tags_serv"]=link_infos_received["tags_serv"]
         
-        if "tag_hp" in link_infos_received.keys():
-            if set(link_infos_received["tag_hp"].split(tags_separator))!= set(link["link_tag_hp"].split("||")):
-                return "Edit tag_hp not IMPLEMENTED"
-                modifs["tag_hp"]=link_infos_received["tag_hp"]
+        if "tags_hp" in link_infos_received.keys():
+            if set(link_infos_received["tags_hp"].split(tags_separator))!= set(link["link_tags_hp"].split("||")):
+                # We check all provided hp tags exists, otherwise return error
+                if link_infos_received["tags_hp"].lower() != "all":
+                    try:
+                        Gotham_check.check_doublon_tags(DB_settings, link_infos_received["tags_hp"])
+                    except:
+                        return "Error with tags: some honeypot tags do not exists"
+                    
+                return "Edit tags_hp not IMPLEMENTED"
+                modifs["tags_hp"]=link_infos_received["tags_hp"]
         
-        if "nb_srv" in link_infos_received.keys():
-            if link_infos_received["nb_srv"]!= link["link_nb_serv"]:
-                return "Edit nb_srv not IMPLEMENTED"
-                modifs["nb_serv"]=link_infos_received["nb_srv"]
+        if "ports" in link_infos_received.keys():
+            if link_infos_received["ports"]!= link["link_ports"]:
+                return "Edit ports not IMPLEMENTED"
+                modifs["ports"]=link_infos_received["ports"]
+
+        # Update link before edit nb_serv and nb_hp (Edit tags can decrease nb_serv and nb_hp)
+        if modifs != {}:
+            Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
+            links = Gotham_link_BDD.get_link_infos(DB_settings, id=link_infos_received["id"])
+            link = Gotham_normalize.normalize_display_object_infos(links[0],"link")
+            modifications=True
+
+        modifs={}
+
+        if "nb_serv" in link_infos_received.keys():
+            if link_infos_received["nb_serv"]!= link["link_nb_serv"]:
+                return "Edit nb_serv not IMPLEMENTED"
+                modifs["nb_serv"]=link_infos_received["nb_serv"]
         
         if "nb_hp" in link_infos_received.keys():
             if link_infos_received["nb_hp"]!= link["link_nb_hp"]:
                 return "Edit nb_hp not IMPLEMENTED"
                 modifs["nb_hp"]=link_infos_received["nb_hp"]
         
-        if "ports" in link_infos_received.keys():
-            if link_infos_received["ports"]!= link["link_ports"]:
-                return "Edit ports not IMPLEMENTED"
-                modifs["ports"]=link_infos_received["ports"]
-        
         if modifs != {}:
             Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
             links = Gotham_link_BDD.get_link_infos(DB_settings, id=link_infos_received["id"])
             link = Gotham_normalize.normalize_display_object_infos(links[0],"link")
-            return link
+            modifications=True
 
-        return "Nothing to change"
+        if modifications==True:
+            return link
+        else:
+            return "Nothing to change"
 
 @app.route('/delete/honeypot', methods=['POST'])
 def rm_honeypot():
