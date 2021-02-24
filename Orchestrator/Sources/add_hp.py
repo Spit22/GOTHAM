@@ -106,35 +106,28 @@ def generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_pa
 
 def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_port, id_hp):
     # Vars
-    rsyslog_conf_datacenter_local_path = "/rsyslog/datacenter/"
-    rsyslog_conf_orchestrator_local_path = "/rsyslog/orchestrator/"
-    rsyslog_conf_datacenter_remote_path = "/rsyslog/"
+    rsyslog_conf_datacenter_local_path = "/data/"+str(id_hp)+"/"
+    rsyslog_conf_orchestrator_local_path = "/data/"+str(id_hp)+"/"
+    remote_path = "/data/"+str(id_hp)+"/"
+    rsyslog_conf_datacenter_remote_path = "/data/"
     remote_hp_log_file_path = "TO BE DEFINED"
-    local_hp_log_file_path = "/rsyslog/log/"
-    local_rulebase_path = "/rsyslog/rulebase/"
-    remote_rulebase_path = "/rsyslog/rulebase/"
+    local_hp_log_file_path = "/data/"+str(id_hp)+"/"
+    local_rulebase_path = "/data/"+str(id_hp)+"/"
+    remote_rulebase_path = "/data/"+str(id_hp)+"/" 
+    rsyslog_conf = [local_rulebase_path + id_hp + ".rb", rsyslog_conf_datacenter_local_path + id_hp + ".conf"]
+    exec_restart_rsyslog = ["service rsyslog restart"]
+
     # Generate configuration files
     try:
         generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, local_rulebase_path, id_hp, rsyslog_conf_datacenter_local_path, remote_hp_log_file_path)
         generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_path, local_hp_log_file_path)
-    except:
+    except Exception as e:
+        logging.error(f"Fail to generate rsyslog configuration : {e}")
         sys.exit(1)
     # Send datacenter rsyslog configuration to the datacenter
     try:
-        print("bypass")
-        #send_file(dc_ip, dc_ssh_port, dc_ssh_key, local_rulebase_path + id_hp + ".rb", remote_rulebase_path)
-        #send_file(dc_ip, dc_ssh_port, dc_ssh_key, rsyslog_conf_datacenter_local_path + id_hp + ".conf", rsyslog_conf_datacenter_remote_path)
-        #execute_commands(dc_ip, dc_ssh_port, dc_ssh_key, "systemctl restart rsyslog")
-    except:
+        #print("bypass")
+        send_file_and_execute_commands(dc_ip, dc_ssh_port, dc_ssh_key, rsyslog_conf, remote_path, exec_restart_rsyslog)
+    except Exception as e:
+        logging.error(f"Fail to deploy rsyslog configuration: {e}")
         sys.exit(1)
-    
-
-#### TEST SECTION ####
-if __name__ == '__main__':
-    id = "sv-test"
-    dockerfile_path = "/data/sv-test/docker/"
-    log_path = "/var/log/syslog"
-    honeypot_port = "22"
-    mapped_port = "2200"
-    generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_port)
-

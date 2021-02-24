@@ -61,6 +61,7 @@ try:
     dc_ssh_key = config['datacenter']['ssh_key']
     dc_ssh_key = base64.b64decode(dc_ssh_key) # ssh_key is byte
     dc_ssh_key = dc_ssh_key.decode('ascii') # ssh_key is ascii string
+    dc_ssh_key_rsyslog = StringIO(dc_ssh_key) # ssh_key for rsyslog
     dc_ssh_key = StringIO(dc_ssh_key) # ssh_key is a file-like object
 except Exception as e:
     print("Error loading datacenter's SSH key")
@@ -170,10 +171,10 @@ def add_honeypot(hp_infos_received={}):
         # Create and deploy rsyslog configuration on the datacenter and the orchestrator
         orch_ip = config["orchestrator"]["ip"]
         orch_rsyslog_port = config["orchestrator"]["syslog_port"]
-        try:
-            add_hp.deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_port, id)
-        except:
-            return "Rsyslog configuration failed"
+        #try:
+        add_hp.deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key_rsyslog, orch_ip, orch_rsyslog_port, id)
+        #except:
+        #    return "Rsyslog configuration failed"
 
         # Create hp_infos
         hp_infos = {'id':str(id),'name':str(name),'descr':str(descr),'tags':str(tags),'port_container':port,'parser':str(parser),'logs':str(logs),'source':str(dockerfile_path),'state':'UNUSED','port':mapped_port}
@@ -186,7 +187,7 @@ def add_honeypot(hp_infos_received={}):
 
         # If all operations succeed
         if received==True:
-            return "OK : "+str(id)
+            return "OK : "+str(id)+"\n"
         
         else:
             return str(id)
@@ -243,7 +244,8 @@ def add_srv():
 
         # Deploy the reverse-proxy service on the new server
         try:
-            add_server.deploy(ip, ssh_port, deploy_ssh_key)
+            print("bypassed")
+            #add_server.deploy(ip, ssh_port, deploy_ssh_key)
         
         except Exception as e:
             return "Something went wrong while deploying Reverse-Proxy"
@@ -258,7 +260,7 @@ def add_srv():
         Gotham_link_BDD.add_server_DB(DB_settings, serv_infos)   
 
         # If all operations succeed
-        return "OK : "+str(id)
+        return "OK : "+str(id)+"\n"
 
 @app.route('/add/link', methods=['POST'])
 def add_lk():
@@ -440,7 +442,7 @@ def add_lk():
                 # Store new link and tags in the internal database        
                 Gotham_link_BDD.add_lhs_DB(DB_settings, lhs_infos)
 
-        return "OK : "+str(id)
+        return "OK : "+str(id)+"\n"
 
 @app.route('/edit/honeypot', methods=['POST'])
 def edit_honeypot():
