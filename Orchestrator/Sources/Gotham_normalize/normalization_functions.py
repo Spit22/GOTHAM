@@ -106,6 +106,8 @@ def normalize_nb_hp(nb_hp):
             int(nb_hp)
         except:
             logging.warning(f"Number of honeypots (nb_hp) has a invalid type : {nb_hp} : nb_hp must be an interger !")
+        if int(nb_hp) < 1:
+            logging.warning(f"Number of honeypots (nb_hp) has a invalid value : {nb_hp} : nb_hp must be superior to 0 !")
         return int(nb_hp)
     else:
         return "ALL"
@@ -118,6 +120,8 @@ def normalize_nb_serv(nb_serv):
             int(nb_serv)
         except:
             logging.warning(f"Number of servers (nb_serv) has a invalid type : {nb_serv} : nb_serv must be an interger !")
+        if int(nb_serv) < 1:
+            logging.warning(f"Number of honeypots (nb_serv) has a invalid value : {nb_serv} : nb_serv must be superior to 0 !")
         return int(nb_serv)
     else:
         return "ALL"
