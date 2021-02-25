@@ -183,3 +183,4 @@ def link_force_serv_hp(DB_connection, mode=False, id="%", nb_hp="%", nb_serv="%"
     for result in rv:
        json_data.append(dict(zip(row_headers,result)))
     return json_data
+

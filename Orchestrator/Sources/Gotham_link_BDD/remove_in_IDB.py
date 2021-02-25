@@ -2,7 +2,8 @@
 import mariadb
 import sys
 import configparser
-
+import get_infos
+from Gotham_check import check_TAGS
 
 # Logging components
 import os
@@ -54,6 +55,17 @@ def server_in_serv_tag(DB_connection, id="", tag=""):
         logging.error(f"'{id}' removal from the table 'Serv_Tags' failed : {e}")
         sys.exit(1)
 
+    # Check if tag is still used
+    tag_info=tag if tag !="" else "%"
+    id_tag=id if id !="" else "%"
+    tag_infos=get_infos.tag(DB_connection, tag=tag_info, id=id_tag)
+
+    tag_used=check_TAGS.check_tag_still_used(DB_connection, id=tag_infos[0]["id"])
+
+    if tag_used==[]:
+        tag(DB_connection,id_tag=tag_infos[0]["id"])
+
+
 ############################### HONEYPOT SECTION ###############################
 
 def honeypot(DB_connection, id):
@@ -94,6 +106,17 @@ def honeypot_in_hp_tag(DB_connection, id="", tag=""):
     except mariadb.Error as e:
         logging.error(f"'{id}' removal from the table 'Hp_Tags' failed : {e}")
         sys.exit(1)
+
+    # Check if tag is still used
+    tag_info=tag if tag !="" else "%"
+    id_tag=id if id !="" else "%"
+    tag_infos=get_infos.tag(DB_connection, tag=tag_info, id=id_tag)
+
+    tag_used=check_TAGS.check_tag_still_used(DB_connection, id=tag_infos[0]["id"])
+
+    if tag_used==[]:
+        tag(DB_connection,id_tag=tag_infos[0]["id"])
+
 
 ############################### LINK SECTION ###############################
 
@@ -184,5 +207,22 @@ def lhs(DB_connection,id_link="%",id_hp="%",id_serv="%"):
         logging.info(f"'{id}' deleted from the table 'Link_Hp_Serv'")
     except mariadb.Error as e:
         logging.error(f"'{id}' removal from the table 'Link_Hp_Serv' failed : {e}")
+        sys.exit(1)
+
+
+############################### TAG SECTION ###############################
+
+def tag(DB_connection,id_tag="%", tag="%"):
+    # Get MariaDB cursor
+    cur = DB_connection.cursor()
+    # Execute SQL request
+    try :
+        cur.execute("DELETE FROM Tags WHERE id LIKE ? AND tag LIKE ?",(id_tag,tag))
+        # Apply the changes
+        DB_connection.commit()
+        # Logs
+        logging.info(f"'{id}' deleted from the table 'Tags'")
+    except mariadb.Error as e:
+        logging.error(f"'{id}' removal from the table 'Tags' failed : {e}")
         sys.exit(1)
 
