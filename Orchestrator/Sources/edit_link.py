@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+# Import external libs
+import configparser
+import sys
+import base64
+import requests
+import json
+
 # Import Gotham's libs
 # GOTHAM'S LIB
 import Gotham_link_BDD
@@ -6,6 +13,7 @@ import Gotham_check
 import Gotham_choose
 import Gotham_normalize
 import Gotham_replace
+import Gotham_SSH_SCP
 
 import add_link
 
@@ -16,7 +24,7 @@ GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
 
-def edit_tags(DB_settings, link, tags, type_tag):
+def edit_tags(DB_settings, datacenter_settings, link, tags, type_tag):
 
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
@@ -50,7 +58,7 @@ def edit_tags(DB_settings, link, tags, type_tag):
                     sys.exit(1)
 
 
-def edit_nb(DB_settings, link, nb, type_nb):
+def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
 
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
@@ -140,7 +148,7 @@ def edit_nb(DB_settings, link, nb, type_nb):
                     id_hp = r.text.split()[2]
                     added_hp.append(id_hp)
                 except Exception as e:
-                    logging.error(f"Error with hp duplication : {honeypot_infos['hp_id']} - " + str(e))
+                    #logging.error(f"Error with hp duplication : {honeypot_infos['hp_id']} - " + str(e))
                     sys.exit(1)
                 
             
@@ -157,7 +165,7 @@ def edit_nb(DB_settings, link, nb, type_nb):
                 nginxRedirectionPath = "/data/template/"+ str(link["link_id"]) +"-"+str(exposed_port)+".conf"
                 try:
                     os.remove(nginxRedirectionPath)
-                    add_link.generate_nginxConf(DB_settings, link["link_id"], dc_ip, selected_objects, exposed_port)
+                    add_link.generate_nginxConf(DB_settings, link["link_id"], datacenter_settings["hostname"], selected_objects, exposed_port)
                 except Exception as e:
                     logging.error(f"Error with nginx conf modification : {nginxRedirectionPath} - " + str(e))
                     sys.exit(1)
@@ -225,7 +233,7 @@ def edit_nb(DB_settings, link, nb, type_nb):
             # Generate NGINX configurations for each redirection on a specific exposed_port
             for exposed_port in new_exposed_ports:
                 try:
-                    add_link.generate_nginxConf(DB_settings, link["link_id"], dc_ip, honeypots, exposed_port)
+                    add_link.generate_nginxConf(DB_settings, link["link_id"], datacenter_settings["hostname"], honeypots, exposed_port)
                 except:
                     sys.exit(1)
 
@@ -278,14 +286,14 @@ def edit_nb(DB_settings, link, nb, type_nb):
 
             try:
                 if type_nb == "hp":
-                    remove_lhs(DB_settings, id_link = dsp_link["link_id"], id_hp = del_object["hp_id"])
+                    Gotham_link_BDD.remove_lhs(DB_settings, id_link = dsp_link["link_id"], id_hp = del_object["hp_id"])
                 elif type_nb == "serv":
-                    remove_lhs(DB_settings, id_link = dsp_link["link_id"], id_serv = del_object["serv_id"])
+                    Gotham_link_BDD.remove_lhs(DB_settings, id_link = dsp_link["link_id"], id_serv = del_object["serv_id"])
             except:
                 sys.exit(1)
             try:
                 modifs={"nb_"+type_nb:int(dsp_link["link_nb_"+type_nb])-1}
                 conditions={"id":dsp_link["link_id"]}
-                edit_link_DB(DB_settings, modifs, conditions)
+                Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
             except:
                 sys.exit(1)

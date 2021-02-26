@@ -2,7 +2,9 @@
 import mariadb
 import sys
 import configparser
-import get_infos
+
+# Import GOTHAM's libs
+from . import get_infos
 from Gotham_check import check_TAGS
 
 # Logging components

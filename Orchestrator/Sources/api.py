@@ -755,7 +755,7 @@ def edit_lk():
                     except:
                         return "Error with tags: some server tags do not exists"
                     try:
-                        edit_link.edit_tags(DB_settings, link_serv_hp, link_infos_received["tags_serv"], "serv")
+                        edit_link.edit_tags(DB_settings, datacenter_settings, link_serv_hp, link_infos_received["tags_serv"], "serv")
                     except:
                         return "Error in tag server edition"
                 modifs["tags_serv"]=link_infos_received["tags_serv"]
@@ -769,7 +769,7 @@ def edit_lk():
                     except:
                         return "Error with tags: some honeypot tags do not exists"
                     try:
-                        edit_link.edit_tags(DB_settings, link_hp_serv, link_infos_received["tags_hp"], "hp")
+                        edit_link.edit_tags(DB_settings, datacenter_settings, link_hp_serv, link_infos_received["tags_hp"], "hp")
                     except:
                         return "Error in tag hp edition"
                 modifs["tags_hp"]=link_infos_received["tags_hp"]
@@ -791,7 +791,7 @@ def edit_lk():
         if "nb_serv" in link_infos_received.keys():
             if link_infos_received["nb_serv"]!= link["link_nb_serv"]:
                 try:
-                    edit_link.edit_nb(DB_settings, link_serv_hp, link_infos_received["nb_serv"], "serv")
+                    edit_link.edit_nb(DB_settings, datacenter_settings, link_serv_hp, link_infos_received["nb_serv"], "serv")
                 except:
                     return "Error in server nb edition"
                 modifs["nb_serv"]=link_infos_received["nb_serv"]
@@ -799,7 +799,7 @@ def edit_lk():
         if "nb_hp" in link_infos_received.keys():
             if link_infos_received["nb_hp"]!= link["link_nb_hp"]:
                 try:
-                    edit_link.edit_nb(DB_settings, link_hp_serv, link_infos_received["nb_hp"], "hp")
+                    edit_link.edit_nb(DB_settings, datacenter_settings, link_hp_serv, link_infos_received["nb_hp"], "hp")
                 except:
                     return "Error in hp nb edition"
                 modifs["nb_hp"]=link_infos_received["nb_hp"]
