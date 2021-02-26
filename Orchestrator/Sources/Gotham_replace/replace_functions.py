@@ -296,3 +296,81 @@ def replace_server_in_link(DB_settings,serv_infos,link, new_tags="", already_use
     else:
         print("Not implemented")
         return False
+
+def distribute_servers_on_link_ports(DB_settings, link):
+    is_possible=True
+    i=0
+    j=1
+    while is_possible:
+        links= Gotham_link_BDD.get_link_serv_hp_infos(DB_settings, id=link["link_id"])
+        dsp_link=Gotham_normalize.normalize_display_object_infos(links[0],"link","serv")
+        count_exposed_ports={}
+        for server in dsp_link["servs"]:
+            exposed_ports=[hp["lhs_port"] for hp in server["hps"]]
+            exposed_ports_unique=list(dict.fromkeys(exposed_ports))
+            if len(exposed_ports_unique) == 1 :
+                count_exposed_ports[str(exposed_ports_unique[0])] = 0 if str(exposed_ports_unique[0]) not in count_exposed_ports.keys() else count_exposed_ports[str(exposed_ports_unique[0])]+1
+            else:
+                logging.error(f"Not implemented")
+                sys.exit(1)
+
+        servers=[]
+
+        # Get all honeypots used by links
+        honeypots=[hp for serv in dsp_link["servs"] for hp in serv["hps"]]
+        # Remove duplicates
+        honeypots=[dict(tuple_of_hp_items) for tuple_of_hp_items in {tuple(hp.items()) for hp in honeypots}]
+
+
+        ports_sorted=sorted(count_exposed_ports, key = count_exposed_ports.get, reverse=True)
+        port_max_used=str(ports_sorted[i])
+        port_min_used=str(ports_sorted[-j])
+
+        for server in dsp_link["servs"]:
+            exposed_ports=[hp["lhs_port"] for hp in server["hps"]]
+            exposed_ports_unique=list(dict.fromkeys(exposed_ports))
+            if len(exposed_ports_unique) == 1 :
+                if str(exposed_ports_unique[0]) == port_max_used:
+                    servs=Gotham_link_BDD.get_server_infos(DB_settings, id=server["serv_id"])
+                    servers.append(servs[0])
+            else:
+                logging.error(f"Not implemented")
+                sys.exit(1)
+
+        servers = Gotham_check.check_servers_ports_matching(servers, [port_min_used])
+
+        if servers!=[]:
+            servers=[servers[0]]
+            
+            try:
+              commands = ["sudo rm /etc/nginx/conf.d/links/" + dsp_link["link_id"] +"-*.conf"]
+              Gotham_SSH_SCP.execute_commands(servers[0]["serv_ip"], servers[0]["serv_ssh_port"], servers[0]["serv_ssh_key"], commands)
+              Gotham_link_BDD.remove_lhs(DB_settings, id_link = dsp_link["link_id"], id_serv = servers[0]["serv_id"])
+            except Exception as e:
+              logging.error(f"{dsp_link['link_id']} removal on servers failed : {e}")
+              sys.exit(1)
+
+            servers[0]["choosed_port"]=port_min_used
+            # Deploy new reverse-proxies's configurations on servers
+            add_link.deploy_nginxConf(DB_settings, dsp_link["link_id"], servers)
+
+            for honeypot in honeypots:
+                # Create lhs_infos
+                lhs_infos = {"id_link":dsp_link["link_id"], "id_hp": honeypot["hp_id"], "id_serv": servers[0]["serv_id"], "port":servers[0]["choosed_port"]}
+                # Normalize infos
+                lhs_infos = Gotham_normalize.normalize_lhs_infos(lhs_infos)
+                # Store new link and tags in the internal database        
+                Gotham_link_BDD.add_lhs_DB(DB_settings, lhs_infos)
+            i=0
+            j=1
+
+
+        elif str(ports_sorted[i+1])!=port_min_used and count_exposed_ports[str(ports_sorted[i+1])]-count_exposed_ports[port_min_used]>1:
+            i+=1
+
+        elif str(ports_sorted[-(j+1)])!=port_max_used and count_exposed_ports[port_max_used]-count_exposed_ports[str(ports_sorted[-(j+1)])]>1:
+            j+=1
+        
+        else:
+            is_possible=False
+    

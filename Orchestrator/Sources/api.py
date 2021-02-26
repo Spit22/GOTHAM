@@ -413,7 +413,7 @@ def add_lk():
         id = 'lk-'+str(uuid.uuid4().hex)
 
         # Generate NGINX configurations for each redirection on a specific exposed_port
-        for exposed_port in final_exposed_ports:
+        for exposed_port in exposed_ports_list:
             add_link.generate_nginxConf(DB_settings, id, dc_ip, honeypots, exposed_port)
 
         # Deploy new reverse-proxies's configurations on servers
@@ -777,7 +777,10 @@ def edit_lk():
         
         if "ports" in link_infos_received.keys():
             if link_infos_received["ports"]!= link["link_ports"]:
-                return "Edit ports not IMPLEMENTED"
+                try:
+                    edit_link.edit_ports(DB_settings, datacenter_settings, link_serv_hp, link_infos_received["ports"])
+                except:
+                    return "Error in ports edition"
                 modifs["ports"]=link_infos_received["ports"]
 
         # Update link before edit nb_serv and nb_hp (Edit tags can decrease nb_serv and nb_hp)
@@ -786,6 +789,14 @@ def edit_lk():
             links = Gotham_link_BDD.get_link_infos(DB_settings, id=link_infos_received["id"])
             link = Gotham_normalize.normalize_display_object_infos(links[0],"link")
             modifications=True
+
+        # Just redistrib ports
+        if "ports" in link_infos_received.keys():
+            if link_infos_received["ports"]!= link["link_ports"]:
+                try:
+                    Gotham_replace.distrib_servers_on_link_ports(DB_settings, link)
+                except:
+                    return "Error in ports redistribution"
 
         modifs={}
 

@@ -412,7 +412,3 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
                 # Store new link and tags in the internal database        
                 Gotham_link_BDD.add_lhs_DB(DB_settings, lhs_infos)
     
-    if min(count_exposed_ports.values())==0 and max(count_exposed_ports.values())>1:
-        is_possible=True
-        while is_possible:
-            ports_sorted=sorted(count_exposed_ports, key = count_exposed_ports.get, reverse=True)

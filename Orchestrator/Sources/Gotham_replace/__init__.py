@@ -173,6 +173,9 @@ def replace_hp_for_added_tags_in_link(DB_settings, datacenter_settings, link_inf
       replace_functions.decrease_link(DB_settings, datacenter_settings, hp_infos, link_infos, "hp")
     except:
       sys.exit(1)
+
+def distrib_servers_on_link_ports(DB_settings, link):
+  replace_functions.distribute_servers_on_link_ports(DB_settings, link)
   
 def config_honeypot_replacement(DB_settings, datacenter_settings, old_hp_infos, new_hp_infos = {}, link = None):
   replace_functions.configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_infos, new_hp_infos = {}, link = None)
