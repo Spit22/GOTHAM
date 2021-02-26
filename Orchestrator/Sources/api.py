@@ -398,8 +398,8 @@ def add_lk():
             
             elif port_available_only_for_this_server!=[]:
                 free_ports_available_only_for_this_server_with_weight={key:value for key,value in count_exposed_ports.items() if key in port_available_only_for_this_server}
-                objects_infos[i]["choosed_port"]=int(min(free_ports_available_only_for_this_server_with_weight, key=free_ports_available_only_for_this_server_with_weight.get))
-                count_exposed_ports[str(objects_infos[i]["choosed_port"])]+=1
+                servers[i]["choosed_port"]=int(min(free_ports_available_only_for_this_server_with_weight, key=free_ports_available_only_for_this_server_with_weight.get))
+                count_exposed_ports[str(servers[i]["choosed_port"])]+=1
         
         for i in range(len(servers)):
             if not("choosed_port" in servers[i].keys()):

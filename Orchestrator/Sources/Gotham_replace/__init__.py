@@ -143,7 +143,7 @@ def replace_serv_for_added_tags_in_link(DB_settings, datacenter_settings, link_i
   # If we can't replace, just edit link to decrease nb serv
   if result == False:
     try:
-      replace_functions.decrease_link(DB_settings, datacenter_settings, serv_infos, link, "serv")
+      replace_functions.decrease_link(DB_settings, datacenter_settings, serv_infos, link_infos, "serv")
       result=True
     except:
       sys.exit(1)
@@ -152,11 +152,11 @@ def replace_serv_for_added_tags_in_link(DB_settings, datacenter_settings, link_i
 
   if result:
     try:
-      commands = ["sudo rm /etc/nginx/conf.d/links/" + link["link_id"] +"-*.conf"]
+      commands = ["sudo rm /etc/nginx/conf.d/links/" + link_infos["link_id"] +"-*.conf"]
       Gotham_SSH_SCP.execute_commands(serv_infos["serv_ip"], serv_infos["serv_ssh_port"], serv_infos["serv_ssh_key"], commands)
       return already_used
     except Exception as e:
-      logging.error(f"{link['link_id']} removal on servers failed : {e}")
+      logging.error(f"{link_infos['link_id']} removal on servers failed : {e}")
       sys.exit(1)
 
 
@@ -173,3 +173,6 @@ def replace_hp_for_added_tags_in_link(DB_settings, datacenter_settings, link_inf
       replace_functions.decrease_link(DB_settings, datacenter_settings, hp_infos, link_infos, "hp")
     except:
       sys.exit(1)
+  
+def config_honeypot_replacement(DB_settings, datacenter_settings, old_hp_infos, new_hp_infos = {}, link = None):
+  replace_functions.configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_infos, new_hp_infos = {}, link = None)

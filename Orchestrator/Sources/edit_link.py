@@ -155,10 +155,10 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
             for id in added_hp:
                 selected_objects.append(Gotham_link_BDD.get_honeypot_infos(DB_settings, id=id))
         
-        if str(nb).lower() == "all":
-            nb_obj=len(selected_objects)
-        else:
-            nb_obj=nb
+        #if str(nb).lower() == "all":
+        #    nb_obj=len(selected_objects)
+        #else:
+        #    nb_obj=nb
 
         if type_nb=="hp":
             for exposed_port in exposed_ports_unique:
@@ -273,7 +273,7 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                 index_hp_in_link=next((index for (index, hp) in enumerate(dsp_link["hps"]) if hp["hp_id"] == del_object["hp_id"]), None)
                 # Configure all server to not redirect on hp
                 try:
-                    configure_honeypot_replacement(DB_settings, datacenter_settings, dsp_link["hps"][index_hp_in_link], link = dsp_link)
+                    Gotham_replace.config_honeypot_replacement(DB_settings, datacenter_settings, dsp_link["hps"][index_hp_in_link], link = dsp_link)
                 except:
                     sys.exit(1)
             if type_nb=="serv":
@@ -390,8 +390,8 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
             
             elif port_available_only_for_this_server!=[]:
                 free_ports_available_only_for_this_server_with_weight={key:value for key,value in count_exposed_ports.items() if key in port_available_only_for_this_server}
-                objects_infos[i]["choosed_port"]=int(min(free_ports_available_only_for_this_server_with_weight, key=free_ports_available_only_for_this_server_with_weight.get))
-                count_exposed_ports[str(objects_infos[i]["choosed_port"])]+=1
+                servers[i]["choosed_port"]=int(min(free_ports_available_only_for_this_server_with_weight, key=free_ports_available_only_for_this_server_with_weight.get))
+                count_exposed_ports[str(servers[i]["choosed_port"])]+=1
     
         for i in range(len(servers)):
             if not("choosed_port" in servers[i].keys()):
