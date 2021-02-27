@@ -8,8 +8,10 @@ import json
 import requests
 
 from Gotham_normalize import normalize_id_honeypot,normalize_honeypot_infos,normalize_server_infos, normalize_display_object_infos
-from Gotham_link_BDD import remove_honeypot_DB, get_honeypot_infos, get_server_infos, remove_server_DB, edit_lhs_DB, edit_link_DB, remove_lhs
-
+#from Gotham_link_BDD import remove_honeypot_DB, get_honeypot_infos, get_server_infos, remove_server_DB, edit_lhs_DB, edit_link_DB, remove_lhs
+import Gotham_link_BDD
+import Gotham_SSH_SCP
+import Gotham_normalize
 import Gotham_check
 import Gotham_choose
 import add_link
@@ -29,7 +31,7 @@ def replace_honeypot_all_link(DB_settings, datacenter_settings, hp_infos):
     tag_separator = config['tag']['separator']
     # Find a honeypot with same tags
     hp_tags = tag_separator.join(hp_infos["hp_tags"].split("||"))
-    honeypots = Gotham_check.check_tags("hp", get_honeypot_infos(DB_settings, tags=hp_tags), tags_hp=hp_tags)
+    honeypots = Gotham_check.check_tags("hp", Gotham_link_BDD.get_honeypot_infos(DB_settings, tags=hp_tags), tags_hp=hp_tags)
     # Filter honeypots in error, and original hp by id
     honeypots = [hp for hp in honeypots if not(hp["hp_state"] == 'ERROR' or hp["hp_id"] == hp_infos["hp_id"])]
     if honeypots!=[]:
@@ -45,7 +47,7 @@ def replace_honeypot_all_link(DB_settings, datacenter_settings, hp_infos):
         modifs={"id_hp":honeypot["hp_id"]}
         conditions={"id_hp":hp_infos["hp_id"]}
         try:
-            edit_lhs_DB(DB_settings, modifs, conditions)
+            Gotham_link_BDD.edit_lhs_DB(DB_settings, modifs, conditions)
         except:
             sys.exit(1)
         return True
@@ -63,7 +65,7 @@ def replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, d
     link_tags_hp = tag_separator.join(link["link_tags_hp"].split("||")) if new_tags=="" else new_tags
 
     # Get all honeypots corresponding to tags
-    honeypots = Gotham_check.check_tags("hp", get_honeypot_infos(DB_settings, tags = link_tags_hp), tags_hp = link_tags_hp)
+    honeypots = Gotham_check.check_tags("hp", Gotham_link_BDD.get_honeypot_infos(DB_settings, tags = link_tags_hp), tags_hp = link_tags_hp)
 
     # Filter honeypots in error, and original hp by id
     honeypots = [hp for hp in honeypots if not(hp["hp_state"] == 'ERROR' or hp["hp_id"] == hp_infos["hp_id"])]
@@ -89,7 +91,7 @@ def replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, d
         modifs = {"id_hp":honeypot["hp_id"]}
         conditions = {"id_link":link["link_id"], "id_hp":honeypot["hp_id"]}
         try:
-            edit_lhs_DB(DB_settings, modifs, conditions)
+            Gotham_link_BDD.edit_lhs_DB(DB_settings, modifs, conditions)
         except:
             sys.exit(1)
         replaced = True
@@ -111,15 +113,15 @@ def decrease_link(DB_settings, datacenter_settings, object_infos, link, type_obj
                 sys.exit(1)
         try:
             if type_obj == "hp":
-                remove_lhs(DB_settings, id_link = link["link_id"], id_hp = object_infos["hp_id"])
+                Gotham_link_BDD.remove_lhs(DB_settings, id_link = link["link_id"], id_hp = object_infos["hp_id"])
             elif type_obj == "serv":
-                remove_lhs(DB_settings, id_link = link["link_id"], id_serv = object_infos["serv_id"])
+                Gotham_link_BDD.remove_lhs(DB_settings, id_link = link["link_id"], id_serv = object_infos["serv_id"])
         except:
             sys.exit(1)
         try:
             modifs={"nb_"+type_obj:int(link["link_nb_"+type_obj])-1}
             conditions={"id":link["link_id"]}
-            edit_link_DB(DB_settings, modifs, conditions)
+            Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
         except:
             sys.exit(1)
     else:        
@@ -216,7 +218,7 @@ def duplicate_hp(DB_settings,honeypot_infos):
     except Exception as e:
         logging.error(f"Error with hp duplication : {honeypot_infos['hp_id']} - " + str(e))
         sys.exit(1)
-    result = get_honeypot_infos(DB_settings, id = id_hp)
+    result = Gotham_link_BDD.get_honeypot_infos(DB_settings, id = id_hp)
     return result[0]
 
 
@@ -233,7 +235,7 @@ def replace_server_in_link(DB_settings,serv_infos,link, new_tags="", already_use
     link_tags_serv=tag_separator.join(link["link_tags_serv"].split("||")) if new_tags=="" else new_tags
 
     # Get all servers corresponding to tags
-    servers = Gotham_check.check_tags("serv",get_server_infos(DB_settings, tags=link_tags_serv), tags_serv=link_tags_serv)
+    servers = Gotham_check.check_tags("serv", Gotham_link_BDD.get_server_infos(DB_settings, tags=link_tags_serv), tags_serv=link_tags_serv)
 
     # Filter servers in those who have one of ports open
     servers = Gotham_check.check_servers_ports_matching(servers, link["link_ports"])
@@ -268,7 +270,7 @@ def replace_server_in_link(DB_settings,serv_infos,link, new_tags="", already_use
                 modifs={"id_serv":replacement_server[0]["serv_id"]}
                 conditions={"id_link":link["link_id"],"id_hp":hp["hp_id"],"id_serv":serv_infos["serv_id"]}
                 try:
-                    edit_lhs_DB(DB_settings,modifs,conditions)
+                    Gotham_link_BDD.edit_lhs_DB(DB_settings,modifs,conditions)
                 except:
                     sys.exit(1)
         elif "hps" in serv_infos.items():
@@ -280,7 +282,7 @@ def replace_server_in_link(DB_settings,serv_infos,link, new_tags="", already_use
                 modifs={"id_serv":replacement_server[0]["serv_id"]}
                 conditions={"id_link":link["link_id"],"id_hp":hp["hp_id"],"id_serv":serv_infos["serv_id"]}
                 try:
-                    edit_lhs_DB(DB_settings,modifs,conditions)
+                    Gotham_link_BDD.edit_lhs_DB(DB_settings,modifs,conditions)
                 except:
                     sys.exit(1)
         else:

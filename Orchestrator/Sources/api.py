@@ -29,6 +29,7 @@ import Gotham_link_BDD
 import Gotham_check
 import Gotham_choose
 import Gotham_normalize
+import Gotham_replace
 
 # Logging components
 import os
