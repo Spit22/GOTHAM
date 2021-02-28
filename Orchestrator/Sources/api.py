@@ -61,7 +61,7 @@ try:
     dc_ssh_key = config['datacenter']['ssh_key']
     dc_ssh_key = base64.b64decode(dc_ssh_key) # ssh_key is byte
     dc_ssh_key = dc_ssh_key.decode('ascii') # ssh_key is ascii string
-    dc_ssh_key_rsyslog = StringIO(dc_ssh_key) # ssh_key for rsyslog
+    dc_ssh_key_rsyslog = dc_ssh_key # ssh_key for rsyslog
     dc_ssh_key = StringIO(dc_ssh_key) # ssh_key is a file-like object
 except Exception as e:
     print("Error loading datacenter's SSH key")
@@ -171,11 +171,11 @@ def add_honeypot(hp_infos_received={}):
         # Create and deploy rsyslog configuration on the datacenter and the orchestrator
         orch_ip = config["orchestrator"]["ip"]
         orch_rsyslog_port = config["orchestrator"]["syslog_port"]
-        rules =[]
-        #try:
-        add_hp.deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key_rsyslog, orch_ip, orch_rsyslog_port, id, rules)
-        #except:
-        #    return "Rsyslog configuration failed"
+        rules =[""]
+        try:
+            add_hp.deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key_rsyslog, orch_ip, orch_rsyslog_port, id, rules)
+        except:
+            return "Rsyslog configuration failed"
 
         # Create hp_infos
         hp_infos = {'id':str(id),'name':str(name),'descr':str(descr),'tags':str(tags),'port_container':port,'parser':str(parser),'logs':str(logs),'source':str(dockerfile_path),'state':'UNUSED','port':mapped_port}

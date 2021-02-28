@@ -7,6 +7,7 @@ import sys
 # Logging components
 import os
 import logging
+from io import StringIO
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
@@ -64,7 +65,7 @@ def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id_hp):
     command_exec_compose = ["cd "+str(docker_dest),"docker-compose -f "+str(docker_dest)+"/docker-compose.yml  --project-name "+id_hp+" up -d"]
     # Copy docker files on datacenter, and execute docker-compose
     try:
-        send_file_and_execute_commands(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, docker_dest, command_exec_compose)
+        send_file_and_execute_commands(dc_ip, dc_ssh_port, StringIO(dc_ssh_key), dockerfile_path, docker_dest, command_exec_compose)
         print(command_exec_compose)
     except Exception as e:
         return False
@@ -118,6 +119,9 @@ def generate_rulebase(id_hp, rules, rulebase_path):
         sys.exit(1)
 
 def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_port, id_hp, rules):
+    # On effectue 2 connexions SSH
+    dc_ssh_key_1 = dc_ssh_key
+    dc_ssh_key_2 = dc_ssh_key
     # PATH ON ORCHESTRATOR
     ### Configuration
     rsyslog_conf_datacenter_local_path = "/data/rsyslog/datacenter-configuration/"
@@ -132,7 +136,7 @@ def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_po
     #remote_path = "/data/"+str(id_hp)+"/"
     rsyslog_conf_datacenter_remote_path = "/data/rsyslog/"
     ## Log files
-    remote_hp_log_file_path = "TO BE DEFINED"
+    remote_hp_log_file_path = "/data/"+str(id_hp)+"/logs/"
     ## Rulebase
     remote_rulebase_path = "/data/rsyslog/rulebase/" 
 
@@ -149,11 +153,10 @@ def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_po
         sys.exit(1)
     # Send datacenter rsyslog configuration to the datacenter
     try:
-        #print("bypass")
         # Send the rulebase
-        send_file(dc_ip, dc_ssh_port, dc_ssh_key, local_rulebase_path + id_hp + ".rb", remote_rulebase_path)
+        send_file(dc_ip, dc_ssh_port, StringIO(dc_ssh_key_1), [ local_rulebase_path + id_hp + ".rb" ], remote_rulebase_path)
         # Send rsyslog configuration
-        send_file_and_execute_commands(dc_ip, dc_ssh_port, dc_ssh_key, rsyslog_conf_datacenter_local_path + id_hp + ".conf", rsyslog_conf_datacenter_remote_path, exec_restart_rsyslog)
+        send_file_and_execute_commands(dc_ip, dc_ssh_port, StringIO(dc_ssh_key_2), [ rsyslog_conf_datacenter_local_path + id_hp + ".conf" ], rsyslog_conf_datacenter_remote_path, exec_restart_rsyslog)
     except Exception as e:
         logging.error(f"Fail to deploy rsyslog configuration: {e}")
         sys.exit(1)
