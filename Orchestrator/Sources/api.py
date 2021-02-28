@@ -22,13 +22,14 @@ import rm_link
 # GOTHAM's Edit Scripts
 import edit_hp
 import edit_server
-#import edit_link
+import edit_link
 
 # GOTHAM'S LIB
 import Gotham_link_BDD
 import Gotham_check
 import Gotham_choose
 import Gotham_normalize
+import Gotham_replace
 
 # Logging components
 import os
@@ -397,7 +398,8 @@ def add_lk():
                 count_exposed_ports[str(servers[i]["choosed_port"])]+=1
             
             elif port_available_only_for_this_server!=[]:
-                servers[i]["choosed_port"]=int(port_available_only_for_this_server[0])
+                free_ports_available_only_for_this_server_with_weight={key:value for key,value in count_exposed_ports.items() if key in port_available_only_for_this_server}
+                servers[i]["choosed_port"]=int(min(free_ports_available_only_for_this_server_with_weight, key=free_ports_available_only_for_this_server_with_weight.get))
                 count_exposed_ports[str(servers[i]["choosed_port"])]+=1
         
         for i in range(len(servers)):
@@ -412,7 +414,7 @@ def add_lk():
         id = 'lk-'+str(uuid.uuid4().hex)
 
         # Generate NGINX configurations for each redirection on a specific exposed_port
-        for exposed_port in final_exposed_ports:
+        for exposed_port in exposed_ports_list:
             add_link.generate_nginxConf(DB_settings, id, dc_ip, honeypots, exposed_port)
 
         # Deploy new reverse-proxies's configurations on servers
@@ -754,8 +756,10 @@ def edit_lk():
                         Gotham_check.check_doublon_tags(DB_settings, link_infos_received["tags_serv"])
                     except:
                         return "Error with tags: some server tags do not exists"
-                
-                return "Edit tags_serv not IMPLEMENTED"
+                    try:
+                        edit_link.edit_tags(DB_settings, datacenter_settings, link_serv_hp, link_infos_received["tags_serv"], "serv")
+                    except:
+                        return "Error in tag server edition"
                 modifs["tags_serv"]=link_infos_received["tags_serv"]
         
         if "tags_hp" in link_infos_received.keys():
@@ -766,13 +770,18 @@ def edit_lk():
                         Gotham_check.check_doublon_tags(DB_settings, link_infos_received["tags_hp"])
                     except:
                         return "Error with tags: some honeypot tags do not exists"
-                    
-                return "Edit tags_hp not IMPLEMENTED"
+                    try:
+                        edit_link.edit_tags(DB_settings, datacenter_settings, link_hp_serv, link_infos_received["tags_hp"], "hp")
+                    except:
+                        return "Error in tag hp edition"
                 modifs["tags_hp"]=link_infos_received["tags_hp"]
         
         if "ports" in link_infos_received.keys():
             if link_infos_received["ports"]!= link["link_ports"]:
-                return "Edit ports not IMPLEMENTED"
+                try:
+                    edit_link.edit_ports(DB_settings, datacenter_settings, link_serv_hp, link_infos_received["ports"])
+                except:
+                    return "Error in ports edition"
                 modifs["ports"]=link_infos_received["ports"]
 
         # Update link before edit nb_serv and nb_hp (Edit tags can decrease nb_serv and nb_hp)
@@ -782,16 +791,30 @@ def edit_lk():
             link = Gotham_normalize.normalize_display_object_infos(links[0],"link")
             modifications=True
 
+        # Just redistrib ports
+        if "ports" in link_infos_received.keys():
+            if link_infos_received["ports"]!= link["link_ports"]:
+                try:
+                    Gotham_replace.distrib_servers_on_link_ports(DB_settings, link)
+                except:
+                    return "Error in ports redistribution"
+
         modifs={}
 
         if "nb_serv" in link_infos_received.keys():
             if link_infos_received["nb_serv"]!= link["link_nb_serv"]:
-                return "Edit nb_serv not IMPLEMENTED"
+                try:
+                    edit_link.edit_nb(DB_settings, datacenter_settings, link_serv_hp, link_infos_received["nb_serv"], "serv")
+                except:
+                    return "Error in server nb edition"
                 modifs["nb_serv"]=link_infos_received["nb_serv"]
         
         if "nb_hp" in link_infos_received.keys():
             if link_infos_received["nb_hp"]!= link["link_nb_hp"]:
-                return "Edit nb_hp not IMPLEMENTED"
+                try:
+                    edit_link.edit_nb(DB_settings, datacenter_settings, link_hp_serv, link_infos_received["nb_hp"], "hp")
+                except:
+                    return "Error in hp nb edition"
                 modifs["nb_hp"]=link_infos_received["nb_hp"]
         
         if modifs != {}:

@@ -75,6 +75,32 @@ def check_doublon_tags(DB_settings, tags):
     except:
         sys.exit(1)
 
+def check_tag_still_used(DB_settings, tag="%", id="%"):
+    '''
+    Check if tag is still used by a honeypot or a server
+
+    ARGUMENTS:
+        DB_settings (dict) : all the settings to connect to the internal database
+        tag (string): tag
+    '''
+    try:
+        DB_connection = mariadb.connect(
+            user=DB_settings["username"],
+            password=DB_settings["password"],
+            host=DB_settings["hostname"],
+            port=int(DB_settings["port"]),
+            database=DB_settings["database"]
+        )
+    except mariadb.Error as e:
+        logging.error(f"Can't connect to the internal database : {e}")
+        sys.exit(1)
+    try:
+        result = check_TAGS.check_tag_still_used(DB_connection, tag,id)
+    except:
+        sys.exit(1)
+    DB_connection.close()
+    return result
+
 def check_used_port(DB_settings):
     '''
     Retrieve a list of all used port by honeypots from the internal database

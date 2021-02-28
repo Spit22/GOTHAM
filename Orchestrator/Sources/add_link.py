@@ -43,13 +43,17 @@ def deploy_nginxConf(db_settings, link_id, servers):
         link_id (string): id of the link we are configuring nginx for
         servers (dict): list of servers we want to deploy on associated with exposed ports
     '''
+
     # Initialize command and file
     checkAndReloadNginx_command = ["nginx -t && nginx -s reload"]
     linkConf_dest = "/etc/nginx/conf.d/links/"
     # Deploy new configuration on each servers
     for server in servers:
+        if "choosed_port" not in server.keys() and "lhs_port" in server.keys():
+            server["choosed_port"]=server["lhs_port"]
+
         linkConf_path = ["/data/template/"+str(link_id)+"-"+str(server["choosed_port"])+".conf"]
-        # Déploy configuration on the server and Reload nginx if ok
+        # Deploy configuration on the server and Reload nginx if ok
         send_file_and_execute_commands(server["serv_ip"], server["serv_ssh_port"], StringIO(server["serv_ssh_key"]), linkConf_path, linkConf_dest, checkAndReloadNginx_command)
 
 ### TEST SECTION ###

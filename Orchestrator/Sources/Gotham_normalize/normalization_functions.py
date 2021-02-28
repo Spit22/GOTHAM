@@ -99,22 +99,32 @@ def normalize_ssh_key(ssh_key):
     return ssh_key
 
 def normalize_nb_hp(nb_hp):
-    if len(str(nb_hp)) > 5:
-        logging.warning(f"Number of honeypots (nb_hp) has a invalid length : {nb_hp} : nb_hp length must be under 5 !")
-    try:
-        int(nb_hp)
-    except:
-        logging.warning(f"Number of honeypots (nb_hp) has a invalid type : {nb_hp} : nb_hp must be an interger !")
-    return int(nb_hp)
+    if str(nb_hp).lower()!="all":
+        if len(str(nb_hp)) > 5:
+            logging.warning(f"Number of honeypots (nb_hp) has a invalid length : {nb_hp} : nb_hp length must be under 5 !")
+        try:
+            int(nb_hp)
+        except:
+            logging.warning(f"Number of honeypots (nb_hp) has a invalid type : {nb_hp} : nb_hp must be an interger !")
+        if int(nb_hp) < 1:
+            logging.warning(f"Number of honeypots (nb_hp) has a invalid value : {nb_hp} : nb_hp must be superior to 0 !")
+        return int(nb_hp)
+    else:
+        return "ALL"
 
 def normalize_nb_serv(nb_serv):
-    if len(str(nb_serv)) > 5:
-        logging.warning(f"Number of servers (nb_serv) has a invalid length : {nb_serv} : nb_hp length must be under 5 !")
-    try:
-        int(nb_serv)
-    except:
-        logging.warning(f"Number of servers (nb_serv) has a invalid type : {nb_serv} : nb_serv must be an interger !")
-    return int(nb_serv)
+    if str(nb_serv).lower()!="all":
+        if len(str(nb_serv)) > 5:
+            logging.warning(f"Number of servers (nb_serv) has a invalid length : {nb_serv} : nb_hp length must be under 5 !")
+        try:
+            int(nb_serv)
+        except:
+            logging.warning(f"Number of servers (nb_serv) has a invalid type : {nb_serv} : nb_serv must be an interger !")
+        if int(nb_serv) < 1:
+            logging.warning(f"Number of honeypots (nb_serv) has a invalid value : {nb_serv} : nb_serv must be superior to 0 !")
+        return int(nb_serv)
+    else:
+        return "ALL"
 
 def normalize_tags(tags):
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
