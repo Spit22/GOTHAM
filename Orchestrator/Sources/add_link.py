@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Import Gotham's libs
 from Gotham_SSH_SCP import send_file_and_execute_commands
-from Gotham_link_BDD import get_server_infos, get_honeypot_infos
 
 # Import external libs
 from io import StringIO

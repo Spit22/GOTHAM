@@ -136,7 +136,7 @@ def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_po
     #remote_path = "/data/"+str(id_hp)+"/"
     rsyslog_conf_datacenter_remote_path = "/data/rsyslog/"
     ## Log files
-    remote_hp_log_file_path = "/data/"+str(id_hp)+"/logs/"
+    remote_hp_log_file_path = "/data/"+str(id_hp)+"/logs/syslog"
     ## Rulebase
     remote_rulebase_path = "/data/rsyslog/rulebase/" 
 
