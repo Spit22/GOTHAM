@@ -26,8 +26,8 @@ def replace_hp_for_rm(DB_settings, datacenter_settings, hp_infos):
   result=False
   try:
     result=replace_functions.replace_honeypot_all_link(DB_settings, datacenter_settings, hp_infos)
-  except:
-    sys.exit(1)
+  except Exception as e:
+      raise ValueError("Error while replacing one hp for all links : "+str(e))
 
   if result==False:
     # if not, just find a honeypot per link
@@ -38,15 +38,15 @@ def replace_hp_for_rm(DB_settings, datacenter_settings, hp_infos):
         res=replace_functions.replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, duplicate_hp_list=duplicate_hp_list)
         result=res["replaced"]
         duplicate_hp_list=res["duplicate_hp_list"]
-      except:
-        sys.exit(1)
+      except Exception as e:
+          raise ValueError("Error while changing hp for a link : "+str(e))
 
       # If we can't replace, just edit link to decrease nb hp
       if result == False:
         try:
           replace_functions.decrease_link(DB_settings, datacenter_settings, hp_infos, link, "hp")
-        except:
-          sys.exit(1)
+        except Exception as e:
+            raise ValueError("Error decreasing the hp number of link : "+str(e))
 
 def replace_hp_for_deleted_tags(DB_settings, datacenter_settings, hp_infos, deleted_tags):
   if not("links" in hp_infos.keys()):
@@ -64,15 +64,15 @@ def replace_hp_for_deleted_tags(DB_settings, datacenter_settings, hp_infos, dele
         res=replace_functions.replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, duplicate_hp_list)
         result=res["replaced"]
         duplicate_hp_list=res["duplicate_hp_list"]
-      except:
-        sys.exit(1)
+      except Exception as e:
+        raise ValueError(e)
 
       # If we can't replace, just edit link to decrease nb hp
       if result == False:
         try:
           replace_functions.decrease_link(DB_settings, datacenter_settings, hp_infos, link, "hp")
-        except:
-          sys.exit(1)
+        except Exception as e:
+          raise ValueError("Olivier a fait de la merde n2")
 
 
 def replace_serv_for_rm(DB_settings, datacenter_settings, serv_infos):
@@ -87,15 +87,15 @@ def replace_serv_for_rm(DB_settings, datacenter_settings, serv_infos):
     # Try to replace
     try:
       result = replace_functions.replace_server_in_link(DB_settings, serv_infos, link)
-    except:
-        sys.exit(1)
+    except Exception as e:
+        raise ValueError(e)
 
     # If we can't replace, just edit link to decrease nb serv
     if not(result):
       try:
         replace_functions.decrease_link(DB_settings, datacenter_settings, serv_infos, link, "serv")
-      except:
-        sys.exit(1)
+      except Exception as e:
+        raise ValueError(e)
 
 
 def replace_serv_for_deleted_tags(DB_settings, datacenter_settings, serv_infos, deleted_tags):
@@ -111,16 +111,16 @@ def replace_serv_for_deleted_tags(DB_settings, datacenter_settings, serv_infos, 
       # Try to replace
       try:
         result = replace_functions.replace_server_in_link(DB_settings, serv_infos, link)
-      except:
-          sys.exit(1)
+      except Exception as e:
+          raise ValueError(e)
 
       # If we can't replace, just edit link to decrease nb serv
       if not(result):
         try:
           replace_functions.decrease_link(DB_settings, datacenter_settings, serv_infos, link, "serv")
           result=True
-        except:
-          sys.exit(1)
+        except Exception as e:
+          raise ValueError(e)
 
       if result:
         try:
@@ -129,7 +129,7 @@ def replace_serv_for_deleted_tags(DB_settings, datacenter_settings, serv_infos, 
           return True
         except Exception as e:
           logging.error(f"{link['link_id']} removal on servers failed : {e}")
-          sys.exit(1)
+          raise ValueError(e)
 
 
 def replace_serv_for_added_tags_in_link(DB_settings, datacenter_settings, link_infos, serv_infos, new_tags, already_used):
@@ -137,16 +137,16 @@ def replace_serv_for_added_tags_in_link(DB_settings, datacenter_settings, link_i
   # Try to replace
   try:
     result = replace_functions.replace_server_in_link(DB_settings, serv_infos, link_infos, new_tags=new_tags, already_used=already_used)
-  except:
-      sys.exit(1)
+  except Exception as e:
+      raise ValueError(e)
 
   # If we can't replace, just edit link to decrease nb serv
   if result == False:
     try:
       replace_functions.decrease_link(DB_settings, datacenter_settings, serv_infos, link_infos, "serv")
       result=True
-    except:
-      sys.exit(1)
+    except Exception as e:
+      raise ValueError(e)
   else:
     return result
 
@@ -157,25 +157,31 @@ def replace_serv_for_added_tags_in_link(DB_settings, datacenter_settings, link_i
       return already_used
     except Exception as e:
       logging.error(f"{link_infos['link_id']} removal on servers failed : {e}")
-      sys.exit(1)
+      raise ValueError(e)
 
 
 def replace_hp_for_added_tags_in_link(DB_settings, datacenter_settings, link_infos, hp_infos, new_tags):
   try:
     res=replace_functions.replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link_infos, new_tags=new_tags)
     result=res["replaced"]
-  except:
-    sys.exit(1)
+  except Exception as e:
+    raise ValueError(e)
 
   # If we can't replace, just edit link to decrease nb hp
   if result == False:
     try:
       replace_functions.decrease_link(DB_settings, datacenter_settings, hp_infos, link_infos, "hp")
-    except:
-      sys.exit(1)
+    except Exception as e:
+      raise ValueError(e)
 
 def distrib_servers_on_link_ports(DB_settings, link):
-  replace_functions.distribute_servers_on_link_ports(DB_settings, link)
-  
+  try:
+    replace_functions.distribute_servers_on_link_ports(DB_settings, link)
+  except Exception as e:
+    raise ValueError(e)
+
 def config_honeypot_replacement(DB_settings, datacenter_settings, old_hp_infos, new_hp_infos = {}, link = None):
-  replace_functions.configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_infos, new_hp_infos = {}, link = None)
+  try:  
+    replace_functions.configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_infos, new_hp_infos = new_hp_infos, link = link)
+  except ValueError as e:
+    raise ValueError(e)

@@ -58,14 +58,14 @@ def server_in_serv_tag(DB_connection, id="", tag=""):
         sys.exit(1)
 
     # Check if tag is still used
-    tag_info=tag if tag !="" else "%"
-    id_tag=id if id !="" else "%"
-    tag_infos=get_infos.tag(DB_connection, tag=tag_info, id=id_tag)
+    #tag_info=tag if tag !="" else "%"
+    #id_tag=id if id !="" else "%"
+    #tag_infos=get_infos.tag(DB_connection, tag=tag_info, id=id_tag)
 
-    tag_used=check_TAGS.check_tag_still_used(DB_connection, id=tag_infos[0]["id"])
+    #tag_used=check_TAGS.check_tag_still_used(DB_connection, id=tag_infos[0]["id"])
 
-    if tag_used==[]:
-        tag(DB_connection,id_tag=tag_infos[0]["id"])
+    #if tag_used==[]:
+    #    tag(DB_connection,id_tag=tag_infos[0]["id"])
 
 
 ############################### HONEYPOT SECTION ###############################
@@ -110,14 +110,12 @@ def honeypot_in_hp_tag(DB_connection, id="", tag=""):
         sys.exit(1)
 
     # Check if tag is still used
-    tag_info=tag if tag !="" else "%"
-    id_tag=id if id !="" else "%"
-    tag_infos=get_infos.tag(DB_connection, tag=tag_info, id=id_tag)
-
-    tag_used=check_TAGS.check_tag_still_used(DB_connection, id=tag_infos[0]["id"])
-
-    if tag_used==[]:
-        tag(DB_connection,id_tag=tag_infos[0]["id"])
+    #tag_info=tag if tag !="" else "%"
+    #id_tag=id if id !="" else "%"
+    #tag_infos=get_infos.tag(DB_connection, tag=tag_info, id=id_tag)
+    #tag_used=check_TAGS.check_tag_still_used(DB_connection, id=tag_infos[0]["id"])
+    #if tag_used==[]:
+    #    tag(DB_connection,id_tag=tag_infos[0]["id"])
 
 
 ############################### LINK SECTION ###############################

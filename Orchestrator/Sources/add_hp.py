@@ -66,8 +66,9 @@ def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id_hp):
     # Copy docker files on datacenter, and execute docker-compose
     try:
         send_file_and_execute_commands(dc_ip, dc_ssh_port, StringIO(dc_ssh_key), dockerfile_path, docker_dest, command_exec_compose)
-        print(command_exec_compose)
+        #print(command_exec_compose)
     except Exception as e:
+        print(e)
         return False
     # If deployment is OK, return True
     return True

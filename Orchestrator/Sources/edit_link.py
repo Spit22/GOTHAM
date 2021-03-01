@@ -32,7 +32,7 @@ def edit_tags(DB_settings, datacenter_settings, link, tags, type_tag):
 
     if type_tag!="hp" and type_tag!="serv":
         logging.error(f"type_tag is incorrect")
-        sys.exit(1)
+        raise ValueError("typ_tag incorrect")
 
     new_tags=tags.split(tags_separator)
     
@@ -42,20 +42,20 @@ def edit_tags(DB_settings, datacenter_settings, link, tags, type_tag):
     for object_infos in dsp_link[type_tag+"s"]:
         not_present_in_obj=list(set(new_tags) - set(object_infos[type_tag+"_tags"].split("||")))
         if not_present_in_obj != []:
-            links = Gotham_link_BDD.get_link_infos(DB_settings, id=dsp_link["link_id"])
-            dsp_link=Gotham_normalize.normalize_display_object_infos(links[0],"link",type_tag)
+            links = Gotham_link_BDD.get_link_infos(DB_settings, id=dsp_link["link_id"])[0]
+            dsp_link=Gotham_normalize.normalize_display_object_infos(links,"link",type_tag)
 
             if type_tag=="serv":
                 try:
                     already_used=Gotham_replace.replace_serv_for_added_tags_in_link(DB_settings, datacenter_settings, dsp_link, object_infos, tags, already_used)
-                except:
-                    sys.exit(1)
+                except Exception as e:
+                    raise ValueError(e)
             
             elif type_tag=="hp":
                 try:
                     Gotham_replace.replace_hp_for_added_tags_in_link(DB_settings, datacenter_settings, dsp_link, object_infos, tags)
-                except:
-                    sys.exit(1)
+                except Exception as e:
+                    raise ValueError(e)
 
 
 def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
@@ -74,24 +74,23 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
     for object_infos in dsp_link[type_nb+"s"]:
 
         if type_nb=="hp":
-            present_object=Gotham_link_BDD.get_honeypot_infos(DB_settings, id=object_infos[type_nb+"_id"])
+            present_object=Gotham_link_BDD.get_honeypot_infos(DB_settings, id=object_infos[type_nb+"_id"])[0]
 
         if type_nb=="serv":
-            present_object=Gotham_link_BDD.get_server_infos(DB_settings, id=object_infos[type_nb+"_id"])
+            present_object=Gotham_link_BDD.get_server_infos(DB_settings, id=object_infos[type_nb+"_id"])[0]
 
         present_objects.append(present_object)
-
-    desired_ports=link["ports"].split(ports_separator)
-    exposed_ports=[sec_obj["lhs_port"] for first_obj in link[type_nb+"s"] for sec_obj in first_obj[other_type_nb+"s"]]
+    desired_ports=link["link_ports"].split(ports_separator)
+    exposed_ports=[sec_obj["lhs_port"] for first_obj in dsp_link[type_nb+"s"] for sec_obj in first_obj[other_type_nb+"s"]]
     exposed_ports_unique=list(dict.fromkeys(exposed_ports))
 
-    if str(nb).lower() == "all" or int(nb)> int(link["nb_"+type_nb]):
+    if str(nb).lower() == "all" or int(nb)> int(link["link_nb_"+type_nb]):
         tags=tags_separator.join(link["link_tags_"+type_nb].split("||"))
         tags_hp=tags if type_nb == "hp" else ''
         tags_serv=tags if type_nb == "serv" else ''        
 
         if str(nb).lower() != "all":
-            nb_sup=int(nb)-int(link["nb_"+type_nb])
+            nb_sup=int(nb)-int(link["link_nb_"+type_nb])
 
         if type_nb=="hp":
             # Get all honeypots corresponding to tags
@@ -102,7 +101,7 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
             objects_infos = Gotham_link_BDD.get_server_infos(DB_settings, tags=tags)
             
             # Filter servers in those who have one of ports open
-            objects_infos = Gotham_check.check_servers_ports_matching(objects_infos, dsp_link["ports"])
+            objects_infos = Gotham_check.check_servers_ports_matching(objects_infos, dsp_link["link_ports"])
 
             
         if tags.lower()!="all":
@@ -120,8 +119,10 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
             if type_nb=="serv":
                 # Checking we have enough servers for the nb_sup directive, otherwise return error
                 if len(objects_infos) < nb_sup:
-                    logging.error(f"Can't deploy link on {str(nb_sup)} servers while there is only {str(len(selected_objects))} servers available")
-                    sys.exit(1)
+                    error = "Can't deploy link on "+str(nb_sup)+" servers while there is only "+str(len(selected_objects))+" servers available"
+                    logging.error(error)
+                    raise ValueError(error)
+                
                 # Choose best servers (the lower scored)
                 objects_infos = Gotham_choose.choose_servers(objects_infos, nb_sup, tags)
                 
@@ -149,11 +150,11 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                     added_hp.append(id_hp)
                 except Exception as e:
                     #logging.error(f"Error with hp duplication : {honeypot_infos['hp_id']} - " + str(e))
-                    sys.exit(1)
+                    raise ValueError(e)
                 
             
             for id in added_hp:
-                selected_objects.append(Gotham_link_BDD.get_honeypot_infos(DB_settings, id=id))
+                selected_objects.append(Gotham_link_BDD.get_honeypot_infos(DB_settings, id=id)[0])
         
         #if str(nb).lower() == "all":
         #    nb_obj=len(selected_objects)
@@ -168,7 +169,7 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                     add_link.generate_nginxConf(DB_settings, link["link_id"], datacenter_settings["hostname"], selected_objects, exposed_port)
                 except Exception as e:
                     logging.error(f"Error with nginx conf modification : {nginxRedirectionPath} - " + str(e))
-                    sys.exit(1)
+                    raise ValueError(e)
             # Get all servers used by links
             servers=[serv for hp in link["hps"] for serv in hp["servs"]]
             # Remove duplicates
@@ -177,8 +178,8 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
             try:
                 # Deploy new reverse-proxies's configurations on servers
                 add_link.deploy_nginxConf(DB_settings, link["link_id"], servers)
-            except:
-                sys.exit(1)
+            except Exception as e:
+                raise ValueError(e)
             
             added_hp=[hp for hp in selected_objects if hp not in present_objects]
             
@@ -191,8 +192,8 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                     try:
                         # Store new link and tags in the internal database        
                         Gotham_link_BDD.add_lhs_DB(DB_settings, lhs_infos)
-                    except:
-                        sys.exit(1)
+                    except Exception as e:
+                        raise ValueError(e)
 
         if type_nb=="serv":
             count_exposed_ports={str(port):0 for port in desired_ports}
@@ -235,14 +236,14 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
             for exposed_port in new_exposed_ports:
                 try:
                     add_link.generate_nginxConf(DB_settings, link["link_id"], datacenter_settings["hostname"], honeypots, exposed_port)
-                except:
-                    sys.exit(1)
+                except Exception as e:
+                    raise ValueError(e)
 
             try:
                 # Deploy new reverse-proxies's configurations on servers
                 add_link.deploy_nginxConf(DB_settings, link["link_id"], objects_infos)
-            except:
-                sys.exit(1)
+            except Exception as e:
+                raise ValueError(e)
             
             for server in objects_infos:
                 for honeypot in honeypots:
@@ -253,11 +254,11 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                     try:
                         # Store new link and tags in the internal database        
                         Gotham_link_BDD.add_lhs_DB(DB_settings, lhs_infos)
-                    except:
-                        sys.exit(1)
+                    except Exception as e:
+                        raise ValueError(e)
 
 
-    elif int(nb) < int(link["nb_"+type_nb]):
+    elif int(nb) < int(link["link_nb_"+type_nb]):
     
         if type_nb=="hp":
             selected_objects = Gotham_choose.choose_honeypots(present_objects, nb, dsp_link["link_tags_hp"])
@@ -274,8 +275,8 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                 # Configure all server to not redirect on hp
                 try:
                     Gotham_replace.config_honeypot_replacement(DB_settings, datacenter_settings, dsp_link["hps"][index_hp_in_link], link = dsp_link)
-                except:
-                    sys.exit(1)
+                except ValueError as e:
+                    raise ValueError(e)
             if type_nb=="serv":
                 try:
                   commands = ["sudo rm /etc/nginx/conf.d/links/" + dsp_link["link_id"] +"-*.conf"]
@@ -283,21 +284,21 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                   
                 except Exception as e:
                   logging.error(f"{link['link_id']} removal on servers failed : {e}")
-                  sys.exit(1)
+                  raise ValueError(e)
 
             try:
                 if type_nb == "hp":
                     Gotham_link_BDD.remove_lhs(DB_settings, id_link = dsp_link["link_id"], id_hp = del_object["hp_id"])
                 elif type_nb == "serv":
                     Gotham_link_BDD.remove_lhs(DB_settings, id_link = dsp_link["link_id"], id_serv = del_object["serv_id"])
-            except:
-                sys.exit(1)
+            except Exception as e:
+                raise ValueError(e)
             try:
                 modifs={"nb_"+type_nb:int(dsp_link["link_nb_"+type_nb])-1}
                 conditions={"id":dsp_link["link_id"]}
                 Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
-            except:
-                sys.exit(1)
+            except Exception as e:
+                raise ValueError(e)
 
 
 
@@ -312,7 +313,7 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
 
     tags_serv=tags_separator.join(dsp_link["link_tags_serv"].split("||"))
 
-    old_desired_ports=link["ports"].split(ports_separator)
+    old_desired_ports=link["link_ports"].split(ports_separator)
     new_desired_ports=new_ports.split(ports_separator)
 
     count_exposed_ports={str(port):0 for port in new_desired_ports}
@@ -334,14 +335,14 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
                   Gotham_link_BDD.remove_lhs(DB_settings, id_link = dsp_link["link_id"], id_serv = server["serv_id"])
                 except Exception as e:
                   logging.error(f"{link['link_id']} removal on servers failed : {e}")
-                  sys.exit(1)
+                  raise ValueError(e)
                 nb_del+=1
             else:
                 count_exposed_ports[str(exposed_ports_unique[0])]+=1
                 servs_keeps.append(server["serv_id"])
         else:
             logging.error(f"Not implemented")
-            sys.exit(1)
+            raise ValueError("Not implemented")
 
     # Get all honeypots used by links
     honeypots=[hp for serv in link["servs"] for hp in serv["hps"]]
@@ -370,10 +371,10 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
                 modifs={"nb_serv":int(dsp_link["link_nb_serv"])-nb_del}
                 conditions={"id":dsp_link["link_id"]}
                 Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
-            except:
-                sys.exit(1)
-            logging.error(f"Can't edit link on {str(nb_del)} servers while there is only {str(len(servers))} servers available for ports edition")
-            sys.exit(1)
+            except Exception as e:
+                raise ValueError(e)
+            #logging.error(f"Can't edit link on {str(nb_del)} servers while there is only {str(len(servers))} servers available for ports edition")
+            #sys.exit(1)
             
         # Choose best servers (the lower scored)
         servers = Gotham_choose.choose_servers(servers, nb_del, tags_serv)

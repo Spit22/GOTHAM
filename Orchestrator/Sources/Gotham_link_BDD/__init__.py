@@ -412,8 +412,8 @@ def remove_honeypot_DB(DB_settings, id):
         remove_in_IDB.honeypot(DB_connection, id)
         DB_connection.close()
         logging.debug(f"[-] Connection to the internal database closed")
-    except:
-        sys.exit(1)
+    except Exception as e:
+        raise ValueError(e)
 
 def remove_link_DB(DB_settings, id):
     '''

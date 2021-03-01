@@ -61,7 +61,7 @@ def remove_links_on_servers(DB_settings, result):
         port = serv_dico['serv_ssh_port']
         ssh_key = StringIO(serv_dico['serv_ssh_key'])
         try:
-            print("rm "+str(result['link_id']))
+            #print("rm "+str(result['link_id']))
             commands = ["rm /etc/nginx/conf.d/links/" + result['link_id'] +"-*.conf", "nginx -s reload"]
             execute_commands(hostname, port, ssh_key, commands)
         except Exception as e:

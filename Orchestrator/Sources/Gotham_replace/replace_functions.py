@@ -31,25 +31,28 @@ def replace_honeypot_all_link(DB_settings, datacenter_settings, hp_infos):
     tag_separator = config['tag']['separator']
     # Find a honeypot with same tags
     hp_tags = tag_separator.join(hp_infos["hp_tags"].split("||"))
-    honeypots = Gotham_check.check_tags("hp", Gotham_link_BDD.get_honeypot_infos(DB_settings, tags=hp_tags), tags_hp=hp_tags)
+    try:
+        honeypots = Gotham_check.check_tags("hp", Gotham_link_BDD.get_honeypot_infos(DB_settings, tags=hp_tags), tags_hp=hp_tags)
+    except Exception as e:
+        raise ValueError("Error while checking tags : "+str(e))
     # Filter honeypots in error, and original hp by id
     honeypots = [hp for hp in honeypots if not(hp["hp_state"] == 'ERROR' or hp["hp_id"] == hp_infos["hp_id"])]
     if honeypots!=[]:
         # Choose best honeypots (the lower scored)
         honeypots = Gotham_choose.choose_honeypots(honeypots, 1, hp_tags)
         # Duplicate, and configure
-        honeypot = duplicate_hp(DB_settings, honeypots)
+        honeypot = duplicate_hp(DB_settings, honeypots[0])
         try:
             configure_honeypot_replacement(DB_settings, datacenter_settings, hp_infos, new_hp_infos = honeypot)
-        except:
-            sys.exit(1)
+        except Exception as e:
+            raise ValueError("Error while configuring honeypot replacement : "+str(e))
 
         modifs={"id_hp":honeypot["hp_id"]}
         conditions={"id_hp":hp_infos["hp_id"]}
         try:
             Gotham_link_BDD.edit_lhs_DB(DB_settings, modifs, conditions)
-        except:
-            sys.exit(1)
+        except Exception as e:
+            raise ValueError("Error while editing link hp server : "+str(e))
         return True
     
     return False
@@ -85,15 +88,15 @@ def replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, d
             duplicate_hp_list.append(honeypot["hp_id"])
         try:
             configure_honeypot_replacement(DB_settings, datacenter_settings, hp_infos, new_hp_infos = honeypot, link = link)
-        except:
-            sys.exit(1)
+        except Exception as e:
+            raise ValueError(e)
             
         modifs = {"id_hp":honeypot["hp_id"]}
         conditions = {"id_link":link["link_id"], "id_hp":honeypot["hp_id"]}
         try:
             Gotham_link_BDD.edit_lhs_DB(DB_settings, modifs, conditions)
-        except:
-            sys.exit(1)
+        except Exception as e:
+            raise ValueError(e)
         replaced = True
 
     return {"replaced":replaced, "duplicate_hp_list":duplicate_hp_list}
@@ -102,32 +105,35 @@ def replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, d
 
 def decrease_link(DB_settings, datacenter_settings, object_infos, link, type_obj):
     if type_obj != "hp" and type_obj != "serv":
-        logging.error(f"Error on type object")
-        sys.exit(1)
+        error = "Error on type object"
+        logging.error(error)
+        raise ValueError(error)
+        
     if int(link["link_nb_"+type_obj]) > 1:
         if type_obj=="hp":
             # Configure all server to not redirect on hp
             try:
                 configure_honeypot_replacement(DB_settings, datacenter_settings, object_infos, link = link)
-            except:
-                sys.exit(1)
+            except Exception as e:
+                raise ValueError(e)
         try:
             if type_obj == "hp":
                 Gotham_link_BDD.remove_lhs(DB_settings, id_link = link["link_id"], id_hp = object_infos["hp_id"])
             elif type_obj == "serv":
                 Gotham_link_BDD.remove_lhs(DB_settings, id_link = link["link_id"], id_serv = object_infos["serv_id"])
-        except:
-            sys.exit(1)
+        except Exception as e:
+            raise ValueError(e)
         try:
             modifs={"nb_"+type_obj:int(link["link_nb_"+type_obj])-1}
             conditions={"id":link["link_id"]}
             Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
-        except:
-            sys.exit(1)
+        except Exception as e:
+            raise ValueError(e)
     else:        
         # If nb=1, error, we can't do nothing
-        logging.error(f"You tried to remove a running {type_obj} with the id = {id}, and it can't be replaced or deleted")
-        sys.exit(1)
+        error = "You tried to remove a running "+str(type_obj)+" with the id ="+str(object_infos[type_obj+"_id"])+", and it can't be replaced or deleted"
+        logging.error(error)
+        raise ValueError(error)
 
 
 def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_infos, new_hp_infos = {}, link = None):
@@ -195,8 +201,9 @@ def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_info
             servers.append(server)
         add_link.deploy_nginxConf(DB_settings, link["link_id"], servers)
     else:
-        logging.error(f"Honeypot replacement configuration failed")
-        sys.exit(1)
+        error = "Honeypot replacement configuration failed"
+        logging.error(error)
+        raise ValueError(error)
 
 def duplicate_hp(DB_settings,honeypot_infos):
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
@@ -216,8 +223,9 @@ def duplicate_hp(DB_settings,honeypot_infos):
         r = requests.post(url, data=jsondata, headers=headers)
         id_hp = r.text.split()[2]
     except Exception as e:
-        logging.error(f"Error with hp duplication : {honeypot_infos['hp_id']} - " + str(e))
-        sys.exit(1)
+        error = "Error with hp duplication :"+str(honeypot_infos['hp_id'])+" - "+str(e)
+        logging.error(error)
+        raise ValueError(error)
     result = Gotham_link_BDD.get_honeypot_infos(DB_settings, id = id_hp)
     return result[0]
 
@@ -251,8 +259,10 @@ def replace_server_in_link(DB_settings,serv_infos,link, new_tags="", already_use
     elif "hps" in serv_infos.items():
         ports_used_ls=[hp["lhs_port"] for hp in serv_infos["hps"]]
     else:
-        logging.error(f"Hps not find in objects items")
-        sys.exit(1)
+        error = "Hp not found in objects items"
+        logging.error(error)
+        raise ValueError(error)
+
     ports_used_ls=list(set(ports_used_ls))
 
     servers_same_port=[server for server in servers if all(port in server["free_ports"].split(port_separator) for port in ports_used_ls)]
@@ -271,8 +281,9 @@ def replace_server_in_link(DB_settings,serv_infos,link, new_tags="", already_use
                 conditions={"id_link":link["link_id"],"id_hp":hp["hp_id"],"id_serv":serv_infos["serv_id"]}
                 try:
                     Gotham_link_BDD.edit_lhs_DB(DB_settings,modifs,conditions)
-                except:
-                    sys.exit(1)
+                except Exception as e:
+                    raise ValueError(e)
+
         elif "hps" in serv_infos.items():
             for hp in serv_infos["hps"]:
                 if not(int(hp["lhs_port"]) in already_deployed):
@@ -283,11 +294,12 @@ def replace_server_in_link(DB_settings,serv_infos,link, new_tags="", already_use
                 conditions={"id_link":link["link_id"],"id_hp":hp["hp_id"],"id_serv":serv_infos["serv_id"]}
                 try:
                     Gotham_link_BDD.edit_lhs_DB(DB_settings,modifs,conditions)
-                except:
-                    sys.exit(1)
+                except Exception as e:
+                    raise ValueError(e)
         else:
-            logging.error(f"Hps not find in objects items")
-            sys.exit(1)
+            error = "Hp not found in objects items"
+            logging.error(error)
+            raise ValueError(error)
         
         if already_used==[]:
             return True
@@ -313,8 +325,9 @@ def distribute_servers_on_link_ports(DB_settings, link):
             if len(exposed_ports_unique) == 1 :
                 count_exposed_ports[str(exposed_ports_unique[0])] = 0 if str(exposed_ports_unique[0]) not in count_exposed_ports.keys() else count_exposed_ports[str(exposed_ports_unique[0])]+1
             else:
-                logging.error(f"Not implemented")
-                sys.exit(1)
+                error = "Not implemented"
+                logging.error(error)
+                raise ValueError(error)
 
         servers=[]
 
@@ -336,8 +349,9 @@ def distribute_servers_on_link_ports(DB_settings, link):
                     servs=Gotham_link_BDD.get_server_infos(DB_settings, id=server["serv_id"])
                     servers.append(servs[0])
             else:
-                logging.error(f"Not implemented")
-                sys.exit(1)
+                error = "Not implemented"
+                logging.error(error)
+                raise ValueError(error)
 
         servers = Gotham_check.check_servers_ports_matching(servers, [port_min_used])
 
@@ -349,8 +363,9 @@ def distribute_servers_on_link_ports(DB_settings, link):
               Gotham_SSH_SCP.execute_commands(servers[0]["serv_ip"], servers[0]["serv_ssh_port"], servers[0]["serv_ssh_key"], commands)
               Gotham_link_BDD.remove_lhs(DB_settings, id_link = dsp_link["link_id"], id_serv = servers[0]["serv_id"])
             except Exception as e:
-              logging.error(f"{dsp_link['link_id']} removal on servers failed : {e}")
-              sys.exit(1)
+              error = str(dsp_link['link_id'])+" removal on servers failed : "+str(e)
+              logging.error(error)
+              raise ValueError(error)
 
             servers[0]["choosed_port"]=port_min_used
             # Deploy new reverse-proxies's configurations on servers

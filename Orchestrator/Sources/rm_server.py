@@ -22,9 +22,10 @@ def main(DB_settings, datacenter_settings, id='sv-000000000000000000000000000000
     try:
         serv_infos = {'id':id, 'ip':ip}
         serv_infos = normalize_server_infos(serv_infos)
-    except:
+    except Exception as e:
         logging.error(f"Can't remove the server : its infos is invalid")
-        sys.exit(1)
+        raise ValueError(e)
+
     # Check if the server exists in the IDB
     if id != 'sv-00000000000000000000000000000000':
         result = get_server_infos(DB_settings, id=id)
@@ -32,29 +33,32 @@ def main(DB_settings, datacenter_settings, id='sv-000000000000000000000000000000
         result = get_server_infos(DB_settings, ip=ip)
     else:
         logging.error(f"Remove server failed : no arguments")
-        sys.exit(1)
+        raise ValueError("Remove server failed : no arguments")
+
     if result == []:
         logging.error(f"You tried to remove a server that doesn't exists with the id = {id}")
-        sys.exit(1)
+        raise ValueError("You tried to remove a server that doesn't exists with the id ="+str(id)) 
+
     # Check if the server is running
     if result[0]['link_id'] != None and result[0]['link_id'] !="NULL":
         serv_infos=normalize_display_object_infos(result[0],"serv")
         try:
             Gotham_replace.replace_serv_for_rm(DB_settings, datacenter_settings, serv_infos)
-        except:
-            sys.exit(1)
+        except Exception as e:
+            raise ValueError(e)
 
     # Remove Server from the server
     try:
         remove_nginx_on_server(result[0]['serv_ip'],result[0]['serv_ssh_port'],StringIO(result[0]['serv_ssh_key']))
-    except:
-        sys.exit(1)
+    except Exception as e:
+        raise ValueError(e)
+
     # Remove Server from the IDB
     try:
         remove_server_DB(DB_settings,result[0]['serv_id'])
     except Exception as e:
         logging.error(f"Remove server failed : {e}")
-        sys.exit(1)
+        raise ValueError(e)
     return True
 
 def remove_nginx_on_server(hostname, port, ssh_key):
@@ -63,4 +67,4 @@ def remove_nginx_on_server(hostname, port, ssh_key):
         execute_commands(hostname,port,ssh_key,commands)
     except Exception as e:
         logging.error(f"Remove server failed : {e}")
-        sys.exit(1)
+        raise ValueError(e)
