@@ -181,7 +181,11 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
             except Exception as e:
                 raise ValueError(e)
             
+            for i in range(len(selected_objects)):
+                del selected_objects[i]["weight"]
+
             added_hp=[hp for hp in selected_objects if hp not in present_objects]
+
             
             for server in servers:
                 for honeypot in added_hp:
