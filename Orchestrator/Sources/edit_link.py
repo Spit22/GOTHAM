@@ -108,20 +108,13 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
             objects_infos = Gotham_check.check_tags(type_nb, objects_infos, tags_hp=tags_hp, tags_serv=tags_serv)
 
         # Filter objects in error and already present in link
-        print(objects_infos[0][type_nb+"_state"])
-        print(objects_infos[0][type_nb+"_id"])
-        print(link[type_nb+"_id"])
-
-        #objects_infos = [object_infos for object_infos in objects_infos if not(object_infos[type_nb+"_state"]=='ERROR' or object_infos[type_nb+"_id"] in link[type_nb+"_id"])]
-        if type_nb == "hp":
-            objects_infos = [object_infos for object_infos in objects_infos if not(object_infos[type_nb+"_state"]=='ERROR')]
-        elif type_nb == "serv":
-            objects_infos = [object_infos for object_infos in objects_infos if not(object_infos[type_nb+"_state"]=='ERROR' or object_infos[type_nb+"_id"] in link[type_nb+"_id"])]
-
+        objects_infos = [object_infos for object_infos in objects_infos if not(object_infos[type_nb+"_state"]=='ERROR' or object_infos[type_nb+"_id"] in link[type_nb+"_id"])]
+        
         if str(nb).lower() != "all":
             if type_nb=="hp":
-                # Choose best honeypots (the lower scored)
-                objects_infos = Gotham_choose.choose_honeypots(objects_infos, nb_sup, tags)
+                if len(objects_infos) > 0:
+                    # Choose best honeypots (the lower scored)
+                    objects_infos = Gotham_choose.choose_honeypots(objects_infos, nb_sup, tags)
 
             if type_nb=="serv":
                 # Checking we have enough servers for the nb_sup directive, otherwise return error
