@@ -11,7 +11,7 @@ import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
-def choose_honeypots(hps_infos, nb_hp, tags_hp):
+def choose_honeypots(hps_infos, nb_hp, tags_hp, del_weight = False):
         '''
         Choose the best honeypots when creating a link according to the need  
 
@@ -47,9 +47,17 @@ def choose_honeypots(hps_infos, nb_hp, tags_hp):
         if len(weighted_hps_infos)<nb_hp:
                 nb_hp=len(weighted_hps_infos)
 
-        return sorted(weighted_hps_infos, key=lambda k: k['weight'])[0:nb_hp] 
+        result = sorted(weighted_hps_infos, key=lambda k: k['weight'])[0:nb_hp] 
 
-def choose_servers(servs_infos, nb_serv, tags_serv):
+        # Clean Weight
+        if del_weight:
+            for i in range(len(result)):
+                del result[i]["weight"]
+        
+        return result
+
+
+def choose_servers(servs_infos, nb_serv, tags_serv, del_weight = False):
         '''
         Choose the best servers when creating a link according to the need  
 
@@ -82,5 +90,12 @@ def choose_servers(servs_infos, nb_serv, tags_serv):
         weighted_servs_infos=selection_function.weighting_time(object_type, weighted_servs_infos, "created_at")
         weighted_servs_infos=selection_function.weighting_time(object_type, weighted_servs_infos, "updated_at")
 
-        return sorted(weighted_servs_infos, key=lambda k: k['weight'])[0:nb_serv]
+        result = sorted(weighted_servs_infos, key=lambda k: k['weight'])[0:nb_serv]
+
+        # Clean Weight
+        if del_weight:
+            for i in range(len(result)):
+                del result[i]["weight"]
+        
+        return result
 

@@ -108,8 +108,15 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
             objects_infos = Gotham_check.check_tags(type_nb, objects_infos, tags_hp=tags_hp, tags_serv=tags_serv)
 
         # Filter objects in error and already present in link
-        objects_infos = [object_infos for object_infos in objects_infos if not(object_infos[type_nb+"_state"]=='ERROR' or object_infos[type_nb+"_id"] in link[type_nb+"_id"])]
+        print(objects_infos[0][type_nb+"_state"])
+        print(objects_infos[0][type_nb+"_id"])
+        print(link[type_nb+"_id"])
 
+        #objects_infos = [object_infos for object_infos in objects_infos if not(object_infos[type_nb+"_state"]=='ERROR' or object_infos[type_nb+"_id"] in link[type_nb+"_id"])]
+        if type_nb == "hp":
+            objects_infos = [object_infos for object_infos in objects_infos if not(object_infos[type_nb+"_state"]=='ERROR')]
+        elif type_nb == "serv":
+            objects_infos = [object_infos for object_infos in objects_infos if not(object_infos[type_nb+"_state"]=='ERROR' or object_infos[type_nb+"_id"] in link[type_nb+"_id"])]
 
         if str(nb).lower() != "all":
             if type_nb=="hp":
@@ -139,7 +146,7 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                 
                 name = (selected_objects[i%len(selected_objects)]["hp_name"]+"_Duplicat" if len(selected_objects[i%len(selected_objects)]["hp_name"]+"_Duplicat")<=128 else selected_objects[i%len(selected_objects)]["hp_name"][:(128-len("_Duplicat"))]+"_Duplicat")
                 descr = "Duplication of "+selected_objects[i%len(selected_objects)]["hp_descr"]
-                duplicate_hp_infos={"name": name,"descr": descr,"tags": selected_objects[i%len(selected_objects)]["hp_tags"].replace("||",tags_separator),"logs": selected_objects[i%len(selected_objects)]["hp_logs"],"parser": selected_objects[i%len(selected_objects)]["hp_parser"],"port": selected_objects[i%len(selected_objects)]["hp_port_container"], "dockerfile": encoded_dockerfile}
+                duplicate_hp_infos={"name": str(name),"descr": str(descr),"tags": str(selected_objects[i%len(selected_objects)]["hp_tags"].replace("||",tags_separator)),"logs": str(selected_objects[i%len(selected_objects)]["hp_logs"]),"parser": str(selected_objects[i%len(selected_objects)]["hp_parser"]),"port": str(selected_objects[i%len(selected_objects)]["hp_port_container"]), "dockerfile": str(encoded_dockerfile.decode("utf-8"))}
                 
                 try:
                     jsondata = json.dumps(duplicate_hp_infos)
@@ -171,7 +178,7 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                     logging.error(f"Error with nginx conf modification : {nginxRedirectionPath} - " + str(e))
                     raise ValueError(e)
             # Get all servers used by links
-            servers=[serv for hp in link["hps"] for serv in hp["servs"]]
+            servers=[serv for hp in dsp_link["hps"] for serv in hp["servs"]]
             # Remove duplicates
             servers=[dict(tuple_of_serv_items) for tuple_of_serv_items in {tuple(serv.items()) for serv in servers}]
 
@@ -227,7 +234,7 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
             new_exposed_ports=[port for port in final_exposed_ports_new_servs if port not in exposed_ports_unique]
 
             # Get all honeypots used by links
-            honeypots=[hp for serv in link["servs"] for hp in serv["hps"]]
+            honeypots=[hp for serv in dsp_link["servs"] for hp in serv["hps"]]
             # Remove duplicates
             honeypots=[dict(tuple_of_hp_items) for tuple_of_hp_items in {tuple(hp.items()) for hp in honeypots}]
 
@@ -261,12 +268,11 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
     elif int(nb) < int(link["link_nb_"+type_nb]):
     
         if type_nb=="hp":
-            selected_objects = Gotham_choose.choose_honeypots(present_objects, nb, dsp_link["link_tags_hp"])
+            selected_objects = Gotham_choose.choose_honeypots(present_objects, nb, dsp_link["link_tags_hp"], del_weight = True)
 
         if type_nb=="serv":
-            selected_objects = Gotham_choose.choose_servers(present_objects, nb, dsp_link["link_tags_serv"])
-
-
+            selected_objects = Gotham_choose.choose_servers(present_objects, nb, dsp_link["link_tags_serv"], del_weight = True)
+        
         del_objects=[obj for obj in present_objects if obj not in selected_objects]
 
         for del_object in del_objects:
@@ -285,7 +291,6 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                 except Exception as e:
                   logging.error(f"{link['link_id']} removal on servers failed : {e}")
                   raise ValueError(e)
-
             try:
                 if type_nb == "hp":
                     Gotham_link_BDD.remove_lhs(DB_settings, id_link = dsp_link["link_id"], id_hp = del_object["hp_id"])
