@@ -182,7 +182,8 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                 raise ValueError(e)
             
             for i in range(len(selected_objects)):
-                del selected_objects[i]["weight"]
+                if "weight" in selected_objects[i].keys():
+                    del selected_objects[i]["weight"]
 
             added_hp=[hp for hp in selected_objects if hp not in present_objects]
 
