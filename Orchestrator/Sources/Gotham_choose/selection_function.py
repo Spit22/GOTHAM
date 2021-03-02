@@ -155,8 +155,6 @@ def weighting_time(object_type, objects_infos, column):
         weight=int(config[object_type+'_weight'][column])
         
         timestamp_list=[float(object_infos[object_type+"_"+column].timestamp()) for object_infos in objects_infos if (object_infos[object_type+'_'+column] != '' and not(object_infos[object_type+'_'+column] is None) and object_infos[object_type+'_'+column] != 'NULL')]
-        print(timestamp_list)
-        print(objects_infos)
         max_time=max(timestamp_list)
         min_time=min(timestamp_list)
         if max_time > min_time:

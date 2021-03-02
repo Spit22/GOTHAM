@@ -5,6 +5,7 @@ import sys
 import base64
 import requests
 import json
+from io import StringIO
 
 # Import Gotham's libs
 # GOTHAM'S LIB
@@ -72,7 +73,6 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
     # Get already used objects
     present_objects=[]
     for object_infos in dsp_link[type_nb+"s"]:
-
         if type_nb=="hp":
             present_object=Gotham_link_BDD.get_honeypot_infos(DB_settings, id=object_infos[type_nb+"_id"])[0]
 
@@ -119,7 +119,7 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
             if type_nb=="serv":
                 # Checking we have enough servers for the nb_sup directive, otherwise return error
                 if len(objects_infos) < nb_sup:
-                    error = "Can't deploy link on "+str(nb_sup)+" servers while there is only "+str(len(selected_objects))+" servers available"
+                    error = "Can't deploy link on "+str(nb_sup)+" others servers while there is only "+str(len(objects_infos))+" servers available"
                     logging.error(error)
                     raise ValueError(error)
                 
@@ -269,8 +269,12 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
             selected_objects = Gotham_choose.choose_honeypots(present_objects, nb, dsp_link["link_tags_hp"], del_weight = True)
 
         if type_nb=="serv":
-            selected_objects = Gotham_choose.choose_servers(present_objects, nb, dsp_link["link_tags_serv"], del_weight = True)
-        
+            selected_objects = Gotham_check.check_servers_ports_matching(present_objects, dsp_link["link_ports"])
+            selected_objects = Gotham_choose.choose_servers(selected_objects, nb, dsp_link["link_tags_serv"], del_weight = True)
+            # Clean free_ports
+            for i in range(len(selected_objects)):
+                del selected_objects[i]["free_ports"]
+
         del_objects=[obj for obj in present_objects if obj not in selected_objects]
 
         for del_object in del_objects:
@@ -283,8 +287,8 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                     raise ValueError(e)
             if type_nb=="serv":
                 try:
-                  commands = ["sudo rm /etc/nginx/conf.d/links/" + dsp_link["link_id"] +"-*.conf"]
-                  Gotham_SSH_SCP.execute_commands(del_object["serv_ip"], del_object["serv_ssh_port"], del_object["serv_ssh_key"], commands)
+                  commands = ["sudo rm /etc/nginx/conf.d/links/" + dsp_link["link_id"] +"-*.conf", "nginx -t && nginx -s reload"]
+                  Gotham_SSH_SCP.execute_commands(del_object["serv_ip"], del_object["serv_ssh_port"], StringIO(del_object["serv_ssh_key"]), commands)
                   
                 except Exception as e:
                   logging.error(f"{link['link_id']} removal on servers failed : {e}")
@@ -333,8 +337,8 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
             if str(exposed_ports_unique[0]) in deleted_ports:
                 # Remove server
                 try:
-                  commands = ["sudo rm /etc/nginx/conf.d/links/" + dsp_link["link_id"] +"-*.conf"]
-                  Gotham_SSH_SCP.execute_commands(server["serv_ip"], server["serv_ssh_port"], server["serv_ssh_key"], commands)
+                  commands = ["sudo rm /etc/nginx/conf.d/links/" + dsp_link["link_id"] +"-*.conf", "nginx -t && nginx -s reload"]
+                  Gotham_SSH_SCP.execute_commands(server["serv_ip"], server["serv_ssh_port"], StringIO(server["serv_ssh_key"]), commands)
                   Gotham_link_BDD.remove_lhs(DB_settings, id_link = dsp_link["link_id"], id_serv = server["serv_id"])
                 except Exception as e:
                   logging.error(f"{link['link_id']} removal on servers failed : {e}")
@@ -381,7 +385,7 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
             
         # Choose best servers (the lower scored)
         servers = Gotham_choose.choose_servers(servers, nb_del, tags_serv)
-            
+
         # Associate servers and an port of exposition
         for i in range(len(servers)):
             serv_i_free_ports=servers[i]["free_ports"].split(ports_separator)

@@ -6,6 +6,7 @@ import fileinput
 import base64
 import json
 import requests
+from io import StringIO
 
 from Gotham_normalize import normalize_id_honeypot,normalize_honeypot_infos,normalize_server_infos, normalize_display_object_infos
 #from Gotham_link_BDD import remove_honeypot_DB, get_honeypot_infos, get_server_infos, remove_server_DB, edit_lhs_DB, edit_link_DB, remove_lhs
@@ -137,7 +138,7 @@ def decrease_link(DB_settings, datacenter_settings, object_infos, link, type_obj
 
 
 def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_infos, new_hp_infos = {}, link = None):
-    #COMMENTAIRE
+    # Edit one hp for all link
     if old_hp_infos != {} and new_hp_infos != {} and link == None :
         for link in old_hp_infos["links"]:
             already_update = []
@@ -154,11 +155,13 @@ def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_info
                             elif first_line:
                                 line.replace(str(old_hp_infos["hp_port"]), str(new_hp_infos["hp_port"]))
                                 first_line = False
+                            else:
+                                print(line, end='')
                     already_update.append(nginxRedirectionPath)
                 server["choosed_port"] = server["lhs_port"]
                 servers.append(server)
             add_link.deploy_nginxConf(DB_settings, link["link_id"], servers)
-    #COMMENTAIRE
+    # Edit one hp for one link
     elif old_hp_infos != {} and new_hp_infos != {} and link != None :
         already_update = []
         servers = []
@@ -175,11 +178,13 @@ def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_info
                         elif first_line:
                             line.replace(str(old_hp_infos["hp_port"]), str(new_hp_infos["hp_port"]))
                             first_line = False
+                        else:
+                            print(line, end='')
                 already_update.append(nginxRedirectionPath)
             server["choosed_port"] = server["lhs_port"]
             servers.append(server)
         add_link.deploy_nginxConf(DB_settings, link["link_id"], servers)
-    #COMMENTAIRE
+    # Delete one hp for one link
     elif old_hp_infos != {} and new_hp_infos == {} and link != None :
         already_update = []
         servers = []
@@ -196,6 +201,8 @@ def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_info
                         elif first_line:
                             line.replace("  server " + str(datacenter_settings["hostname"]) + ":" + str(old_hp_infos["hp_port"]) + ";\n", "")
                             first_line = False
+                        else:
+                            print(line, end='')
                 already_update.append(nginxRedirectionPath)
             server["choosed_port"] = server["lhs_port"]
             servers.append(server)
@@ -359,8 +366,8 @@ def distribute_servers_on_link_ports(DB_settings, link):
             servers=[servers[0]]
             
             try:
-              commands = ["sudo rm /etc/nginx/conf.d/links/" + dsp_link["link_id"] +"-*.conf"]
-              Gotham_SSH_SCP.execute_commands(servers[0]["serv_ip"], servers[0]["serv_ssh_port"], servers[0]["serv_ssh_key"], commands)
+              commands = ["sudo rm /etc/nginx/conf.d/links/" + dsp_link["link_id"] +"-*.conf", "nginx -t && nginx -s reload"]
+              Gotham_SSH_SCP.execute_commands(servers[0]["serv_ip"], servers[0]["serv_ssh_port"], StringIO(servers[0]["serv_ssh_key"]), commands)
               Gotham_link_BDD.remove_lhs(DB_settings, id_link = dsp_link["link_id"], id_serv = servers[0]["serv_id"])
             except Exception as e:
               error = str(dsp_link['link_id'])+" removal on servers failed : "+str(e)

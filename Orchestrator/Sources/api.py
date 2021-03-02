@@ -83,7 +83,6 @@ dockerfile_storage = "/data/"
 @app.route('/', methods=['GET'])
 def index():
         return """
-               _,    _   _    ,_
   .o888P     Y8o8Y     Y888o.
  d88888      88888      88888b
 d888888b_  _d88888b_  _d888888b
@@ -792,7 +791,7 @@ def edit_lk():
                 try:
                     edit_link.edit_nb(DB_settings, datacenter_settings, link_serv_hp, link_infos_received["nb_serv"], "serv")
                 except Exception as e:
-                    return "Error in server nb edition\n"
+                    return "Error in server nb edition: "+str(e)+"\n"
                 modifs["nb_serv"]=link_infos_received["nb_serv"]
         
         if "nb_hp" in link_infos_received.keys():

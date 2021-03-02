@@ -71,7 +71,10 @@ stream{
     include conf.d/links/*.conf;
 }" > /etc/nginx/nginx.conf
 
-# Apply the configuration
-nginx
+# Add nginx user
+/usr/sbin/useradd nginx
 
-nginx -s reload
+# Apply the configuration
+/usr/sbin/nginx
+
+/usr/sbin/nginx -s reload
