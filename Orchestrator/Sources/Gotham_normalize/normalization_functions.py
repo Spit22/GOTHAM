@@ -162,5 +162,5 @@ def normalize_tag(tag):
 
 def normalize_display(object_infos, obj_type, separator, next_type):
     next_obj={key:(value.split(separator) if (separator in str(value)) else value) for (key,value) in object_infos.items() if key[:len(obj_type+"_")]!=obj_type+"_" and value!="NULL"}
-    resultat={**{key:value for (key,value) in object_infos.items() if key[:len(obj_type+"_")]==obj_type+"_"},**{next_type+"s": ([{key:value[i] for (key,value) in next_obj.items()} for i in range(len(next_obj[next_type+"_id"]))] if isinstance(next_obj[next_type+"_id"],list) else [next_obj])}} 
+    resultat={**{key:value for (key,value) in object_infos.items() if key[:len(obj_type+"_")]==obj_type+"_"},**{next_type+"s": (([{key:value[i] for (key,value) in next_obj.items()} for i in range(len(next_obj[next_type+"_id"]))] if isinstance(next_obj[next_type+"_id"],list) else [next_obj]) if next_obj != {} else [])}} 
     return resultat
