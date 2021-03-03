@@ -62,9 +62,10 @@ def main(DB_settings, datacenter_settings, id='sv-000000000000000000000000000000
     return True
 
 def remove_nginx_on_server(hostname, port, ssh_key):
-    commands=["rm -r /etc/nginx","rm -r /usr/sbin/nginx","rm -r /usr/lib/nginx/modules","rm -r /etc/nginx/nginx.conf","rm -r /var/log/nginx/error.log", "rm -r /var/log/nginx/access.log", "rm -r /run/nginx.pid","rm -r /var/lock/nginx.lock"]
+    commands=["rm -rf /etc/nginx","rm -r /usr/sbin/nginx","rm -r /usr/lib/nginx/modules","rm -r /var/log/nginx/error.log", "rm -r /var/log/nginx/access.log", "rm -r /run/nginx.pid","rm -r /var/lock/nginx.lock"]
     try:
-        execute_commands(hostname,port,ssh_key,commands)
+        print("bypassed")
+        #execute_commands(hostname,port,ssh_key,commands)
     except Exception as e:
         logging.error(f"Remove server failed : {e}")
         raise ValueError(e)

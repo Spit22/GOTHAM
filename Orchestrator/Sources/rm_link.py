@@ -21,12 +21,12 @@ def main(DB_settings, id):
     try:
         id = normalize_id_link(id)
     except:
-        logging.error(f"Can't remove the honeypot : its id is invalid")
+        logging.error(f"Can't remove the link : its id is invalid")
         sys.exit(1)
     # Check if the link exists in the IDB
     result = get_link_serv_hp_infos(DB_settings, id=id)
     if result == []:
-        logging.error(f"You tried to remove a honeypot that doesn't exists with the id = {id}")
+        logging.error(f"You tried to remove a link that doesn't exists with the id = {id}")
         sys.exit(1)
     # Remove link on the servers affected by the link
     try:

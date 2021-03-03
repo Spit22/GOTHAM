@@ -257,16 +257,15 @@ def replace_server_in_link(DB_settings,serv_infos,link, new_tags="", already_use
 
     # Filter servers in error, with same link, and original server by id
     servers = [server for server in servers if not(server["serv_state"]=='ERROR' or link["link_id"] in server["link_id"] or server["serv_id"] in already_used or server["serv_id"]==serv_infos["serv_id"])]
-    
     if servers==[]:
         return False
 
-    if "hps" in link.items():
+    if "hps" in link.keys():
         ports_used_ls=[hp["lhs_port"] for hp in link["hps"]]
-    elif "hps" in serv_infos.items():
+    elif "hps" in serv_infos.keys():
         ports_used_ls=[hp["lhs_port"] for hp in serv_infos["hps"]]
     else:
-        error = "Hp not found in objects items"
+        error = "Hp not found in objects keys"
         logging.error(error)
         raise ValueError(error)
 
@@ -278,7 +277,7 @@ def replace_server_in_link(DB_settings,serv_infos,link, new_tags="", already_use
         replacement_server=Gotham_choose.choose_servers(servers_same_port, 1, link_tags_serv)
 
         already_deployed=[]
-        if "hps" in link.items():
+        if "hps" in link.keys():
             for hp in link["hps"]:
                 if not(int(hp["lhs_port"]) in already_deployed):
                     replacement_server[0]["choosed_port"]=int(hp["lhs_port"])
@@ -291,7 +290,7 @@ def replace_server_in_link(DB_settings,serv_infos,link, new_tags="", already_use
                 except Exception as e:
                     raise ValueError(e)
 
-        elif "hps" in serv_infos.items():
+        elif "hps" in serv_infos.keys():
             for hp in serv_infos["hps"]:
                 if not(int(hp["lhs_port"]) in already_deployed):
                     replacement_server[0]["choosed_port"]=int(hp["lhs_port"])
@@ -304,7 +303,7 @@ def replace_server_in_link(DB_settings,serv_infos,link, new_tags="", already_use
                 except Exception as e:
                     raise ValueError(e)
         else:
-            error = "Hp not found in objects items"
+            error = "Hp not found in objects keys"
             logging.error(error)
             raise ValueError(error)
         
@@ -348,53 +347,53 @@ def distribute_servers_on_link_ports(DB_settings, link):
         port_max_used=str(ports_sorted[i])
         port_min_used=str(ports_sorted[-j])
 
-        for server in dsp_link["servs"]:
-            exposed_ports=[hp["lhs_port"] for hp in server["hps"]]
-            exposed_ports_unique=list(dict.fromkeys(exposed_ports))
-            if len(exposed_ports_unique) == 1 :
-                if str(exposed_ports_unique[0]) == port_max_used:
-                    servs=Gotham_link_BDD.get_server_infos(DB_settings, id=server["serv_id"])
-                    servers.append(servs[0])
-            else:
-                error = "Not implemented"
-                logging.error(error)
-                raise ValueError(error)
-
-        servers = Gotham_check.check_servers_ports_matching(servers, [port_min_used])
-
-        if servers!=[]:
-            servers=[servers[0]]
+        if port_max_used != port_min_used:
+            for server in dsp_link["servs"]:
+                exposed_ports=[hp["lhs_port"] for hp in server["hps"]]
+                exposed_ports_unique=list(dict.fromkeys(exposed_ports))
+                if len(exposed_ports_unique) == 1 :
+                    if str(exposed_ports_unique[0]) == port_max_used:
+                        servs=Gotham_link_BDD.get_server_infos(DB_settings, id=server["serv_id"])
+                        servers.append(servs[0])
+                else:
+                    error = "Not implemented"
+                    logging.error(error)
+                    raise ValueError(error)
+            servers = Gotham_check.check_servers_ports_matching(servers, port_min_used)
+            if servers!=[]:
+                servers=[servers[0]]
             
-            try:
-              commands = ["sudo rm /etc/nginx/conf.d/links/" + dsp_link["link_id"] +"-*.conf", "nginx -t && nginx -s reload"]
-              Gotham_SSH_SCP.execute_commands(servers[0]["serv_ip"], servers[0]["serv_ssh_port"], StringIO(servers[0]["serv_ssh_key"]), commands)
-              Gotham_link_BDD.remove_lhs(DB_settings, id_link = dsp_link["link_id"], id_serv = servers[0]["serv_id"])
-            except Exception as e:
-              error = str(dsp_link['link_id'])+" removal on servers failed : "+str(e)
-              logging.error(error)
-              raise ValueError(error)
+                try:
+                    commands = ["rm /etc/nginx/conf.d/links/" + dsp_link["link_id"] +"-*.conf", "/usr/sbin/nginx -t && /usr/sbin/nginx -s reload"]
+                    Gotham_SSH_SCP.execute_commands(servers[0]["serv_ip"], servers[0]["serv_ssh_port"], StringIO(servers[0]["serv_ssh_key"]), commands)
+                    Gotham_link_BDD.remove_lhs(DB_settings, id_link = dsp_link["link_id"], id_serv = servers[0]["serv_id"])
+                except Exception as e:
+                    error = str(dsp_link['link_id'])+" removal on servers failed : "+str(e)
+                    logging.error(error)
+                    raise ValueError(error)
 
-            servers[0]["choosed_port"]=port_min_used
-            # Deploy new reverse-proxies's configurations on servers
-            add_link.deploy_nginxConf(DB_settings, dsp_link["link_id"], servers)
+                servers[0]["choosed_port"]=port_min_used
+                # Deploy new reverse-proxies's configurations on servers
+                add_link.deploy_nginxConf(DB_settings, dsp_link["link_id"], servers)
 
-            for honeypot in honeypots:
-                # Create lhs_infos
-                lhs_infos = {"id_link":dsp_link["link_id"], "id_hp": honeypot["hp_id"], "id_serv": servers[0]["serv_id"], "port":servers[0]["choosed_port"]}
-                # Normalize infos
-                lhs_infos = Gotham_normalize.normalize_lhs_infos(lhs_infos)
-                # Store new link and tags in the internal database        
-                Gotham_link_BDD.add_lhs_DB(DB_settings, lhs_infos)
-            i=0
-            j=1
+                for honeypot in honeypots:
+                    # Create lhs_infos
+                    lhs_infos = {"id_link":dsp_link["link_id"], "id_hp": honeypot["hp_id"], "id_serv": servers[0]["serv_id"], "port":servers[0]["choosed_port"]}
+                    # Normalize infos
+                    lhs_infos = Gotham_normalize.normalize_lhs_infos(lhs_infos)
+                    # Store new link and tags in the internal database        
+                    Gotham_link_BDD.add_lhs_DB(DB_settings, lhs_infos)
+                i=0
+                j=1
 
 
-        elif str(ports_sorted[i+1])!=port_min_used and count_exposed_ports[str(ports_sorted[i+1])]-count_exposed_ports[port_min_used]>1:
-            i+=1
+            elif str(ports_sorted[i+1])!=port_min_used and count_exposed_ports[str(ports_sorted[i+1])]-count_exposed_ports[port_min_used]>1:
+                i+=1
 
-        elif str(ports_sorted[-(j+1)])!=port_max_used and count_exposed_ports[port_max_used]-count_exposed_ports[str(ports_sorted[-(j+1)])]>1:
-            j+=1
+            elif str(ports_sorted[-(j+1)])!=port_max_used and count_exposed_ports[port_max_used]-count_exposed_ports[str(ports_sorted[-(j+1)])]>1:
+                j+=1
         
+            else:
+                is_possible = False
         else:
-            is_possible=False
-    
+            is_possible = False

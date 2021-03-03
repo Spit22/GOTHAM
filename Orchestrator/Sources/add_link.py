@@ -44,7 +44,7 @@ def deploy_nginxConf(db_settings, link_id, servers):
     '''
 
     # Initialize command and file
-    checkAndReloadNginx_command = ["nginx -t && nginx -s reload"]
+    checkAndReloadNginx_command = ["/usr/sbin/nginx -t && /usr/sbin/nginx -s reload"]
     linkConf_dest = "/etc/nginx/conf.d/links/"
     # Deploy new configuration on each servers
     for server in servers:

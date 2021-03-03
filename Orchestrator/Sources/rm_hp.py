@@ -86,13 +86,13 @@ def remove_rsyslog_configuration(datacenter_settings, id_hp):
     remote_rulebase_path = "/rsyslog/rulebase/"
     # Remove RSYSLOG configuration on the datacenter
     try:
-        commands = ["sudo rm " + remote_rulebase_path + ".rb", "sudo rm " + remote_hp_log_file_path + id_hp + ".log", "sudo rm " + rsyslog_conf_datacenter_remote_path + id_hp + ".conf"]
+        commands = ["rm " + remote_rulebase_path + ".rb", "rm " + remote_hp_log_file_path + id_hp + ".log", "rm " + rsyslog_conf_datacenter_remote_path + id_hp + ".conf"]
         execute_commands(datacenter_settings["hostname"], datacenter_settings["ssh_port"], StringIO(datacenter_settings["ssh_key"]), commands)
     except Exception as e:
         raise ValueError(e)
     # Remove local RSYSLOG configuration
     try:
-        commands = ["sudo rm " + local_rulebase_path + ".rb", "sudo rm " + local_hp_log_file_path + id_hp + ".log", "sudo rm " + rsyslog_conf_datacenter_local_path + id_hp + ".conf", "sudo rm " + rsyslog_conf_orchestrator_local_path + id_hp + ".conf"]
+        commands = ["rm " + local_rulebase_path + ".rb", "rm " + local_hp_log_file_path + id_hp + ".log", "rm " + rsyslog_conf_datacenter_local_path + id_hp + ".conf", "rm " + rsyslog_conf_orchestrator_local_path + id_hp + ".conf"]
         execute_commands(datacenter_settings["hostname"], datacenter_settings["ssh_port"], StringIO(datacenter_settings["ssh_key"]), commands)
     except Exception as e:
         raise ValueError(e)

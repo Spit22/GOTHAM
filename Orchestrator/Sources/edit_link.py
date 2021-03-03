@@ -187,9 +187,18 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
 
             added_hp=[hp for hp in selected_objects if hp not in present_objects]
 
-            
+            # Insert data in Link_Hp_Serv
             for server in servers:
+                # Update state of server
+                modifs={"state":"HEALTHY"}
+                conditions={"id":server["serv_id"]}
+                Gotham_link_BDD.edit_server_DB(DB_settings, modifs, conditions)
+
                 for honeypot in added_hp:
+                    # Update state of honeypot
+                    modifs={"state":"HEALTHY"}
+                    conditions={"id":honeypot["hp_id"]}
+                    Gotham_link_BDD.edit_honeypot_DB(DB_settings, modifs, conditions)
                     # Create lhs_infos
                     lhs_infos = {"id_link":link["link_id"], "id_hp": honeypot["hp_id"], "id_serv": server["serv_id"], "port":server["lhs_port"]}
                     # Normalize infos
@@ -249,9 +258,20 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                 add_link.deploy_nginxConf(DB_settings, link["link_id"], objects_infos)
             except Exception as e:
                 raise ValueError(e)
-            
+           
+            # Insert data in Link_Hp_Serv
             for server in objects_infos:
+                # Update state of server
+                modifs={"state":"HEALTHY"}
+                conditions={"id":server["serv_id"]}
+                Gotham_link_BDD.edit_server_DB(DB_settings, modifs, conditions)
+
                 for honeypot in honeypots:
+                    # Update state of honeypot
+                    modifs={"state":"HEALTHY"}
+                    conditions={"id":honeypot["hp_id"]}
+                    Gotham_link_BDD.edit_honeypot_DB(DB_settings, modifs, conditions)
+
                     # Create lhs_infos
                     lhs_infos = {"id_link":link["link_id"], "id_hp": honeypot["hp_id"], "id_serv": server["serv_id"], "port":server["choosed_port"]}
                     # Normalize infos
@@ -287,7 +307,7 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                     raise ValueError(e)
             if type_nb=="serv":
                 try:
-                  commands = ["sudo rm /etc/nginx/conf.d/links/" + dsp_link["link_id"] +"-*.conf", "nginx -t && nginx -s reload"]
+                  commands = ["rm /etc/nginx/conf.d/links/" + dsp_link["link_id"] +"-*.conf", "/usr/sbin/nginx -t && /usr/sbin/nginx -s reload"]
                   Gotham_SSH_SCP.execute_commands(del_object["serv_ip"], del_object["serv_ssh_port"], StringIO(del_object["serv_ssh_key"]), commands)
                   
                 except Exception as e:
@@ -306,7 +326,8 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                 Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
             except Exception as e:
                 raise ValueError(e)
-
+    
+    return len(selected_objects)
 
 
 def edit_ports(DB_settings, datacenter_settings, link, new_ports):
@@ -328,6 +349,14 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
     deleted_ports=[str(port) for port in old_desired_ports if port not in new_desired_ports]
     added_ports=[str(port) for port in new_desired_ports if port not in old_desired_ports]
 
+    # Get all honeypots used by links
+    honeypots=[hp for serv in dsp_link["servs"] for hp in serv["hps"]]
+    # Remove duplicates
+    honeypots=[dict(tuple_of_hp_items) for tuple_of_hp_items in {tuple(hp.items()) for hp in honeypots}]
+    
+    # Generate NGINX configurations for each redirection on a specific exposed_port
+    for exposed_port in added_ports:
+        add_link.generate_nginxConf(DB_settings, dsp_link["link_id"], datacenter_settings["hostname"], honeypots, exposed_port)
     nb_del=0
     servs_keeps=[]
     for server in dsp_link["servs"]:
@@ -337,7 +366,7 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
             if str(exposed_ports_unique[0]) in deleted_ports:
                 # Remove server
                 try:
-                  commands = ["sudo rm /etc/nginx/conf.d/links/" + dsp_link["link_id"] +"-*.conf", "nginx -t && nginx -s reload"]
+                  commands = ["rm /etc/nginx/conf.d/links/" + dsp_link["link_id"] +"-*.conf", "/usr/sbin/nginx -t && /usr/sbin/nginx -s reload"]
                   Gotham_SSH_SCP.execute_commands(server["serv_ip"], server["serv_ssh_port"], StringIO(server["serv_ssh_key"]), commands)
                   Gotham_link_BDD.remove_lhs(DB_settings, id_link = dsp_link["link_id"], id_serv = server["serv_id"])
                 except Exception as e:
@@ -350,16 +379,6 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
         else:
             logging.error(f"Not implemented")
             raise ValueError("Not implemented")
-
-    # Get all honeypots used by links
-    honeypots=[hp for serv in link["servs"] for hp in serv["hps"]]
-    # Remove duplicates
-    honeypots=[dict(tuple_of_hp_items) for tuple_of_hp_items in {tuple(hp.items()) for hp in honeypots}]
-
-    # Generate NGINX configurations for each redirection on a specific exposed_port
-    for exposed_port in added_ports:
-        add_link.generate_nginxConf(DB_settings, dsp_link["link_id"], datacenter_settings["hostname"], honeypots, exposed_port)
-
     
     if nb_del > 0:
         # Get all servers corresponding to tags
@@ -367,12 +386,12 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
         
         if tags_serv.lower()!="all":
             servers = Gotham_check.check_tags("serv",servers, tags_serv=tags_serv)
-
-        servers = Gotham_check.check_servers_ports_matching(servers, new_desired_ports)
-            
+        
+        servers = Gotham_check.check_servers_ports_matching(servers, new_ports)
+        print(servers)
+        print(servs_keeps)
         # Filter servers in error and already used by link
         servers = [server for server in servers if not(server["serv_state"]=='ERROR' or server["serv_id"] in servs_keeps) ]
-        
         if len(servers) < nb_del:
             try:
                 modifs={"nb_serv":int(dsp_link["link_nb_serv"])-nb_del}
@@ -385,7 +404,6 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
             
         # Choose best servers (the lower scored)
         servers = Gotham_choose.choose_servers(servers, nb_del, tags_serv)
-
         # Associate servers and an port of exposition
         for i in range(len(servers)):
             serv_i_free_ports=servers[i]["free_ports"].split(ports_separator)
@@ -412,7 +430,16 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
 
         # Insert data in Link_Hp_Serv
         for server in servers:
+            # Update state of server
+            modifs={"state":"HEALTHY"}
+            conditions={"id":server["serv_id"]}
+            Gotham_link_BDD.edit_server_DB(DB_settings, modifs, conditions)
+
             for honeypot in honeypots:
+                # Update state of honeypot
+                modifs={"state":"HEALTHY"}
+                conditions={"id":honeypot["hp_id"]}
+                Gotham_link_BDD.edit_honeypot_DB(DB_settings, modifs, conditions)
                 # Create lhs_infos
                 lhs_infos = {"id_link":dsp_link["link_id"], "id_hp": honeypot["hp_id"], "id_serv": server["serv_id"], "port":server["choosed_port"]}
                 # Normalize infos

@@ -124,7 +124,7 @@ def replace_serv_for_deleted_tags(DB_settings, datacenter_settings, serv_infos, 
 
       if result:
         try:
-          commands = ["sudo rm /etc/nginx/conf.d/links/" + link["link_id"] +"-*.conf"]
+          commands = ["rm /etc/nginx/conf.d/links/" + link["link_id"] +"-*.conf"]
           Gotham_SSH_SCP.execute_commands(serv_infos["serv_ip"], serv_infos["serv_ssh_port"], serv_infos["serv_ssh_key"], commands)
           return True
         except Exception as e:
@@ -152,7 +152,7 @@ def replace_serv_for_added_tags_in_link(DB_settings, datacenter_settings, link_i
 
   if result:
     try:
-      commands = ["sudo rm /etc/nginx/conf.d/links/" + link_infos["link_id"] +"-*.conf"]
+      commands = ["rm /etc/nginx/conf.d/links/" + link_infos["link_id"] +"-*.conf"]
       Gotham_SSH_SCP.execute_commands(serv_infos["serv_ip"], serv_infos["serv_ssh_port"], serv_infos["serv_ssh_key"], commands)
       return already_used
     except Exception as e:

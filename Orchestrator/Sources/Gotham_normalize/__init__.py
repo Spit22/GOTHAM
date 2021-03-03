@@ -169,7 +169,7 @@ def normalize_id_link(id):
 ########## NORMALIZE EDIT SECTION ##########
 
 def normalize_modif_to_str(modifs):
-    replacement_dict= {"': ":"=","{'":"","}":"","', ":", "}
+    replacement_dict= {"': ":"=","{'":"","}":"",", '":", "}
     result=str(modifs)
     for key, value in replacement_dict.items():
         result=result.replace(key,value)

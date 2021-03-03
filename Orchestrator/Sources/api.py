@@ -213,8 +213,8 @@ def add_srv():
             # Decode and format the ssh key
             ssh_key = base64.b64decode(encoded_ssh_key) # ssh_key is byte
             ssh_key = ssh_key.decode('ascii') # ssh_key is ascii string
-            check_ssh_key = StringIO(ssh_key) # ssh_key for the check is a file-like object
-            deploy_ssh_key = StringIO(ssh_key) # ssh_key for the deployment is a file-like object
+            check_ssh_key = ssh_key # ssh_key for the check is a file-like object
+            deploy_ssh_key = ssh_key # ssh_key for the deployment is a file-like object
             ssh_port = serv_infos_received["ssh_port"]
         
         except Exception as e:
@@ -432,7 +432,17 @@ def add_lk():
         
         # Insert data in Link_Hp_Serv
         for server in servers:
+            # Update state of server
+            modifs={"state":"HEALTHY"}
+            conditions={"id":server["serv_id"]}
+            Gotham_link_BDD.edit_server_DB(DB_settings, modifs, conditions)
+
             for honeypot in honeypots:
+                # Update state of honeypot
+                modifs={"state":"HEALTHY"}
+                conditions={"id":honeypot["hp_id"]}
+                Gotham_link_BDD.edit_honeypot_DB(DB_settings, modifs, conditions)
+                
                 # Create lhs_infos
                 lhs_infos = {"id_link":lk_infos["id"], "id_hp": honeypot["hp_id"], "id_serv": server["serv_id"], "port":server["choosed_port"]}
                 # Normalize infos
@@ -747,6 +757,20 @@ def edit_lk():
                         return "Error in tag server edition\n"
                 modifs["tags_serv"]=link_infos_received["tags_serv"]
         
+        # Update database 
+        if modifs != {}:
+            Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
+            links = Gotham_link_BDD.get_link_infos(DB_settings, id=link_infos_received["id"])
+            link = Gotham_normalize.normalize_display_object_infos(links[0],"link")
+            # Triage of links
+            link_hp_serv = Gotham_link_BDD.get_link_hp_serv_infos(DB_settings, id=link_infos_received["id"])[0]
+            link_serv_hp = Gotham_link_BDD.get_link_serv_hp_infos(DB_settings, id=link_infos_received["id"])[0]
+
+            modifications=True
+
+        # Clean modifs dict before editing nb_hp
+        modifs = {}
+       
         if "tags_hp" in link_infos_received.keys():
             if set(link_infos_received["tags_hp"].split(tags_separator))!= set(link["link_tags_hp"].split("||")):
                 # We check all provided hp tags exists, otherwise return error
@@ -761,6 +785,21 @@ def edit_lk():
                         return "Error in tag hp edition\n"
                 modifs["tags_hp"]=link_infos_received["tags_hp"]
         
+        # Update database 
+        if modifs != {}:
+            Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
+            links = Gotham_link_BDD.get_link_infos(DB_settings, id=link_infos_received["id"])
+            link = Gotham_normalize.normalize_display_object_infos(links[0],"link")
+            # Triage of links
+            link_hp_serv = Gotham_link_BDD.get_link_hp_serv_infos(DB_settings, id=link_infos_received["id"])[0]
+            link_serv_hp = Gotham_link_BDD.get_link_serv_hp_infos(DB_settings, id=link_infos_received["id"])[0]
+
+            modifications=True
+
+        # Clean modifs dict before editing nb_hp
+        modifs = {}
+
+
         if "ports" in link_infos_received.keys():
             if link_infos_received["ports"]!= link["link_ports"]:
                 try:
@@ -769,39 +808,61 @@ def edit_lk():
                     return "Error in ports edition\n"
                 modifs["ports"]=link_infos_received["ports"]
 
+        
+        # Just redistrib ports
+        #if "ports" in link_infos_received.keys():
+        #    if link_infos_received["ports"]!= link["link_ports"]:
+        #        try:
+        #            Gotham_replace.distrib_servers_on_link_ports(DB_settings, link)
+        #        except Exception as e:
+        #            return "Error in ports redistribution : "+str(e)+"\n"
+        
         # Update link before edit nb_serv and nb_hp (Edit tags can decrease nb_serv and nb_hp)
         if modifs != {}:
             Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
             links = Gotham_link_BDD.get_link_infos(DB_settings, id=link_infos_received["id"])
             link = Gotham_normalize.normalize_display_object_infos(links[0],"link")
-            modifications=True
+            
+            # Triage of links
+            link_hp_serv = Gotham_link_BDD.get_link_hp_serv_infos(DB_settings, id=link_infos_received["id"])[0]
+            link_serv_hp = Gotham_link_BDD.get_link_serv_hp_infos(DB_settings, id=link_infos_received["id"])[0]
 
-        # Just redistrib ports
-        if "ports" in link_infos_received.keys():
-            if link_infos_received["ports"]!= link["link_ports"]:
-                try:
-                    Gotham_replace.distrib_servers_on_link_ports(DB_settings, link)
-                except:
-                    return "Error in ports redistribution\n"
+            modifications=True
 
         modifs={}
 
         if "nb_serv" in link_infos_received.keys():
             if link_infos_received["nb_serv"]!= link["link_nb_serv"]:
                 try:
-                    edit_link.edit_nb(DB_settings, datacenter_settings, link_serv_hp, link_infos_received["nb_serv"], "serv")
+                    nb_serv = edit_link.edit_nb(DB_settings, datacenter_settings, link_serv_hp, link_infos_received["nb_serv"], "serv")
                 except Exception as e:
                     return "Error in server nb edition: "+str(e)+"\n"
-                modifs["nb_serv"]=link_infos_received["nb_serv"]
+                modifs["nb_serv"] = nb_serv
         
+        # Update database 
+        if modifs != {}:
+            Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
+            links = Gotham_link_BDD.get_link_infos(DB_settings, id=link_infos_received["id"])
+            link = Gotham_normalize.normalize_display_object_infos(links[0],"link")
+            # Triage of links
+            link_hp_serv = Gotham_link_BDD.get_link_hp_serv_infos(DB_settings, id=link_infos_received["id"])[0]
+            link_serv_hp = Gotham_link_BDD.get_link_serv_hp_infos(DB_settings, id=link_infos_received["id"])[0]
+
+            modifications=True
+
+        # Clean modifs dict before editing nb_hp
+        modifs = {}
+
         if "nb_hp" in link_infos_received.keys():
             if link_infos_received["nb_hp"]!= link["link_nb_hp"]:
-                #try:
-                edit_link.edit_nb(DB_settings, datacenter_settings, link_hp_serv, link_infos_received["nb_hp"], "hp")
-                #except:
-                #    return "Error in hp nb edition\n"
-                modifs["nb_hp"]=link_infos_received["nb_hp"]
+                try:
+                    nb_hp = edit_link.edit_nb(DB_settings, datacenter_settings, link_hp_serv, link_infos_received["nb_hp"], "hp")
+                except:
+                    return "Error in hp nb edition\n"
+                modifs["nb_hp"]= nb_hp
+
         
+        # Update database
         if modifs != {}:
             Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
             links = Gotham_link_BDD.get_link_infos(DB_settings, id=link_infos_received["id"])
