@@ -608,11 +608,11 @@ def edit_srv():
         try:
             # Normalize infos
             serv_infos_received = Gotham_normalize.normalize_server_infos(serv_infos_received)            
-        
+
         except Exception as e:
             return "Invalid data sent "+str(e)+"\n"
 
-        # Check if the honyepot exists in the IDB
+        # Check if the server exists in the IDB
         servers = Gotham_link_BDD.get_server_infos(DB_settings, id=serv_infos_received["id"])
         
         if servers == []:
@@ -650,6 +650,10 @@ def edit_srv():
             ip=server["serv_ip"]
             ssh_port=server["serv_ssh_port"]
             ssh_key=server["serv_ssh_key"]
+            # Decode and format the ssh key
+            ssh_key = base64.b64decode(ssh_key) # ssh_key is byte
+            ssh_key = ssh_key.decode('ascii') # ssh_key is ascii string
+
             
             if "ip" in serv_infos_received.keys():
                 if serv_infos_received["ip"]!= server["serv_ip"]:
@@ -660,6 +664,9 @@ def edit_srv():
                 if serv_infos_received["ssh_key"]!= server["serv_ssh_key"]:
                     modifs["ssh_key"]=serv_infos_received["ssh_key"]
                     ssh_key=serv_infos_received["ssh_key"]
+                    # Decode and format the ssh key
+                    ssh_key = base64.b64decode(ssh_key) # ssh_key is byte
+                    ssh_key = ssh_key.decode('ascii') # ssh_key is ascii string
             
             if "ssh_port" in serv_infos_received.keys():
                 if serv_infos_received["ssh_port"]!= server["serv_ssh_port"]:
@@ -757,7 +764,7 @@ def edit_lk():
                         return "Error in tag server edition\n"
                 modifs["tags_serv"]=link_infos_received["tags_serv"]
         
-        # Update database 
+        # Update database in memory 
         if modifs != {}:
             Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
             links = Gotham_link_BDD.get_link_infos(DB_settings, id=link_infos_received["id"])
