@@ -10,50 +10,50 @@ GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
 def normalize_honeypot_infos(hp_infos):
-  for key, value in hp_infos.items():
-    normalize_key=getattr(normalization_functions,'normalize_' + key)
-    if (key=="id" or key=="state"):
-      hp_infos[key]=normalize_key("hp",value)
-    else:
-      hp_infos[key]=normalize_key(value)
-  return hp_infos
+    for key, value in hp_infos.items():
+        normalize_key=getattr(normalization_functions,'normalize_' + key)
+        if (key=="id" or key=="state"):
+            hp_infos[key]=normalize_key("hp",value)
+        else:
+            hp_infos[key]=normalize_key(value)
+    return hp_infos
 
 def normalize_server_infos(serv_infos):
-  for key, value in serv_infos.items():
-    normalize_key=getattr(normalization_functions,'normalize_' + key)
-    if (key=="id" or key=="state"):
-      serv_infos[key]=normalize_key("sv",value)
-    else:
-      serv_infos[key]=normalize_key(value)
-  return serv_infos
+    for key, value in serv_infos.items():
+        normalize_key=getattr(normalization_functions,'normalize_' + key)
+        if (key=="id" or key=="state"):
+            serv_infos[key]=normalize_key("sv",value)
+        else:
+            serv_infos[key]=normalize_key(value)
+    return serv_infos
 
 def normalize_link_infos(lk_infos):
-  for key, value in lk_infos.items():
-    if (key=="tags_hp" or key=="tags_serv"):
-      normalize_key=getattr(normalization_functions,'normalize_tags')
-    else:
-      normalize_key=getattr(normalization_functions,'normalize_' + key)
-    if (key=="id" or key=="state"):
-      lk_infos[key]=normalize_key("lk",value)
-    else:
-      lk_infos[key]=normalize_key(value)
-  return lk_infos
+    for key, value in lk_infos.items():
+        if (key=="tags_hp" or key=="tags_serv"):
+            normalize_key=getattr(normalization_functions,'normalize_tags')
+        else:
+            normalize_key=getattr(normalization_functions,'normalize_' + key)
+        if (key=="id" or key=="state"):
+            lk_infos[key]=normalize_key("lk",value)
+        else:
+            lk_infos[key]=normalize_key(value)
+    return lk_infos
 
 def normalize_lhs_infos(lhs_infos):
-  for key, value in lhs_infos.items():
-    if (key=="id_hp"):
-      normalize_key=getattr(normalization_functions,'normalize_id')
-      lhs_infos[key]=normalize_key("hp",value)
-    elif (key=="id_serv"):
-      normalize_key=getattr(normalization_functions,'normalize_id')
-      lhs_infos[key]=normalize_key("sv",value)
-    elif (key=="id_link"):
-      normalize_key=getattr(normalization_functions,'normalize_id')
-      lhs_infos[key]=normalize_key("lk",value)
-    else:
-      normalize_key=getattr(normalization_functions,'normalize_' + key)
-      lhs_infos[key]=normalize_key(value)
-  return lhs_infos
+    for key, value in lhs_infos.items():
+        if (key=="id_hp"):
+            normalize_key=getattr(normalization_functions,'normalize_id')
+            lhs_infos[key]=normalize_key("hp",value)
+        elif (key=="id_serv"):
+            normalize_key=getattr(normalization_functions,'normalize_id')
+            lhs_infos[key]=normalize_key("sv",value)
+        elif (key=="id_link"):
+            normalize_key=getattr(normalization_functions,'normalize_id')
+            lhs_infos[key]=normalize_key("lk",value)
+        else:
+            normalize_key=getattr(normalization_functions,'normalize_' + key)
+            lhs_infos[key]=normalize_key(value)
+    return lhs_infos
 
 ########## NORMALIZE WITH DEFAULT VALUES SECTION ##########
 
@@ -67,11 +67,13 @@ def normalize_full_honeypot_infos(hp_infos):
     for key, value in default_hp_infos.items():
         if value == 'NOT NULL':
             if not(key in hp_infos):
-                logging.error(f" Missing value of '{key}'")
-                sys.exit(1)
+                error = "Missing value of " + str(key)
+                logging.error(error)
+                raise ValueError(error)
             elif(hp_infos[key] == '' or hp_infos[key] == 0 or hp_infos[key] == None):
-                logging.error(f" Missing value of '{key}'")
-                sys.exit(1)
+                error = str(id) + "Missing value of " + str(key)
+                logging.error(error)
+                raise ValueError(error)
         else:
             if not(key in hp_infos):
                 hp_infos[key] = value
@@ -87,11 +89,13 @@ def normalize_full_server_infos(server_infos):
     for key, value in default_server_infos.items():
         if value == 'NOT NULL':
             if not(key in server_infos):
-                logging.error(f" Missing value of '{key}'")
-                sys.exit(1)
+                error = str(id) + "Missing value of " + str(key)
+                logging.error(error)
+                raise ValueError(error)
             elif(server_infos[key] == '' or server_infos[key] == 0 or server_infos[key] == None):
-                logging.error(f" Missing value of '{key}'")
-                sys.exit(1)
+                error = str(id) + "Missing value of " + str(key)
+                logging.error(error)
+                raise ValueError(error)
         else:
             if not(key in server_infos):
                 server_infos[key] = value
@@ -107,11 +111,13 @@ def normalize_full_link_infos(lk_infos):
     for key, value in default_lk_infos.items():
         if value == 'NOT NULL':
             if not(key in lk_infos):
-                logging.error(f" Missing value of '{key}'")
-                sys.exit(1)
+                error = str(id) + "Missing value of " + str(key)
+                logging.error(error)
+                raise ValueError(error)
             elif(lk_infos[key] == '' or lk_infos[key] == 0 or lk_infos[key] == None):
-                logging.error(f" Missing value of '{key}'")
-                sys.exit(1)
+                error = str(id) + "Missing value of " + str(key)
+                logging.error(error)
+                raise ValueError(error)
         else:
             if not(key in lk_infos):
                 lk_infos[key] = value
@@ -124,11 +130,13 @@ def normalize_full_lhs_infos(lhs_infos):
     for key, value in default_lhs_infos.items():
         if value == 'NOT NULL':
             if not(key in lhs_infos):
-                logging.error(f" Missing value of '{key}'")
-                sys.exit(1)
+                error = str(id) + "Missing value of " + str(key)
+                logging.error(error)
+                raise ValueError(error)
             elif(lhs_infos[key] == '' or lhs_infos[key] == 0):
-                logging.error(f" Missing value of '{key}'")
-                sys.exit(1)
+                error = str(id) + "Missing value of " + str(key)
+                logging.error(error)
+                raise ValueError(error)
         else:
             if not(key in lhs_infos):
                 lhs_infos[key] = value
@@ -139,8 +147,9 @@ def normalize_full_lhs_infos(lhs_infos):
 def normalize_display_object_infos(object_infos, obj_type, next_type=''):
   obj_types=["hp","serv","link"]
   if not(obj_type in obj_types and (next_type in obj_types or next_type=='')):
-    logging.error(f" Wrong value of '{obj_type}'")
-    sys.exit(1)
+    error = str(id) + "Wrong value of " + str(obj_type)
+    logging.error(error)
+    raise ValueError(error)
   if obj_type != "link":
     next_type= "link"
   elif next_type=='':

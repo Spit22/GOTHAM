@@ -10,8 +10,9 @@ logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',leve
 
 def check_tags(object_type, objects_infos, tags_hp='', tags_serv='', mode=False):
    if (object_type != "hp" and object_type != "serv" and object_type != "link"):
-      logging.error(f"'{object_type}' is uncorrect")
-      sys.exit(1)
+      error = str(object_type) + " is uncorrect"
+      logging.error(error)
+      raise ValueError(error)
 
    GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
    # Retrieve settings from config file
@@ -49,8 +50,9 @@ def check_tag_still_used(DB_connection, tag="%", id="%"):
        json_data.append(dict(zip(row_headers,result)))
     
     if json_data==[]:
-         logging.error(f"Tag can't be found")
-         sys.exit(1)
+         error = "Tag can't be found"
+         logging.error(error)
+         raise ValueError(error)
 
     id_tag=json_data[0]["id"]
     # Get MariaDB cursor

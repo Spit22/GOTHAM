@@ -88,8 +88,9 @@ def generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, 
         # Stop dealing with these logs
         rsyslog_conf_file.write('stop\n')
     except Exception as e:
-        logging.error(f"Fail to create rsyslog configuration for datacenter : {e}")
-        sys.exit(1)
+        error = "Fail to create rsyslog configuration for datacenter : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 
 def generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_path, local_hp_log_file_path):
@@ -103,8 +104,9 @@ def generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_pa
         # Stop dealing with these logs
         rsyslog_conf_file.write('stop\n')
     except Exception as e:
-        logging.error(f"Fail to create rsyslog configuration for orchestrator : {e}")
-        sys.exit(1)
+        error = "Fail to create rsyslog configuration for orchestrator : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 def generate_rulebase(id_hp, rules, rulebase_path):
     try:
@@ -116,8 +118,9 @@ def generate_rulebase(id_hp, rules, rulebase_path):
         for rule in rules:
             rulebase.write(str(rule) + '\n')
     except Exception as e:
-        logging.error(f"Fail to create rulebase : {e}")
-        sys.exit(1)
+        error = "Fail to create rulebase : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_port, id_hp, rules):
     # On effectue 2 connexions SSH
@@ -150,8 +153,9 @@ def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_po
         generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, remote_rulebase_path, id_hp, rsyslog_conf_datacenter_local_path, remote_hp_log_file_path)
         generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_path, local_hp_log_file_path)
     except Exception as e:
-        logging.error(f"Fail to generate rsyslog configuration : {e}")
-        sys.exit(1)
+        error = "Fail to generate rsyslog configuration : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
     # Send datacenter rsyslog configuration to the datacenter
     try:
         # Send the rulebase
@@ -159,5 +163,6 @@ def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_po
         # Send rsyslog configuration
         send_file_and_execute_commands(dc_ip, dc_ssh_port, StringIO(dc_ssh_key_2), [ rsyslog_conf_datacenter_local_path + id_hp + ".conf" ], rsyslog_conf_datacenter_remote_path, exec_restart_rsyslog)
     except Exception as e:
-        logging.error(f"Fail to deploy rsyslog configuration: {e}")
-        sys.exit(1)
+        error = "Fail to deploy rsyslog configuration : " + str(e)
+        logging.error(error)
+        raise ValueError(error)

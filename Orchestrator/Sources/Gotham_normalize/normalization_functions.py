@@ -12,8 +12,9 @@ logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',leve
 
 def normalize_id(type, id):
     if (id == '' or id == None):
-        logging.warning(f"id is undefined or empty")
-        sys.exit(1)
+        error = "id is undefined or empty"
+        logging.error(error)
+        raise ValueError(error)
     if not(id[:3] == (type + '-')):
         logging.warning(f"id type doesn't match: {id}")
     try:
@@ -38,8 +39,9 @@ def normalize_descr(descr):
 
 def normalize_port(port):
     if (port == '' or port == None or port==0):
-        logging.warning(f"port is undefined or empty")
-        sys.exit(1)
+        error = "port is undefined or empty"
+        logging.error(error)
+        raise ValueError(error)  
     try:
         int(port)
     except:
@@ -68,8 +70,9 @@ def normalize_source(source):
 
 def normalize_state(obj_type, state):
     if (obj_type != "hp" and obj_type != "sv"):
-        logging.error(f"'{obj_type}' is uncorrect")
-        sys.exit(1)
+        error = str(obj_type) + " is incorrect"
+        logging.error(error)
+        raise ValueError(error)
     state = state.upper()
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
     # Retrieve settings from config file

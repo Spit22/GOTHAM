@@ -36,8 +36,8 @@ def edit_tags(DB_settings, datacenter_settings, server, tags):
 
     try:
         Gotham_replace.replace_serv_for_deleted_tags(DB_settings, datacenter_settings, dsp_server, deleted_tags)
-    except:
-        sys.exit(1)
+    except Exception as e:
+        raise ValueError(e)
 
 
 def edit_connection(DB_settings, server, ip, ssh_port, ssh_key):
@@ -45,13 +45,16 @@ def edit_connection(DB_settings, server, ip, ssh_port, ssh_key):
     # First check the ip not already exists in database
     exists = Gotham_check.check_doublon_server(DB_settings, ip)
     if exists:
-        logging.error(f"Provided ip already exists in database")
-        sys.exit(1)
+        error = "Provided ip already exists in database"
+        logging.error(error)
+        raise ValueError(error)
 
     # Check given auth information are ok
     connected = Gotham_check.check_ssh(ip, ssh_port, ssh_key) 
     if not connected:
-        logging.error(f"Provided ssh_key or ssh_port is wrong")
-        sys.exit(1)
+        error = "Provided ssh_key or ssh_port is wrong"
+        logging.error(error)
+        raise ValueError(error)
+        
 
     return

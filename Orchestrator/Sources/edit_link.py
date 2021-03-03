@@ -399,8 +399,6 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
                 Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
             except Exception as e:
                 raise ValueError(e)
-            #logging.error(f"Can't edit link on {str(nb_del)} servers while there is only {str(len(servers))} servers available for ports edition")
-            #sys.exit(1)
             
         # Choose best servers (the lower scored)
         servers = Gotham_choose.choose_servers(servers, nb_del, tags_serv)

@@ -17,7 +17,7 @@ logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',leve
 # Retrieve settings from config file
 config = configparser.ConfigParser()
 config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
-_separator = config['tag']['separator']
+tag_separator = config['tag']['separator']
 
 
 ############################### TAG SECTION ###############################
@@ -45,16 +45,18 @@ def server(DB_connection, modifs, conditions):
     # Normalize modifs
     try:
         modifs = normalize_server_infos(modifs)
-    except:
-        logging.error(f"Bad server modification")
-        sys.exit(1)
+    except Exception as e:
+        error = "Bad server modification : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
     # Normalize conditions
     try:
         conditions = normalize_server_infos(conditions)
-    except:
-        logging.error(f"Bad server modif's conditions")
-        sys.exit(1)
+    except Exception as e:
+        error = "Bad server modification's conditions : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 
     if "tags" in modifs.items():
@@ -75,23 +77,26 @@ def server(DB_connection, modifs, conditions):
                     # Add the tag in the IDB
                     try:
                         add_in_IDB.tag(DB_connection, tag)
-                    except:
-                        sys.exit(1)
+                    except Exception as e:
+                        raise ValueError(e)
                     # Then retrieve tag id
                     answer = get_infos.tag(DB_connection, tag=tag)
                     tag_id = answer[0]['id']
                 # Add the relation between server and tag in Serv_Tags table
                 try:
                     add_in_IDB.serv_tags(DB_connection, tag_id, servers[0]["serv_id"])
-                except:
-                    sys.exit(1)
+                except Exception as e:
+                    raise ValueError(e)
         else:
-            logging.error(f"Tags modification without id in conditions not implemented")
-            sys.exit(1)
+            error = "Tags modification without id in conditions not implemented"
+            logging.error(error)
+            raise ValueError(error)
 
     if [val for key, val in conditions.items() if 'tags' in key]!=[]:
-        logging.error(f"Modification by tag not implemented")
-        sys.exit(1)
+        error = "Modification by tag not implemented"
+        logging.error(error)
+        raise ValueError(error)
+        
 
     
 
@@ -99,15 +104,17 @@ def server(DB_connection, modifs, conditions):
     ## Prepare modifs
     try:
         modifs = normalize_modif_to_str(modifs)
-    except:
-        logging.error(f"Can't prepare server modification")
-        sys.exit(1)
+    except Exception as e:
+        error = "Can't prepare server modification : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
     ## Prepare conditions
     try:
         conditions = normalize_conditions_to_str(conditions)
-    except:
-        logging.error(f"Can't prepare server modif's conditions")
-        sys.exit(1)
+    except Exception as e:
+        error = "Can't prepare server modification's conditions : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
     # Create the query
     query="UPDATE Server SET "+modifs+" WHERE "+conditions
@@ -121,8 +128,9 @@ def server(DB_connection, modifs, conditions):
         DB_connection.commit()
         logging.info(f"Modification ok -- SET {modifs}  WHERE {conditions} -- in the table 'Server'")
     except mariadb.Error as e:
-        logging.error(f"Modification failed -- SET {modifs}  WHERE {conditions} --  in the table 'Server' : {e}")
-        sys.exit(1)
+        error = "Modification failed -- SET " + str(modifs) + " WHERE " + str(conditions) + "--  in the table 'Server' : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
     
 
 
@@ -148,17 +156,18 @@ def honeypot(DB_connection, modifs, conditions):
     # Normalize modifs
     try:
         modifs = normalize_honeypot_infos(modifs)
-    except:
-        logging.error(f"Bad honeypot modification")
-        sys.exit(1)
-
+    except Exception as e:
+        error = "Bad honeypot modification : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
+        
     # Normalize conditions
     try:
         conditions = normalize_honeypot_infos(conditions)
-    except:
-        logging.error(f"Bad honeypot modif's conditions")
-        sys.exit(1)
-
+    except Exception as e:
+        error = "Bad honeypot modification's conditions : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
     if "tags" in modifs.items():
         if "id" in conditions.items():
@@ -178,23 +187,25 @@ def honeypot(DB_connection, modifs, conditions):
                     # Add the tag in the IDB
                     try:
                         add_in_IDB.tag(DB_connection, tag)
-                    except:
-                        sys.exit(1)
+                    except Exception as e:
+                        raise ValueError(e)
                     # Then retrieve tag id
                     answer = get_infos.tag(DB_connection, tag=tag)
                     tag_id = answer[0]['id']
                 # Add the relation between honeypot and tag in hp_Tags table
                 try:
                     add_in_IDB.hp_tags(DB_connection, tag_id, honeypots[0]["hp_id"])
-                except:
-                    sys.exit(1)
+                except Exception as e:
+                    raise ValueError(e)
         else:
-            logging.error(f"Tags modification without id in conditions not implemented")
-            sys.exit(1)
+            error = "Tags modification without id in conditions not implemented"
+            logging.error(error)
+            raise ValueError(error)
 
     if [val for key, val in conditions.items() if 'tags' in key]!=[]:
-        logging.error(f"Modification by tag not implemented")
-        sys.exit(1)
+        error = "Modification by tag not implemented"
+        logging.error(error)
+        raise ValueError(error)
 
 
 
@@ -202,15 +213,17 @@ def honeypot(DB_connection, modifs, conditions):
     ## Prepare modifs
     try:
         modifs = normalize_modif_to_str(modifs)
-    except:
-        logging.error(f"Can't prepare honeypot modification")
-        sys.exit(1)
+    except Exception as e:
+        error = "Can't prepare honeypot modification : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
     ## Prepare conditions
     try:
         conditions = normalize_conditions_to_str(conditions)
-    except:
-        logging.error(f"Can't prepare honeypot modif's conditions")
-        sys.exit(1)
+    except Exception as e:
+        error = "Can't prepare honeypot modification's conditions : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
     # Create the query
     query="UPDATE Honeypot SET "+modifs+" WHERE "+conditions
@@ -224,8 +237,10 @@ def honeypot(DB_connection, modifs, conditions):
         DB_connection.commit()
         logging.info(f"Modification ok -- SET {modifs}  WHERE {conditions} -- in the table 'Honeypot'")
     except mariadb.Error as e:
-        logging.error(f"Modification failed -- SET {modifs}  WHERE {conditions} --  in the table 'Honeypot' : {e}")
-        sys.exit(1)
+        error = "Modification failed -- SET " + str(modifs) + " WHERE " + str(conditions) + "--  in the table 'Honeypot' : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
+        
     
 
 ############################### LINK SECTION ###############################
@@ -242,15 +257,17 @@ def link(DB_connection, modifs, conditions):
     # Normalize modifs
     try:
         modifs = normalize_link_infos(modifs)
-    except:
-        logging.error(f"Bad link modification")
-        sys.exit(1)
+    except Exception as e:
+        error = "Bad link modification : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
     # Normalize conditions
     try:
         conditions = normalize_link_infos(conditions)
-    except:
-        logging.error(f"Bad link modif's conditions")
-        sys.exit(1)
+    except Exception as e:
+        error = "Bad link modification's conditions : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 
     if "tags_hp" in modifs.items():
@@ -262,22 +279,24 @@ def link(DB_connection, modifs, conditions):
             deleted_tags=list(set(old_tag_list)-set(new_tag_list))
             added_tags=list(set(new_tag_list)-set(old_tag_list))
             for tag in deleted_tags:
-                remove_in_IDB.link_in_link_tags_hp(DB_connection, id=links[0]["link_id"], tag=tag)
+                remove_in_IDB.link_in_link_tags_hp(DB_connection, id=links[0]["link_id"], tag_hp=tag)
             for tag in added_tags:
                 answer = get_infos.tag(DB_connection, tag=tag)
                 if answer != []:
                     tag_id = answer[0]['id']
                 else:
-                    logging.error(f"Error with tags: some honeypot tags do not exists")
-                    sys.exit(1)
+                    error = "Error with tags: some honeypot tags do not exists"
+                    logging.error(error)
+                    raise ValueError(error)
                 # Add the relation between link and tag in hp_Tags table
                 try:
                     add_in_IDB.link_tags_hp(DB_connection, tag_id, links[0]["link_id"])
-                except:
-                    sys.exit(1)
+                except Exception as e:
+                    raise ValueError(e)
         else:
-            logging.error(f"Tags modification without id in conditions not implemented")
-            sys.exit(1)
+            error = "Tags modification without id in conditions not implemented"
+            logging.error(error)
+            raise ValueError(error)
 
     if "tags_serv" in modifs.items():
         if "id" in conditions.items():
@@ -288,26 +307,29 @@ def link(DB_connection, modifs, conditions):
             deleted_tags=list(set(old_tag_list)-set(new_tag_list))
             added_tags=list(set(new_tag_list)-set(old_tag_list))
             for tag in deleted_tags:
-                remove_in_IDB.link_in_link_tags_serv(DB_connection, id=links[0]["link_id"], tag=tag)
+                remove_in_IDB.link_in_link_tags_serv(DB_connection, id=links[0]["link_id"], tag_serv=tag)
             for tag in added_tags:
                 answer = get_infos.tag(DB_connection, tag=tag)
                 if answer != []:
                     tag_id = answer[0]['id']
                 else:
-                    logging.error(f"Error with tags: some server tags do not exists")
-                    sys.exit(1)
+                    error = "Error with tags: some server tags do not exists"
+                    logging.error(error)
+                    raise ValueError(error)
                 # Add the relation between link and tag in hp_Tags table
                 try:
                     add_in_IDB.link_tags_serv(DB_connection, tag_id, links[0]["link_id"])
-                except:
-                    sys.exit(1)
+                except Exception as e:
+                    raise ValueError(e)
         else:
-            logging.error(f"Tags modification without id in conditions not implemented")
-            sys.exit(1)
+            error = "Tags modification without id in conditions not implemented"
+            logging.error(error)
+            raise ValueError(error)
 
     if [val for key, val in conditions.items() if 'tag' in key]!=[]:
-        logging.error(f"Modification by tag not implemented")
-        sys.exit(1)
+        error = "Modification by tag not implemented"
+        logging.error(error)
+        raise ValueError(error)
 
 
     
@@ -316,15 +338,17 @@ def link(DB_connection, modifs, conditions):
     ## Prepare modifs
     try:
         modifs = normalize_modif_to_str(modifs)
-    except:
-        logging.error(f"Can't prepare link modification")
-        sys.exit(1)
+    except Exception as e:
+        error = "Can't prepare link modification : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
     ## Prepare conditions
     try:
         conditions = normalize_conditions_to_str(conditions)
-    except:
-        logging.error(f"Can't prepare link modif's conditions")
-        sys.exit(1)
+    except Exception as e:
+        error = "Can't prepare link modification's conditions : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
     # Create the query
     query="UPDATE Link SET "+modifs+" WHERE "+conditions
@@ -338,8 +362,9 @@ def link(DB_connection, modifs, conditions):
         DB_connection.commit()
         logging.info(f"Modification ok -- SET {modifs}  WHERE {conditions} -- in the table 'Link'")
     except mariadb.Error as e:
-        logging.error(f"Modification failed -- SET {modifs}  WHERE {conditions} --  in the table 'Link' : {e}")
-        sys.exit(1)
+        error = "Modification failed -- SET " + str(modifs) + " WHERE " + str(conditions) + "--  in the table 'Link' : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
     
 
 ############################### LHS SECTION ###############################
@@ -356,29 +381,34 @@ def lhs(DB_connection, modifs, conditions):
     # Normalize modifs
     try:
         modifs = normalize_lhs_infos(modifs)
-    except:
-        logging.error(f"Bad lhs modification")
-        sys.exit(1)
+    except Exception as e:
+        error = "Bad lhs modification : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
+        
     # Normalize conditions
     try:
         conditions = normalize_lhs_infos(conditions)
-    except:
-        logging.error(f"Bad lhs modif's conditions")
-        sys.exit(1)
+    except Exception as e:
+        error = "Bad lhs modification's conditions : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
     # Prepare query
     ## Prepare modifs
     try:
         modifs = normalize_modif_to_str(modifs)
-    except:
-        logging.error(f"Can't prepare lhs modification")
-        sys.exit(1)
+    except Exception as e:
+        error = "Can't prepare lhs modification : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
     ## Prepare conditions
     try:
         conditions = normalize_conditions_to_str(conditions)
-    except:
-        logging.error(f"Can't prepare lhs modif's conditions")
-        sys.exit(1)
+    except Exception as e:
+        error = "Can't prepare lhs modif's conditions : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
     # Create the query
     query="UPDATE Link_Hp_Serv SET "+modifs+" WHERE "+conditions
@@ -392,5 +422,6 @@ def lhs(DB_connection, modifs, conditions):
         DB_connection.commit()
         logging.info(f"Modification ok -- SET {modifs}  WHERE {conditions} -- in the table 'Link_Hp_Serv'")
     except mariadb.Error as e:
-        logging.error(f"Modification failed -- SET {modifs}  WHERE {conditions} --  in the table 'Link_Hp_Serv' : {e}")
-        sys.exit(1)
+        error = "Modification failed -- SET " + str(modifs) + " WHERE " + str(conditions) + "--  in the table 'Link_Hp_Serv' : " + str(e)
+        logging.error(error)
+        raise ValueError(error)

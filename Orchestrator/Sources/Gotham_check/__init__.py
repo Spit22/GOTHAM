@@ -73,8 +73,8 @@ def check_doublon_tags(DB_settings, tags):
     '''
     try:
         check_DOUBLON.tags(DB_settings, tags)
-    except:
-        sys.exit(1)
+    except Exception as e:
+        raise ValueError("Error while check doublon tags : "+str(e))
 
 def check_tag_still_used(DB_settings, tag="%", id="%"):
     '''
@@ -93,12 +93,13 @@ def check_tag_still_used(DB_settings, tag="%", id="%"):
             database=DB_settings["database"]
         )
     except mariadb.Error as e:
-        logging.error(f"Can't connect to the internal database : {e}")
-        sys.exit(1)
+        error = "Can't connect to the internal database : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
     try:
         result = check_TAGS.check_tag_still_used(DB_connection, tag,id)
-    except:
-        sys.exit(1)
+    except Exception as e:
+        raise ValueError(e)
     DB_connection.close()
     return result
 
@@ -118,8 +119,9 @@ def check_used_port(DB_settings):
             database=DB_settings["database"]
         )
     except mariadb.Error as e:
-        logging.error(f"Can't connect to the internal database : {e}")
-        sys.exit(1)
+        error = "Can't connect to the internal database : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
     result = check_USED_PORT.get_used_port(DB_connection)
     DB_connection.close()
     return result

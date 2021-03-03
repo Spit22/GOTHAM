@@ -22,7 +22,8 @@ def main(ip, ssh_port, used_ssh_key):
     try:
         execute_commands(ip, ssh_port, StringIO(used_ssh_key), command_exec_check)
     except Exception as e:
-        logging.error(f"Can't execute commands on {ip} : {e}")
-        sys.exit(1)
+        error = "Can't execute commands on " + str(ip) + " : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
     # If we were able to execute the commands, return True
     return True

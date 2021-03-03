@@ -46,7 +46,8 @@ def tags(DB_settings, tags):
     tags_list = tags.split(separator)
     for a_tag in tags_list:
         if not(tag(DB_settings, tag=a_tag)):
-            logging.error(f"'{a_tag}' : tag does not exists")
-            sys.exit(1)
+            error = str(a_tag) + " : tag does not exists"
+            logging.error(error)
+            raise ValueError(error)
 
     
