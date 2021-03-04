@@ -1,20 +1,20 @@
-# Import external libs
-import sys
+#===Import external libs===#
 import subprocess
-
-# Temp
 from io import StringIO
+#==========================#
 
-# Import GOTHAM's libs
+#===Import GOTHAM's libs===#
 from Gotham_SSH_SCP import execute_commands
 from Gotham_link_BDD import remove_link_DB, get_link_infos, get_link_serv_hp_infos
 from Gotham_normalize import normalize_id_link, normalize_display_object_infos
+#==========================#
 
-# Logging components
+#===Logging components===#
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log', level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+#=======================#
 
 def main(DB_settings, id):
     # Check id format
@@ -50,6 +50,7 @@ def main(DB_settings, id):
         logging.error(error)
         raise ValueError(error)
     return True
+
 
 def remove_links_on_servers(DB_settings, result):
     try:

@@ -32,21 +32,19 @@ import Gotham_choose
 import Gotham_normalize
 import Gotham_replace
 
-# Logging components
-import os
-import logging
-
+# Create the flask application
 app = flask.Flask(__name__)
 
-
-# GHOTHAM_HOME env definition 
+#===Logging components===#
+import os
+import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log', level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+#=======================#
 
-# Logging Configuration
-logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
-
-##### Chargement des variables globales #######
+#===Retrieve settings from configuration file===#
+# General settings
 app.config["DEBUG"] = True
 version = "0.0"
 
@@ -64,21 +62,25 @@ try:
     dc_ssh_key = base64.b64decode(dc_ssh_key) # ssh_key is byte
     dc_ssh_key = dc_ssh_key.decode('ascii') # ssh_key is ascii string
     dc_ssh_key_rsyslog = dc_ssh_key # ssh_key for rsyslog
-    #dc_ssh_key = StringIO(dc_ssh_key) # ssh_key is a file-like object
 except Exception as e:
     print("Error loading datacenter's SSH key")
 # Put datacenter settings in a dictionary
-datacenter_settings = {"hostname": dc_ip, "ssh_key": dc_ssh_key, "ssh_port": dc_ssh_port}
+datacenter_settings = {"hostname": dc_ip, "ssh_key": dc_ssh_key, "rsyslog_ssh_key": dc_ssh_key_rsyslog, "ssh_port": dc_ssh_port}
+
+# Retrieve orchestrator settings from config file
+orchestrator_ip = config["orchestrator"]["ip"]
+orchestrator_rsyslog_port = config["orchestrator"]["syslog_port"]
+# Put orchestrator settings in a dictionary
+orchestrator_settings = {"hostname": orchestrator_ip, "syslog_port": orchestrator_rsyslog_port}
 
 # Retreive separators
 ports_separator = config['port']['separator']
 tags_separator = config['tag']['separator']
 
-
 # Path to store object's data
 store_path = "/data"
 dockerfile_storage = "/data/"
-
+#=======================================#
 
 @app.route('/', methods=['GET'])
 def index():
@@ -105,7 +107,6 @@ def add_honeypot():
         # parser (string) : règle de parsing des logs monitorés
         # dockerfile (string) : dockerfile to generate the honeypot on datacenter, base64 encoded
         # service_port (int) : port on which the honeypot will lcoally listen
-
 
         # Get POST data on JSON format
         data = request.get_json()
@@ -165,11 +166,8 @@ def add_honeypot():
             return "An error occured in the ssh connection\n"
         
         # Create and deploy rsyslog configuration on the datacenter and the orchestrator
-        orch_ip = config["orchestrator"]["ip"]
-        orch_rsyslog_port = config["orchestrator"]["syslog_port"]
-        rules =[""]
         try:
-            add_hp.deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key_rsyslog, orch_ip, orch_rsyslog_port, id, rules)
+            add_hp.deploy_rsyslog_conf(datacenter_settings, orchestrator_settings, id, parser)
         except:
             return "Rsyslog configuration failed\n"
 

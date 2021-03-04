@@ -1,4 +1,4 @@
-# Import external libs
+#===Import external libs===#
 import Gotham_check
 import Gotham_choose
 import Gotham_replace
@@ -9,31 +9,30 @@ import base64
 import json
 import requests
 from io import StringIO
+#==========================#
 
-# Import GOTHAM's libs
+#===Import GOTHAM's libs===#
 from Gotham_SSH_SCP import execute_commands
 from Gotham_link_BDD import remove_honeypot_DB, get_honeypot_infos, edit_lhs_DB, edit_link_DB, remove_lhs
 from Gotham_normalize import normalize_id_honeypot,normalize_honeypot_infos, normalize_display_object_infos
-#import api
 import add_link
+#==========================#
 
-# Logging components
+#===Logging components===#
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log', level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+#=======================#
 
-# TO RETRIEVE FROM SECRET FILE !!!
-#datacenter_settings = {'hostname':'42.42.42.42', 'ssh_port':22, 'ssh_key':'usidbvyr$pqsi'}
-#dc_ip = "172.16.2.250"
+#===Retrieve settings from configuration file===#
+config = configparser.ConfigParser()
+config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+tag_separator = config['tag']['separator']
+#===============================================#
+
 
 def main(DB_settings, datacenter_settings, id):
-    GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-    # Retrieve settings from config file
-    config = configparser.ConfigParser()
-    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
-    tag_separator = config['tag']['separator']
-
     # Check id format
     try:
         id = normalize_id_honeypot(id)

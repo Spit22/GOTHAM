@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-# Import Gotham's libs
-from Gotham_SSH_SCP import send_file_and_execute_commands
 
-# Import external libs
+#===Import external libs===#
 from io import StringIO
+#==========================#
+
+#===Import GOTHAM's libs===#
+from Gotham_SSH_SCP import send_file_and_execute_commands
+#==========================#
 
 def generate_nginxConf(db_settings, link_id, dc_ip, honeypots, exposed_port):
     '''
@@ -34,6 +37,7 @@ def generate_nginxConf(db_settings, link_id, dc_ip, honeypots, exposed_port):
     nginxRedirectionFile.write("  proxy_pass "+ str(link_id) +";\n")
     nginxRedirectionFile.write("}\n")
 
+
 def deploy_nginxConf(db_settings, link_id, servers):
     '''
     Deploy the nginx configuration on all servers chosen
@@ -42,7 +46,6 @@ def deploy_nginxConf(db_settings, link_id, servers):
         link_id (string): id of the link we are configuring nginx for
         servers (dict): list of servers we want to deploy on associated with exposed ports
     '''
-
     # Initialize command and file
     checkAndReloadNginx_command = ["/usr/sbin/nginx -t && /usr/sbin/nginx -s reload"]
     linkConf_dest = "/etc/nginx/conf.d/links/"
@@ -54,13 +57,3 @@ def deploy_nginxConf(db_settings, link_id, servers):
         linkConf_path = ["/data/template/"+str(link_id)+"-"+str(server["choosed_port"])+".conf"]
         # Deploy configuration on the server and Reload nginx if ok
         send_file_and_execute_commands(server["serv_ip"], server["serv_ssh_port"], StringIO(server["serv_ssh_key"]), linkConf_path, linkConf_dest, checkAndReloadNginx_command)
-
-### TEST SECTION ###
-if __name__ == '__main__':
-    db_settings = {"username":"root", "password":"password", "hostname":"localhost", "port":"3306", "database":"GOTHAM"}
-    link_id = "lk-123456789"
-    dc_ip = "datacenter.local"
-    honeypots = ["hp-4332bc41f15f4d9181dd21e175fa3d42","hp-018ad24e2c6942d7ab4ede959035f9d4"]
-    exposed_port = "8080"
-    generate_nginxConf(db_settings, link_id, dc_ip, honeypots, exposed_port)
-    deploy_nginxConf(db_settings, link_id, ["sv-c8d26db7ee934eeb81c5409e67fe1d82%"])

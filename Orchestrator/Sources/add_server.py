@@ -1,15 +1,18 @@
-# Import external libs
+#===Import external libs===#
 from io import StringIO
 import base64
+#==========================#
 
-# Logging components
+#===Import GOTHAM's libs===#
+from Gotham_SSH_SCP import send_file_and_execute_commands
+#==========================#
+
+#===Logging components===#
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
-
-# Import Gotham's libs
-from Gotham_SSH_SCP import send_file_and_execute_commands
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log', level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+#=======================#
 
 def deploy(ip, ssh_port, used_ssh_key):
     '''

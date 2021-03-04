@@ -1,36 +1,35 @@
 # -*- coding: utf-8 -*-
-# Import external libs
+
+#===Import external libs===#
 from io import StringIO
 import base64
-import sys
 import configparser
+#==========================#
 
-# GOTHAM'S LIB
+#===Import GOTHAM's libs===#
 import Gotham_link_BDD
 import Gotham_check
 import Gotham_choose
 import Gotham_replace
 import Gotham_normalize
 import rm_hp
+from Gotham_SSH_SCP import send_file_and_execute_commands
+#==========================#
 
-# Logging components
+#===Logging components===#
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log', level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+#=======================#
 
-# Import Gotham's libs
-from Gotham_SSH_SCP import send_file_and_execute_commands
+#===Retrieve settings from configuration file===#
+config = configparser.ConfigParser()
+config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+tags_separator = config['tag']['separator']
+#===============================================#
 
-def edit_tags(DB_settings, datacenter_settings, honeypot, tags):
-
-    config = configparser.ConfigParser()
-    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
-    tags_separator = config['tag']['separator']
-    
-    #port_separator = config['port']['separator']
-    #mod_honeypot=honeypot
-    
+def edit_tags(DB_settings, datacenter_settings, honeypot, tags):    
     old_tags=honeypot["hp_tags"].split("||")
     new_tags=tags.split(tags_separator)
 
