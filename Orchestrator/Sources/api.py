@@ -809,30 +809,32 @@ def edit_lk():
             if link_infos_received["ports"]!= link["link_ports"]:
                 try:
                     edit_link.edit_ports(DB_settings, datacenter_settings, link_serv_hp, link_infos_received["ports"])
-                except:
-                    return "Error in ports edition\n"
+                except Exception as e:
+                    return "Error in ports edition : "+str(e)+"\n"
                 modifs["ports"]=link_infos_received["ports"]
 
-        
-        # Just redistrib ports
-        #if "ports" in link_infos_received.keys():
-        #    if link_infos_received["ports"]!= link["link_ports"]:
-        #        try:
-        #            Gotham_replace.distrib_servers_on_link_ports(DB_settings, link)
-        #        except Exception as e:
-        #            return "Error in ports redistribution : "+str(e)+"\n"
+                # Update link before edit nb_serv and nb_hp (Edit tags can decrease nb_serv and nb_hp)
+                if modifs != {}:
+                    Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
+                    links = Gotham_link_BDD.get_link_infos(DB_settings, id=link_infos_received["id"])
+                    link = Gotham_normalize.normalize_display_object_infos(links[0],"link")
+                    modifications=True
+
+                modifs={}
+
+                # Just redistrib ports
+                try:
+                    Gotham_replace.distrib_servers_on_link_ports(DB_settings, link)
+                except Exception as e:
+                    return "Error in ports redistribution : "+str(e)+"\n"
         
         # Update link before edit nb_serv and nb_hp (Edit tags can decrease nb_serv and nb_hp)
-        if modifs != {}:
-            Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
-            links = Gotham_link_BDD.get_link_infos(DB_settings, id=link_infos_received["id"])
-            link = Gotham_normalize.normalize_display_object_infos(links[0],"link")
+        links = Gotham_link_BDD.get_link_infos(DB_settings, id=link_infos_received["id"])
+        link = Gotham_normalize.normalize_display_object_infos(links[0],"link")
             
-            # Triage of links
-            link_hp_serv = Gotham_link_BDD.get_link_hp_serv_infos(DB_settings, id=link_infos_received["id"])[0]
-            link_serv_hp = Gotham_link_BDD.get_link_serv_hp_infos(DB_settings, id=link_infos_received["id"])[0]
-
-            modifications=True
+        # Triage of links
+        link_hp_serv = Gotham_link_BDD.get_link_hp_serv_infos(DB_settings, id=link_infos_received["id"])[0]
+        link_serv_hp = Gotham_link_BDD.get_link_serv_hp_infos(DB_settings, id=link_infos_received["id"])[0]
 
         modifs={}
 

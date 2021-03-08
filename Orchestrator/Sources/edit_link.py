@@ -346,7 +346,7 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
     added_ports=[str(port) for port in new_desired_ports if port not in old_desired_ports]
 
     # Get all honeypots used by links
-    honeypots=[hp for serv in dsp_link["servs"] for hp in serv["hps"]]
+    honeypots=[{key:value for key,value in hp.items() if key != "lhs_port"} for serv in dsp_link["servs"] for hp in serv["hps"]]
     # Remove duplicates
     honeypots=[dict(tuple_of_hp_items) for tuple_of_hp_items in {tuple(hp.items()) for hp in honeypots}]
     
@@ -373,6 +373,7 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
                 count_exposed_ports[str(exposed_ports_unique[0])]+=1
                 servs_keeps.append(server["serv_id"])
         else:
+            # Feature : multi ports on multi hp (today : only HA)
             logging.error(f"Not implemented")
             raise ValueError("Not implemented")
     
@@ -421,14 +422,14 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
 
         # Deploy new reverse-proxies's configurations on servers
         add_link.deploy_nginxConf(DB_settings, dsp_link["link_id"], servers)
-
+        print(honeypots)
         # Insert data in Link_Hp_Serv
         for server in servers:
             # Update state of server
             modifs={"state":"HEALTHY"}
             conditions={"id":server["serv_id"]}
             Gotham_link_BDD.edit_server_DB(DB_settings, modifs, conditions)
-
+            
             for honeypot in honeypots:
                 # Update state of honeypot
                 modifs={"state":"HEALTHY"}
@@ -438,6 +439,7 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
                 lhs_infos = {"id_link":dsp_link["link_id"], "id_hp": honeypot["hp_id"], "id_serv": server["serv_id"], "port":server["choosed_port"]}
                 # Normalize infos
                 lhs_infos = Gotham_normalize.normalize_lhs_infos(lhs_infos)
+                print(lhs_infos)
                 # Store new link and tags in the internal database        
                 Gotham_link_BDD.add_lhs_DB(DB_settings, lhs_infos)
     

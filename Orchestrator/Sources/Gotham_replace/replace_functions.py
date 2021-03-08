@@ -80,20 +80,22 @@ def replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, d
         # Choose best honeypots (the lower scored)
         honeypots = Gotham_choose.choose_honeypots(honeypots, 1, link_tags_hp)
 
-        if honeypots[0]["hp_id"] in duplicate_hp_list:
+        # If already duplicate or no link configured, just edit the link to redirect to the hp
+        if honeypots[0]["hp_id"] in duplicate_hp_list or honeypots[0]["hp_state"] == "UNUSED":
             # Don't duplicate, just configure
             honeypot = honeypots[0]
         else:
             # Duplicate, and configure
-            honeypot = duplicate_hp(DB_settings, honeypots)
+            honeypot = duplicate_hp(DB_settings, honeypots[0])
             duplicate_hp_list.append(honeypot["hp_id"])
         try:
             configure_honeypot_replacement(DB_settings, datacenter_settings, hp_infos, new_hp_infos = honeypot, link = link)
         except Exception as e:
             raise ValueError(e)
-            
+        
+        # Edit link hp_serv table, replace old hp by new hp
         modifs = {"id_hp":honeypot["hp_id"]}
-        conditions = {"id_link":link["link_id"], "id_hp":honeypot["hp_id"]}
+        conditions = {"id_link":link["link_id"], "id_hp":hp_infos["hp_id"]}
         try:
             Gotham_link_BDD.edit_lhs_DB(DB_settings, modifs, conditions)
         except Exception as e:
@@ -318,13 +320,16 @@ def replace_server_in_link(DB_settings,serv_infos,link, new_tags="", already_use
         return False
 
 def distribute_servers_on_link_ports(DB_settings, link):
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    tag_separator = config['tag']['separator']
     is_possible=True
     i=0
     j=1
     while is_possible:
         links= Gotham_link_BDD.get_link_serv_hp_infos(DB_settings, id=link["link_id"])
         dsp_link=Gotham_normalize.normalize_display_object_infos(links[0],"link","serv")
-        count_exposed_ports={}
+        count_exposed_ports={str(key):0 for key in dsp_link["link_ports"].split(tag_separator)}
         for server in dsp_link["servs"]:
             exposed_ports=[hp["lhs_port"] for hp in server["hps"]]
             exposed_ports_unique=list(dict.fromkeys(exposed_ports))
@@ -334,18 +339,25 @@ def distribute_servers_on_link_ports(DB_settings, link):
                 error = "Not implemented"
                 logging.error(error)
                 raise ValueError(error)
-
+        print("a")
+        print(count_exposed_ports)
         servers=[]
 
         # Get all honeypots used by links
-        honeypots=[hp for serv in dsp_link["servs"] for hp in serv["hps"]]
+        honeypots=[{key:value for key,value in hp.items() if key != "lhs_port"} for serv in dsp_link["servs"] for hp in serv["hps"]]
         # Remove duplicates
         honeypots=[dict(tuple_of_hp_items) for tuple_of_hp_items in {tuple(hp.items()) for hp in honeypots}]
-
+        print("b")
+        print(honeypots)
 
         ports_sorted=sorted(count_exposed_ports, key = count_exposed_ports.get, reverse=True)
         port_max_used=str(ports_sorted[i])
         port_min_used=str(ports_sorted[-j])
+
+        print("c")
+        print(ports_sorted)
+        print(port_max_used)
+        print(port_min_used)
 
         if port_max_used != port_min_used:
             for server in dsp_link["servs"]:
@@ -356,11 +368,12 @@ def distribute_servers_on_link_ports(DB_settings, link):
                         servs=Gotham_link_BDD.get_server_infos(DB_settings, id=server["serv_id"])
                         servers.append(servs[0])
                 else:
+                    # Feature : multi port on multi honeypots (today : only HA)
                     error = "Not implemented"
                     logging.error(error)
                     raise ValueError(error)
             servers = Gotham_check.check_servers_ports_matching(servers, port_min_used)
-            if servers!=[]:
+            if servers!=[] and count_exposed_ports[str(port_max_used)]-count_exposed_ports[str(port_min_used)]>1:
                 servers=[servers[0]]
             
                 try:
@@ -377,11 +390,14 @@ def distribute_servers_on_link_ports(DB_settings, link):
                 add_link.deploy_nginxConf(DB_settings, dsp_link["link_id"], servers)
 
                 for honeypot in honeypots:
+                    print("eeeeee")
+                    print(honeypot)
                     # Create lhs_infos
                     lhs_infos = {"id_link":dsp_link["link_id"], "id_hp": honeypot["hp_id"], "id_serv": servers[0]["serv_id"], "port":servers[0]["choosed_port"]}
                     # Normalize infos
                     lhs_infos = Gotham_normalize.normalize_lhs_infos(lhs_infos)
                     # Store new link and tags in the internal database        
+                    print(lhs_infos)
                     Gotham_link_BDD.add_lhs_DB(DB_settings, lhs_infos)
                 i=0
                 j=1
@@ -397,3 +413,4 @@ def distribute_servers_on_link_ports(DB_settings, link):
                 is_possible = False
         else:
             is_possible = False
+            # 80,100,300,1024
