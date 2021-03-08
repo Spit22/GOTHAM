@@ -75,6 +75,28 @@ stream{
 /usr/sbin/useradd nginx
 
 # Apply the configuration
-/usr/sbin/nginx
+#/usr/sbin/nginx
+#/usr/sbin/nginx -s reload
 
-/usr/sbin/nginx -s reload
+echo "[Unit]
+Description=The NGINX HTTP and reverse proxy server
+After=syslog.target network-online.target remote-fs.target nss-lookup.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+PIDFile=/run/nginx.pid
+ExecStartPre=/usr/sbin/nginx -t
+ExecStart=/usr/sbin/nginx
+ExecReload=/usr/sbin/nginx -s reload
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target" > /lib/systemd/system/nginx.service
+
+# Enable nginx for future reboot
+systemctl enable nginx
+
+# Start nginx
+systemctl start nginx
