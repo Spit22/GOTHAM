@@ -242,9 +242,11 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
 
             # Get all honeypots used by links
             honeypots=[hp for serv in dsp_link["servs"] for hp in serv["hps"]]
+            for i in range(len(honeypots)):
+                del honeypots[i]["lhs_port"]
             # Remove duplicates
             honeypots=[dict(tuple_of_hp_items) for tuple_of_hp_items in {tuple(hp.items()) for hp in honeypots}]
-
+            print(honeypots)
 
             # Generate NGINX configurations for each redirection on a specific exposed_port
             for exposed_port in new_exposed_ports:
@@ -258,7 +260,7 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                 add_link.deploy_nginxConf(DB_settings, link["link_id"], objects_infos)
             except Exception as e:
                 raise ValueError(e)
-           
+            
             # Insert data in Link_Hp_Serv
             for server in objects_infos:
                 # Update state of server
