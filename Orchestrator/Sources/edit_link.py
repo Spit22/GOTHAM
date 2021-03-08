@@ -1,35 +1,39 @@
 # -*- coding: utf-8 -*-
-# Import external libs
+
+#===Import external libs===#
 import configparser
 import sys
 import base64
 import requests
 import json
 from io import StringIO
+#==========================#
 
-# Import Gotham's libs
-# GOTHAM'S LIB
+#===Import GOTHAM's libs===#
 import Gotham_link_BDD
 import Gotham_check
 import Gotham_choose
 import Gotham_normalize
 import Gotham_replace
 import Gotham_SSH_SCP
-
 import add_link
+#==========================#
 
-# Logging components
+#===Logging components===#
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log', level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+#=======================#
 
+#===Retrieve settings from configuration file===#
+config = configparser.ConfigParser()
+config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+tags_separator = config['tag']['separator']
+ports_separator = config['port']['separator']
+#===============================================#
 
 def edit_tags(DB_settings, datacenter_settings, link, tags, type_tag):
-
-    config = configparser.ConfigParser()
-    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
-    tags_separator = config['tag']['separator']
 
     if type_tag!="hp" and type_tag!="serv":
         logging.error(f"type_tag is incorrect")
@@ -60,11 +64,6 @@ def edit_tags(DB_settings, datacenter_settings, link, tags, type_tag):
 
 
 def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
-
-    config = configparser.ConfigParser()
-    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
-    tags_separator = config['tag']['separator']
-    ports_separator = config['port']['separator']
 
     dsp_link=Gotham_normalize.normalize_display_object_infos(link,"link",type_nb)
 
@@ -334,11 +333,6 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
 
 def edit_ports(DB_settings, datacenter_settings, link, new_ports):
 
-    config = configparser.ConfigParser()
-    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
-    tags_separator = config['tag']['separator']
-    ports_separator = config['port']['separator']
-
     dsp_link=Gotham_normalize.normalize_display_object_infos(link,"link","serv")
 
     tags_serv=tags_separator.join(dsp_link["link_tags_serv"].split("||"))
@@ -401,8 +395,6 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
                 Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
             except Exception as e:
                 raise ValueError(e)
-            #logging.error(f"Can't edit link on {str(nb_del)} servers while there is only {str(len(servers))} servers available for ports edition")
-            #sys.exit(1)
             
         # Choose best servers (the lower scored)
         servers = Gotham_choose.choose_servers(servers, nb_del, tags_serv)

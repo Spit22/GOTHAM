@@ -29,8 +29,9 @@ def tag(DB_connection, tag):
         DB_connection.commit()
         logging.info(f"'{tag}' added in the table 'Tags'")
     except mariadb.Error as e:
-        logging.error(f"'{tag}' insertion in the table 'Tags' failed : {e}")
-        sys.exit(1)
+        error = str(tag) + " insertion in the table 'Tags' failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 ############################### SERVER SECTION ###############################
 
@@ -38,9 +39,11 @@ def server(DB_connection, server_infos):
     # Normalize server_infos
     try:
         server_infos = normalize_full_server_infos(server_infos)
-    except:
-        logging.error(f"Bad server_infos")
-        sys.exit(1)
+    except Exception as e:
+        error = "Bad server infos : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
+        
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request
@@ -58,20 +61,21 @@ def server(DB_connection, server_infos):
                 # Add the tag in the IDB
                 try:
                     tag(DB_connection, a_tag)
-                except:
-                    sys.exit(1)
+                except Exception as e:
+                    raise ValueError(e)
                 # Then retrieve tag id
                 answer = get_infos.tag(DB_connection, tag=a_tag)
                 tag_id = answer[0]['id']
             # Add the relation between server and tag in Serv_Tags table
             try:
                 serv_tags(DB_connection, tag_id, server_infos["id"])
-            except:
-                sys.exit(1)
+            except Exception as e:
+                raise ValueError(e)
         logging.info(f"'{server_infos['id']}' added in the table 'Server'")
     except mariadb.Error as e:
-        logging.error(f"'{server_infos['id']}' insertion in the table 'Server' failed : {e}")
-        sys.exit(1)
+        error = str(server_infos['id']) + " insertion in the table 'Server' failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 def serv_tags(DB_connection, tag_id, id_serv):
     # Get MariaDB cursor
@@ -81,8 +85,9 @@ def serv_tags(DB_connection, tag_id, id_serv):
         DB_connection.commit()
         logging.info(f"'{tag_id}' added in the table 'Serv_Tags'")
     except mariadb.Error as e:
-        logging.error(f"'{tag_id} -- {id_serv}' insertion in the table 'Serv_Tags' failed : {e}")
-        sys.exit(1)
+        error = str(tag_id) + " --- " + str(id_serv) + " insertion in the table 'Serv_Tags' failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 ############################### HONEYPOT SECTION ###############################
 
@@ -90,9 +95,10 @@ def honeypot(DB_connection, hp_infos):
     # Normalize honeypot_infos
     try:
         hp_infos = normalize_full_honeypot_infos(hp_infos)
-    except:
-        logging.error(f"Bad hp_infos")
-        sys.exit(1)
+    except Exception as e:
+        error = "Bad hp infos : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request
@@ -110,20 +116,22 @@ def honeypot(DB_connection, hp_infos):
                 # Add the new tag in the IDB
                 try:
                     tag(DB_connection, a_tag)
-                except:
-                    sys.exit(1)
+                except Exception as e:
+                    raise ValueError(e)
                 # Then retrieve the id of the tag
                 answer = get_infos.tag(DB_connection, tag=a_tag)
                 tag_id = answer[0]['id']
             # Add the relation between honeypot and tag in Hp_Tags table
             try:
                 hp_tags(DB_connection, tag_id, hp_infos["id"])
-            except:
-                sys.exit(1)
+            except Exception as e:
+                raise ValueError(e)
         logging.info(f"'{hp_infos['id']}' added in the table 'Honeypot'")
     except mariadb.Error as e:
-        logging.error(f"'{hp_infos['name']}' insertion in the table 'Honeypot' failed : {e}")
-        sys.exit(1)
+        error = str(hp_infos['name']) + " insertion in the table 'Honeypot' failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
+        
 
 def hp_tags(DB_connection, tag_id, id_hp):
     # Get MariaDB cursor
@@ -133,8 +141,9 @@ def hp_tags(DB_connection, tag_id, id_hp):
         DB_connection.commit()
         logging.info(f"'{id_hp}' added in the table 'Hp_Tags'")
     except mariadb.Error as e:
-        logging.error(f"'{tag_id} -- {id_hp}' insertion in the table 'Hp_Tags' failed : {e}")
-        sys.exit(1)
+        error = str(tag_id) + " --- " + str(id_hp) + " insertion in the table 'Hp_Tags' failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 ############################### LINK SECTION ###############################
 
@@ -142,9 +151,10 @@ def link(DB_connection, lk_infos):
     # Normalize link_infos
     try:
         lk_infos = normalize_full_link_infos(lk_infos)
-    except:
-        logging.error(f"Bad lk_infos")
-        sys.exit(1)
+    except Exception as e:
+        error = "Bad link infos : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request
@@ -165,8 +175,8 @@ def link(DB_connection, lk_infos):
                 # Add the new tag in the IDB
                 try:
                     tag(DB_connection, a_tag_hp)
-                except:
-                    sys.exit(1)
+                except Exception as e:
+                    raise ValueError(e)
                 # Then retrieve the id of the new tag
                 answer = get_infos.tag(DB_connection, tag=a_tag_hp)
                 tag_id = answer[0]['id']
@@ -182,8 +192,8 @@ def link(DB_connection, lk_infos):
                 # Add the new tag in the IDB
                 try:
                     tag(DB_connection, a_tag_serv)
-                except:
-                    sys.exit(1)
+                except Exception as e:
+                    raise ValueError(e)
                 #Then retrieve the id of the new tag
                 answer = get_infos.tag(DB_connection, tag=a_tag_serv)
                 tag_id = answer[0]['id']
@@ -191,8 +201,9 @@ def link(DB_connection, lk_infos):
             link_tags_serv(DB_connection, tag_id, lk_infos["id"])
         logging.info(f"'{lk_infos['id']}' added in the table 'Link' ")
     except mariadb.Error as e:
-        logging.error(f"'{lk_infos['id']}' insertion in the table 'Link' failed : {e}")
-        sys.exit(1)
+        error = str(lk_infos['id']) + " insertion in the table 'Link' failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 def link_tags_hp(DB_connection, tag_id, id_lk):
     cur = DB_connection.cursor()
@@ -201,8 +212,10 @@ def link_tags_hp(DB_connection, tag_id, id_lk):
         DB_connection.commit()
         logging.info(f"'{tag_id} -- {id_lk}' added in the table 'Link_Tags_hp'")
     except mariadb.Error as e:
-        logging.error(f"'{tag_id} -- {id_lk}' insertion in the table 'Link_Tags_hp' failed : {e}")
-        sys.exit(1)
+        error = str(tag_id) + " --- " + str(id_lk) + " insertion in the table 'Link_Tags_hp' failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
+
     
 def link_tags_serv(DB_connection, tag_id, id_lk):
     cur = DB_connection.cursor()
@@ -211,8 +224,10 @@ def link_tags_serv(DB_connection, tag_id, id_lk):
         DB_connection.commit()
         logging.info(f"'{tag_id} -- {id_lk}' added in the table 'Link_Tags_serv'")
     except mariadb.Error as e:
-        logging.error(f"'{tag_id} -- {id_lk}' insertion in the table 'Link_Tags_serv' failed : {e}")
-        sys.exit(1)
+        error = str(tag_id) + " --- " + str(id_lk) + " insertion in the table 'Link_Tags_serv' failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
+        
 
 
 ############################### LHS SECTION ###############################
@@ -221,9 +236,10 @@ def link_hp_serv(DB_connection, lhs_infos):
     # Normalize lhs_infos
     try:
         lhs_infos = normalize_full_lhs_infos(lhs_infos)
-    except:
-        logging.error(f"Bad lhs_infos")
-        sys.exit(1)
+    except Exception as e:
+        error = "Bad lhs infos : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request
@@ -233,5 +249,6 @@ def link_hp_serv(DB_connection, lhs_infos):
         DB_connection.commit()
         logging.info(f"'{lhs_infos['id_link']} -- {lhs_infos['id_hp']} -- {lhs_infos['id_serv']}' added in the table 'Link_Hp_Serv'")
     except mariadb.Error as e:
-        logging.error(f"'{lhs_infos['id_link']} -- {lhs_infos['id_hp']} -- {lhs_infos['id_serv']}' insertion in the table 'Link_Hp_Serv' : {e}")
-        sys.exit(1)
+        error = str(lhs_infos['id_link']) + " --- " + str(lhs_infos['id_hp']) + " --- " + str(lhs_infos['id_serv']) + " insertion in the table 'Link_Hp_Serv' : " + str(e)
+        logging.error(error)
+        raise ValueError(error)

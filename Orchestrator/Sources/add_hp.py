@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
-# Import Gotham's libs
+
+#===Import external libs===#
+from io import StringIO
+#==========================#
+
+#===Import GOTHAM's libs===#
 from Gotham_SSH_SCP import send_file_and_execute_commands, send_file, execute_commands
+#==========================#
 
-import sys
-
-# Logging components
+#===Logging components===#
 import os
 import logging
-from io import StringIO
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log', level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+#=======================#
 
 
 def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_port):
@@ -22,6 +26,7 @@ def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_
         log_path (string) : remote path of logs (in the honeypot)
         mapped_port (int) : available port we can map honeypot to
     '''
+    # Create the docker-compose
     dockercompose = open(str(dockerfile_path)+"docker-compose.yml", "a")
     # Write the docker-compose version
     dockercompose.write('version: "3"\n')
@@ -46,6 +51,7 @@ def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_
     # Close file
     dockercompose.close()
 
+
 def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id_hp):
     '''
     Install and deploy an Nginx Reverse-Proxy on a given server
@@ -68,12 +74,11 @@ def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id_hp):
         send_file_and_execute_commands(dc_ip, dc_ssh_port, StringIO(dc_ssh_key), dockerfile_path, docker_dest, command_exec_compose)
         #print(command_exec_compose)
     except Exception as e:
-        print(e)
+        logging.error(e)
         return False
     # If deployment is OK, return True
     return True
 
-########### RSYSLOG SECTION ############
 
 def generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, id_hp, rsyslog_conf_datacenter_local_path, remote_hp_log_file_path):
     try:
@@ -88,8 +93,9 @@ def generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, 
         # Stop dealing with these logs
         rsyslog_conf_file.write('stop\n')
     except Exception as e:
-        logging.error(f"Fail to create rsyslog configuration for datacenter : {e}")
-        sys.exit(1)
+        error = "Fail to create rsyslog configuration for datacenter : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 
 def generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_path, local_hp_log_file_path):
@@ -103,8 +109,9 @@ def generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_pa
         # Stop dealing with these logs
         rsyslog_conf_file.write('stop\n')
     except Exception as e:
-        logging.error(f"Fail to create rsyslog configuration for orchestrator : {e}")
-        sys.exit(1)
+        error = "Fail to create rsyslog configuration for orchestrator : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 def generate_rulebase(id_hp, rules, rulebase_path):
     try:
@@ -116,13 +123,15 @@ def generate_rulebase(id_hp, rules, rulebase_path):
         for rule in rules:
             rulebase.write(str(rule) + '\n')
     except Exception as e:
-        logging.error(f"Fail to create rulebase : {e}")
-        sys.exit(1)
+        error = "Fail to create rulebase : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
-def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_port, id_hp, rules):
+
+def deploy_rsyslog_conf(datacenter_settings, orchestrateur_settings, id_hp, rules):
     # On effectue 2 connexions SSH
-    dc_ssh_key_1 = dc_ssh_key
-    dc_ssh_key_2 = dc_ssh_key
+    dc_ssh_key_1 = datacenter_settings["ssh_key"]
+    dc_ssh_key_2 = datacenter_settings["ssh_key"]
     # PATH ON ORCHESTRATOR
     ### Configuration
     rsyslog_conf_datacenter_local_path = "/data/rsyslog/datacenter-configuration/"
@@ -147,17 +156,19 @@ def deploy_rsyslog_conf(dc_ip, dc_ssh_port, dc_ssh_key, orch_ip, orch_rsyslog_po
     # Generate configuration files and rulebase
     try:
         generate_rulebase(id_hp, rules, local_rulebase_path)
-        generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, remote_rulebase_path, id_hp, rsyslog_conf_datacenter_local_path, remote_hp_log_file_path)
+        generate_datacenter_rsyslog_conf(orchestrateur_settings["hostname"], orchestrateur_settings["syslog_port"], remote_rulebase_path, id_hp, rsyslog_conf_datacenter_local_path, remote_hp_log_file_path)
         generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_path, local_hp_log_file_path)
     except Exception as e:
-        logging.error(f"Fail to generate rsyslog configuration : {e}")
-        sys.exit(1)
+        error = "Fail to generate rsyslog configuration : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
     # Send datacenter rsyslog configuration to the datacenter
     try:
         # Send the rulebase
-        send_file(dc_ip, dc_ssh_port, StringIO(dc_ssh_key_1), [ local_rulebase_path + id_hp + ".rb" ], remote_rulebase_path)
+        send_file(datacenter_settings["hostname"], datacenter_settings["ssh_port"], StringIO(dc_ssh_key_1), [ local_rulebase_path + id_hp + ".rb" ], remote_rulebase_path)
         # Send rsyslog configuration
-        send_file_and_execute_commands(dc_ip, dc_ssh_port, StringIO(dc_ssh_key_2), [ rsyslog_conf_datacenter_local_path + id_hp + ".conf" ], rsyslog_conf_datacenter_remote_path, exec_restart_rsyslog)
+        send_file_and_execute_commands(datacenter_settings["hostname"], datacenter_settings["ssh_port"], StringIO(dc_ssh_key_2), [ rsyslog_conf_datacenter_local_path + id_hp + ".conf" ], rsyslog_conf_datacenter_remote_path, exec_restart_rsyslog)
     except Exception as e:
-        logging.error(f"Fail to deploy rsyslog configuration: {e}")
-        sys.exit(1)
+        error = "Fail to deploy rsyslog configuration : " + str(e)
+        logging.error(error)
+        raise ValueError(error)

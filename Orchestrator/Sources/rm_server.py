@@ -1,21 +1,25 @@
+#===Import external libs===#
+from io import StringIO
+import configparser
+#==========================#
+
+#===Import GOTHAM's libs===#
 from Gotham_SSH_SCP import execute_commands
 from Gotham_normalize import normalize_server_infos, normalize_display_object_infos
 from Gotham_link_BDD import get_server_infos, remove_server_DB, edit_lhs_DB, edit_link_DB, remove_lhs
-
 import Gotham_check
 import Gotham_choose
 import Gotham_replace
-import configparser
-import sys
 import add_link
+#==========================#
 
-# Logging components
+#===Logging components===#
 import os
 import logging
-from io import StringIO
-
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log', level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+#=======================#
+
 
 def main(DB_settings, datacenter_settings, id='sv-00000000000000000000000000000000', ip='255.255.255.255'):
     # Check id format

@@ -20,8 +20,8 @@ def server(DB_connection, id):
     # First, remove the relation between the server and its tags
     try:
         server_in_serv_tag(DB_connection, id)
-    except:
-        sys.exit(1)
+    except Exception as e:
+        raise ValueError(e)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request
@@ -33,8 +33,9 @@ def server(DB_connection, id):
         # Logs
         logging.info(f"'{id}' deleted from the table 'Server'")
     except mariadb.Error as e:
-        logging.error(f"'{id}' removal from the table Server failed : {e}")
-        sys.exit(1)
+        error = str(id) + " removal from the table 'Server' failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 def server_in_serv_tag(DB_connection, id="", tag=""):
     # Get MariaDB cursor
@@ -48,14 +49,16 @@ def server_in_serv_tag(DB_connection, id="", tag=""):
         elif id!="" and tag!="":
             cur.execute("DELETE FROM Serv_Tags LEFT JOIN Tags on Serv_Tags.id_tag=Tags.id WHERE id_serv = ? and tag = ?",(id,tag))
         else:
-            sys.exit(1)
+            raise ValueError("server in serv tag failed")
         # Apply the changes
         DB_connection.commit()
         # Logs
         logging.info(f"'{id}' deleted from the table 'Serv_Tags'")
     except mariadb.Error as e:
-        logging.error(f"'{id}' removal from the table 'Serv_Tags' failed : {e}")
-        sys.exit(1)
+        error = str(id) + " removal from the table 'Serv_Tags' failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
+        
 
     # Check if tag is still used
     #tag_info=tag if tag !="" else "%"
@@ -85,8 +88,9 @@ def honeypot(DB_connection, id):
         logging.info(f"'{id}' deleted from the table 'Honeypot' of the internal database")
     except mariadb.Error as e:
         # If an error occurs, log it and exit
-        logging.error(f"'{id}' removal from the table 'Honeypot' : {e}")
-        sys.exit(1)
+        error = str(id) + " removal from the table 'Honeypot' failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 def honeypot_in_hp_tag(DB_connection, id="", tag=""):
     # Get MariaDB cursor
@@ -100,14 +104,15 @@ def honeypot_in_hp_tag(DB_connection, id="", tag=""):
         elif id != "" and tag != "":
             cur.execute("DELETE FROM Hp_Tags LEFT JOIN Tags on Hp_Tags.id_tag=Tags.id WHERE id_hp = ? and tag = ?",(id,tag))
         else:
-            sys.exit(1)
+            raise ValueError("honeypot in hp tag failed")
         # Apply the changes
         DB_connection.commit()
         # Logs
         logging.info(f"'{id}' deleted from the table 'Hp_Tags'")
     except mariadb.Error as e:
-        logging.error(f"'{id}' removal from the table 'Hp_Tags' failed : {e}")
-        sys.exit(1)
+        error = str(id) + " removal from the table 'Hp_Tags' failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
     # Check if tag is still used
     #tag_info=tag if tag !="" else "%"
@@ -124,18 +129,18 @@ def link(DB_connection, id):
     # Remove the relation between the link and the serv_tag
     try:
         link_in_link_tags_serv(DB_connection, id)
-    except:
-        sys.exit(1)
+    except Exception as e:
+        raise ValueError(e)
     # Remove the relation between the link and the hp_tag
     try:
         link_in_link_tags_hp(DB_connection, id)
-    except:
-        sys.exit(1)
+    except Exception as e:
+        raise ValueError(e)
     #Remove the relations between the link, the honeypots and the servers
     try:
         lhs(DB_connection, id_link=id)
-    except:
-        sys.exit(1)
+    except Exception as e:
+        raise ValueError(e)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request
@@ -148,8 +153,9 @@ def link(DB_connection, id):
         logging.info(f"'{id}' deleted from the table 'Link'")
     except mariadb.Error as e:
         # If an error occurs, log it and return False
-        logging.error(f"'{id}' removal from the table 'Link' failed : {e}")
-        sys.exit(1)
+        error = str(id) + " removal from the table 'Link' failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 def link_in_link_tags_hp(DB_connection, id="", tag_hp=""):
     # Get MariaDB cursor
@@ -163,15 +169,16 @@ def link_in_link_tags_hp(DB_connection, id="", tag_hp=""):
         elif id != "" and tag_hp != "":
             cur.execute("DELETE FROM Link_Tags_hp LEFT JOIN Tags on Link_Tags_hp.id_tag=Tags.id WHERE id_link = ? and tag = ?",(id,tag_hp))
         else:
-            sys.exit(1)
+            raise ValueError("link in link tags hp failed")
         
         # Apply the changes
         DB_connection.commit()
         # Logs
         logging.info(f"'{id}' deleted from the table 'Link_Tags_hp'")
     except mariadb.Error as e:
-        logging.error(f"'{id}' removal from the table 'Link_Tags_hp' failed : {e}")
-        sys.exit(1)
+        error = str(id) + " removal from the table 'Link_Tags_hp' failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 def link_in_link_tags_serv(DB_connection, id="", tag_serv=""):
     # Get MariaDB cursor
@@ -185,15 +192,16 @@ def link_in_link_tags_serv(DB_connection, id="", tag_serv=""):
         elif id != "" and tag_serv != "":
             cur.execute("DELETE FROM Link_Tags_serv LEFT JOIN Tags on Link_Tags_serv.id_tag=Tags.id WHERE id_link = ? and tag = ?",(id,tag_serv))
         else:
-            sys.exit(1)
+            raise ValueError("link in link tags serv failed")
         
         # Apply the changes
         DB_connection.commit()
         # Logs
         logging.info(f"'{id}' deleted from the table 'Link_Tags_serv'")
     except mariadb.Error as e:
-        logging.error(f"'{id}' removal from the table 'Link_Tags_serv' failed : {e}")
-        sys.exit(1)
+        error = str(id) + " removal from the table 'Link_Tags_serv' failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 def lhs(DB_connection,id_link="%",id_hp="%",id_serv="%"):
     # Get MariaDB cursor
@@ -206,8 +214,9 @@ def lhs(DB_connection,id_link="%",id_hp="%",id_serv="%"):
         # Logs
         logging.info(f"'{id}' deleted from the table 'Link_Hp_Serv'")
     except mariadb.Error as e:
-        logging.error(f"'{id}' removal from the table 'Link_Hp_Serv' failed : {e}")
-        sys.exit(1)
+        error = str(id) + " removal from the table 'Link_Hp_Serv' failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 
 ############################### TAG SECTION ###############################
@@ -223,6 +232,7 @@ def tag(DB_connection,id_tag="%", tag="%"):
         # Logs
         logging.info(f"'{id}' deleted from the table 'Tags'")
     except mariadb.Error as e:
-        logging.error(f"'{id}' removal from the table 'Tags' failed : {e}")
-        sys.exit(1)
+        error = str(id) + " removal from the table 'Tags' failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
