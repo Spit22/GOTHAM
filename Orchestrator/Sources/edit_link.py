@@ -39,13 +39,13 @@ def edit_tags(DB_settings, datacenter_settings, link, tags, type_tag):
         logging.error(f"type_tag is incorrect")
         raise ValueError("typ_tag incorrect")
 
-    new_tags=tags.split(tags_separator)
+    new_tags=tags.lower().split(tags_separator)
     
     dsp_link=Gotham_normalize.normalize_display_object_infos(link,"link",type_tag)
 
     already_used=[]
     for object_infos in dsp_link[type_tag+"s"]:
-        not_present_in_obj=list(set(new_tags) - set(object_infos[type_tag+"_tags"].split("||")))
+        not_present_in_obj=list(set(new_tags) - set(object_infos[type_tag+"_tags"].lower().split("||")))
         if not_present_in_obj != []:
             links = Gotham_link_BDD.get_link_infos(DB_settings, id=dsp_link["link_id"])[0]
             dsp_link=Gotham_normalize.normalize_display_object_infos(links,"link",type_tag)
@@ -245,7 +245,6 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                 del honeypots[i]["lhs_port"]
             # Remove duplicates
             honeypots=[dict(tuple_of_hp_items) for tuple_of_hp_items in {tuple(hp.items()) for hp in honeypots}]
-            print(honeypots)
 
             # Generate NGINX configurations for each redirection on a specific exposed_port
             for exposed_port in new_exposed_ports:
@@ -385,8 +384,6 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
             servers = Gotham_check.check_tags("serv",servers, tags_serv=tags_serv)
         
         servers = Gotham_check.check_servers_ports_matching(servers, new_ports)
-        print(servers)
-        print(servs_keeps)
         # Filter servers in error and already used by link
         servers = [server for server in servers if not(server["serv_state"]=='ERROR' or server["serv_id"] in servs_keeps) ]
         if len(servers) < nb_del:
@@ -422,7 +419,6 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
 
         # Deploy new reverse-proxies's configurations on servers
         add_link.deploy_nginxConf(DB_settings, dsp_link["link_id"], servers)
-        print(honeypots)
         # Insert data in Link_Hp_Serv
         for server in servers:
             # Update state of server
@@ -439,7 +435,6 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
                 lhs_infos = {"id_link":dsp_link["link_id"], "id_hp": honeypot["hp_id"], "id_serv": server["serv_id"], "port":server["choosed_port"]}
                 # Normalize infos
                 lhs_infos = Gotham_normalize.normalize_lhs_infos(lhs_infos)
-                print(lhs_infos)
                 # Store new link and tags in the internal database        
                 Gotham_link_BDD.add_lhs_DB(DB_settings, lhs_infos)
     

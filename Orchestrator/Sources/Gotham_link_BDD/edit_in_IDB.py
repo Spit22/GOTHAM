@@ -59,8 +59,8 @@ def server(DB_connection, modifs, conditions):
         raise ValueError(error)
 
 
-    if "tags" in modifs.items():
-        if "id" in conditions.items():
+    if "tags" in modifs.keys():
+        if "id" in conditions.keys():
             tags = modifs.pop("tags")
             new_tag_list = tags.split(tag_separator)
             servers = get_infos.server(DB_connection, id=conditions["id"])
@@ -96,42 +96,45 @@ def server(DB_connection, modifs, conditions):
         error = "Modification by tag not implemented"
         logging.error(error)
         raise ValueError(error)
-        
 
-    
 
-    # Prepare query
-    ## Prepare modifs
-    try:
-        modifs = normalize_modif_to_str(modifs)
-    except Exception as e:
-        error = "Can't prepare server modification : " + str(e)
-        logging.error(error)
-        raise ValueError(error)
-    ## Prepare conditions
-    try:
-        conditions = normalize_conditions_to_str(conditions)
-    except Exception as e:
-        error = "Can't prepare server modification's conditions : " + str(e)
-        logging.error(error)
-        raise ValueError(error)
 
-    # Create the query
-    query="UPDATE Server SET "+modifs+" WHERE "+conditions
+    if modifs != {}:
+        # Prepare query
+        ## Prepare modifs
+        try:
+            modifs = normalize_modif_to_str(modifs)
+        except Exception as e:
+            error = "Can't prepare server modification : " + str(e)
+            logging.error(error)
+            raise ValueError(error)
+        ## Prepare conditions
+        try:
+            conditions = normalize_conditions_to_str(conditions)
+        except Exception as e:
+            error = "Can't prepare server modification's conditions : " + str(e)
+            logging.error(error)
+            raise ValueError(error)
 
-    # Get MariaDB cursor
-    cur = DB_connection.cursor()
-    # Execute SQL request
-    try:
-        # Edit values in Server table
-        cur.execute(query)
-        DB_connection.commit()
-        logging.info(f"Modification ok -- SET {modifs}  WHERE {conditions} -- in the table 'Server'")
-    except mariadb.Error as e:
-        error = "Modification failed -- SET " + str(modifs) + " WHERE " + str(conditions) + "--  in the table 'Server' : " + str(e)
-        logging.error(error)
-        raise ValueError(error)
-    
+        # Create the query
+        if conditions != {}:
+            query="UPDATE Server SET "+modifs+" WHERE "+conditions
+        else:
+            query="UPDATE Server SET "+modifs
+
+        # Get MariaDB cursor
+        cur = DB_connection.cursor()
+        # Execute SQL request
+        try:
+            # Edit values in Server table
+            cur.execute(query)
+            DB_connection.commit()
+            logging.info(f"Modification ok -- SET {modifs}  WHERE {conditions} -- in the table 'Server'")
+        except mariadb.Error as e:
+            error = "Modification failed -- SET " + str(modifs) + " WHERE " + str(conditions) + "--  in the table 'Server' : " + str(e)
+            logging.error(error)
+            raise ValueError(error)
+
 
 
 
@@ -160,7 +163,7 @@ def honeypot(DB_connection, modifs, conditions):
         error = "Bad honeypot modification : " + str(e)
         logging.error(error)
         raise ValueError(error)
-        
+
     # Normalize conditions
     try:
         conditions = normalize_honeypot_infos(conditions)
@@ -169,8 +172,8 @@ def honeypot(DB_connection, modifs, conditions):
         logging.error(error)
         raise ValueError(error)
 
-    if "tags" in modifs.items():
-        if "id" in conditions.items():
+    if "tags" in modifs.keys():
+        if "id" in conditions.keys():
             tags=modifs.pop("tags")
             new_tag_list=tags.split(tag_separator)
             honeypots=get_infos.honeypot(DB_connection, id=conditions["id"])
@@ -208,40 +211,43 @@ def honeypot(DB_connection, modifs, conditions):
         raise ValueError(error)
 
 
+    if modifs != {}:
+        # Prepare query
+        ## Prepare modifs
+        try:
+            modifs = normalize_modif_to_str(modifs)
+        except Exception as e:
+            error = "Can't prepare honeypot modification : " + str(e)
+            logging.error(error)
+            raise ValueError(error)
+        ## Prepare conditions
+        try:
+            conditions = normalize_conditions_to_str(conditions)
+        except Exception as e:
+            error = "Can't prepare honeypot modification's conditions : " + str(e)
+            logging.error(error)
+            raise ValueError(error)
 
-    # Prepare query
-    ## Prepare modifs
-    try:
-        modifs = normalize_modif_to_str(modifs)
-    except Exception as e:
-        error = "Can't prepare honeypot modification : " + str(e)
-        logging.error(error)
-        raise ValueError(error)
-    ## Prepare conditions
-    try:
-        conditions = normalize_conditions_to_str(conditions)
-    except Exception as e:
-        error = "Can't prepare honeypot modification's conditions : " + str(e)
-        logging.error(error)
-        raise ValueError(error)
+        # Create the query
+        if conditions != {}:
+            query="UPDATE Honeypot SET "+modifs+" WHERE "+conditions
+        else:
+            query="UPDATE Honeypot SET "+modifs
 
-    # Create the query
-    query="UPDATE Honeypot SET "+modifs+" WHERE "+conditions
+        # Get MariaDB cursor
+        cur = DB_connection.cursor()
+        # Execute SQL request
+        try:
+            # Edit values in Honeypot table
+            cur.execute(query)
+            DB_connection.commit()
+            logging.info(f"Modification ok -- SET {modifs}  WHERE {conditions} -- in the table 'Honeypot'")
+        except mariadb.Error as e:
+            error = "Modification failed -- SET " + str(modifs) + " WHERE " + str(conditions) + "--  in the table 'Honeypot' : " + str(e)
+            logging.error(error)
+            raise ValueError(error)
 
-    # Get MariaDB cursor
-    cur = DB_connection.cursor()
-    # Execute SQL request
-    try:
-        # Edit values in Honeypot table
-        cur.execute(query)
-        DB_connection.commit()
-        logging.info(f"Modification ok -- SET {modifs}  WHERE {conditions} -- in the table 'Honeypot'")
-    except mariadb.Error as e:
-        error = "Modification failed -- SET " + str(modifs) + " WHERE " + str(conditions) + "--  in the table 'Honeypot' : " + str(e)
-        logging.error(error)
-        raise ValueError(error)
-        
-    
+
 
 ############################### LINK SECTION ###############################
 
@@ -270,8 +276,8 @@ def link(DB_connection, modifs, conditions):
         raise ValueError(error)
 
 
-    if "tags_hp" in modifs.items():
-        if "id" in conditions.items():
+    if "tags_hp" in modifs.keys():
+        if "id" in conditions.keys():
             tags=modifs.pop("tags_hp")
             new_tag_list=tags.split(tag_separator)
             links=get_infos.link(DB_connection, id=conditions["id"])
@@ -298,8 +304,8 @@ def link(DB_connection, modifs, conditions):
             logging.error(error)
             raise ValueError(error)
 
-    if "tags_serv" in modifs.items():
-        if "id" in conditions.items():
+    if "tags_serv" in modifs.keys():
+        if "id" in conditions.keys():
             tags=modifs.pop("tags_serv")
             new_tag_list=tags.split(tag_separator)
             links=get_infos.link(DB_connection, id=conditions["id"])
@@ -332,40 +338,43 @@ def link(DB_connection, modifs, conditions):
         raise ValueError(error)
 
 
-    
 
-    # Prepare query
-    ## Prepare modifs
-    try:
-        modifs = normalize_modif_to_str(modifs)
-    except Exception as e:
-        error = "Can't prepare link modification : " + str(e)
-        logging.error(error)
-        raise ValueError(error)
-    ## Prepare conditions
-    try:
-        conditions = normalize_conditions_to_str(conditions)
-    except Exception as e:
-        error = "Can't prepare link modification's conditions : " + str(e)
-        logging.error(error)
-        raise ValueError(error)
+    if modifs != {}:
+        # Prepare query
+        ## Prepare modifs
+        try:
+            modifs = normalize_modif_to_str(modifs)
+        except Exception as e:
+            error = "Can't prepare link modification : " + str(e)
+            logging.error(error)
+            raise ValueError(error)
+        ## Prepare conditions
+        try:
+            conditions = normalize_conditions_to_str(conditions)
+        except Exception as e:
+            error = "Can't prepare link modification's conditions : " + str(e)
+            logging.error(error)
+            raise ValueError(error)
 
-    # Create the query
-    query="UPDATE Link SET "+modifs+" WHERE "+conditions
+        # Create the query
+        if conditions != {}:
+            query="UPDATE Link SET "+modifs+" WHERE "+conditions
+        else:
+            query="UPDATE Link SET "+modifs
 
-    # Get MariaDB cursor
-    cur = DB_connection.cursor()
-    # Execute SQL request
-    try:
-        # Edit values in Link table
-        cur.execute(query)
-        DB_connection.commit()
-        logging.info(f"Modification ok -- SET {modifs}  WHERE {conditions} -- in the table 'Link'")
-    except mariadb.Error as e:
-        error = "Modification failed -- SET " + str(modifs) + " WHERE " + str(conditions) + "--  in the table 'Link' : " + str(e)
-        logging.error(error)
-        raise ValueError(error)
-    
+        # Get MariaDB cursor
+        cur = DB_connection.cursor()
+        # Execute SQL request
+        try:
+            # Edit values in Link table
+            cur.execute(query)
+            DB_connection.commit()
+            logging.info(f"Modification ok -- SET {modifs}  WHERE {conditions} -- in the table 'Link'")
+        except mariadb.Error as e:
+            error = "Modification failed -- SET " + str(modifs) + " WHERE " + str(conditions) + "--  in the table 'Link' : " + str(e)
+            logging.error(error)
+            raise ValueError(error)
+
 
 ############################### LHS SECTION ###############################
 
@@ -385,7 +394,7 @@ def lhs(DB_connection, modifs, conditions):
         error = "Bad lhs modification : " + str(e)
         logging.error(error)
         raise ValueError(error)
-        
+
     # Normalize conditions
     try:
         conditions = normalize_lhs_infos(conditions)

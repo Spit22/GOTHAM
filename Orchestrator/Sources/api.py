@@ -167,6 +167,7 @@ def add_honeypot():
         
         # Create and deploy rsyslog configuration on the datacenter and the orchestrator
         try:
+            #print("bypassed")
             add_hp.deploy_rsyslog_conf(datacenter_settings, orchestrator_settings, id, parser)
         except:
             return "Rsyslog configuration failed\n"
@@ -707,14 +708,14 @@ def edit_lk():
         else:
             return "Need to specify a link id\n"
         
-        if "tag_srv" in data.keys():
-            link_infos_received["tags_serv"] = data["tag_srv"]
+        if "tags_serv" in data.keys():
+            link_infos_received["tags_serv"] = data["tags_serv"]
         
-        if "tag_hp" in data.keys():
-            link_infos_received["tags_hp"] = data["tag_hp"]
+        if "tags_hp" in data.keys():
+            link_infos_received["tags_hp"] = data["tags_hp"]
         
         if "nb_srv" in data.keys():
-            link_infos_received["nb_serv"] = data["nb_srv"]
+            link_infos_received["nb_serv"] = data["nb_serv"]
         
         if "nb_hp" in data.keys():
             link_infos_received["nb_hp"] = data["nb_hp"]

@@ -45,9 +45,9 @@ def server_in_serv_tag(DB_connection, id="", tag=""):
         if tag=="" and id!="":
             cur.execute("DELETE FROM Serv_Tags WHERE id_serv = ?",(id,))
         elif id=="" and tag!="":
-            cur.execute("DELETE FROM Serv_Tags LEFT JOIN Tags on Serv_Tags.id_tag=Tags.id WHERE tag = ?",(tag,))
+            cur.execute("DELETE Serv_Tags FROM Serv_Tags LEFT JOIN Tags on Serv_Tags.id_tag=Tags.id WHERE tag = ?",(tag,))
         elif id!="" and tag!="":
-            cur.execute("DELETE FROM Serv_Tags LEFT JOIN Tags on Serv_Tags.id_tag=Tags.id WHERE id_serv = ? and tag = ?",(id,tag))
+            cur.execute("DELETE Serv_Tags FROM Serv_Tags LEFT JOIN Tags on Serv_Tags.id_tag=Tags.id WHERE id_serv = ? and tag = ?",(id,tag))
         else:
             raise ValueError("server in serv tag failed")
         # Apply the changes
@@ -100,9 +100,9 @@ def honeypot_in_hp_tag(DB_connection, id="", tag=""):
         if tag == "" and id != "":
             cur.execute("DELETE FROM Hp_Tags WHERE id_hp = ?",(id,))
         elif id == "" and tag != "":
-            cur.execute("DELETE FROM Hp_Tags LEFT JOIN Tags on Hp_Tags.id_tag=Tags.id WHERE tag = ?",(tag,))
+            cur.execute("DELETE Hp_Tags FROM Hp_Tags LEFT JOIN Tags on Hp_Tags.id_tag=Tags.id WHERE tag = ?",(tag,))
         elif id != "" and tag != "":
-            cur.execute("DELETE FROM Hp_Tags LEFT JOIN Tags on Hp_Tags.id_tag=Tags.id WHERE id_hp = ? and tag = ?",(id,tag))
+            cur.execute("DELETE Hp_Tags FROM Hp_Tags LEFT JOIN Tags on Hp_Tags.id_tag=Tags.id WHERE id_hp = ? and tag = ?",(id,tag))
         else:
             raise ValueError("honeypot in hp tag failed")
         # Apply the changes
@@ -165,9 +165,9 @@ def link_in_link_tags_hp(DB_connection, id="", tag_hp=""):
         if tag_hp == "" and id != "":
             cur.execute("DELETE FROM Link_Tags_hp WHERE id_link = ?",(id,))
         elif id == "" and tag_hp != "":
-            cur.execute("DELETE FROM Link_Tags_hp LEFT JOIN Tags on Link_Tags_hp.id_tag=Tags.id WHERE tag = ?",(tag_hp,))
+            cur.execute("DELETE Link_Tags_hp FROM Link_Tags_hp LEFT JOIN Tags on Link_Tags_hp.id_tag=Tags.id WHERE tag = ?",(tag_hp,))
         elif id != "" and tag_hp != "":
-            cur.execute("DELETE FROM Link_Tags_hp LEFT JOIN Tags on Link_Tags_hp.id_tag=Tags.id WHERE id_link = ? and tag = ?",(id,tag_hp))
+            cur.execute("DELETE Link_Tags_hp FROM Link_Tags_hp LEFT JOIN Tags on Link_Tags_hp.id_tag=Tags.id WHERE id_link = ? and tag = ?",(id,tag_hp))
         else:
             raise ValueError("link in link tags hp failed")
         
@@ -188,9 +188,9 @@ def link_in_link_tags_serv(DB_connection, id="", tag_serv=""):
         if tag_serv == "" and id != "":
             cur.execute("DELETE FROM Link_Tags_serv WHERE id_link = ?",(id,))
         elif id == "" and tag_serv != "":
-            cur.execute("DELETE FROM Link_Tags_serv LEFT JOIN Tags on Link_Tags_serv.id_tag=Tags.id WHERE tag = ?",(tag_serv,))
+            cur.execute("DELETE Link_Tags_serv FROM Link_Tags_serv LEFT JOIN Tags on Link_Tags_serv.id_tag=Tags.id WHERE tag = ?",(tag_serv,))
         elif id != "" and tag_serv != "":
-            cur.execute("DELETE FROM Link_Tags_serv LEFT JOIN Tags on Link_Tags_serv.id_tag=Tags.id WHERE id_link = ? and tag = ?",(id,tag_serv))
+            cur.execute("DELETE Link_Tags_serv FROM Link_Tags_serv LEFT JOIN Tags on Link_Tags_serv.id_tag=Tags.id WHERE id_link = ? and tag = ?",(id,tag_serv))
         else:
             raise ValueError("link in link tags serv failed")
         
