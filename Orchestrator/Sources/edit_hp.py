@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 #===Import external libs===#
-from io import StringIO
 import base64
 import configparser
 #==========================#

@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 
-#===Import external libs===#
-from io import StringIO
-#==========================#
-
 #===Import GOTHAM's libs===#
 from Gotham_SSH_SCP import send_file_and_execute_commands
 #==========================#
@@ -56,4 +52,4 @@ def deploy_nginxConf(db_settings, link_id, servers):
 
         linkConf_path = ["/data/template/"+str(link_id)+"-"+str(server["choosed_port"])+".conf"]
         # Deploy configuration on the server and Reload nginx if ok
-        send_file_and_execute_commands(server["serv_ip"], server["serv_ssh_port"], StringIO(server["serv_ssh_key"]), linkConf_path, linkConf_dest, checkAndReloadNginx_command)
+        send_file_and_execute_commands(server["serv_ip"], server["serv_ssh_port"], server["serv_ssh_key"], linkConf_path, linkConf_dest, checkAndReloadNginx_command)

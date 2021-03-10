@@ -206,7 +206,6 @@ def link_in_link_tags_serv(DB_connection, id="", tag_serv=""):
 def lhs(DB_connection,id_link="%",id_hp="%",id_serv="%"):
     # Get MariaDB cursor
     cur = DB_connection.cursor()
-    print("DELETE FROM Link_Hp_Serv WHERE id_link LIKE "+str(id_link)+" AND id_hp LIKE "+str(id_hp)+" AND id_serv LIKE "+str(id_serv))
     # Execute SQL request
     try :
         cur.execute("DELETE FROM Link_Hp_Serv WHERE id_link LIKE ? AND id_hp LIKE ? AND id_serv LIKE ?",(id_link,id_hp,id_serv))

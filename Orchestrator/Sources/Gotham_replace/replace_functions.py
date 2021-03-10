@@ -6,7 +6,6 @@ import fileinput
 import base64
 import json
 import requests
-from io import StringIO
 
 from Gotham_normalize import normalize_id_honeypot,normalize_honeypot_infos,normalize_server_infos, normalize_display_object_infos
 #from Gotham_link_BDD import remove_honeypot_DB, get_honeypot_infos, get_server_infos, remove_server_DB, edit_lhs_DB, edit_link_DB, remove_lhs
@@ -67,21 +66,17 @@ def replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, d
     # Try to replace
     replaced = False
     link_tags_hp = tag_separator.join(link["link_tags_hp"].split("||")) if new_tags=="" else new_tags
-
     # Get all honeypots corresponding to tags
     honeypots = Gotham_check.check_tags("hp", Gotham_link_BDD.get_honeypot_infos(DB_settings, tags = link_tags_hp), tags_hp = link_tags_hp)
-
     # Filter honeypots in error, and original hp by id
     honeypots = [hp for hp in honeypots if not(hp["hp_state"] == 'ERROR' or hp["hp_id"] == hp_infos["hp_id"])]
-
     if honeypots != []:
         already_duplicate_weight = int(config['hp_weight']["already_duplicate"])
         honeypots = [dict(hp, **{'weight':already_duplicate_weight}) if hp["hp_id"] in duplicate_hp_list else hp for hp in honeypots]
         # Choose best honeypots (the lower scored)
         honeypots = Gotham_choose.choose_honeypots(honeypots, 1, link_tags_hp)
-
         # If already duplicate or no link configured, just edit the link to redirect to the hp
-        if honeypots[0]["hp_id"] in duplicate_hp_list or honeypots[0]["hp_state"] == "UNUSED":
+        if (honeypots[0]["hp_id"] in duplicate_hp_list or honeypots[0]["hp_state"] == "UNUSED") and link["link_id"] not in honeypots[0]["link_id"]:
             # Don't duplicate, just configure
             honeypot = honeypots[0]
         else:
@@ -339,25 +334,16 @@ def distribute_servers_on_link_ports(DB_settings, link):
                 error = "Not implemented"
                 logging.error(error)
                 raise ValueError(error)
-        print("a")
-        print(count_exposed_ports)
         servers=[]
 
         # Get all honeypots used by links
         honeypots=[{key:value for key,value in hp.items() if key != "lhs_port"} for serv in dsp_link["servs"] for hp in serv["hps"]]
         # Remove duplicates
         honeypots=[dict(tuple_of_hp_items) for tuple_of_hp_items in {tuple(hp.items()) for hp in honeypots}]
-        print("b")
-        print(honeypots)
 
         ports_sorted=sorted(count_exposed_ports, key = count_exposed_ports.get, reverse=True)
         port_max_used=str(ports_sorted[i])
         port_min_used=str(ports_sorted[-j])
-
-        print("c")
-        print(ports_sorted)
-        print(port_max_used)
-        print(port_min_used)
 
         if port_max_used != port_min_used:
             for server in dsp_link["servs"]:
@@ -378,10 +364,10 @@ def distribute_servers_on_link_ports(DB_settings, link):
             
                 try:
                     commands = ["rm /etc/nginx/conf.d/links/" + dsp_link["link_id"] +"-*.conf", "/usr/sbin/nginx -t && /usr/sbin/nginx -s reload"]
-                    Gotham_SSH_SCP.execute_commands(servers[0]["serv_ip"], servers[0]["serv_ssh_port"], StringIO(servers[0]["serv_ssh_key"]), commands)
+                    Gotham_SSH_SCP.execute_commands(servers[0]["serv_ip"], servers[0]["serv_ssh_port"], servers[0]["serv_ssh_key"], commands)
                     Gotham_link_BDD.remove_lhs(DB_settings, id_link = dsp_link["link_id"], id_serv = servers[0]["serv_id"])
                 except Exception as e:
-                    error = str(dsp_link['link_id'])+" removal on servers failed : "+str(e)
+                    error = str(dsp_link['link_id'])+" removal on servers failed : "+str(e)+" c'est cette erreur !!"
                     logging.error(error)
                     raise ValueError(error)
 
@@ -390,14 +376,11 @@ def distribute_servers_on_link_ports(DB_settings, link):
                 add_link.deploy_nginxConf(DB_settings, dsp_link["link_id"], servers)
 
                 for honeypot in honeypots:
-                    print("eeeeee")
-                    print(honeypot)
                     # Create lhs_infos
                     lhs_infos = {"id_link":dsp_link["link_id"], "id_hp": honeypot["hp_id"], "id_serv": servers[0]["serv_id"], "port":servers[0]["choosed_port"]}
                     # Normalize infos
                     lhs_infos = Gotham_normalize.normalize_lhs_infos(lhs_infos)
                     # Store new link and tags in the internal database        
-                    print(lhs_infos)
                     Gotham_link_BDD.add_lhs_DB(DB_settings, lhs_infos)
                 i=0
                 j=1

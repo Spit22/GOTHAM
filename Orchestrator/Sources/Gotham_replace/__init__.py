@@ -162,7 +162,7 @@ def replace_serv_for_added_tags_in_link(DB_settings, datacenter_settings, link_i
 
 def replace_hp_for_added_tags_in_link(DB_settings, datacenter_settings, link_infos, hp_infos, new_tags):
   try:
-    res=replace_functions.replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link_infos, new_tags=new_tags)
+    res=replace_functions.replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link_infos, duplicate_hp_list=[], new_tags=new_tags)
     result=res["replaced"]
   except Exception as e:
     raise ValueError(e)

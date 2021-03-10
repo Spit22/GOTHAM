@@ -1,5 +1,4 @@
 #===Import external libs===#
-from io import StringIO
 import base64
 import sys
 import configparser

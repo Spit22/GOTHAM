@@ -1,6 +1,7 @@
 import paramiko
 import scp
 import sys
+from io import StringIO
 
 # Logging components
 import os
@@ -23,8 +24,9 @@ class GothamServer:
         self.username = "gotham"
         # Remote SSH port
         self.port = port
-        # User's password
-        self.ssh_key = paramiko.RSAKey.from_private_key(ssh_key)
+        # User's key
+        self.ssh_key = StringIO(ssh_key)
+        self.ssh_key = paramiko.RSAKey.from_private_key(self.ssh_key)
         # Some variable for class's methods
         self.ssh_session = None
         self.scp_session = None

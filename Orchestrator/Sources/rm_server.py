@@ -1,5 +1,4 @@
 #===Import external libs===#
-from io import StringIO
 import configparser
 #==========================#
 
@@ -53,7 +52,7 @@ def main(DB_settings, datacenter_settings, id='sv-000000000000000000000000000000
 
     # Remove Server from the server
     try:
-        remove_nginx_on_server(result[0]['serv_ip'],result[0]['serv_ssh_port'],StringIO(result[0]['serv_ssh_key']))
+        remove_nginx_on_server(result[0]['serv_ip'],result[0]['serv_ssh_port'],result[0]['serv_ssh_key'])
     except Exception as e:
         raise ValueError(e)
 

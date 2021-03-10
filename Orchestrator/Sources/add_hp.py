@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 
-#===Import external libs===#
-from io import StringIO
-#==========================#
-
 #===Import GOTHAM's libs===#
 from Gotham_SSH_SCP import send_file_and_execute_commands, send_file, execute_commands
 #==========================#
@@ -71,8 +67,7 @@ def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id_hp):
     command_exec_compose = ["cd "+str(docker_dest),"docker-compose -f "+str(docker_dest)+"/docker-compose.yml  --project-name "+id_hp+" up -d"]
     # Copy docker files on datacenter, and execute docker-compose
     try:
-        send_file_and_execute_commands(dc_ip, dc_ssh_port, StringIO(dc_ssh_key), dockerfile_path, docker_dest, command_exec_compose)
-        #print(command_exec_compose)
+        send_file_and_execute_commands(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, docker_dest, command_exec_compose)
     except Exception as e:
         logging.error(e)
         return False
@@ -165,9 +160,9 @@ def deploy_rsyslog_conf(datacenter_settings, orchestrateur_settings, id_hp, rule
     # Send datacenter rsyslog configuration to the datacenter
     try:
         # Send the rulebase
-        send_file(datacenter_settings["hostname"], datacenter_settings["ssh_port"], StringIO(dc_ssh_key_1), [ local_rulebase_path + id_hp + ".rb" ], remote_rulebase_path)
+        send_file(datacenter_settings["hostname"], datacenter_settings["ssh_port"], dc_ssh_key_1, [ local_rulebase_path + id_hp + ".rb" ], remote_rulebase_path)
         # Send rsyslog configuration
-        send_file_and_execute_commands(datacenter_settings["hostname"], datacenter_settings["ssh_port"], StringIO(dc_ssh_key_2), [ rsyslog_conf_datacenter_local_path + id_hp + ".conf" ], rsyslog_conf_datacenter_remote_path, exec_restart_rsyslog)
+        send_file_and_execute_commands(datacenter_settings["hostname"], datacenter_settings["ssh_port"], dc_ssh_key_2, [ rsyslog_conf_datacenter_local_path + id_hp + ".conf" ], rsyslog_conf_datacenter_remote_path, exec_restart_rsyslog)
     except Exception as e:
         error = "Fail to deploy rsyslog configuration : " + str(e)
         logging.error(error)

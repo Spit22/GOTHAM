@@ -6,7 +6,6 @@ import sys
 import base64
 import requests
 import json
-from io import StringIO
 #==========================#
 
 #===Import GOTHAM's libs===#
@@ -308,7 +307,7 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
             if type_nb=="serv":
                 try:
                   commands = ["rm /etc/nginx/conf.d/links/" + dsp_link["link_id"] +"-*.conf", "/usr/sbin/nginx -t && /usr/sbin/nginx -s reload"]
-                  Gotham_SSH_SCP.execute_commands(del_object["serv_ip"], del_object["serv_ssh_port"], StringIO(del_object["serv_ssh_key"]), commands)
+                  Gotham_SSH_SCP.execute_commands(del_object["serv_ip"], del_object["serv_ssh_port"], del_object["serv_ssh_key"], commands)
                   
                 except Exception as e:
                   logging.error(f"{link['link_id']} removal on servers failed : {e}")
@@ -362,7 +361,7 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
                 # Remove server
                 try:
                   commands = ["rm /etc/nginx/conf.d/links/" + dsp_link["link_id"] +"-*.conf", "/usr/sbin/nginx -t && /usr/sbin/nginx -s reload"]
-                  Gotham_SSH_SCP.execute_commands(server["serv_ip"], server["serv_ssh_port"], StringIO(server["serv_ssh_key"]), commands)
+                  Gotham_SSH_SCP.execute_commands(server["serv_ip"], server["serv_ssh_port"], server["serv_ssh_key"], commands)
                   Gotham_link_BDD.remove_lhs(DB_settings, id_link = dsp_link["link_id"], id_serv = server["serv_id"])
                 except Exception as e:
                   logging.error(f"{link['link_id']} removal on servers failed : {e}")

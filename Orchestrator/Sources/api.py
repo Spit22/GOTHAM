@@ -8,7 +8,6 @@ import random
 import requests
 import configparser
 from flask import request, jsonify
-from io import StringIO
 
 # GOTHAM'S Add Scripts
 import add_server  
@@ -185,7 +184,7 @@ def add_honeypot():
         return "OK : "+str(id)+"\n"
 
 @app.route('/add/server', methods=['POST'])
-def add_srv():
+def add_serv():
         # Creates a server object
         # 
         # name (string) : nom du serveur
@@ -260,7 +259,7 @@ def add_lk():
         # 
         # tags_serv (list) : tag du/des serveurs ciblés
         # tags_hp (list) : tag du/des hp ciblés
-        # nb_srv (int) : nombre de serveurs ciblés
+        # nb_serv (int) : nombre de serveurs ciblés
         # nb_hp (int) : nombre de hp ciblés
         # exposed_port (list): list des ports à utiliser
 
@@ -275,15 +274,15 @@ def add_lk():
             if str(data["nb_hp"]).lower() != "all":
                 lk_infos_received["nb_hp"]=data["nb_hp"]
             
-            if str(data["nb_srv"]).lower() != "all":
-                lk_infos_received["nb_serv"]=data["nb_srv"]
+            if str(data["nb_serv"]).lower() != "all":
+                lk_infos_received["nb_serv"]=data["nb_serv"]
                            
             lk_infos_received = Gotham_normalize.normalize_link_infos(lk_infos_received)
             
             # Get all function's parameters
             tags_serv = lk_infos_received["tags_serv"]
             tags_hp = lk_infos_received["tags_hp"]
-            nb_srv = lk_infos_received["nb_serv"] if "nb_serv" in lk_infos_received.keys() else data["nb_srv"]
+            nb_serv = lk_infos_received["nb_serv"] if "nb_serv" in lk_infos_received.keys() else data["nb_serv"]
             nb_hp = lk_infos_received["nb_hp"] if "nb_hp" in lk_infos_received.keys() else data["nb_hp"]
             exposed_ports = lk_infos_received["ports"]
             exposed_ports_list = exposed_ports.split(ports_separator)
@@ -333,15 +332,15 @@ def add_lk():
         # Filter honeypots in error
         honeypots = [honeypot for honeypot in honeypots if honeypot["hp_state"]!='ERROR']
 
-        if str(nb_srv).lower()=="all":
-            nb_srv=len(servers)
+        if str(nb_serv).lower()=="all":
+            nb_serv=len(servers)
         
         if str(nb_hp).lower()=="all":
             nb_hp=len(honeypots)
 
-        # Checking we have enough servers for the nb_srv directive, otherwise return error
-        if len(servers) < nb_srv:
-            return "Can't deploy link on "+str(nb_srv)+" servers while there is only "+str(len(servers))+" servers available\n"
+        # Checking we have enough servers for the nb_serv directive, otherwise return error
+        if len(servers) < nb_serv:
+            return "Can't deploy link on "+str(nb_serv)+" servers while there is only "+str(len(servers))+" servers available\n"
         
         # If we don't have any honeypots corresponding, just return error,
         if len(honeypots) < 1:
@@ -376,7 +375,7 @@ def add_lk():
                 honeypots.append(Gotham_link_BDD.get_honeypot_infos(DB_settings, id=id)[0])
 
         # Choose best servers (the lower scored)
-        servers = Gotham_choose.choose_servers(servers, nb_srv, tags_serv)
+        servers = Gotham_choose.choose_servers(servers, nb_serv, tags_serv)
         
         count_exposed_ports={str(port):0 for port in exposed_ports_list}
         
@@ -421,7 +420,7 @@ def add_lk():
                 return "Error : link is not effective on server "+str(server["serv_ip"])+"\n"
 
         # Create lk_infos
-        lk_infos = {"id":id, "nb_hp": nb_hp, "nb_serv": nb_srv, "tags_hp":tags_hp, "tags_serv":tags_serv, "ports":exposed_ports}
+        lk_infos = {"id":id, "nb_hp": nb_hp, "nb_serv": nb_serv, "tags_hp":tags_hp, "tags_serv":tags_serv, "ports":exposed_ports}
         
         # Normalize infos
         lk_infos = Gotham_normalize.normalize_link_infos(lk_infos)
@@ -563,7 +562,7 @@ def edit_honeypot():
         return "Nothing to change\n"
 
 @app.route('/edit/server', methods=['POST'])
-def edit_srv():
+def edit_serv():
         # Edits a server object
         # 
         # id (string) : id du serveur à modifier
@@ -690,9 +689,9 @@ def edit_lk():
         # Edits a link object
         #
         # id (string) : id du lien à modifier
-        # tag_srv (list) : tag du/des serveurs ciblés
-        # tag_hp (list) : tag du/des hp ciblés
-        # nb_srv (int) : nombre de serveurs ciblés
+        # tags_serv (list) : tag du/des serveurs ciblés
+        # tags_hp (list) : tag du/des hp ciblés
+        # nb_serv (int) : nombre de serveurs ciblés
         # nb_hp (int) : nombre de hp ciblés
         # ports (string) : exposed ports
 
@@ -714,7 +713,7 @@ def edit_lk():
         if "tags_hp" in data.keys():
             link_infos_received["tags_hp"] = data["tags_hp"]
         
-        if "nb_srv" in data.keys():
+        if "nb_serv" in data.keys():
             link_infos_received["nb_serv"] = data["nb_serv"]
         
         if "nb_hp" in data.keys():
@@ -908,7 +907,7 @@ def rm_honeypot():
         return "Deletion completed : " + str(id)+"\n"
 
 @app.route('/delete/server', methods=['POST'])
-def rm_srv():
+def rm_serv():
         # Removes a server object
         # 
         # id (string) : id du serveur à supprimer
@@ -1018,7 +1017,7 @@ def ls_honeypot():
                 return "No honeypot in database\n"
 
 @app.route('/list/server', methods=['GET'])
-def ls_srv():
+def ls_serv():
         # Gives information on server object
         # 
         # id (string) : id du serveur à afficher

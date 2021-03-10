@@ -1,5 +1,4 @@
 #===Import external libs===#
-from io import StringIO
 import base64
 #==========================#
 
@@ -31,7 +30,7 @@ def deploy(ip, ssh_port, used_ssh_key):
     command_exec_install = ["/bin/sh /tmp/install_nginx.sh"]
     # Send and execute the nginx installation script on the server
     try:
-        send_file_and_execute_commands(ip, ssh_port, StringIO(used_ssh_key), installNginx_file, installNginx_dest, command_exec_install)
+        send_file_and_execute_commands(ip, ssh_port, used_ssh_key, installNginx_file, installNginx_dest, command_exec_install)
     except Exception as e:
         logging.error(f"Server deployement failed : {e}")
         return False

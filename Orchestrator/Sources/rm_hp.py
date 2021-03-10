@@ -8,7 +8,6 @@ import fileinput
 import base64
 import json
 import requests
-from io import StringIO
 #==========================#
 
 #===Import GOTHAM's libs===#
@@ -60,7 +59,7 @@ def main(DB_settings, datacenter_settings, id):
     # Remove the Honeypot from the datacenter
     commands = [f"docker container stop {id}",f"docker container rm {id}", "docker network prune -f"]
     try:
-        execute_commands(datacenter_settings['hostname'], datacenter_settings['ssh_port'], StringIO(datacenter_settings['ssh_key']), commands)
+        execute_commands(datacenter_settings['hostname'], datacenter_settings['ssh_port'], datacenter_settings['ssh_key'], commands)
     except Exception as e:
         logging.error(f"Remove container failed : {e}")
         raise ValueError(e)
@@ -86,12 +85,12 @@ def remove_rsyslog_configuration(datacenter_settings, id_hp):
     # Remove RSYSLOG configuration on the datacenter
     try:
         commands = ["rm " + remote_rulebase_path + ".rb", "rm " + remote_hp_log_file_path + id_hp + ".log", "rm " + rsyslog_conf_datacenter_remote_path + id_hp + ".conf"]
-        execute_commands(datacenter_settings["hostname"], datacenter_settings["ssh_port"], StringIO(datacenter_settings["ssh_key"]), commands)
+        execute_commands(datacenter_settings["hostname"], datacenter_settings["ssh_port"], datacenter_settings["ssh_key"], commands)
     except Exception as e:
         raise ValueError(e)
     # Remove local RSYSLOG configuration
     try:
         commands = ["rm " + local_rulebase_path + ".rb", "rm " + local_hp_log_file_path + id_hp + ".log", "rm " + rsyslog_conf_datacenter_local_path + id_hp + ".conf", "rm " + rsyslog_conf_orchestrator_local_path + id_hp + ".conf"]
-        execute_commands(datacenter_settings["hostname"], datacenter_settings["ssh_port"], StringIO(datacenter_settings["ssh_key"]), commands)
+        execute_commands(datacenter_settings["hostname"], datacenter_settings["ssh_port"], datacenter_settings["ssh_key"], commands)
     except Exception as e:
         raise ValueError(e)

@@ -16,7 +16,6 @@ def check_server_ports(serv_infos, ports):
         ports_list = ports.split(separator)
         serv_used_port=(list(filter(None,dict.fromkeys(serv_infos["lhs_port"].split("||")))))
         serv_used_port.append(str(serv_infos["serv_ssh_port"]))
-        print(serv_used_port)
         free_port=''
         for port in ports_list:
                 if not(port in serv_used_port):
