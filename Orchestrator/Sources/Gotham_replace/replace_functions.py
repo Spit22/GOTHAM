@@ -367,7 +367,7 @@ def distribute_servers_on_link_ports(DB_settings, link):
                     Gotham_SSH_SCP.execute_commands(servers[0]["serv_ip"], servers[0]["serv_ssh_port"], servers[0]["serv_ssh_key"], commands)
                     Gotham_link_BDD.remove_lhs(DB_settings, id_link = dsp_link["link_id"], id_serv = servers[0]["serv_id"])
                 except Exception as e:
-                    error = str(dsp_link['link_id'])+" removal on servers failed : "+str(e)+" c'est cette erreur !!"
+                    error = str(dsp_link['link_id'])+" removal on servers failed : "+str(e)
                     logging.error(error)
                     raise ValueError(error)
 
