@@ -43,14 +43,15 @@ def edit_tags(DB_settings, datacenter_settings, server, tags):
         raise ValueError(e)
 
 
-def edit_connection(DB_settings, server, ip, ssh_port, ssh_key):
+def check_edited_connection(DB_settings, server, ip, ssh_port, ssh_key):
 
-    # First check the ip not already exists in database
-    exists = Gotham_check.check_doublon_server(DB_settings, ip)
-    if exists:
-        error = "Provided ip already exists in database"
-        logging.error(error)
-        raise ValueError(error)
+    if server["serv_ip"] != ip:
+        # First check the ip not already exists in database
+        exists = Gotham_check.check_doublon_server(DB_settings, ip)
+        if exists:
+            error = "Provided ip already exists in database"
+            logging.error(error)
+            raise ValueError(error)
 
     # Check given auth information are ok
     connected = Gotham_check.check_ssh(ip, ssh_port, ssh_key) 

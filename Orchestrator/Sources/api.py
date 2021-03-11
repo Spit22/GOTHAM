@@ -649,8 +649,8 @@ def edit_serv():
             ssh_port=server["serv_ssh_port"]
             ssh_key=server["serv_ssh_key"]
             # Decode and format the ssh key
-            ssh_key = base64.b64decode(ssh_key) # ssh_key is byte
-            ssh_key = ssh_key.decode('ascii') # ssh_key is ascii string
+            #ssh_key = base64.b64decode(ssh_key) # ssh_key is byte
+            #ssh_key = ssh_key.decode('ascii') # ssh_key is ascii string
 
             
             if "ip" in serv_infos_received.keys():
@@ -671,10 +671,10 @@ def edit_serv():
                     modifs["ssh_port"]=serv_infos_received["ssh_port"]
                     ssh_port=serv_infos_received["ssh_port"]
             try:
-                edit_server.edit_connection(DB_settings, server, ip, ssh_port, ssh_key)
+                edit_server.check_edited_connection(DB_settings, server, ip, ssh_port, ssh_key)
             
-            except:
-                return "Error in connection edition\n"
+            except Exception as e:
+                return "Error in connection edition"+str(e)+"\n"
 
         if modifs != {}:
             Gotham_link_BDD.edit_server_DB(DB_settings, modifs, conditions)

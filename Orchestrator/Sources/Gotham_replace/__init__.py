@@ -125,6 +125,7 @@ def replace_serv_for_deleted_tags(DB_settings, datacenter_settings, serv_infos, 
       if result:
         try:
           commands = ["rm /etc/nginx/conf.d/links/" + link["link_id"] +"-*.conf"]
+          #print(serv_infos["serv_ssh_key"])
           Gotham_SSH_SCP.execute_commands(serv_infos["serv_ip"], serv_infos["serv_ssh_port"], serv_infos["serv_ssh_key"], commands)
           return True
         except Exception as e:

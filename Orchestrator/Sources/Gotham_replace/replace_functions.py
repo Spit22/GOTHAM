@@ -147,10 +147,10 @@ def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_info
                         first_line = False
                         for line in file:
                             if ("  # " + str(old_hp_infos["hp_id"])) in line:
-                                line.replace(str(old_hp_infos["hp_id"]), str(new_hp_infos["hp_id"]))
+                                print(line.replace(str(old_hp_infos["hp_id"]), str(new_hp_infos["hp_id"])), end='')
                                 first_line = True
                             elif first_line:
-                                line.replace(str(old_hp_infos["hp_port"]), str(new_hp_infos["hp_port"]))
+                                print(line.replace(str(old_hp_infos["hp_port"]), str(new_hp_infos["hp_port"])), end='')
                                 first_line = False
                             else:
                                 print(line, end='')
@@ -170,10 +170,10 @@ def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_info
                     first_line = False
                     for line in file:
                         if ("  # " + str(old_hp_infos["hp_id"])) in line:
-                            line.replace(str(old_hp_infos["hp_id"]), str(new_hp_infos["hp_id"]))
+                            print(line.replace(str(old_hp_infos["hp_id"]), str(new_hp_infos["hp_id"])), end='')
                             first_line = True
                         elif first_line:
-                            line.replace(str(old_hp_infos["hp_port"]), str(new_hp_infos["hp_port"]))
+                            print(line.replace(str(old_hp_infos["hp_port"]), str(new_hp_infos["hp_port"])), end='')
                             first_line = False
                         else:
                             print(line, end='')
@@ -183,6 +183,7 @@ def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_info
         add_link.deploy_nginxConf(DB_settings, link["link_id"], servers)
     # Delete one hp for one link
     elif old_hp_infos != {} and new_hp_infos == {} and link != None :
+        print("You shall not pass here")
         already_update = []
         servers = []
         interable_servs = link["servs"] if "servs" in link.keys() else old_hp_infos["servs"]
@@ -193,10 +194,10 @@ def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_info
                     first_line = False
                     for line in file:
                         if ("  # " + str(old_hp_infos["hp_id"])) in line:
-                            line.replace("  # " + str(old_hp_infos["hp_id"]) + "\n", "")
+                            print(line.replace("  # " + str(old_hp_infos["hp_id"]) + "\n", ""), end='')
                             first_line = True
                         elif first_line:
-                            line.replace("  server " + str(datacenter_settings["hostname"]) + ":" + str(old_hp_infos["hp_port"]) + ";\n", "")
+                            print(line.replace("  server " + str(datacenter_settings["hostname"]) + ":" + str(old_hp_infos["hp_port"]) + ";\n", ""), end='')
                             first_line = False
                         else:
                             print(line, end='')
