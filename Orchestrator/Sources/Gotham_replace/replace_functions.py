@@ -226,7 +226,8 @@ def duplicate_hp(DB_settings,honeypot_infos):
         url = "http://localhost:5000/add/honeypot"
         headers = {'Content-type': 'application/json'}
         r = requests.post(url, data=jsondata, headers=headers)
-        id_hp = r.text.split()[2]
+        jsonresponse = r.json()
+        id_hp = jsonresponse["id"]
     except Exception as e:
         error = "Error with hp duplication :"+str(honeypot_infos['hp_id'])+" - "+str(e)
         logging.error(error)

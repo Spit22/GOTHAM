@@ -7,6 +7,7 @@ import os
 import random
 import requests
 import configparser
+import sys
 from flask import request, jsonify
 
 # GOTHAM'S Add Scripts
@@ -46,6 +47,7 @@ logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log', lev
 # General settings
 app.config["DEBUG"] = True
 version = "0.0"
+debug_mode = True
 
 # Retrieve  internaldb settings from config file
 config = configparser.ConfigParser()
@@ -63,6 +65,8 @@ try:
     dc_ssh_key_rsyslog = dc_ssh_key # ssh_key for rsyslog
 except Exception as e:
     print("Error loading datacenter's SSH key")
+    sys.exit(1)
+
 # Put datacenter settings in a dictionary
 datacenter_settings = {"hostname": dc_ip, "ssh_key": dc_ssh_key, "rsyslog_ssh_key": dc_ssh_key_rsyslog, "ssh_port": dc_ssh_port}
 
@@ -168,7 +172,7 @@ def add_honeypot():
         try:
             #print("bypassed")
             add_hp.deploy_rsyslog_conf(datacenter_settings, orchestrator_settings, id, parser)
-        except:
+        except Exception as e:
             return "Rsyslog configuration failed\n"
 
         # Create hp_infos
@@ -180,8 +184,10 @@ def add_honeypot():
         # Store new hp and tags in the database
         Gotham_link_BDD.add_honeypot_DB(DB_settings, hp_infos)
 
-        # If all operations succeed
-        return "OK : "+str(id)+"\n"
+        
+        # If all operations succeed, return id of created object
+        response = {"id":str(id)}
+        return response, 200
 
 @app.route('/add/server', methods=['POST'])
 def add_serv():
@@ -250,8 +256,9 @@ def add_serv():
         # Store new server and tags in the internal database        
         Gotham_link_BDD.add_server_DB(DB_settings, serv_infos)   
 
-        # If all operations succeed
-        return "OK : "+str(id)+"\n"
+        # If all operations succeed, return id of created object
+        response = {"id":str(id)}
+        return response, 200
 
 @app.route('/add/link', methods=['POST'])
 def add_lk():
@@ -300,7 +307,7 @@ def add_lk():
         if tags_serv.lower() != "all":
             try:
                 Gotham_check.check_doublon_tags(DB_settings, tags_serv)
-            except:
+            except Exception as e:
                 return "Error with tags: some server tags do not exists\n"
 
         # We check all provided hp tags exists, otherwise return error
@@ -308,7 +315,7 @@ def add_lk():
             try:
                 Gotham_check.check_doublon_tags(DB_settings, tags_hp)
             
-            except:
+            except Exception as e:
                 return "Error with tags: some honeypot tags do not exists\n"
 
         # Get all honeypots corresponding to tags
@@ -366,10 +373,11 @@ def add_lk():
                     url = "http://localhost:5000/add/honeypot"
                     headers = {'Content-type': 'application/json'}
                     r = requests.post(url, data=jsondata, headers=headers)
-                    id_hp = r.text.split()[2]
+                    jsonresponse = r.json()
+                    id_hp = jsonresponse["id"]
                     added_hp.append(id_hp)
                 except Exception as e:
-                    return "Error with hp duplication\n" 
+                    return "Error with hp duplication\n"+str(e) 
 
             for id in added_hp:
                 honeypots.append(Gotham_link_BDD.get_honeypot_infos(DB_settings, id=id)[0])
@@ -448,7 +456,10 @@ def add_lk():
                 # Store new link and tags in the internal database        
                 Gotham_link_BDD.add_lhs_DB(DB_settings, lhs_infos)
 
-        return "OK : "+str(id)+"\n"
+        # If all operations succeed, return id of created object
+        response = {"id":str(id)}
+        return response, 200
+
 
 @app.route('/edit/honeypot', methods=['POST'])
 def edit_honeypot():
@@ -528,7 +539,7 @@ def edit_honeypot():
                         edit_hp.edit_tags(DB_settings, datacenter_settings, honeypot, hp_infos_received["tags"])
                         succes = True
                     
-                    except:
+                    except Exception as e:
                         succes = False
                 if succes:
                     modifs["tags"] = hp_infos_received["tags"]
@@ -636,7 +647,7 @@ def edit_serv():
                     try:
                         edit_server.edit_tags(DB_settings, datacenter_settings, server, serv_infos_received["tags"])
                         succes = True
-                    except:
+                    except Exception as e:
                         succes = False
                 if succes:
                     modifs["tags"]=serv_infos_received["tags"]
@@ -754,11 +765,11 @@ def edit_lk():
                 if link_infos_received["tags_serv"].lower() != "all":
                     try:
                         Gotham_check.check_doublon_tags(DB_settings, link_infos_received["tags_serv"])
-                    except:
+                    except Exception as e:
                         return "Error with tags: some server tags do not exists\n"
                     try:
                         edit_link.edit_tags(DB_settings, datacenter_settings, link_serv_hp, link_infos_received["tags_serv"], "serv")
-                    except:
+                    except Exception as e:
                         return "Error in tag server edition\n"
                 modifs["tags_serv"]=link_infos_received["tags_serv"]
         
@@ -782,11 +793,11 @@ def edit_lk():
                 if link_infos_received["tags_hp"].lower() != "all":
                     try:
                         Gotham_check.check_doublon_tags(DB_settings, link_infos_received["tags_hp"])
-                    except:
+                    except Exception as e:
                         return "Error with tags: some honeypot tags do not exists\n"
                     try:
                         edit_link.edit_tags(DB_settings, datacenter_settings, link_hp_serv, link_infos_received["tags_hp"], "hp")
-                    except:
+                    except Exception as e:
                         return "Error in tag hp edition\n"
                 modifs["tags_hp"]=link_infos_received["tags_hp"]
         
@@ -864,7 +875,7 @@ def edit_lk():
             if link_infos_received["nb_hp"]!= link["link_nb_hp"]:
                 try:
                     nb_hp = edit_link.edit_nb(DB_settings, datacenter_settings, link_hp_serv, link_infos_received["nb_hp"], "hp")
-                except:
+                except Exception as e:
                     return "Error in hp nb edition\n"
                 modifs["nb_hp"]= nb_hp
 
@@ -904,7 +915,10 @@ def rm_honeypot():
         except Exception as e:
             return "An error occured during the deletion of the rsyslog configuration\n"
         
-        return "Deletion completed : " + str(id)+"\n"
+        # If all operations succeed, return id of deleted object
+        response = {"id":str(id)}
+        return response, 200
+
 
 @app.route('/delete/server', methods=['POST'])
 def rm_serv():
@@ -922,7 +936,11 @@ def rm_serv():
             rm_server.main(DB_settings, datacenter_settings, id=id)
         except Exception as e:
             return "An error occured during the deletion of the server : "+str(e)+"\n"
-        return "Deletion completed : " + str(id)+"\n"
+        
+        # If all operations succeed, return id of created object
+        response = {"id":str(id)}
+        return response, 200
+
 
 @app.route('/delete/link', methods=['POST'])
 def rm_lk():
@@ -940,7 +958,11 @@ def rm_lk():
             rm_link.main(DB_settings, id=id)
         except Exception as e:
             return "An error occured during the deletion of the link : "+str(e)+"\n"
-        return "Deletion completed : " + str(id) + "\n"
+
+        # If all operations succeed, return id of created object
+        response = {"id":str(id)}
+        return response, 200
+
 
 @app.route('/list/honeypot', methods=['GET'])
 def ls_honeypot():
@@ -1195,6 +1217,8 @@ def get_version():
         # Return the orchestrator's version
         #
 
-        return "GOTHAM's version : "+version+"\n"
+        # Return orchestrator version
+        response = {"version":str(version)}
+        return response, 200
 
 app.run()
