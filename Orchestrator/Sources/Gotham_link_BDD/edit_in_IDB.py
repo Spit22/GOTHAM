@@ -421,7 +421,6 @@ def lhs(DB_connection, modifs, conditions):
 
     # Create the query
     query="UPDATE Link_Hp_Serv SET "+modifs+" WHERE "+conditions
-    print(query)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request

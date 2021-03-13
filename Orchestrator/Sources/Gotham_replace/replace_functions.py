@@ -183,7 +183,6 @@ def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_info
         add_link.deploy_nginxConf(DB_settings, link["link_id"], servers)
     # Delete one hp for one link
     elif old_hp_infos != {} and new_hp_infos == {} and link != None :
-        print("You shall not pass here")
         already_update = []
         servers = []
         interable_servs = link["servs"] if "servs" in link.keys() else old_hp_infos["servs"]
