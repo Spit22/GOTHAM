@@ -12,7 +12,9 @@ import sys
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
+                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+
 
 def check_ssh(ip, ssh_port, ssh_key):
     '''
@@ -25,23 +27,28 @@ def check_ssh(ip, ssh_port, ssh_key):
     '''
     return check_SSH.main(ip, ssh_port, ssh_key)
 
+
 def check_ping(hostname):
     return check_PING.main(hostname)
+
 
 def check_tags(object_type, objects_infos, tags_hp='', tags_serv='', mode=False):
     return check_TAGS.check_tags(object_type, objects_infos, tags_hp, tags_serv, mode)
 
+
 def check_server_ports_is_free(serv_infos, ports):
     return check_SERVER_PORTS.check_server_ports(serv_infos, ports)
 
+
 def check_servers_ports_matching(servs_infos, ports):
-    result=[]
+    result = []
     for serv_infos in servs_infos:
-        free_ports=check_server_ports_is_free(serv_infos, ports)
-        if free_ports!='':
-            result.append(dict(serv_infos,**{"free_ports":free_ports}))
-    
+        free_ports = check_server_ports_is_free(serv_infos, ports)
+        if free_ports != '':
+            result.append(dict(serv_infos, **{"free_ports": free_ports}))
+
     return result
+
 
 def check_doublon_server(DB_settings, ip):
     '''
@@ -53,6 +60,7 @@ def check_doublon_server(DB_settings, ip):
     '''
     return check_DOUBLON.server(DB_settings, ip)
 
+
 def check_doublon_tag(DB_settings, tag):
     '''
     Check if a tag doesn't already exists in the internal database
@@ -62,6 +70,7 @@ def check_doublon_tag(DB_settings, tag):
         tag (string) : name of the tag you want to check
     '''
     return check_DOUBLON.tag(DB_settings, tag)
+
 
 def check_doublon_tags(DB_settings, tags):
     '''
@@ -75,6 +84,7 @@ def check_doublon_tags(DB_settings, tags):
         check_DOUBLON.tags(DB_settings, tags)
     except Exception as e:
         raise ValueError("Error while check doublon tags : "+str(e))
+
 
 def check_tag_still_used(DB_settings, tag="%", id="%"):
     '''
@@ -97,11 +107,12 @@ def check_tag_still_used(DB_settings, tag="%", id="%"):
         logging.error(error)
         raise ValueError(error)
     try:
-        result = check_TAGS.check_tag_still_used(DB_connection, tag,id)
+        result = check_TAGS.check_tag_still_used(DB_connection, tag, id)
     except Exception as e:
         raise ValueError(e)
     DB_connection.close()
     return result
+
 
 def check_used_port(DB_settings):
     '''
@@ -126,6 +137,6 @@ def check_used_port(DB_settings):
     DB_connection.close()
     return result
 
+
 def check_server_redirects(ip_srv, port):
     return check_SERVER_REDIRECTS.main(ip_srv, port)
-    

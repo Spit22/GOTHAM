@@ -18,7 +18,8 @@ import add_link
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log', level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
+                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 #=======================#
 
 #===Retrieve settings from configuration file===#
@@ -28,17 +29,20 @@ tags_separator = config['tag']['separator']
 ports_separator = config['port']['separator']
 #===============================================#
 
+
 def edit_tags(DB_settings, datacenter_settings, server, tags):
 
-    old_tags=server["serv_tags"].split("||")
-    new_tags=tags.split(tags_separator)
+    old_tags = server["serv_tags"].split("||")
+    new_tags = tags.split(tags_separator)
 
-    deleted_tags=list(set(old_tags)-set(new_tags))
+    deleted_tags = list(set(old_tags)-set(new_tags))
 
-    dsp_server=Gotham_normalize.normalize_display_object_infos(server,"serv")
+    dsp_server = Gotham_normalize.normalize_display_object_infos(
+        server, "serv")
 
     try:
-        Gotham_replace.replace_serv_for_deleted_tags(DB_settings, datacenter_settings, dsp_server, deleted_tags)
+        Gotham_replace.replace_serv_for_deleted_tags(
+            DB_settings, datacenter_settings, dsp_server, deleted_tags)
     except Exception as e:
         raise ValueError(e)
 
@@ -54,11 +58,10 @@ def check_edited_connection(DB_settings, server, ip, ssh_port, ssh_key):
             raise ValueError(error)
 
     # Check given auth information are ok
-    connected = Gotham_check.check_ssh(ip, ssh_port, ssh_key) 
+    connected = Gotham_check.check_ssh(ip, ssh_port, ssh_key)
     if not connected:
         error = "Provided ssh_key or ssh_port is wrong"
         logging.error(error)
         raise ValueError(error)
-        
 
     return

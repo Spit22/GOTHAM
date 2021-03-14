@@ -6,7 +6,9 @@ import sys
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
+                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+
 
 def server(DB_settings, ip):
     # Check if a server is already present in database
@@ -19,6 +21,7 @@ def server(DB_settings, ip):
     response = get_server_infos(DB_settings, ip=ip)
     return not(response == [])
 
+
 def tag(DB_settings, tag):
     # Check if a tag is already present in database
     #
@@ -29,6 +32,7 @@ def tag(DB_settings, tag):
 
     response = get_tag_infos(DB_settings, tag=tag)
     return not(response == [])
+
 
 def tags(DB_settings, tags):
     # Check if tags is already present in database
@@ -49,5 +53,3 @@ def tags(DB_settings, tags):
             error = str(a_tag) + " : tag does not exists"
             logging.error(error)
             raise ValueError(error)
-
-    
