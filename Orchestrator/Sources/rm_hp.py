@@ -33,6 +33,14 @@ tag_separator = config['tag']['separator']
 
 
 def main(DB_settings, datacenter_settings, id):
+    # Execute the deletion attempt
+    #
+    # DB_settings (dict) : all authentication information to connect to db
+    # datacenter_settings (dict) : all authentication information to connect to datacenter
+    # id (string) : id of the honeypot we want to delete
+    #
+    # Return true if deletion succeed, false in the other case
+
     # Check id format
     try:
         id = normalize_id_honeypot(id)
@@ -80,6 +88,11 @@ def main(DB_settings, datacenter_settings, id):
 
 
 def remove_rsyslog_configuration(datacenter_settings, id_hp):
+    # Delete the rsyslog configuration of the honeypot on datacenter
+    #
+    # datacenter_settings (dict) : all authentication information to connect to datacenter
+    # id_hp (string) : id of the honeypot we are trying to delete configuration
+
     # Vars
     rsyslog_conf_datacenter_local_path = "/rsyslog/datacenter/"
     rsyslog_conf_orchestrator_local_path = "/rsyslog/orchestrator/"

@@ -18,6 +18,13 @@ logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
 
 
 def main(DB_settings, id):
+    # Execute a link deletion attemps
+    #
+    # DB_settings (dict) : all authentication information to connect to db
+    # id (string) : id of the link we are trying to delete
+    #
+    # Return true if deletion succeed, false in the other case
+
     # Check id format
     try:
         id = normalize_id_link(id)
@@ -56,6 +63,11 @@ def main(DB_settings, id):
 
 
 def remove_links_on_servers(DB_settings, result):
+    # Delete link on nginx configuration of each server
+    #
+    # DB_settings (dict) : all authentication information to connect to db
+    # result ?
+
     try:
         lk_display = normalize_display_object_infos(result, "link", "serv")
     except Exception as e:

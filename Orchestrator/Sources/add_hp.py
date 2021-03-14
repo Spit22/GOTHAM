@@ -14,15 +14,13 @@ logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
 
 
 def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_port):
-    '''
-    Generates a docker-compose.yml file  from given information
+    # Generates a docker-compose.yml file  from given information
+    #
+    # id (string) : id of the honeypot
+    # dockerfile_path (string) : local path to the dockerfile
+    # log_path (string) : remote path of logs (in the honeypot)
+    # mapped_port (int) : available port we can map honeypot to
 
-    ARGUMENTS:
-        id (string) : id of the honeypot
-        dockerfile_path (string) : local path to the dockerfile
-        log_path (string) : remote path of logs (in the honeypot)
-        mapped_port (int) : available port we can map honeypot to
-    '''
     # Create the docker-compose
     dockercompose = open(str(dockerfile_path)+"docker-compose.yml", "a")
     # Write the docker-compose version
@@ -51,18 +49,16 @@ def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_
 
 
 def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id_hp):
-    '''
-    Install and deploy an Nginx Reverse-Proxy on a given server
-
-    ARGUMENTS :
-        ip_dc (string): ip of remote server
-        dc_ssh_port (int) : port the ssh service listen
-        dc_ssh_key (file-like object) : ssh key used to connect to server
-        dockerfile_paht (string) : local path of the dockerfile
-        id_hp (string) : id of the hp we are deploying
-
-    Return True if succeed, False in the other case
-    '''
+    # Install and deploy an Nginx Reverse-Proxy on a given server
+    #
+    # ip_dc (string): ip of remote server
+    # dc_ssh_port (int) : port the ssh service listen
+    # dc_ssh_key (file-like object) : ssh key used to connect to server
+    # dockerfile_paht (string) : local path of the dockerfile
+    # id_hp (string) : id of the hp we are deploying
+    #
+    # Return True if succeed, False in the other case
+    
     dockerfile_path = [dockerfile_path+"/Dockerfile",
                        dockerfile_path+"/docker-compose.yml"]
     # Declare local vars
@@ -81,6 +77,15 @@ def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id_hp):
 
 
 def generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, id_hp, rsyslog_conf_datacenter_local_path, remote_hp_log_file_path):
+    # Generates Rsyslog configuration for datacenter-side
+    #
+    # orch_ip (string) : Orchestrator's IP
+    # orch_rsyslog_port (int) : Port where rsyslog is listening
+    # rulebase_path (string) : intern path of the rulebase
+    # id_hp (string) : id of the honeypot we are configuring logging
+    # rsyslog_conf_datacenter_local_path (string) : intern path of rsyslog datacenter configuration
+    # remote_hp_log_file_path (string) : remote honeypot log files
+
     try:
         # Create the configuration file
         rsyslog_conf_file = open(
@@ -104,6 +109,12 @@ def generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, 
 
 
 def generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_path, local_hp_log_file_path):
+    # Generates Rsyslog configuration for orchestrator-side
+    #
+    # id_hp (string) : id of the honyepot we are configuring logging
+    # rsyslog_conf_orchestrator_local_path (string) : Rsyslog configuration path
+    # local_hp_log_file_path (string) : Hp logs files path
+
     try:
         # Create the configuration file
         rsyslog_conf_file = open(
@@ -123,6 +134,11 @@ def generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_pa
 
 
 def generate_rulebase(id_hp, rules, rulebase_path):
+    # Generates the specific rulebase for honeypot
+    #
+    # id_hp (string) : Id of the honeypot we are configuring
+    # rules (string) : Honeypot rsyslog rules
+    # rulebase_path (string) : Intern path to honeypot rulebase
     try:
         # Create the rulebase
         rulebase = open(rulebase_path + id_hp + ".rb", "a")
@@ -138,6 +154,13 @@ def generate_rulebase(id_hp, rules, rulebase_path):
 
 
 def deploy_rsyslog_conf(datacenter_settings, orchestrateur_settings, id_hp, rules):
+    # Deploy remotely the rsyslog configuration
+    #
+    # datacenter_settings (dict) : all authentication information to connect to datacenter
+    # orchestrateur_settinfs (dict) : all authentication information to connect to orchestrator
+    # id_hp (string) : Id of the honeypot we are configuring
+    # rules (string) : rsyslog rules
+
     # On effectue 2 connexions SSH
     dc_ssh_key_1 = datacenter_settings["ssh_key"]
     dc_ssh_key_2 = datacenter_settings["ssh_key"]

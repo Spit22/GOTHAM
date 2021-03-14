@@ -31,6 +31,12 @@ ports_separator = config['port']['separator']
 
 
 def edit_tags(DB_settings, datacenter_settings, server, tags):
+    # Edit server's tags
+    #
+    # DB_settings (dict) : all authentication information to connect to db
+    # datacenter_settings (dict): all authentication information to connect to datacenter
+    # server (dict) : server information
+    # tags (string) : new server's tags
 
     old_tags = server["serv_tags"].split("||")
     new_tags = tags.split(tags_separator)
@@ -48,6 +54,13 @@ def edit_tags(DB_settings, datacenter_settings, server, tags):
 
 
 def check_edited_connection(DB_settings, server, ip, ssh_port, ssh_key):
+    # Check if we can connect to the server with given informations
+    #
+    # DB_settings (dict) : all authentication information to connect to db
+    # server (dict) : server information
+    # ip (string) : new ip we have to check
+    # ssh_port (int) : new ssh port we have to check
+    # ssh_key (string) : new ssh key we have to check
 
     if server["serv_ip"] != ip:
         # First check the ip not already exists in database

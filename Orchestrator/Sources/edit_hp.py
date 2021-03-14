@@ -31,6 +31,13 @@ tags_separator = config['tag']['separator']
 
 
 def edit_tags(DB_settings, datacenter_settings, honeypot, tags):
+    # Edit honeypot's tags
+    #
+    # DB_settings (dict) : all authentication information to connect to db
+    # datacenter_settings (dict) : all authentication information to connect to datacenter
+    # honeypot (dict) : honeypot information
+    # tags (string) : new tags of the honeypot
+
     old_tags = honeypot["hp_tags"].split("||")
     new_tags = tags.split(tags_separator)
 

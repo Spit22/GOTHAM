@@ -6,15 +6,13 @@ from Gotham_SSH_SCP import send_file_and_execute_commands
 
 
 def generate_nginxConf(db_settings, link_id, dc_ip, honeypots, exposed_port):
-    '''
-    Generate the config file to include in nginx config for the redirection
+    # Generate the config file to include in nginx config for the redirection
+    # 
+    # link_id (string): id of the link we are configuring nginx for
+    # dc_ip (string): ip of FQDN of the remote datacenter
+    # honeypots (list): list of honeypots
+    # exposed_port (int): port to listen on the server
 
-    ARGUMENTS:
-        link_id (string): id of the link we are configuring nginx for
-        dc_ip (string): ip of FQDN of the remote datacenter
-        honeypots (list): list of honeypots
-        exposed_port (int): port to listen on the server
-    '''
     # Initialise the creation of the new nginx config file
     nginxRedirectionPath = "/data/template/" + \
         str(link_id) + "-"+str(exposed_port)+".conf"
@@ -38,13 +36,11 @@ def generate_nginxConf(db_settings, link_id, dc_ip, honeypots, exposed_port):
 
 
 def deploy_nginxConf(db_settings, link_id, servers):
-    '''
-    Deploy the nginx configuration on all servers chosen
+    # Deploy the nginx configuration on all servers chosen
+    #
+    # link_id (string): id of the link we are configuring nginx for
+    # servers (dict): list of servers we want to deploy on associated with exposed ports
 
-    ARGUMENTS:
-        link_id (string): id of the link we are configuring nginx for
-        servers (dict): list of servers we want to deploy on associated with exposed ports
-    '''
     # Initialize command and file
     checkAndReloadNginx_command = [
         "/usr/sbin/nginx -t && /usr/sbin/nginx -s reload"]

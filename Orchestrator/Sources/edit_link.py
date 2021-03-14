@@ -35,6 +35,13 @@ ports_separator = config['port']['separator']
 
 
 def edit_tags(DB_settings, datacenter_settings, link, tags, type_tag):
+    # Edit tags for a specified link
+    #
+    # DB_settings (dict) : all authentication information to connect to db
+    # datacenter_settings (dict) : all authentication information to connect to datacenter
+    # link (dict) : link information
+    # tags (string) : new desired tags
+    # type_tag (string) : "hp" or "serv"
 
     if type_tag != "hp" and type_tag != "serv":
         logging.error(f"type_tag is incorrect")
@@ -71,6 +78,13 @@ def edit_tags(DB_settings, datacenter_settings, link, tags, type_tag):
 
 
 def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
+    # Edit honeypot number or server number for a specified link
+    #
+    # DB_settings (dict) : all authentication information to connect to db
+    # datacenter_settings (dict) : all authentication information to connect to datacenter
+    # link (dict): link information
+    # nb (int) : new number of objects
+    # type_nb (string) : "hp" or "serv"
 
     dsp_link = Gotham_normalize.normalize_display_object_infos(
         link, "link", type_nb)
@@ -393,6 +407,12 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
 
 
 def edit_ports(DB_settings, datacenter_settings, link, new_ports):
+    # Edit ports exposed by a link
+    #
+    # DB_settings (dict) : all authentication information to connect to db
+    # datacenter_settings (dict) : all authentication information to connect to datacenter
+    # link (dict) : link information
+    # new_pors (string) : new desired ports
 
     dsp_link = Gotham_normalize.normalize_display_object_infos(
         link, "link", "serv")

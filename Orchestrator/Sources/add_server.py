@@ -16,16 +16,14 @@ logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
 
 
 def deploy(ip, ssh_port, used_ssh_key):
-    '''
-    Install and deploy an Nginx Reverse-Proxy on a given server
+    # Install and deploy an Nginx Reverse-Proxy on a given server
+    #
+    # ip (string): ip of remote server
+    # ssh_port (int) : port the ssh service listen
+    # used_ssh_key (file-like object) : ssh key used to connect to server
+    #
+    # Return True if succeed, False in the other case
 
-    ARGUMENTS:
-        ip (string): ip of remote server
-        ssh_port (int) : port the ssh service listen
-        used_ssh_key (file-like object) : ssh key used to connect to server
-
-    Return True if succeed, False in the other case
-    '''
     # Declare local vars
     installNginx_file = [GOTHAM_HOME +
                          "/Orchestrator/NGINX_scripts/install_nginx.sh"]

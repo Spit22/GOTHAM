@@ -22,6 +22,15 @@ logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
 
 
 def main(DB_settings, datacenter_settings, id='sv-00000000000000000000000000000000', ip='255.255.255.255'):
+    # Execute a server deletion attempt
+    #
+    # DB_settings (dict) : all authentication information to connect to db
+    # datacenter_settings (dict) : all authentication information to connect to datacenter
+    # id (string) : id of the server we want to delete
+    # ip (string) : ip of the server we want to delete
+    #
+    # Return true if deletion succeed, false in the other case
+
     # Check id format
     try:
         serv_infos = {'id': id, 'ip': ip}
@@ -71,6 +80,12 @@ def main(DB_settings, datacenter_settings, id='sv-000000000000000000000000000000
 
 
 def remove_nginx_on_server(hostname, port, ssh_key):
+    # Reomves nginx items on server
+    #
+    # hostname (string) : hostname or ip of the server
+    # port (int) : ssh port to connect to
+    # ssh_key (string) : ssh key to authenticate with
+
     commands = ["rm -rf /etc/nginx", "rm -r /usr/sbin/nginx", "rm -r /usr/lib/nginx/modules", "rm -r /var/log/nginx/error.log",
                 "rm -r /var/log/nginx/access.log", "rm -r /run/nginx.pid", "rm -r /var/lock/nginx.lock"]
     try:
