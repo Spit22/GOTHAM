@@ -7,15 +7,17 @@ from . import get_infos
 from . import add_in_IDB
 from . import remove_in_IDB
 from . import edit_in_IDB
-from Gotham_normalize import normalize_id_server,normalize_id_honeypot,normalize_id_link
+from Gotham_normalize import normalize_id_server, normalize_id_honeypot, normalize_id_link
 
 # Logging components
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename = GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',level=logging.DEBUG ,format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
+                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
 ########## READ THINGS IN THE INTERNAL DATABASE ##########
+
 
 def get_server_infos(DB_settings, mode=False, ip="%", id="%", name="%", tags="%", state="%", descr="%", ssh_port="%"):
     '''
@@ -30,8 +32,8 @@ def get_server_infos(DB_settings, mode=False, ip="%", id="%", name="%", tags="%"
         tag (string, optional) : tag of the server whose data we want
         state (string, optional) : state of the server whose data we want
     '''
-    if tags.lower()=="all":
-        tags="%"
+    if tags.lower() == "all":
+        tags = "%"
 
     try:
         DB_connection = mariadb.connect(
@@ -46,10 +48,12 @@ def get_server_infos(DB_settings, mode=False, ip="%", id="%", name="%", tags="%"
         error = "Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    result = get_infos.server(DB_connection, mode, ip, id, name, tags, state, descr, ssh_port)
+    result = get_infos.server(DB_connection, mode, ip,
+                              id, name, tags, state, descr, ssh_port)
     DB_connection.close()
     logging.debug(f"[-] Connection to the internal database closed")
     return result
+
 
 def get_honeypot_infos(DB_settings, mode=False, id="%", name="%", tags="%", state="%", descr="%", port="%", parser="%", logs="%", source="%", port_container="%"):
     '''
@@ -65,8 +69,8 @@ def get_honeypot_infos(DB_settings, mode=False, id="%", name="%", tags="%", stat
         state (string, optional) : state of the server whose data we want
     '''
 
-    if tags.lower()=="all":
-        tags="%"
+    if tags.lower() == "all":
+        tags = "%"
 
     try:
         DB_connection = mariadb.connect(
@@ -81,10 +85,12 @@ def get_honeypot_infos(DB_settings, mode=False, id="%", name="%", tags="%", stat
         error = "Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    result = get_infos.honeypot(DB_connection, mode, id, name, tags, state, descr, port, parser, logs, source, port_container)
+    result = get_infos.honeypot(DB_connection, mode, id, name, tags,
+                                state, descr, port, parser, logs, source, port_container)
     DB_connection.close()
     logging.debug(f"[-] Connection to the internal database closed")
     return result
+
 
 def get_link_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="%", tags_hp="%", tags_serv="%"):
     '''
@@ -92,14 +98,14 @@ def get_link_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="%", tags
 
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
-       
+
     '''
 
-    if tags_hp.lower()=="all":
-        tags_hp="%"
+    if tags_hp.lower() == "all":
+        tags_hp = "%"
 
-    if tags_serv.lower()=="all":
-        tags_serv="%"
+    if tags_serv.lower() == "all":
+        tags_serv = "%"
 
     try:
         DB_connection = mariadb.connect(
@@ -114,10 +120,12 @@ def get_link_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="%", tags
         error = "Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    result = get_infos.link(DB_connection, mode, id, nb_hp, nb_serv, tags_hp, tags_serv)
+    result = get_infos.link(DB_connection, mode, id,
+                            nb_hp, nb_serv, tags_hp, tags_serv)
     DB_connection.close()
     logging.debug(f"[-] Connection to the internal database closed")
     return result
+
 
 def get_link_hp_serv_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="%", tags_hp="%", tags_serv="%"):
     '''
@@ -125,15 +133,14 @@ def get_link_hp_serv_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="
 
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
-       
+
     '''
 
-    if tags_hp.lower()=="all":
-        tags_hp="%"
+    if tags_hp.lower() == "all":
+        tags_hp = "%"
 
-    if tags_serv.lower()=="all":
-        tags_serv="%"
-
+    if tags_serv.lower() == "all":
+        tags_serv = "%"
 
     try:
         DB_connection = mariadb.connect(
@@ -148,10 +155,12 @@ def get_link_hp_serv_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="
         error = "Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    result = get_infos.link_force_hp_serv(DB_connection, mode, id, nb_hp, nb_serv, tags_hp, tags_serv)
+    result = get_infos.link_force_hp_serv(
+        DB_connection, mode, id, nb_hp, nb_serv, tags_hp, tags_serv)
     DB_connection.close()
     logging.debug(f"[-] Connection to the internal database closed")
     return result
+
 
 def get_link_serv_hp_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="%", tags_hp="%", tags_serv="%"):
     '''
@@ -159,14 +168,14 @@ def get_link_serv_hp_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="
 
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
-       
+
     '''
 
-    if tags_hp.lower()=="all":
-        tags_hp="%"
+    if tags_hp.lower() == "all":
+        tags_hp = "%"
 
-    if tags_serv.lower()=="all":
-        tags_serv="%"
+    if tags_serv.lower() == "all":
+        tags_serv = "%"
 
     try:
         DB_connection = mariadb.connect(
@@ -181,10 +190,12 @@ def get_link_serv_hp_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="
         error = "Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    result = get_infos.link_force_serv_hp(DB_connection, mode, id, nb_hp, nb_serv, tags_hp, tags_serv)
+    result = get_infos.link_force_serv_hp(
+        DB_connection, mode, id, nb_hp, nb_serv, tags_hp, tags_serv)
     DB_connection.close()
     logging.debug(f"[-] Connection to the internal database closed")
     return result
+
 
 def get_tag_infos(DB_settings, mode=False, tag="%", id="%"):
     '''
@@ -197,9 +208,8 @@ def get_tag_infos(DB_settings, mode=False, tag="%", id="%"):
         tag (string, optional) : name of the tag whose data we want
     '''
 
-    if tag.lower()=="all":
-        tag="%"
-
+    if tag.lower() == "all":
+        tag = "%"
 
     try:
         DB_connection = mariadb.connect(
@@ -218,9 +228,6 @@ def get_tag_infos(DB_settings, mode=False, tag="%", id="%"):
     DB_connection.close()
     logging.debug(f"[-] Connection to the internal database closed")
     return result
-
-
-
 
 
 ########## ADD THINGS IN THE INTERNAL DATABASE ##########
@@ -253,6 +260,7 @@ def add_server_DB(DB_settings, server_infos):
     except Exception as e:
         raise ValueError(error)
 
+
 def add_honeypot_DB(DB_settings, hp_infos):
     '''
     Add a honeypot in the internal database
@@ -280,6 +288,7 @@ def add_honeypot_DB(DB_settings, hp_infos):
         logging.debug(f"[-] Connection to the internal database closed")
     except Exception as e:
         raise ValueError(e)
+
 
 def add_link_DB(DB_settings, lk_infos):
     '''
@@ -311,6 +320,7 @@ def add_link_DB(DB_settings, lk_infos):
         logging.error(error)
         raise ValueError(error)
 
+
 def add_lhs_DB(DB_settings, lhs_infos):
     '''
     Add a link-honeypot-server combination in the internal database
@@ -341,6 +351,7 @@ def add_lhs_DB(DB_settings, lhs_infos):
 
 ########## REMOVE IN THE INTERNAL DATABASE ##########
 
+
 def remove_server_DB(DB_settings, id):
     '''
     Remove a server in the internal database from its id
@@ -369,6 +380,7 @@ def remove_server_DB(DB_settings, id):
         logging.debug(f"[-] Connection to the internal database closed")
     except Exception as e:
         raise ValueError(e)
+
 
 def remove_server_tags_DB(DB_settings, id="", tag=""):
     '''
@@ -399,6 +411,7 @@ def remove_server_tags_DB(DB_settings, id="", tag=""):
     except Exception as e:
         raise ValueError(e)
 
+
 def remove_honeypot_DB(DB_settings, id):
     '''
     Remove a honeypot in the internal database from its id
@@ -428,6 +441,7 @@ def remove_honeypot_DB(DB_settings, id):
         logging.debug(f"[-] Connection to the internal database closed")
     except Exception as e:
         raise ValueError(e)
+
 
 def remove_link_DB(DB_settings, id):
     '''
@@ -460,7 +474,7 @@ def remove_link_DB(DB_settings, id):
         raise ValueError(e)
 
 
-def remove_lhs(DB_settings,id_link="%",id_hp="%",id_serv="%"):
+def remove_lhs(DB_settings, id_link="%", id_hp="%", id_serv="%"):
     '''
     Remove a Link_Hp_Serv combinaison in the internal database from its id
 
@@ -486,7 +500,7 @@ def remove_lhs(DB_settings,id_link="%",id_hp="%",id_serv="%"):
         raise ValueError(error)
     # Remove the link
     try:
-        remove_in_IDB.lhs(DB_connection,id_link,id_hp,id_serv)
+        remove_in_IDB.lhs(DB_connection, id_link, id_hp, id_serv)
         DB_connection.close()
         logging.debug(f"[-] Connection to the internal database closed")
     except Exception as e:
@@ -623,4 +637,3 @@ def edit_server_DB(DB_settings, modifs, conditions):
         logging.debug(f"[-] Connection to the internal database closed")
     except Exception as e:
         raise ValueError(e)
-

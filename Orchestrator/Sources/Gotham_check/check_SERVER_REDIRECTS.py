@@ -1,5 +1,6 @@
 import socket
 
+
 def main(ip_srv, port):
     # Check if requesing ip_serv:exposed_port is open
     #
@@ -10,9 +11,10 @@ def main(ip_srv, port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     result = sock.connect_ex((ip_srv, int(port)))
     if result == 0:
-    	return True
+        return True
     sock.close()
     return False
+
 
 if __name__ == '__main__':
     main("172.16.2.201", 8081)
