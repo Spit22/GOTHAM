@@ -5,6 +5,12 @@ import pytest
 
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 sys.path.insert(1, GOTHAM_HOME + 'Orchestrator/Sources')
+print(sys.path)
+
+from Gotham_link_BDD import add_server_DB, add_honeypot_DB, add_link_DB
+from Gotham_link_BDD import remove_server_DB, remove_honeypot_DB, remove_link_DB
+
+
 
 DB_settings = {"username":"gotham", "password":"password", "hostname":"localhost", "port":"3306", "database":"GOTHAM"}
 
@@ -28,36 +34,63 @@ honeypot_infos_5 = {"id":"hp-1F5B3AFE32EE71EFB1D25EFFFC2CA005", 'name':'hp-test-
 honeypot_infos_6 = {"id":"hp-1F5B3AFE32EE71EFB1D25EFFFC2CA006", 'name':'hp-test-7','tags':'LDAP', 'port':389,'parser':'my%parsing%list','logs':'TO_ADD','source':"TO_ADD", "port_container":389,'state':'UNUSED'}
 honeypot_infos_7 = {"id":"hp-1F5B3AFE32EE71EFB1D25EFFFC2CA007", 'name':'hp-test-8','tags':'Elasticsearch', 'port':3003,'parser':'my%parsing%list','logs':'TO_ADD','source':"TO_ADD", "port_container":3003,'state':'UNUSED'}
 
+lk_infos_1 = {"id": "lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA000", "nb_hp": 4, "nb_serv": 2, "tags_hp": "SSH", "tags_serv": "France, Europe", 'ports': '22,186,658'}
 
-from Gotham_link_BDD import *
 
-def test_index(app, client):
-    with pytest.raises(ValueError) as e:
+
+
+def test_add_server(app, client):
+    try:
         add_server_DB(DB_settings, server_infos_1)
-    with pytest.raises(ValueError) as e: 
+    except Exception as e:
+        raise pytest.fail(e)
+    try:
         add_server_DB(DB_settings, server_infos_2)
-    with pytest.raises(ValueError) as e:
+    except Exception as e:
+        raise pytest.fail(e)
+    try:
         add_server_DB(DB_settings, server_infos_3)
-    with pytest.raises(ValueError) as e:
-        add_server_DB(DB_settings, server_infos_4)
-    with pytest.raises(ValueError) as e:
-        add_server_DB(DB_settings, server_infos_5)
-    with pytest.raises(ValueError) as e:
-        add_server_DB(DB_settings, server_infos_6)
-    with pytest.raises(ValueError) as e:
-        add_server_DB(DB_settings, server_infos_7)
+    except Exception as e:
+        raise pytest.fail(e)
 
-    with pytest.raises(ValueError) as e:
+def test_add_honeypot(app, client):
+    try:
         add_honeypot_DB(DB_settings, honeypot_infos_1)
-    with pytest.raises(ValueError) as e:
+    except Exception as e:
+        raise pytest.fail(e)
+    try:
         add_honeypot_DB(DB_settings, honeypot_infos_2)
-    with pytest.raises(ValueError) as e:
+    except Exception as e:
+        raise pytest.fail(e)
+    try:
         add_honeypot_DB(DB_settings, honeypot_infos_3)
-    with pytest.raises(ValueError) as e:
-        add_honeypot_DB(DB_settings, honeypot_infos_4)
-    with pytest.raises(ValueError) as e:
-        add_honeypot_DB(DB_settings, honeypot_infos_5)
-    with pytest.raises(ValueError) as e:
-        add_honeypot_DB(DB_settings, honeypot_infos_6)
-    with pytest.raises(ValueError) as e:
-        add_honeypot_DB(DB_settings, honeypot_infos_7)
+    except Exception as e:
+        raise pytest.fail(e)
+
+def test_rm_server(app, client):
+    try:
+        remove_server_DB(DB_settings, server_infos_1)
+    except Exception as e:
+        raise pytest.fail(e)
+    try:
+        remove_server_DB(DB_settings, server_infos_2)
+    except Exception as e:
+        raise pytest.fail(e)
+    try:
+        remove_server_DB(DB_settings, server_infos_3)
+    except Exception as e:
+        raise pytest.fail(e)
+
+def test_rm_honeypot(app, client):
+    try:
+        remove_honeypot_DB(DB_settings, honeypot_infos_1)
+    except Exception as e:
+        raise pytest.fail(e)
+    try:
+        remove_honeypot_DB(DB_settings, honeypot_infos_2)
+    except Exception as e:
+        raise pytest.fail(e)
+    try:
+        remove_honeypot_DB(DB_settings, honeypot_infos_3)
+    except Exception as e:
+        raise pytest.fail(e)
