@@ -61,15 +61,16 @@ def check_doublon_server(DB_settings, ip):
     return check_DOUBLON.server(DB_settings, ip)
 
 
-def check_doublon_tag(DB_settings, tag):
+def check_doublon_tag(DB_settings, tag, table=""):
     '''
     Check if a tag doesn't already exists in the internal database
 
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
         tag (string) : name of the tag you want to check
+        table (string, optional) : name of the table we want search in (""=Tag table, "hp"=Hp_Tags table, "serv"=Serv_Tags table)
     '''
-    return check_DOUBLON.tag(DB_settings, tag)
+    return check_DOUBLON.tag(DB_settings, tag, table)
 
 
 def check_doublon_tags(DB_settings, tags):

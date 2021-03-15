@@ -22,15 +22,16 @@ def server(DB_settings, ip):
     return not(response == [])
 
 
-def tag(DB_settings, tag):
+def tag(DB_settings, tag, table=""):
     # Check if a tag is already present in database
     #
     # DB_settings (json) : auth information
     # tag (string) : tag we want to check
+    # table (string, optional) : name of the table we want search in (""=Tag table, "hp"=Hp_Tags table, "serv"=Serv_Tags table)
     #
     # Return True if already exists, False in the other case
 
-    response = get_tag_infos(DB_settings, tag=tag)
+    response = get_tag_infos(DB_settings, tag=tag, table)
     return not(response == [])
 
 

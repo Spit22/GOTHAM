@@ -197,7 +197,7 @@ def get_link_serv_hp_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="
     return result
 
 
-def get_tag_infos(DB_settings, mode=False, tag="%", id="%"):
+def get_tag_infos(DB_settings, mode=False, tag="%", id="%",table=""):
     '''
     Retrieve a JSON with all the data of one or several tags from the internal database
 
@@ -206,6 +206,7 @@ def get_tag_infos(DB_settings, mode=False, tag="%", id="%"):
         mode (bool, optional) : False means accurate answer, True means extended answer
         id (string, optional) : id of the tag whose data we want
         tag (string, optional) : name of the tag whose data we want
+        table (string, optional) : name of the table we want search in (""=Tag table, "hp"=Hp_Tags table, "serv"=Serv_Tags table)
     '''
 
     if tag.lower() == "all":
@@ -224,7 +225,12 @@ def get_tag_infos(DB_settings, mode=False, tag="%", id="%"):
         error = "Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    result = get_infos.tag(DB_connection, mode, tag, id)
+    if table=="":
+        result = get_infos.tag(DB_connection, mode, tag, id)
+    elif table=="hp":
+        result = get_infos.tag_hp(DB_connection, mode, tag, id)
+    elif table=="serv":
+        result = get_infos.tag_serv(DB_connection, mode, tag, id)
     DB_connection.close()
     logging.debug(f"[-] Connection to the internal database closed")
     return result

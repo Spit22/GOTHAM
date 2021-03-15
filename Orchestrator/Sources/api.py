@@ -340,7 +340,7 @@ def add_lk():
     # We check all provided server tags exists, otherwise return error
     if tags_serv.lower() != "all":
         try:
-            Gotham_check.check_doublon_tags(DB_settings, tags_serv)
+            Gotham_check.check_doublon_tags(DB_settings, tags_serv, table="serv")
         except Exception as e:
             error = "Some server tags does not exist"
             return Gotham_error.format_usererror(error, str(e), debug_mode), 400
@@ -348,7 +348,7 @@ def add_lk():
     # We check all provided hp tags exists, otherwise return error
     if tags_hp.lower() != "all":
         try:
-            Gotham_check.check_doublon_tags(DB_settings, tags_hp)
+            Gotham_check.check_doublon_tags(DB_settings, tags_hp, table="hp")
 
         except Exception as e:
             error = "Some honeypot tags does not exist"
@@ -858,7 +858,7 @@ def edit_lk():
             if link_infos_received["tags_serv"].lower() != "all":
                 try:
                     Gotham_check.check_doublon_tags(
-                        DB_settings, link_infos_received["tags_serv"])
+                        DB_settings, link_infos_received["tags_serv"], table="serv")
                 except Exception as e:
                     error = "Some server tags does not exist"
                     return Gotham_error.format_usererror(error, str(e), debug_mode), 400
@@ -894,7 +894,7 @@ def edit_lk():
             if link_infos_received["tags_hp"].lower() != "all":
                 try:
                     Gotham_check.check_doublon_tags(
-                        DB_settings, link_infos_received["tags_hp"])
+                        DB_settings, link_infos_received["tags_hp"], table="hp")
                 except Exception as e:
                     error = "Some honeypot tags does not exist"
                     return Gotham_error.format_usererror(error, str(e), debug_mode), 400
