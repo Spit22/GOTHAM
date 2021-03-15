@@ -315,7 +315,7 @@ def add_link_DB(DB_settings, lk_infos):
         add_in_IDB.link(DB_connection, lk_infos)
         DB_connection.close()
         logging.debug(f"[------] Connection to the internal database closed")
-    except:
+    except mariadb.Error as e:
         error = "Add link in IDB failed : " + str(e)
         logging.error(error)
         raise ValueError(error)
