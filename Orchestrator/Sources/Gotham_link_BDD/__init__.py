@@ -1,13 +1,11 @@
 # Import external libs
 import mariadb
-import sys
 
 # Import GOTHAM's libs
 from . import get_infos
 from . import add_in_IDB
 from . import remove_in_IDB
 from . import edit_in_IDB
-from Gotham_normalize import normalize_id_server, normalize_id_honeypot, normalize_id_link
 
 # Logging components
 import os
@@ -197,7 +195,7 @@ def get_link_serv_hp_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="
     return result
 
 
-def get_tag_infos(DB_settings, mode=False, tag="%", id="%",table=""):
+def get_tag_infos(DB_settings, mode=False, tag="%", id="%", table=""):
     '''
     Retrieve a JSON with all the data of one or several tags from the internal database
 
@@ -206,7 +204,6 @@ def get_tag_infos(DB_settings, mode=False, tag="%", id="%",table=""):
         mode (bool, optional) : False means accurate answer, True means extended answer
         id (string, optional) : id of the tag whose data we want
         tag (string, optional) : name of the tag whose data we want
-        table (string, optional) : name of the table we want search in (""=Tag table, "hp"=Hp_Tags table, "serv"=Serv_Tags table)
     '''
 
     if tag.lower() == "all":

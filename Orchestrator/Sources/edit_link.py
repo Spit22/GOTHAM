@@ -2,7 +2,6 @@
 
 #===Import external libs===#
 import configparser
-import sys
 import base64
 import requests
 import json

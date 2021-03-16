@@ -1,6 +1,5 @@
 import paramiko
 import scp
-import sys
 from io import StringIO
 
 # Logging components

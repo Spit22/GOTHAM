@@ -1,4 +1,3 @@
-import sys
 import configparser
 import os
 from . import normalization_functions

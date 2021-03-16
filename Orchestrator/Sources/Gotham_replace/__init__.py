@@ -1,15 +1,9 @@
-import sys
-import configparser
 import os
 from . import replace_functions
 
 # GOTHAM'S LIB
-import Gotham_link_BDD
-import Gotham_check
-import Gotham_choose
 import Gotham_normalize
 import Gotham_SSH_SCP
-import add_link
 
 # Logging components
 import os

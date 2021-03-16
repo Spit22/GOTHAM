@@ -1,15 +1,20 @@
-import sys
 import configparser
-import re
+
 # Logging components
 import os
 import logging
+
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
                     level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
 
 def check_tags(object_type, objects_infos, tags_hp='', tags_serv='', mode=False):
+    #
+    #
+    #
+    #
+
     if (object_type != "hp" and object_type != "serv" and object_type != "link"):
         error = str(object_type) + " is uncorrect"
         logging.error(error)
@@ -20,6 +25,7 @@ def check_tags(object_type, objects_infos, tags_hp='', tags_serv='', mode=False)
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     separator = config['tag']['separator']
+
     if object_type == "hp" or object_type == "serv":
         if object_type == "hp":
             tags_list = tags_hp.lower().split(separator)
@@ -44,6 +50,14 @@ def check_tags(object_type, objects_infos, tags_hp='', tags_serv='', mode=False)
 
 
 def check_tag_still_used(DB_connection, tag="%", id="%"):
+    # Determine where a tag is used
+    #
+    # DB_connection (string) : all information to connect to db
+    # tag (string) : Tag wa want to check for
+    # id (string) : id of the at gwe want to check
+    #
+    # Return a json containing information on where the tag is used
+
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request

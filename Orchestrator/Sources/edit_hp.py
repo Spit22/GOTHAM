@@ -1,17 +1,12 @@
 # -*- coding: utf-8 -*-
 
 #===Import external libs===#
-import base64
 import configparser
 #==========================#
 
 #===Import GOTHAM's libs===#
-import Gotham_link_BDD
-import Gotham_check
-import Gotham_choose
 import Gotham_replace
 import Gotham_normalize
-import rm_hp
 from Gotham_SSH_SCP import send_file_and_execute_commands
 #==========================#
 

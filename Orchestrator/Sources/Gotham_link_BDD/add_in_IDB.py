@@ -1,6 +1,5 @@
 # Import external libs
 import mariadb
-import sys
 import configparser
 
 # Import Gotham's libs

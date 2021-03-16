@@ -1,11 +1,5 @@
 # Import external libs
 import mariadb
-import sys
-import configparser
-
-# Import GOTHAM's libs
-from . import get_infos
-from Gotham_check import check_TAGS
 
 # Logging components
 import os

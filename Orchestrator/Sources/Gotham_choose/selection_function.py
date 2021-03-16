@@ -1,8 +1,5 @@
 # Import libraries
 import configparser
-import sys
-import operator
-import datetime
 
 # Logging components
 import os
