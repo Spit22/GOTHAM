@@ -72,7 +72,7 @@ def tag_hp(DB_connection, mode=False, tag='%', id='%'):
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request
-    cur.execute("SELECT Hp_Tags.id_tag as tag_id, Tags.tag as tag, group_concat(IFNULL(Hp_Tags.id_hp,'NULL') separator '||') AS hp_id FROM Hp_Tags LEFT JOIN Tags on Hp_Tags.id_tag=Tags.id WHERE tag LIKE ? AND tag_id like ? group by tag_id", (tag, id))
+    cur.execute("SELECT Hp_Tags.id_tag as tag_id, Tags.tag as tag, group_concat(IFNULL(Hp_Tags.id_hp,'NULL') separator '||') AS hp_id FROM Hp_Tags LEFT JOIN Tags on Hp_Tags.id_tag=Tags.id WHERE tag LIKE ? AND Hp_Tags.id_tag like ? group by tag_id", (tag, id))
     # Convert answer to JSON
     row_headers = [x[0] for x in cur.description]
     rv = cur.fetchall()
@@ -88,7 +88,7 @@ def tag_serv(DB_connection, mode=False, tag='%', id='%'):
     # Get MariaDB cursor
     cur = DB_connection.cursor()
     # Execute SQL request
-    cur.execute("SELECT Serv_Tags.id_tag as tag_id, Tags.tag as tag, group_concat(IFNULL(Serv_Tags.id_hp,'NULL') separator '||') AS serv_id FROM Serv_Tags LEFT JOIN Tags on Serv_Tags.id_tag=Tags.id WHERE tag LIKE ? AND tag_id like ? group by tag_id", (tag, id))
+    cur.execute("SELECT Serv_Tags.id_tag as tag_id, Tags.tag as tag, group_concat(IFNULL(Serv_Tags.id_serv,'NULL') separator '||') AS serv_id FROM Serv_Tags LEFT JOIN Tags on Serv_Tags.id_tag=Tags.id WHERE tag LIKE ? AND Serv_Tags.id_tag like ? group by tag_id", (tag, id))
     # Convert answer to JSON
     row_headers = [x[0] for x in cur.description]
     rv = cur.fetchall()

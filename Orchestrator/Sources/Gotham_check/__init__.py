@@ -70,10 +70,10 @@ def check_doublon_tag(DB_settings, tag, table=""):
         tag (string) : name of the tag you want to check
         table (string, optional) : name of the table we want search in (""=Tag table, "hp"=Hp_Tags table, "serv"=Serv_Tags table)
     '''
-    return check_DOUBLON.tag(DB_settings, tag, table)
+    return check_DOUBLON.tag(DB_settings, tag, table=table)
 
 
-def check_doublon_tags(DB_settings, tags):
+def check_doublon_tags(DB_settings, tags, table=""):
     '''
     Check if all tags already exists in the internal database
 
@@ -82,7 +82,7 @@ def check_doublon_tags(DB_settings, tags):
         tags (string) : tags you want to check
     '''
     try:
-        check_DOUBLON.tags(DB_settings, tags)
+        check_DOUBLON.tags(DB_settings, tags, table=table)
     except Exception as e:
         raise ValueError("Error while check doublon tags : "+str(e))
 

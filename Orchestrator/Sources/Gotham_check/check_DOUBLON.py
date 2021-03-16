@@ -31,11 +31,11 @@ def tag(DB_settings, tag, table=""):
     #
     # Return True if already exists, False in the other case
 
-    response = get_tag_infos(DB_settings, tag=tag, table)
+    response = get_tag_infos(DB_settings, tag=tag, table=table)
     return not(response == [])
 
 
-def tags(DB_settings, tags):
+def tags(DB_settings, tags, table=""):
     # Check if tags is already present in database
     #
     # DB_settings (json) : auth information
@@ -50,7 +50,7 @@ def tags(DB_settings, tags):
     separator = config['tag']['separator']
     tags_list = tags.split(separator)
     for a_tag in tags_list:
-        if not(tag(DB_settings, tag=a_tag)):
+        if not(tag(DB_settings, tag=a_tag, table=table)):
             error = str(a_tag) + " : tag does not exists"
             logging.error(error)
             raise ValueError(error)
