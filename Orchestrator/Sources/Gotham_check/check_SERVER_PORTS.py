@@ -10,6 +10,13 @@ logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
 
 
 def check_server_ports(serv_infos, ports):
+    # Determine available ports on a server from a specified list
+    #
+    # serv_infos (dict) : all informations of the server
+    # ports (string) : ports we want to check for
+    #
+    # Return the list of available ports presents in the list of given ports
+
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
     # Retrieve settings from config file
     config = configparser.ConfigParser()

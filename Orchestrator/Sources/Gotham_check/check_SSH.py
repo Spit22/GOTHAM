@@ -17,6 +17,7 @@ def main(ip, ssh_port, used_ssh_key):
     # used_ssh_key (file-like object) : Key used to auth to the server
     #
     # Return True if succeed, False in the other case
+
     command_exec_check = [
         "echo 'alive' > /tmp/gotham_status && rm -rf /tmp/gotham_status"]
     # Try to execute the commands to the remote server

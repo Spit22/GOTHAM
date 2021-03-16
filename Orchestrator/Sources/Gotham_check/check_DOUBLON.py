@@ -40,7 +40,7 @@ def tags(DB_settings, tags):
     # DB_settings (json) : auth information
     # tags (string) : tags we want to check
     #
-    # Return True if all tags already exists, False in the other case
+    # Raise error if tag does not exists
 
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
     # Retrieve settings from config file
