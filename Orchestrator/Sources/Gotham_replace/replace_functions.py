@@ -1,5 +1,3 @@
-import sys
-import re
 import configparser
 import os
 import fileinput
@@ -7,8 +5,6 @@ import base64
 import json
 import requests
 
-from Gotham_normalize import normalize_id_honeypot, normalize_honeypot_infos, normalize_server_infos, normalize_display_object_infos
-#from Gotham_link_BDD import remove_honeypot_DB, get_honeypot_infos, get_server_infos, remove_server_DB, edit_lhs_DB, edit_link_DB, remove_lhs
 import Gotham_link_BDD
 import Gotham_SSH_SCP
 import Gotham_normalize

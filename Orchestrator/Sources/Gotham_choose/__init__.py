@@ -2,8 +2,6 @@ from . import selection_function
 
 # Import libraries
 import configparser
-import mariadb
-import sys
 
 # Logging components
 import os

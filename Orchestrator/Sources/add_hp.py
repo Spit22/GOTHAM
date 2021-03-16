@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #===Import GOTHAM's libs===#
-from Gotham_SSH_SCP import send_file_and_execute_commands, send_file, execute_commands
+from Gotham_SSH_SCP import send_file_and_execute_commands, send_file
 #==========================#
 
 #===Logging components===#

@@ -1,17 +1,11 @@
 #===Import external libs===#
-import base64
-import sys
 import configparser
 #==========================#
 
 #===Import GOTHAM's libs===#
-import Gotham_link_BDD
 import Gotham_check
-import Gotham_choose
 import Gotham_replace
 import Gotham_normalize
-import Gotham_SSH_SCP
-import add_link
 #==========================#
 
 #===Logging components===#

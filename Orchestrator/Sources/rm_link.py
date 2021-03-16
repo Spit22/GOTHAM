@@ -4,7 +4,7 @@ import subprocess
 
 #===Import GOTHAM's libs===#
 from Gotham_SSH_SCP import execute_commands
-from Gotham_link_BDD import remove_link_DB, get_link_infos, get_link_serv_hp_infos
+from Gotham_link_BDD import remove_link_DB, get_link_serv_hp_infos
 from Gotham_normalize import normalize_id_link, normalize_display_object_infos
 #==========================#
 

@@ -1,5 +1,3 @@
-import sys
-
 
 def get_used_port(DB_connection):
     # Get MariaDB cursor
