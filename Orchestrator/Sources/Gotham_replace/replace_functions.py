@@ -1,10 +1,4 @@
-import configparser
-import os
-import fileinput
-import base64
-import json
-import requests
-
+# GOTHAM'S LIB
 import Gotham_link_BDD
 import Gotham_SSH_SCP
 import Gotham_normalize
@@ -12,8 +6,12 @@ import Gotham_check
 import Gotham_choose
 import add_link
 
-
 # Logging components
+import configparser
+import fileinput
+import base64
+import json
+import requests
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
@@ -450,4 +448,4 @@ def distribute_servers_on_link_ports(DB_settings, link):
                 is_possible = False
         else:
             is_possible = False
-            # 80,100,300,1024
+            
