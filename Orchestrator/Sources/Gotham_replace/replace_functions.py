@@ -20,12 +20,26 @@ logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
 
 
 def replace_honeypot_all_link(DB_settings, datacenter_settings, hp_infos):
+    # Try to replace the honeypot for all of its links by only one honeypot
+    #
+    #
+    # DB_settings (json) : auth information
+    # datacenter_settings (json) : datacenter auth information
+    # hp_infos (dict) : honeypot information subject to replacement 
+    #
+    # Return True if the honeypot has been replaced, return false otherwise
+
+    # Retrieve settings from config file
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    # Retrieve tag separator in config file
     tag_separator = config['tag']['separator']
-    # Find a honeypot with same tags
+    
+    # Format honeypot tags to be separate by the tag separator
     hp_tags = tag_separator.join(hp_infos["hp_tags"].split("||"))
+    
     try:
+        # Find a honeypot with same tags
         honeypots = Gotham_check.check_tags("hp", Gotham_link_BDD.get_honeypot_infos(
             DB_settings, tags=hp_tags), tags_hp=hp_tags)
     except Exception as e:
@@ -33,21 +47,28 @@ def replace_honeypot_all_link(DB_settings, datacenter_settings, hp_infos):
     # Filter honeypots in error, and original hp by id
     honeypots = [hp for hp in honeypots if not(
         hp["hp_state"] == 'ERROR' or hp["hp_id"] == hp_infos["hp_id"])]
+    # If at least one honeypot matches
     if honeypots != []:
         # Choose best honeypots (the lower scored)
         honeypots = Gotham_choose.choose_honeypots(honeypots, 1, hp_tags)
-        # Duplicate, and configure
+        # Duplicate the honeypot to avoid overload
         honeypot = duplicate_hp(DB_settings, honeypots[0])
         try:
+            # Configure servers to replace old honeypot by the new one
             configure_honeypot_replacement(
                 DB_settings, datacenter_settings, hp_infos, new_hp_infos=honeypot)
         except Exception as e:
             raise ValueError(
                 "Error while configuring honeypot replacement : "+str(e))
 
+        # Prepare Database modification
+        # Define the modifications in Internal Database
         modifs = {"id_hp": honeypot["hp_id"]}
+        # Define the conditions of  modifications in Internal Database
         conditions = {"id_hp": hp_infos["hp_id"]}
+        
         try:
+            # Edit the Link_Hp_Serv table in Internal Database
             Gotham_link_BDD.edit_lhs_DB(DB_settings, modifs, conditions)
         except Exception as e:
             raise ValueError("Error while editing link hp server : "+str(e))
@@ -57,45 +78,71 @@ def replace_honeypot_all_link(DB_settings, datacenter_settings, hp_infos):
 
 
 def replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, duplicate_hp_list=[], new_tags=""):
+    # Try to replace the honeypot for a link by another honeypot
+    #
+    #
+    # DB_settings (json) : auth information
+    # datacenter_settings (json) : datacenter auth information
+    # hp_infos (dict) : honeypot information subject to replacement 
+    # link (dict) : link information subject of the replacement 
+    # duplicate_hp_list (list) - optional : list of honeypot that have been already duplicated for the replacement of this honeypot
+    # new_tags (string) - optional : list of new honeypot tag for the link
+    #
+    # Return a dict : "replaced" is a boolean set to true if the honeypot has been replaced, false otherwise ; "duplicate_hp_list" is a list of honeypot that have been duplicated for the replacement of this honeypot
+    
     # Retrieve settings from config file
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    # Retrieve tag separator in config file
     tag_separator = config['tag']['separator']
-    # Try to replace
+    
+    # Variable declaration and initialisation
     replaced = False
+
+    # Define link honeypot tags either by the new ones if they exist, or by taking those defined in the information of the link and fomat them to be separate by the tag separator
     link_tags_hp = tag_separator.join(
         link["link_tags_hp"].split("||")) if new_tags == "" else new_tags
+    
     # Get all honeypots corresponding to tags
     honeypots = Gotham_check.check_tags("hp", Gotham_link_BDD.get_honeypot_infos(
         DB_settings, tags=link_tags_hp), tags_hp=link_tags_hp)
     # Filter honeypots in error, and original hp by id
     honeypots = [hp for hp in honeypots if not(
         hp["hp_state"] == 'ERROR' or hp["hp_id"] == hp_infos["hp_id"])]
+    
+    # If at least one honeypot matches
     if honeypots != []:
+        # Retrieve weight for duplicate honeypot in config file
         already_duplicate_weight = int(
             config['hp_weight']["already_duplicate"])
+        # Favor already duplicated honeypots to replace this honeypot in other links by reducing a customizable weight 
         honeypots = [dict(hp, **{'weight': already_duplicate_weight})
                      if hp["hp_id"] in duplicate_hp_list else hp for hp in honeypots]
         # Choose best honeypots (the lower scored)
         honeypots = Gotham_choose.choose_honeypots(honeypots, 1, link_tags_hp)
         # If already duplicate or no link configured, just edit the link to redirect to the hp
         if (honeypots[0]["hp_id"] in duplicate_hp_list or honeypots[0]["hp_state"] == "UNUSED") and link["link_id"] not in honeypots[0]["link_id"]:
-            # Don't duplicate, just configure
+            # Don't duplicate
             honeypot = honeypots[0]
         else:
-            # Duplicate, and configure
+            # Duplicate the honeypot to avoid overload
             honeypot = duplicate_hp(DB_settings, honeypots[0])
+            # Add it to the list of duplicate honeypots 
             duplicate_hp_list.append(honeypot["hp_id"])
         try:
+            # Configure servers to replace old honeypot by the new one
             configure_honeypot_replacement(
                 DB_settings, datacenter_settings, hp_infos, new_hp_infos=honeypot, link=link)
         except Exception as e:
             raise ValueError(e)
 
-        # Edit link hp_serv table, replace old hp by new hp
+        # Prepare Database modification
+        # Define the modifications in Internal Database
         modifs = {"id_hp": honeypot["hp_id"]}
+        # Define the conditions of  modifications in Internal Database
         conditions = {"id_link": link["link_id"], "id_hp": hp_infos["hp_id"]}
         try:
+            # Edit the Link_Hp_Serv table in Internal Database
             Gotham_link_BDD.edit_lhs_DB(DB_settings, modifs, conditions)
         except Exception as e:
             raise ValueError(e)
@@ -105,36 +152,55 @@ def replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, d
 
 
 def decrease_link(DB_settings, datacenter_settings, object_infos, link, type_obj):
+    # Try to decrease the object (honeypot or server) number specified un a link
+    #
+    #
+    # DB_settings (json) : auth information
+    # datacenter_settings (json) : datacenter auth information
+    # object_infos (dict) : object information subject to removal
+    # link (dict) : link information subject to decrease
+    # type_obj (string) : "hp" or "serv", specify the type of object requiring decrease 
+    #
+    # Raise error if something failed
+
+    # Check type_obj
     if type_obj != "hp" and type_obj != "serv":
         error = "Error on type object"
         logging.error(error)
         raise ValueError(error)
 
+    # Check that the number of objects is greater than 1 and can therefore be decrease 
     if int(link["link_nb_"+type_obj]) > 1:
         if type_obj == "hp":
-            # Configure all server to not redirect on hp
             try:
+                # Configure all server to not redirect on hp
                 configure_honeypot_replacement(
                     DB_settings, datacenter_settings, object_infos, link=link)
             except Exception as e:
                 raise ValueError(e)
         try:
             if type_obj == "hp":
+                # Remove the combinaison Hp-Link in the Link_Hp_Serv table in Internal Database
                 Gotham_link_BDD.remove_lhs(
                     DB_settings, id_link=link["link_id"], id_hp=object_infos["hp_id"])
             elif type_obj == "serv":
+                # Remove the combinaison Serv-Link in the Link_Hp_Serv table in Internal Database
                 Gotham_link_BDD.remove_lhs(
                     DB_settings, id_link=link["link_id"], id_serv=object_infos["serv_id"])
         except Exception as e:
             raise ValueError(e)
         try:
+            # Prepare Database modification
+            # Define the modifications in Internal Database : decrease the object number in the link
             modifs = {"nb_"+type_obj: int(link["link_nb_"+type_obj])-1}
+            # Define the conditions of  modifications in Internal Database
             conditions = {"id": link["link_id"]}
+            # Edit the Link table in Internal Database
             Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
         except Exception as e:
             raise ValueError(e)
     else:
-        # If nb=1, error, we can't do nothing
+        # If nb=1, error, we can't do nothing, just raise an error
         error = "You tried to remove a running "+str(type_obj)+" with the id ="+str(
             object_infos[type_obj+"_id"])+", and it can't be replaced or deleted"
         logging.error(error)
@@ -142,16 +208,34 @@ def decrease_link(DB_settings, datacenter_settings, object_infos, link, type_obj
 
 
 def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_infos, new_hp_infos={}, link=None):
-    # Edit one hp for all link
+    # Configure servers to remove or replace by new one, the old honeypot for one link or for all, by modifying the Nginx conf
+    #
+    #
+    # DB_settings (json) : auth information
+    # datacenter_settings (json) : datacenter auth information
+    # old_hp_infos (dict) : old honeypot information subject to removal or replacement
+    # new_hp_infos (dict) - optional : new honeypot information for replacement
+    # link (dict) - optional : link information subject to reconfiguration
+    #
+    # Raise error if something failed   
+
+
+    # Configure servers to replace by new one, the old honeypot for all of its link
     if old_hp_infos != {} and new_hp_infos != {} and link == None:
+        # Loop through all of the links using the old hp  
         for link in old_hp_infos["links"]:
+            # Variable declaration and initialisation to save servers and the already modified configs  
             already_update = []
             servers = []
+            # Loop through all of the servers used by the link  
             for server in link["servs"]:
+                # Find the path of the configuration used by the server for the link 
                 nginxRedirectionPath = "/data/template/" + \
                     str(link["link_id"]) + "-" + \
                     str(server["lhs_port"]) + ".conf"
+                # If the configuration has not already been modified 
                 if not(nginxRedirectionPath in already_update):
+                    # Modify the nginx conf to replace the old honeypot by the new one
                     with fileinput.FileInput(nginxRedirectionPath, inplace=True, backup='.bak') as file:
                         first_line = False
                         for line in file:
@@ -165,20 +249,31 @@ def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_info
                                 first_line = False
                             else:
                                 print(line, end='')
+                    # Add the config to the list of already updated configs
                     already_update.append(nginxRedirectionPath)
+                # Prepare the deploiment of nginx config
                 server["choosed_port"] = server["lhs_port"]
                 servers.append(server)
+            # Deploy the new Nginx config
             add_link.deploy_nginxConf(DB_settings, link["link_id"], servers)
-    # Edit one hp for one link
+    
+    # Configure servers to replace by new one, the old honeypot for one of its link
     elif old_hp_infos != {} and new_hp_infos != {} and link != None:
+        # Variable declaration and initialisation to save servers and the already modified configs  
         already_update = []
         servers = []
-        interable_servs = link["servs"] if "servs" in link.keys(
-        ) else old_hp_infos["servs"]
+
+        # Finds the information of the servers used for the link, either directly in the link, or in the information of the old honeypot 
+        interable_servs = link["servs"] if "servs" in link.keys() else old_hp_infos["servs"]
+        
+        # Loop through all of the servers used by the link  
         for server in interable_servs:
+            # Find the path of the configuration used by the server for the link 
             nginxRedirectionPath = "/data/template/" + \
                 str(link["link_id"]) + "-"+str(server["lhs_port"]) + ".conf"
+            # If the configuration has not already been modified 
             if not(nginxRedirectionPath in already_update):
+                # Modify the nginx conf to replace the old honeypot by the new one
                 with fileinput.FileInput(nginxRedirectionPath, inplace=True, backup='.bak') as file:
                     first_line = False
                     for line in file:
@@ -192,20 +287,31 @@ def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_info
                             first_line = False
                         else:
                             print(line, end='')
+                # Add the config to the list of already updated configs
                 already_update.append(nginxRedirectionPath)
+            # Prepare the deploiment of nginx config
             server["choosed_port"] = server["lhs_port"]
             servers.append(server)
+        # Deploy the new Nginx config
         add_link.deploy_nginxConf(DB_settings, link["link_id"], servers)
-    # Delete one hp for one link
+    
+    # Configure servers to remove the old honeypot for one of its link
     elif old_hp_infos != {} and new_hp_infos == {} and link != None:
+        # Variable declaration and initialisation to save servers and the already modified configs  
         already_update = []
         servers = []
-        interable_servs = link["servs"] if "servs" in link.keys(
-        ) else old_hp_infos["servs"]
+
+        # Finds the information of the servers used for the link, either directly in the link, or in the information of the old honeypot 
+        interable_servs = link["servs"] if "servs" in link.keys() else old_hp_infos["servs"]
+
+        # Loop through all of the servers used by the link  
         for server in interable_servs:
+            # Find the path of the configuration used by the server for the link 
             nginxRedirectionPath = "/data/template/" + \
                 str(link["link_id"]) + "-"+str(server["lhs_port"]) + ".conf"
+            # If the configuration has not already been modified 
             if not(nginxRedirectionPath in already_update):
+                # Modify the nginx conf to remove the old honeypot
                 with fileinput.FileInput(nginxRedirectionPath, inplace=True, backup='.bak') as file:
                     first_line = False
                     for line in file:
@@ -219,10 +325,16 @@ def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_info
                             first_line = False
                         else:
                             print(line, end='')
+                # Add the config to the list of already updated configs
                 already_update.append(nginxRedirectionPath)
+            # Prepare the deploiment of nginx config
             server["choosed_port"] = server["lhs_port"]
             servers.append(server)
+        # Deploy the new Nginx config
         add_link.deploy_nginxConf(DB_settings, link["link_id"], servers)
+    
+    # If we are not in one of the previous cases, the call to the function and/or the passing of the arguments are not correct, 
+    # Then raise an error 
     else:
         error = "Honeypot replacement configuration failed"
         logging.error(error)
@@ -448,4 +560,4 @@ def distribute_servers_on_link_ports(DB_settings, link):
                 is_possible = False
         else:
             is_possible = False
-            
+        
