@@ -51,7 +51,10 @@ def edit_tags(DB_settings, datacenter_settings, link, tags, type_tag):
     dsp_link = Gotham_normalize.normalize_display_object_infos(
         link, "link", type_tag)
 
-    already_used = []
+    if type_tag == "serv":
+        already_used = []
+        already_used.append("not empty")
+
     for object_infos in dsp_link[type_tag+"s"]:
         not_present_in_obj = list(
             set(new_tags) - set(object_infos[type_tag+"_tags"].lower().split("||")))
