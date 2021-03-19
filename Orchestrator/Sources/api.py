@@ -854,8 +854,9 @@ def edit_lk():
 
     if "tags_serv" in link_infos_received.keys():
         if set(link_infos_received["tags_serv"].split(tags_separator)) != set(link["link_tags_serv"].split("||")):
-            # We check all provided server tags exists, otherwise return error
+            
             if link_infos_received["tags_serv"].lower() != "all":
+                # We check all provided server tags exists, otherwise return error
                 try:
                     Gotham_check.check_doublon_tags(
                         DB_settings, link_infos_received["tags_serv"], table="serv")
@@ -864,10 +865,11 @@ def edit_lk():
                     return Gotham_error.format_usererror(error, str(e), debug_mode), 400
                 try:
                     edit_link.edit_tags(DB_settings, datacenter_settings,
-                                        link_serv_hp, link_infos_received["tags_serv"], "serv")
+                                            link_serv_hp, link_infos_received["tags_serv"], "serv")
                 except Exception as e:
                     error = "Tag server edition failed"
                     return Gotham_error.format_usererror(error, str(e), debug_mode), 500
+            
             modifs["tags_serv"] = link_infos_received["tags_serv"]
 
     # Update database in memory
@@ -890,8 +892,9 @@ def edit_lk():
 
     if "tags_hp" in link_infos_received.keys():
         if set(link_infos_received["tags_hp"].split(tags_separator)) != set(link["link_tags_hp"].split("||")):
-            # We check all provided hp tags exists, otherwise return error
+            
             if link_infos_received["tags_hp"].lower() != "all":
+                # We check all provided hp tags exists, otherwise return error
                 try:
                     Gotham_check.check_doublon_tags(
                         DB_settings, link_infos_received["tags_hp"], table="hp")
