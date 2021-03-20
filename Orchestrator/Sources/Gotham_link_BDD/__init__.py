@@ -1,18 +1,22 @@
-# Import external libs
+#===Import external libs===#
 import mariadb
+import os
+import logging
+#==========================#
 
-# Import GOTHAM's libs
+#===Import GOTHAM's libs===#
 from . import get_infos
 from . import add_in_IDB
 from . import remove_in_IDB
 from . import edit_in_IDB
+#==========================#
 
-# Logging components
-import os
-import logging
+#===Logging components===#
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
                     level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+#=======================#
+
 
 ########## READ THINGS IN THE INTERNAL DATABASE ##########
 
@@ -24,15 +28,18 @@ def get_server_infos(DB_settings, mode=False, ip="%", id="%", name="%", tags="%"
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
         mode (bool, optional) : False means accurate answer, True means extended answer
-        ip (string, optional) : ip address of the server whose data we want
-        id (string, optional) : id of the server whose data we want
-        name (string, optional) : name of the server whose data we want
-        tag (string, optional) : tag of the server whose data we want
-        state (string, optional) : state of the server whose data we want
+        ip (string, optional) : ip address of the server whose information we want
+        id (string, optional) : id of the server whose information we want
+        name (string, optional) : name of the server whose information we want
+        tags (string, optional) : tag(s) of the server whose information we want
+        state (string, optional) : state of the server whose information we want
+        descr (string, optional) : description of the server whose information we want
+        ssh_port (string, optional) : SSH port of the server whose information we want
     '''
+    # In case tags="all", replace it with "%"
     if tags.lower() == "all":
         tags = "%"
-
+    # Try to connect to the internal database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -41,35 +48,42 @@ def get_server_infos(DB_settings, mode=False, ip="%", id="%", name="%", tags="%"
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+] Connection to the internal database started")
+        logging.debug(f"[+] Connection to the internal database has started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
+    # Retrieve server information from the internal database
     result = get_infos.server(DB_connection, mode, ip,
                               id, name, tags, state, descr, ssh_port)
+    # Close the connection to the internal database
     DB_connection.close()
-    logging.debug(f"[-] Connection to the internal database closed")
+    logging.debug(f"[-] Connection to the internal database has been closed")
     return result
 
 
 def get_honeypot_infos(DB_settings, mode=False, id="%", name="%", tags="%", state="%", descr="%", port="%", parser="%", logs="%", source="%", port_container="%"):
     '''
-    Retrieve a JSON with all the data of one or several servers from the internal database
+    Retrieve a JSON with all the data of one or several honeypots from the internal database
 
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
         mode (bool, optional) : False means accurate answer, True means extended answer
-        ip (string, optional) : ip address of the server whose data we want
-        id (string, optional) : id of the server whose data we want
-        name (string, optional) : name of the server whose data we want
-        tag (string, optional) : tag of the server whose data we want
-        state (string, optional) : state of the server whose data we want
+        id (string, optional) : id of the server whose information we want
+        name (string, optional) : name of the honeypot whose information we want
+        tags (string, optional) : tag(s) of the honeypot whose information we want
+        state (string, optional) : state of the honeypot whose information we want
+        descr (string, optional) : description of the honeypot whose information we want
+        port (string, optional) : port of the honeypot whose information we want
+        parser (string, optional) : parsing rules for the honeypot whose information we want
+        logs (string, optional) : path of the log files of the honeypot whose information we want
+        source (string, optional) : path of the dockerfile of the honeypot whose information we want
+        port_container (string, optional) : container port of the the honeypot whose information we want
     '''
-
+    # In case tags="all", replace it with "%"
     if tags.lower() == "all":
         tags = "%"
-
+    # Try to connect to the internal database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -78,33 +92,40 @@ def get_honeypot_infos(DB_settings, mode=False, id="%", name="%", tags="%", stat
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+] Connection to the internal database started")
+        logging.debug(f"[+] Connection to the internal database has started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
+    # Retrieve honeypot information from the internal database
     result = get_infos.honeypot(DB_connection, mode, id, name, tags,
                                 state, descr, port, parser, logs, source, port_container)
+    # Close the connection to the internal database
     DB_connection.close()
-    logging.debug(f"[-] Connection to the internal database closed")
+    logging.debug(f"[-] Connection to the internal database has been closed")
     return result
 
 
 def get_link_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="%", tags_hp="%", tags_serv="%"):
     '''
-    Retrieve a JSON with all the data of one or several servers from the internal database
+    Retrieve a JSON with all the data of one or several link from the internal database
 
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
-
+        mode (bool, optional) : False means accurate answer, True means extended answer
+        id (string, optional) : id of the link whose information we want
+        nb_hp (string, optional) : number of honeypots supported by the link whose information we want
+        nb_serv (string, optional) : number of servers supported by the link whose information we want
+        tags_hp (string, optional) : tags of the honeypots supported by the link whose information we want
+        tags_serv (string, optional) : tags of the servers supported by the link whose information we want
     '''
-
+    # In case tags_hp="all", replace it with "%"
     if tags_hp.lower() == "all":
         tags_hp = "%"
-
+    # In case tags_serv="all", replace it with "%"
     if tags_serv.lower() == "all":
         tags_serv = "%"
-
+    # Try to connect to the internal database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -113,15 +134,17 @@ def get_link_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="%", tags
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+] Connection to the internal database started")
+        logging.debug(f"[+] Connection to the internal database has started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
+    # Retrieve link information from the internal database
     result = get_infos.link(DB_connection, mode, id,
                             nb_hp, nb_serv, tags_hp, tags_serv)
+    # Close the connection to the internal database
     DB_connection.close()
-    logging.debug(f"[-] Connection to the internal database closed")
+    logging.debug(f"[-] Connection to the internal database has been closed")
     return result
 
 
@@ -131,15 +154,20 @@ def get_link_hp_serv_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="
 
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
-
+        mode (bool, optional) : False means accurate answer, True means extended answer
+        id (string, optional) : id of the link whose information we want
+        nb_hp (string, optional) : number of honeypots supported by the link whose information we want
+        nb_serv (string, optional) : number of servers supported by the link whose information we want
+        tags_hp (string, optional) : tags of the honeypots supported by the link whose information we want
+        tags_serv (string, optional) : tags of the servers supported by the link whose information we want
     '''
-
+    # In case tags_hp="all", replace it with "%"
     if tags_hp.lower() == "all":
         tags_hp = "%"
-
+    # In case tags_serv="all", replace it with "%"
     if tags_serv.lower() == "all":
         tags_serv = "%"
-
+    # Try to connect to the internal database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -148,15 +176,17 @@ def get_link_hp_serv_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+] Connection to the internal database started")
+        logging.debug(f"[+] Connection to the internal database has started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    result = get_infos.link_force_hp_serv(
-        DB_connection, mode, id, nb_hp, nb_serv, tags_hp, tags_serv)
+    # Retrieve link information from the internal database
+    result = get_infos.link_force_hp_serv(DB_connection, mode, id, 
+                                          nb_hp, nb_serv, tags_hp, tags_serv)
+    # Close the connection to the internal database
     DB_connection.close()
-    logging.debug(f"[-] Connection to the internal database closed")
+    logging.debug(f"[-] Connection to the internal database has been closed")
     return result
 
 
@@ -166,15 +196,20 @@ def get_link_serv_hp_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="
 
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
-
+        mode (bool, optional) : False means accurate answer, True means extended answer
+        id (string, optional) : id of the link whose information we want
+        nb_hp (string, optional) : number of honeypots supported by the link whose information we want
+        nb_serv (string, optional) : number of servers supported by the link whose information we want
+        tags_hp (string, optional) : tags of the honeypots supported by the link whose information we want
+        tags_serv (string, optional) : tags of the servers supported by the link whose information we want
     '''
-
+    # In case tags_hp="all", replace it with "%"
     if tags_hp.lower() == "all":
         tags_hp = "%"
-
+    # In case tags_serv="all", replace it with "%"
     if tags_serv.lower() == "all":
         tags_serv = "%"
-
+    # Try to connect to the internal database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -183,15 +218,17 @@ def get_link_serv_hp_infos(DB_settings, mode=False, id="%", nb_hp="%", nb_serv="
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+] Connection to the internal database started")
+        logging.debug(f"[+] Connection to the internal database has started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    result = get_infos.link_force_serv_hp(
-        DB_connection, mode, id, nb_hp, nb_serv, tags_hp, tags_serv)
+    # Retrieve link information from the internal database
+    result = get_infos.link_force_serv_hp(DB_connection, mode, id, 
+                                          nb_hp, nb_serv, tags_hp, tags_serv)
+    # Close the connection to the internal database
     DB_connection.close()
-    logging.debug(f"[-] Connection to the internal database closed")
+    logging.debug(f"[-] Connection to the internal database has been closed")
     return result
 
 
@@ -202,13 +239,14 @@ def get_tag_infos(DB_settings, mode=False, tag="%", id="%", table=""):
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
         mode (bool, optional) : False means accurate answer, True means extended answer
-        id (string, optional) : id of the tag whose data we want
-        tag (string, optional) : name of the tag whose data we want
+        id (string, optional) : id of the tag whose information we want
+        tag (string, optional) : name of the tag whose information we want
+        table (string, optional) : name of the table of the tag whose information we want
     '''
-
+    # In case tag="all", replace it with "%"
     if tag.lower() == "all":
         tag = "%"
-
+    # Try to connect to the internal database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -217,19 +255,21 @@ def get_tag_infos(DB_settings, mode=False, tag="%", id="%", table=""):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+] Connection to the internal database started")
+        logging.debug(f"[+] Connection to the internal database has started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[ X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
+    # Retrieve link information from the internal database according to the chosen table 
     if table=="":
         result = get_infos.tag(DB_connection, mode, tag, id)
     elif table=="hp":
         result = get_infos.tag_hp(DB_connection, mode, tag, id)
     elif table=="serv":
         result = get_infos.tag_serv(DB_connection, mode, tag, id)
+    # Close the connection to the internal database
     DB_connection.close()
-    logging.debug(f"[-] Connection to the internal database closed")
+    logging.debug(f"[-] Connection to the internal database has been closed")
     return result
 
 

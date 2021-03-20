@@ -1,23 +1,37 @@
+#===Import external libs===#
 import paramiko
 import scp
 from io import StringIO
-
-# Logging components
 import os
 import logging
+#==========================#
+
+#===Logging components===#
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
                     level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+#=======================#
 
 
 class GothamServer:
     '''
-    This class represents a server being part of the project
+    This class represents a remote server being part of the project
+
+    METHODS:
+        connect() : open a ssh session with the remote server
+        disconnect() : close the ssh session with the remote server
+        upload_files() : upload file(s) on the remote server
+        commands_execution() : execute command(s) on the remote server
     '''
 
     def __init__(self, hostname, port, ssh_key):
         '''
         Initialize a GhotamServer object
+
+        ARGUMENTS:
+            hostname (string) : hostname of the remote server
+            port (string) : SSH port of the remote host
+            ssh_key (string) : SSH key that allow the orchestrator to connect to the remote host
         '''
         # SSH credentials (username@hostname)
         self.hostname = hostname
@@ -70,6 +84,10 @@ class GothamServer:
     def upload_files(self, file_paths, remote_file_path):
         '''
         Upload files to a remote directory
+
+        ARGUMENTS:
+            file_path (list) : local path(s) of the file(s) we want to send
+            remote_file_path (string) : path on the remote host we want to put the file(s)
         '''
         # Start an SCP connection
         self.is_connected = self.connect()
@@ -86,6 +104,9 @@ class GothamServer:
     def commands_execution(self, commands):
         '''
         Execute multiple commands
+
+        ARGUMENTS:
+            commands (list) : list of the commands we want to execute on the remote server
         '''
         # Start an SSH connection
         self.is_connected = self.connect()
