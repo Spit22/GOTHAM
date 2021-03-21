@@ -68,28 +68,28 @@ def test_add_honeypot(app, client):
 
 def test_rm_server(app, client):
     try:
-        remove_server_DB(DB_settings, server_infos_1)
+        remove_server_DB(DB_settings, server_infos_1["id"])
     except Exception as e:
         raise pytest.fail(e)
     try:
-        remove_server_DB(DB_settings, server_infos_2)
+        remove_server_DB(DB_settings, server_infos_2["id"])
     except Exception as e:
         raise pytest.fail(e)
     try:
-        remove_server_DB(DB_settings, server_infos_3)
+        remove_server_DB(DB_settings, server_infos_3["id"])
     except Exception as e:
         raise pytest.fail(e)
 
 def test_rm_honeypot(app, client):
     try:
-        remove_honeypot_DB(DB_settings, honeypot_infos_1)
+        remove_honeypot_DB(DB_settings, honeypot_infos_1["id"])
     except Exception as e:
         raise pytest.fail(e)
     try:
-        remove_honeypot_DB(DB_settings, honeypot_infos_2)
+        remove_honeypot_DB(DB_settings, honeypot_infos_2["id"])
     except Exception as e:
         raise pytest.fail(e)
     try:
-        remove_honeypot_DB(DB_settings, honeypot_infos_3)
+        remove_honeypot_DB(DB_settings, honeypot_infos_3["id"])
     except Exception as e:
         raise pytest.fail(e)

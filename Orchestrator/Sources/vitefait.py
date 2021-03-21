@@ -24,7 +24,7 @@ import configparser
 
 ##########-SETTINGS-##########
 DB_settings = {"username": "gotham", "password": "password",
-               "hostname": "localhost", "port": "3306", "database": "gotham"}
+               "hostname": "localhost", "port": "3306", "database": "GOTHAM"}
 
 lk_port_infos = {"id": "lk-1BFB3AFE3FEE1FEFB1D25E22FC2CA69F", "nb_hp": 4, "nb_serv": 2, "tags_hp": "OpenSSH,SSH,Elasticsearch",
                  "tags_serv": "Europe ,  suisse,  geneve,TagDeTest42,TagDeTest4254,TagDeTest427", "ports": "22, 189  ,  469,6484,88"}
