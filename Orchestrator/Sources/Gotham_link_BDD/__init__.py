@@ -283,6 +283,7 @@ def add_server_DB(DB_settings, server_infos):
         DB_settings (dict) : all the settings to connect to the internal database
         server_infos (dict) : the informations of the server we want to add in the internal database
     '''
+    # Try to connect to the internal database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -291,16 +292,21 @@ def add_server_DB(DB_settings, server_infos):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+] Connection to the internal database started")
+        logging.debug(f"[+] Connection to the internal database has started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
+    # Try to add the server in the internal database
     try:
         add_in_IDB.server(DB_connection, server_infos)
         DB_connection.close()
-        logging.debug(f"[-] Connection to the internal database closed")
+        logging.debug(f"[-] Connection to the internal database has been closed")
     except Exception as e:
+        error = "Add server in IDB failed : " + str(e)
+        logging.error(error)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database has been closed")
         raise ValueError(error)
 
 
@@ -312,6 +318,7 @@ def add_honeypot_DB(DB_settings, hp_infos):
         DB_settings (dict) : all the settings to connect to the internal database
         hp_infos (dict) : the informations of the honeypot we want to add in the internal database
     '''
+    # Try to connect to the internal database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -320,17 +327,22 @@ def add_honeypot_DB(DB_settings, hp_infos):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+] Connection to the internal database started")
+        logging.debug(f"[+] Connection to the internal database has started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
+    # Try to add the server in the internal database
     try:
         add_in_IDB.honeypot(DB_connection, hp_infos)
         DB_connection.close()
-        logging.debug(f"[-] Connection to the internal database closed")
+        logging.debug(f"[-] Connection to the internal database has been closed")
     except Exception as e:
-        raise ValueError(e)
+        error = "Add honeypot in IDB failed : " + str(e)
+        logging.error(error)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database has been closed")
+        raise ValueError(error)
 
 
 def add_link_DB(DB_settings, lk_infos):
@@ -339,8 +351,9 @@ def add_link_DB(DB_settings, lk_infos):
 
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
-        lk_infos (dict) : the informations of the honeypot we want to add in the internal database
+        lk_infos (dict) : the informations of the link we want to add in the internal database
     '''
+    # Try to connect to the internal database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -349,18 +362,21 @@ def add_link_DB(DB_settings, lk_infos):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+++++] Connection to the internal database started")
+        logging.debug(f"[+] Connection to the internal database has started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
+    # Try to add the server in the internal database
     try:
         add_in_IDB.link(DB_connection, lk_infos)
         DB_connection.close()
-        logging.debug(f"[------] Connection to the internal database closed")
+        logging.debug(f"[-] Connection to the internal database has been closed")
     except mariadb.Error as e:
         error = "Add link in IDB failed : " + str(e)
         logging.error(error)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database has been closed")
         raise ValueError(error)
 
 
@@ -372,6 +388,7 @@ def add_lhs_DB(DB_settings, lhs_infos):
         DB_settings (dict) : all the settings to connect to the internal database
         lhs_infos (dict) : the informations of the combination we want to add in the internal database
     '''
+    # Try to connect to the internal database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -382,27 +399,33 @@ def add_lhs_DB(DB_settings, lhs_infos):
         )
         logging.debug(f"[+] Connection to the internal database started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
+    # Try to add the server in the internal database
     try:
         add_in_IDB.link_hp_serv(DB_connection, lhs_infos)
         DB_connection.close()
-        logging.debug(f"[-] Connection to the internal database closed")
+        logging.debug(f"[-] Connection to the internal database has been closed")
     except Exception as e:
-        raise ValueError(e)
+        error = "Add combination in IDB failed : " + str(e)
+        logging.error(error)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database has been closed")
+        raise ValueError(error)
 
 ########## REMOVE IN THE INTERNAL DATABASE ##########
 
 
 def remove_server_DB(DB_settings, id):
     '''
-    Remove a server in the internal database from its id
+    Remove a server from the internal database
+
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
-        id (string) : the id of the server we want to remove in the internal database
+        id (string) : the id of the server we want to remove from the internal database
     '''
-    # Connect to the database
+    # Try to connect to the internal database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -411,28 +434,34 @@ def remove_server_DB(DB_settings, id):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+] Connection to the internal database started")
+        logging.debug(f"[+] Connection to the internal database has started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    # Remove the server in the IDB
+    # Try to remove the server from the internal database
     try:
         remove_in_IDB.server(DB_connection, id)
         DB_connection.close()
-        logging.debug(f"[-] Connection to the internal database closed")
+        logging.debug(f"[-] Connection to the internal database has been closed")
     except Exception as e:
+        error = "Remove server from the IDB failed : " + str(e)
+        logging.error(error)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database has been closed")
         raise ValueError(e)
 
 
 def remove_server_tags_DB(DB_settings, id="", tag=""):
     '''
-    Remove a server in the internal database from its id
+    Remove a server tag from the internal database
+
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
-        id (string) : the id of the server we want to remove in the internal database
+        id (string) : the id of the server tag we want to remove from the internal database
+        tag (string) : name of the tag we want to remove from the internal database
     '''
-    # Connect to the database
+    # Try to connect to the internal database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -441,29 +470,33 @@ def remove_server_tags_DB(DB_settings, id="", tag=""):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+] Connection to the internal database started")
+        logging.debug(f"[+] Connection to the internal database has started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    # Remove the server in the IDB
+    # Try to remove the server tag from the internal database
     try:
         remove_in_IDB.server_in_serv_tag(DB_connection, id, tag)
         DB_connection.close()
-        logging.debug(f"[-] Connection to the internal database closed")
+        logging.debug(f"[-] Connection to the internal database has been closed")
     except Exception as e:
+        error = "Remove server tag from the IDB failed : " + str(e)
+        logging.error(error)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database has been closed")
         raise ValueError(e)
 
 
 def remove_honeypot_DB(DB_settings, id):
     '''
-    Remove a honeypot in the internal database from its id
+    Remove a honeypot from the internal database
 
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
-        id (string) : the id of the honeypot we want to remove in the internal database
+        id (string) : the id of the honeypot we want to remove from the internal database
     '''
-    # Connect to the database
+    # Try to connect to the internal database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -472,29 +505,33 @@ def remove_honeypot_DB(DB_settings, id):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+] Connection to the internal database started")
+        logging.debug(f"[+] Connection to the internal database has started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    # Remove the Honeypot
+    # Try to remove the honeypot from the internal database
     try:
         remove_in_IDB.honeypot(DB_connection, id)
         DB_connection.close()
-        logging.debug(f"[-] Connection to the internal database closed")
+        logging.debug(f"[-] Connection to the internal database has been closed")
     except Exception as e:
+        error = "Remove honeypot from the IDB failed : " + str(e)
+        logging.error(error)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database has been closed")
         raise ValueError(e)
 
 
 def remove_link_DB(DB_settings, id):
     '''
-    Remove a link in the internal database from its id
+    Remove a link from the internal database from
 
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
-        id (string) : the id of the link we want to remove in the internal database
+        id (string) : the id of the link we want to remove from the internal database
     '''
-    # Connect to the database
+    # Try to connect to the database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -503,31 +540,35 @@ def remove_link_DB(DB_settings, id):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+] Connection to the internal database started")
+        logging.debug(f"[+] Connection to the internal database has started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    # Remove the link
+    # Remove the link from the internal database
     try:
         remove_in_IDB.link(DB_connection, id)
         DB_connection.close()
-        logging.debug(f"[-] Connection to the internal database closed")
+        logging.debug(f"[-] Connection to the internal database has been closed")
     except Exception as e:
+        error = "Remove link from the IDB failed : " + str(e)
+        logging.error(error)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database has been closed")
         raise ValueError(e)
 
 
 def remove_lhs(DB_settings, id_link="%", id_hp="%", id_serv="%"):
     '''
-    Remove a Link_Hp_Serv combinaison in the internal database from its id
+    Remove a Link/Honeypot/Server combination from the internal database
 
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
-        id_link (string) : the id of the link we want to remove in the internal database
-        id_hp (string) : the id of the hp we want to remove in the internal database
-        id_serv (string) : the id of the serv we want to remove in the internal database
+        id_link (string, optional) : the id of the link we want to remove from the internal database
+        id_hp (string, optional) : the id of the hp we want to remove from the internal database
+        id_serv (string, optional) : the id of the serv we want to remove from the internal database
     '''
-    # Connect to the database
+    # Try to connect to the database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -536,17 +577,21 @@ def remove_lhs(DB_settings, id_link="%", id_hp="%", id_serv="%"):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+] Connection to the internal database started")
+        logging.debug(f"[+] Connection to the internal database has started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    # Remove the link
+    # Try to remove the link from the internal database
     try:
         remove_in_IDB.lhs(DB_connection, id_link, id_hp, id_serv)
         DB_connection.close()
-        logging.debug(f"[-] Connection to the internal database closed")
+        logging.debug(f"[-] Connection to the internal database has been closed")
     except Exception as e:
+        error = "Remove combination from the IDB failed : " + str(e)
+        logging.error(error)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database has been closed")
         raise ValueError(e)
 
 
@@ -554,15 +599,14 @@ def remove_lhs(DB_settings, id_link="%", id_hp="%", id_serv="%"):
 
 def edit_link_DB(DB_settings, modifs, conditions):
     '''
-    Edit a link in the internal database from its id
+    Edit a link in the internal database
 
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
-        id (string) : the id of the link we want to remove in the internal database
         modifs (dict) : dict of modifications with column:value syntax
         conditions (dict) : dict of conditions with column:value syntax (put here the id of the link we want to edit)
     '''
-    # Connect to the database
+    # Try to connect to the database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -571,17 +615,21 @@ def edit_link_DB(DB_settings, modifs, conditions):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+] Connection to the internal database started")
+        logging.debug(f"[+] Connection to the internal database has started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    # Edit the link
+    # Try to edit the link
     try:
         edit_in_IDB.link(DB_connection, modifs, conditions)
         DB_connection.close()
-        logging.debug(f"[-] Connection to the internal database closed")
+        logging.debug(f"[-] Connection to the internal database has been closed")
     except Exception as e:
+        error = "Edit link in the IDB failed : " + str(e)
+        logging.error(error)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database has been closed")
         raise ValueError(e)
 
 
@@ -594,7 +642,7 @@ def edit_lhs_DB(DB_settings, modifs, conditions):
         modifs (dict) : dict of modifications with column:value syntax
         conditions (dict) : dict of conditions with column:value syntax
     '''
-    # Connect to the database
+    # Try to connect to the database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -603,30 +651,34 @@ def edit_lhs_DB(DB_settings, modifs, conditions):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+] Connection to the internal database started")
+        logging.debug(f"[+] Connection to the internal database has started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    # Edit the lhs
+    # Try to edit the lhs
     try:
         edit_in_IDB.lhs(DB_connection, modifs, conditions)
         DB_connection.close()
-        logging.debug(f"[-] Connection to the internal database closed")
+        logging.debug(f"[-] Connection to the internal database has been closed")
     except Exception as e:
+        error = "Edit combination in the IDB failed : " + str(e)
+        logging.error(error)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database has been closed")
         raise ValueError(e)
 
 
 def edit_honeypot_DB(DB_settings, modifs, conditions):
     '''
-    Edit a honeypot in the internal database from its id
+    Edit a honeypot in the internal database
 
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
         modifs (dict) : dict of modifications with column:value syntax
         conditions (dict) : dict of conditions with column:value syntax (put here the id of the honeypot we want to edit)
     '''
-    # Connect to the database
+    # Try to connect to the database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -635,17 +687,21 @@ def edit_honeypot_DB(DB_settings, modifs, conditions):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+] Connection to the internal database started")
+        logging.debug(f"[+] Connection to the internal database has started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    # Edit the honeypot
+    # Try to edit the honeypot
     try:
         edit_in_IDB.honeypot(DB_connection, modifs, conditions)
         DB_connection.close()
-        logging.debug(f"[-] Connection to the internal database closed")
+        logging.debug(f"[-] Connection to the internal database has been closed")
     except Exception as e:
+        error = "Edit honeypot in the IDB failed : " + str(e)
+        logging.error(error)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database has been closed")
         raise ValueError(e)
 
 
@@ -655,11 +711,10 @@ def edit_server_DB(DB_settings, modifs, conditions):
 
     ARGUMENTS:
         DB_settings (dict) : all the settings to connect to the internal database
-        id (string) : the id of the server we want to remove in the internal database
         modifs (dict) : dict of modifications with column:value syntax
         conditions (dict) : dict of conditions with column:value syntax (put here the id of the server we want to edit)
     '''
-    # Connect to the database
+    # Try to connect to the database
     try:
         DB_connection = mariadb.connect(
             user=DB_settings["username"],
@@ -668,15 +723,19 @@ def edit_server_DB(DB_settings, modifs, conditions):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug(f"[+] Connection to the internal database started")
+        logging.debug(f"[+] Connection to the internal database has started")
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[X] Can't connect to the internal database : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    # Edit the server
+    # Try to edit the server
     try:
         edit_in_IDB.server(DB_connection, modifs, conditions)
         DB_connection.close()
-        logging.debug(f"[-] Connection to the internal database closed")
+        logging.debug(f"[-] Connection to the internal database has been closed")
     except Exception as e:
+        error = "Edit server in the IDB failed : " + str(e)
+        logging.error(error)
+        DB_connection.close()
+        logging.debug(f"[-] Connection to the internal database has been closed")
         raise ValueError(e)

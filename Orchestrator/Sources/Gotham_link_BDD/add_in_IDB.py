@@ -1,30 +1,42 @@
-# Import external libs
+#===Import external libs===#
 import mariadb
 import configparser
-
-# Import Gotham's libs
-from . import get_infos
-from Gotham_normalize import normalize_full_link_infos, normalize_full_lhs_infos, normalize_full_server_infos, normalize_full_honeypot_infos
-
-# Logging components
 import os
 import logging
+#==========================#
+
+#===Import GOTHAM's libs===#
+from . import get_infos
+from Gotham_normalize import normalize_full_link_infos, normalize_full_lhs_infos, normalize_full_server_infos, normalize_full_honeypot_infos
+#==========================#
+
+#===Logging components===#
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
                     level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+#=======================#
 
-# Retrieve settings from config file
+#===Retrieve settings from configuration file===#
 config = configparser.ConfigParser()
 config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
 _separator = config['tag']['separator']
+#===============================================#
+
 
 ############################### TAG SECTION ###############################
 
 
 def tag(DB_connection, tag):
+    '''
+    Add a tag in the internal database
+
+    ARGUMENTS:
+        DB_connection (<mariadb connection object>) = connection with the internal database
+        tag (string) = name of the tag we want to insert into the internal database
+    '''
     # Get MariaDB cursor
     cur = DB_connection.cursor()
-    # Add the tag to the Tags table
+    # Try to add the tag to the Tags table
     try:
         cur.execute("INSERT INTO Tags (tag) VALUES (?)", (tag,))
         DB_connection.commit()
@@ -34,21 +46,28 @@ def tag(DB_connection, tag):
         logging.error(error)
         raise ValueError(error)
 
+
 ############################### SERVER SECTION ###############################
 
 
 def server(DB_connection, server_infos):
-    # Normalize server_infos
+    '''
+    Add a server in the internal database
+
+    ARGUMENTS:
+        DB_connection (<mariadb connection object>) = connection with the internal database
+        server_infos (dict) = information of the server we want to insert into the internal database
+    '''
+    # Try to normalize server information
     try:
         server_infos = normalize_full_server_infos(server_infos)
     except Exception as e:
         error = "Bad server infos : " + str(e)
         logging.error(error)
         raise ValueError(error)
-
     # Get MariaDB cursor
     cur = DB_connection.cursor()
-    # Execute SQL request
+    # Try to execute SQL request
     try:
         # Insert values in Server table
         cur.execute("INSERT INTO Server (id,name,descr,ip,ssh_key,ssh_port,state) VALUES (?,?,?,?,?,?,?)",
@@ -83,8 +102,17 @@ def server(DB_connection, server_infos):
 
 
 def serv_tags(DB_connection, tag_id, id_serv):
+    '''
+    Add a server tag in the internal database
+
+    ARGUMENTS:
+        DB_connection (<mariadb connection object>) = connection with the internal database
+        tag_id (dict) = id of the tag we want to insert into the internal database
+        serv_id (dict) = id of the server we want to insert into the internal database
+    '''
     # Get MariaDB cursor
     cur = DB_connection.cursor()
+    # Try to execute SQL requests
     try:
         cur.execute(
             "INSERT INTO Serv_Tags (id_tag,id_serv) VALUES (?,?)", (tag_id, id_serv))
@@ -96,20 +124,28 @@ def serv_tags(DB_connection, tag_id, id_serv):
         logging.error(error)
         raise ValueError(error)
 
+
 ############################### HONEYPOT SECTION ###############################
 
 
 def honeypot(DB_connection, hp_infos):
-    # Normalize honeypot_infos
+    '''
+    Add a honeypot in the internal database
+
+    ARGUMENTS:
+        DB_connection (<mariadb connection object>) = connection with the internal database
+        hp_infos (dict) = information of the honeypot we want to insert into the internal database
+    '''
+    # Try to normalize honeypot information
     try:
         hp_infos = normalize_full_honeypot_infos(hp_infos)
     except Exception as e:
-        error = "Bad hp infos : " + str(e)
+        error = "Bad honeypot infos : " + str(e)
         logging.error(error)
         raise ValueError(error)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
-    # Execute SQL request
+    # Try to execute SQL request
     try:
         # Insert values in Honeypot table
         cur.execute("INSERT INTO Honeypot (id,name,descr,port,parser,logs,source,port_container,state) VALUES (?,?,?,?,?,?,?,?,?)",
@@ -144,8 +180,17 @@ def honeypot(DB_connection, hp_infos):
 
 
 def hp_tags(DB_connection, tag_id, id_hp):
+    '''
+    Add a server tag in the internal database
+
+    ARGUMENTS:
+        DB_connection (<mariadb connection object>) = connection with the internal database
+        tag_id (dict) = id of the tag we want to insert into the internal database
+        id_hp (dict) = id of the honeypot we want to insert into the internal database
+    '''
     # Get MariaDB cursor
     cur = DB_connection.cursor()
+    # Try to execute SQL requests
     try:
         cur.execute(
             "INSERT INTO Hp_Tags (id_tag,id_hp) VALUES (?,?)", (tag_id, id_hp))
@@ -157,11 +202,19 @@ def hp_tags(DB_connection, tag_id, id_hp):
         logging.error(error)
         raise ValueError(error)
 
+
 ############################### LINK SECTION ###############################
 
 
 def link(DB_connection, lk_infos):
-    # Normalize link_infos
+    '''
+    Add a link in the internal database
+
+    ARGUMENTS:
+        DB_connection (<mariadb connection object>) = connection with the internal database
+        lk_infos (dict) = information of the link we want to insert into the internal database
+    '''
+    # Try to normalize link_infos
     try:
         lk_infos = normalize_full_link_infos(lk_infos)
     except Exception as e:
@@ -170,7 +223,7 @@ def link(DB_connection, lk_infos):
         raise ValueError(error)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
-    # Execute SQL request
+    # Try to execute SQL request
     try:
         # Insert values in Link table
         cur.execute("INSERT INTO Link (id,nb_hp,nb_serv,ports) VALUES (?,?,?,?)",
@@ -222,7 +275,17 @@ def link(DB_connection, lk_infos):
 
 
 def link_tags_hp(DB_connection, tag_id, id_lk):
+    '''
+    Add a honeypot tag for the link in the internal database
+
+    ARGUMENTS:
+        DB_connection (<mariadb connection object>) = connection with the internal database
+        tag_id (dict) = id of the honeypot tag we want to bind with the link
+        id_lk (dict) = id of the link we are dealing with
+    '''
+    # Get MariaDB cursor
     cur = DB_connection.cursor()
+    # Try to execute SLQ requests
     try:
         cur.execute(
             "INSERT INTO Link_Tags_hp (id_tag,id_link) VALUES (?,?)", (tag_id, id_lk))
@@ -237,7 +300,17 @@ def link_tags_hp(DB_connection, tag_id, id_lk):
 
 
 def link_tags_serv(DB_connection, tag_id, id_lk):
+    '''
+    Add a server tag for the link in the internal database
+
+    ARGUMENTS:
+        DB_connection (<mariadb connection object>) = connection with the internal database
+        tag_id (dict) = id of the server tag we want to bind with the link
+        id_lk (dict) = id of the link we are dealing with
+    '''
+    # Get MariaDB cursor
     cur = DB_connection.cursor()
+    # Try to execute SLQ requests
     try:
         cur.execute(
             "INSERT INTO Link_Tags_serv (id_tag,id_link) VALUES (?,?)", (tag_id, id_lk))
@@ -254,7 +327,14 @@ def link_tags_serv(DB_connection, tag_id, id_lk):
 ############################### LHS SECTION ###############################
 
 def link_hp_serv(DB_connection, lhs_infos):
-    # Normalize lhs_infos
+    '''
+    Add a Link/Honeypot/Server combination in the internal database
+
+    ARGUMENTS:
+        DB_connection (<mariadb connection object>) = connection with the internal database
+        lhs_infos (dict) = information of the combination we want to insert into the internal database
+    '''
+    # Try to normalize lhs_infos
     try:
         lhs_infos = normalize_full_lhs_infos(lhs_infos)
     except Exception as e:
@@ -263,7 +343,7 @@ def link_hp_serv(DB_connection, lhs_infos):
         raise ValueError(error)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
-    # Execute SQL request
+    # Try to execute SQL request
     try:
         # Insert values in Link_Hp_Serv table
         cur.execute("INSERT INTO Link_Hp_Serv (id_link,id_hp,id_serv,port) VALUES (?,?,?,?)",
