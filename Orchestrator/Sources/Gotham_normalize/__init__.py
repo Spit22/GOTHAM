@@ -1,16 +1,28 @@
+#===Import external libs===#
+import os
+import logging
+#==========================#
+
+#===Import GOTHAM's libs===#
 import configparser
 import os
 from . import normalization_functions
+#==========================#
 
-# Logging components
-import os
-import logging
+#===Logging components===#
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
                     level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+#=======================#
 
 
 def normalize_honeypot_infos(hp_infos):
+    '''
+    Normalize honeypots information
+
+    ARGUMENTS:
+        hp_infos (dict) : honeypot information
+    '''
     for key, value in hp_infos.items():
         normalize_key = getattr(normalization_functions, 'normalize_' + key)
         if (key == "id" or key == "state"):
@@ -21,6 +33,12 @@ def normalize_honeypot_infos(hp_infos):
 
 
 def normalize_server_infos(serv_infos):
+    '''
+    Normalize server information
+
+    ARGUMENTS:
+        serv_infos (dict) : server information
+    '''
     for key, value in serv_infos.items():
         normalize_key = getattr(normalization_functions, 'normalize_' + key)
         if (key == "id" or key == "state"):
@@ -31,6 +49,12 @@ def normalize_server_infos(serv_infos):
 
 
 def normalize_link_infos(lk_infos):
+    '''
+    Normalize link information
+
+    ARGUMENTS:
+        lk_infos (dict) : link information
+    '''
     for key, value in lk_infos.items():
         if (key == "tags_hp" or key == "tags_serv"):
             normalize_key = getattr(normalization_functions, 'normalize_tags')
@@ -45,6 +69,12 @@ def normalize_link_infos(lk_infos):
 
 
 def normalize_lhs_infos(lhs_infos):
+    '''
+    Normalize Link/Honeypot/Server combination information
+
+    ARGUMENTS:
+        lhs_infos (dict) : combination information
+    '''
     for key, value in lhs_infos.items():
         if (key == "id_hp"):
             normalize_key = getattr(normalization_functions, 'normalize_id')
@@ -60,6 +90,7 @@ def normalize_lhs_infos(lhs_infos):
                 normalization_functions, 'normalize_' + key)
             lhs_infos[key] = normalize_key(value)
     return lhs_infos
+
 
 ########## NORMALIZE WITH DEFAULT VALUES SECTION ##########
 
@@ -154,9 +185,11 @@ def normalize_full_lhs_infos(lhs_infos):
 
 
 ########## NORMALIZE DISPLAY SECTION ##########
+
+
 def normalize_display_object_infos(object_infos, obj_type, next_type=''):
-    obj_types = ["hp", "serv", "link"]
-    if not(obj_type in obj_types and (next_type in obj_types or next_type == '')):
+    obj_types_possible = ["hp", "serv", "link"]
+    if not(obj_type in obj_types_possible and (next_type in obj_types_possible or next_type == '')):
         error = str(id) + "Wrong value of " + str(obj_type)
         logging.error(error)
         raise ValueError(error)
@@ -169,7 +202,7 @@ def normalize_display_object_infos(object_infos, obj_type, next_type=''):
             next_type = "serv"
     resultat = normalization_functions.normalize_display(
         object_infos, obj_type, "||||||", next_type)
-    last_type = list(set(obj_types) - set([obj_type, next_type]))[0]
+    last_type = list(set(obj_types_possible) - set([obj_type, next_type]))[0]
     for i in range(len(resultat[next_type+'s'])):
         resultat[next_type+'s'][i] = normalization_functions.normalize_display(
             resultat[next_type+'s'][i], next_type, "||||", last_type)
@@ -179,18 +212,37 @@ def normalize_display_object_infos(object_infos, obj_type, next_type=''):
 
 
 def normalize_id_server(id):
+    '''
+    Normalize server id
+
+    ARGUMENT:
+        id (string) : the server id to normalize
+    '''
     return normalization_functions.normalize_id('sv', id)
 
 
 def normalize_id_honeypot(id):
+    '''
+    Normalize honeypot id
+
+    ARGUMENT:
+        id (string) : the honeypot id to normalize
+    '''
     return normalization_functions.normalize_id('hp', id)
 
 
 def normalize_id_link(id):
+    '''
+    Normalize link id
+
+    ARGUMENT:
+        id (string) : the link id to normalize
+    '''
     return normalization_functions.normalize_id('lk', id)
 
 
 ########## NORMALIZE EDIT SECTION ##########
+
 
 def normalize_modif_to_str(modifs):
     replacement_dict = {"': ": "=", "{'": "", "}": "", ", '": ", "}
