@@ -35,7 +35,7 @@ class GothamServer:
         '''
         # SSH credentials (username@hostname)
         self.hostname = hostname
-        self.username = "gotham"
+        self.username = "root"
         # Remote SSH port
         self.port = port
         # User's key
