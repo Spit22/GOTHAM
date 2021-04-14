@@ -10,7 +10,7 @@ from Gotham_link_BDD import add_honeypot_DB
 from Gotham_link_BDD import remove_honeypot_DB
 from Gotham_link_BDD import get_honeypot_infos
 
-DB_settings = {"username":"gotham", "password":"password", "hostname":"localhost", "port":"3306", "database":"GOTHAM"}
+DB_settings = {"username":"gotham", "password":"password", "hostname":"172.17.0.2", "port":"3306", "database":"GOTHAM"}
 
 honeypot_infos_1 = {"id":"hp-1F5B3AFE32EE71EFB1D25EFFFC2CA000", 'name':'hp-test-1','tags':'SSH,OpenSSH,Port22', 'port':'22','parser':'my%parsing%list','logs':'TO_ADD','source':"TO_ADD", "port_container":22,'state':'UNUSED'}
 honeypot_infos_2 = {"id":"hp-1F5B3AFE32EE71EFB1D25EFFFC2CA001", 'name':'hp-test-2','tags':'DNS,OpenDNS', 'port':'53','parser':'my%parsing%list','logs':'TO_ADD','source':"TO_ADD", "port_container":53,'state':'UNUSED'}
@@ -20,7 +20,7 @@ honeypot_infos_5 = {"id":"hp-1F5B3AFE32EE71EFB1D25EFFFC2CA005", 'name':'hp-test-
 honeypot_infos_6 = {"id":"hp-1F5B3AFE32EE71EFB1D25EFFFC2CA006", 'name':'hp-test-7','tags':'LDAP', 'port':'389','parser':'my%parsing%list','logs':'TO_ADD','source':"TO_ADD", "port_container":389,'state':'UNUSED'}
 honeypot_infos_7 = {"id":"hp-1F5B3AFE32EE71EFB1D25EFFFC2CA007", 'name':'hp-test-8','tags':'Elasticsearch', 'port':'3003','parser':'my%parsing%list','logs':'TO_ADD','source':"TO_ADD", "port_container":3003,'state':'UNUSED'}
 
-def test_add_honeypot(app, client):
+def test_add_honeypot():
     try:
         add_honeypot_DB(DB_settings, honeypot_infos_1)
     except Exception as e:
@@ -34,7 +34,7 @@ def test_add_honeypot(app, client):
     except Exception as e:
         raise pytest.fail(e)
 
-def test_honeypot_integrity(app, client):
+def test_honeypot_integrity():
     result = get_honeypot_infos(DB_settings, id=honeypot_infos_1["id"])[0]
     assert result["hp_id"] == honeypot_infos_1["id"]
     assert result["hp_name"] == honeypot_infos_1["name"]
@@ -80,7 +80,7 @@ def test_honeypot_integrity(app, client):
     for tag_in_IDB in tags_in_IDB:
         assert tag_in_IDB in honeypot_infos_3["tags"]
 
-def test_remove_honeypot(app, client):
+def test_remove_honeypot():
     try:
         remove_honeypot_DB(DB_settings, honeypot_infos_1["id"])
     except Exception as e:

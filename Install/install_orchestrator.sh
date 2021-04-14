@@ -33,7 +33,9 @@ pip3 install -r requirements.txt
 
 # Create /data to store GTOAHM's data
 mkdir -p /data/template
-mkdir -p 
+mkdir -p /data/rsyslog/datacenter-configuration
+mkdir -p /data/honeypot-log
+mkdir -p /data/rsyslog/rulebase
 
 # Copy configuration template to /etc/gotham
 #mkdir /etc/gotham/
