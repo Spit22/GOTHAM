@@ -265,8 +265,7 @@ def add_serv():
 
     # Deploy the reverse-proxy service on the new server
     try:
-        print("bypassed")
-        #add_server.deploy(ip, ssh_port, deploy_ssh_key)
+        add_server.deploy(ip, ssh_port, deploy_ssh_key)
 
     except Exception as e:
         error = "Server deployment failed"
