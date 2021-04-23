@@ -93,8 +93,8 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     # Retrieve State list
-    state_list_serv = config['state']['serv_state']
-    state_list_hp = config['state']['hp_state']
+    state_list_serv = config['state']['serv_state'].split(",")
+    state_list_hp = config['state']['hp_state'].split(",")
     
     if len(state_list_serv)<4 or len(state_list_hp)<4:
         error = "The config file needs 4 differents states for honeypot and server"
@@ -450,7 +450,7 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     # Retrieve State list
-    state_list = config['state']['serv_state']
+    state_list = config['state']['serv_state'].split(",")
     
     if len(state_list)<4:
         error = "The config file needs 4 differents states for honeypot and server"

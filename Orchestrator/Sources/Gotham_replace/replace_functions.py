@@ -36,7 +36,7 @@ def replace_honeypot_all_link(DB_settings, datacenter_settings, hp_infos):
     # Retrieve tag separator in config file
     tag_separator = config['tag']['separator']
     # Retrieve State list
-    state_list = config['state']['hp_state']
+    state_list = config['state']['hp_state'].split(",")
     
     if len(state_list)<4:
         error = "The config file needs 4 differents states for honeypot and server"
@@ -132,7 +132,7 @@ def replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, d
     # Retrieve tag separator in config file
     tag_separator = config['tag']['separator']
     # Retrieve State list
-    state_list = config['state']['hp_state']
+    state_list = config['state']['hp_state'].split(",")
     
     if len(state_list)<4:
         error = "The config file needs 4 differents states for honeypot and server"
@@ -492,7 +492,7 @@ def replace_server_in_link(DB_settings, serv_infos, link, new_tags="", already_u
     # Retrieve tag separator in config file
     tag_separator = config['tag']['separator']
     # Retrieve State list
-    state_list = config['state']['serv_state']
+    state_list = config['state']['serv_state'].split(",")
     
     if len(state_list)<4:
         error = "The config file needs 4 differents states for honeypot and server"

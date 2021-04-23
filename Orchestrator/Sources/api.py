@@ -123,8 +123,8 @@ def add_honeypot():
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     # Retrieve State list
-    state_list = config['state']['hp_state']
-    
+    state_list = config['state']['hp_state'].split(",")
+   
     if len(state_list)<4:
         error = "The config file needs 4 differents states for honeypot and server"
         logging.error(error)
@@ -242,7 +242,7 @@ def add_serv():
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     # Retrieve State list
-    state_list = config['state']['serv_state']
+    state_list = config['state']['serv_state'].split(",")
     
     if len(state_list)<4:
         error = "The config file needs 4 differents states for honeypot and server"
@@ -419,7 +419,7 @@ def add_lk():
     servers = Gotham_check.check_servers_ports_matching(servers, exposed_ports)
 
     # Update server state which are in ERROR or DOWN
-    servers_bad_states = [server for server in servers if (server["serv_state"] == str(state_list_serv[2]).upper() or server["serv_state"] == str(state_list_serv[3]).upper())]
+    servers_bad_states = [server for server in servers if (server["serv_state"] == str(state_list_serv[2]).upper() or server["serv_state"] == str(state_list_serv[3]).upper())]
     for server in servers_bad_states:
         try:
             # Update state of server
@@ -652,7 +652,7 @@ def edit_honeypot():
 
     if honeypots == []:
         logging.error(
-            f"You tried to edit a honeypot that doesn't exists with the id = {hp_infos_received["id"]}")
+            f"You tried to edit a honeypot that doesn't exists with the id = {hp_infos_received['id']}")
         error = "Unknown hp id" + hp_infos_received["id"]
         return Gotham_error.format_usererror(error, "", debug_mode), 400
 
@@ -784,7 +784,7 @@ def edit_serv():
 
     if servers == []:
         logging.error(
-            f"You tried to edit a server that doesn't exists with the id = {serv_infos_received["id"]}")
+            f"You tried to edit a server that doesn't exists with the id = {serv_infos_received['id']}")
         error = "Unknown id " + serv_infos_received["id"]
         return Gotham_error.format_usererror(error, "", debug_mode), 400
 

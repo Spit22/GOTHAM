@@ -83,7 +83,7 @@ def normalize_source(source):
 
 
 def normalize_state(obj_type, state):
-    if (obj_type != "hp" and obj_type != "sv"):
+    if (obj_type != "hp" and obj_type != "serv"):
         error = str(obj_type) + " is incorrect"
         logging.error(error)
         raise ValueError(error)

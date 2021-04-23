@@ -10,11 +10,11 @@ logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
                     level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
 
-def change_state(DB_connection, obj_id, obj_type, new_state):
+def change_state(DB_settings, obj_id, obj_type, new_state):
     # Change the object state in the Internal Database
     #
     #
-    # DB_connection (<mariadb connection object>) : connection with the internal database
+    # DB_settings (json) : auth information
     # obj_id (string) : id of the object
     # obj_type (string) : type of the object ("hp" or "serv")
     # new_state (string) : new state of the object (need to be in the config file)
@@ -35,8 +35,8 @@ def change_state(DB_connection, obj_id, obj_type, new_state):
     conditions = {"id": obj_id}
     
     if obj_type == "serv":
-        states_list=config['state']['serv_state'].split(",")
-        if modifs["state"] in states_list:      
+        state_list=config['state']['serv_state'].split(",")
+        if modifs["state"] in state_list:      
             try:
                 Gotham_link_BDD.edit_server_DB(DB_settings, modifs, conditions)
             except Exception as e:
@@ -44,8 +44,8 @@ def change_state(DB_connection, obj_id, obj_type, new_state):
         else:
             raise ValueError(modifs["state"]+" is not defined in the config file for server")
     elif obj_type == "hp":
-        states_list=config['state']['hp_state'].split(",")
-        if modifs["state"] in states_list:
+        state_list=config['state']['hp_state'].split(",")
+        if modifs["state"] in state_list:
             try:
                 Gotham_link_BDD.edit_honeypot_DB(DB_settings, modifs, conditions)
             except Exception as e:

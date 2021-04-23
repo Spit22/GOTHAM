@@ -9,6 +9,8 @@ from . import state_functions
 import json
 import base64
 import os
+import configparser
+import mariadb
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
@@ -40,7 +42,7 @@ def adapt_state(DB_settings, obj_id, obj_type, link_id="", check_all=True):
     # Retrieve settings from config file
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
-    states_list=config['state'][obj_type+'_state'].split(",")
+    state_list=config['state'][obj_type+'_state'].split(",")
 
     # Retrieve datacenter settings from config file
     dc_ip = config['datacenter']['ip']
@@ -54,7 +56,7 @@ def adapt_state(DB_settings, obj_id, obj_type, link_id="", check_all=True):
         sys.exit(1)
 
     # Checking length of states specified in config file
-    if len(states_list)<4:
+    if len(state_list)<4:
         error = "The config file needs 4 differents states for honeypot and server"
         logging.error(error)
         raise ValueError(error)
@@ -96,7 +98,7 @@ def adapt_state(DB_settings, obj_id, obj_type, link_id="", check_all=True):
             # check docker liveness
             command='docker inspect --format="{{json .State}}" $(docker ps -a | grep '+object_infos["hp_id"]+' | cut -d " " -f1)'
             try:
-                container_state=eval(Gotham_SSH_SCP.execute_command_with_return(dc_ip, dc_ssh_port, dc_ssh_key, command)[0])
+                container_state=json.loads(Gotham_SSH_SCP.execute_command_with_return(dc_ip, dc_ssh_port, dc_ssh_key, command)[0][2:-1])
             except ValueError as e:
                 error = "Error while trying to execute ssh command for nginx state check on serv (id: "+object_infos["serv_id"]+") : " + str(e)
                 logging.error(error)
@@ -170,7 +172,7 @@ def adapt_state(DB_settings, obj_id, obj_type, link_id="", check_all=True):
                    
     # If state is still not defined, check links
     if final_state=="":
-        if str(object_infos["link_id"])==str(link_id):
+        if str(object_infos["link_id"])==str(link_id) or str(object_infos["link_id"]) == "NULL":
             final_state=str(state_list[0]).upper()
             logging.debug(
             f"{str(obj_type).capitalize()} with id {str(obj_id)}, no link are using the object, set state to {final_state}")
@@ -180,30 +182,10 @@ def adapt_state(DB_settings, obj_id, obj_type, link_id="", check_all=True):
             f"{str(obj_type).capitalize()} with id {str(obj_id)}, some link are using the object, set state to {final_state}")
         
 
-
-    # Try to connect to the internal database
-    try:
-        DB_connection = mariadb.connect(
-            user=DB_settings["username"],
-            password=DB_settings["password"],
-            host=DB_settings["hostname"],
-            port=int(DB_settings["port"]),
-            database=DB_settings["database"]
-        )
-        logging.debug(f"[+] Connection to the internal database has started")
-    except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
-        logging.error(error)
-        raise ValueError(error)
-    
     # Update the state
     try: 
-        state_functions.change_state(DB_connection, object_infos[obj_type+"_id"], obj_type, final_state)
+        state_functions.change_state(DB_settings, object_infos[obj_type+"_id"], obj_type, final_state)
     except Exception as e:
         raise ValueError("Error while set state to "+final_state+" : "+str(e))
-
-    # Close the connection to the internal database
-    DB_connection.close()
-    logging.debug(f"[-] Connection to the internal database has been closed")
     
     return final_state

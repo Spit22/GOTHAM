@@ -41,8 +41,10 @@ def normalize_server_infos(serv_infos):
     '''
     for key, value in serv_infos.items():
         normalize_key = getattr(normalization_functions, 'normalize_' + key)
-        if (key == "id" or key == "state"):
+        if (key == "id"):
             serv_infos[key] = normalize_key("sv", value)
+        elif (key == "state"):
+            serv_infos[key] = normalize_key("serv", value)
         else:
             serv_infos[key] = normalize_key(value)
     return serv_infos

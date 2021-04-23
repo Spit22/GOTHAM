@@ -42,7 +42,7 @@ def main(DB_settings, id):
         raise ValueError(error)
     # Remove link on the servers affected by the link
     try:
-        remove_links_on_servers(DB_settings, result[0])
+        obj_linked=remove_links_on_servers(DB_settings, result[0])
     except Exception as e:
         raise ValueError(e)
     # Remove NGINX file of the link on the Orchestrator
@@ -60,6 +60,14 @@ def main(DB_settings, id):
         error = "Remove link failed : " + str(e)
         logging.error(error)
         raise ValueError(error)
+    
+    for id_obj, type_obj in obj_linked.items():
+        try:
+            # Update state of objext
+            Gotham_state.adapt_state(DB_settings, id_obj, type_obj)
+        except Exception as e:
+            logging.error(
+                    "Error while configuring server state : "+str(e))
     return True
 
 
@@ -76,6 +84,9 @@ def remove_links_on_servers(DB_settings, result):
         logging.error(error)
         raise ValueError(error)
     servs = lk_display['servs']
+    # Save linked object
+    obj_linked={}
+
     # For each servers
     for serv_dico in servs:
         # Delete the configuration file of the link we want to delete
@@ -91,18 +102,8 @@ def remove_links_on_servers(DB_settings, result):
                 " removal on servers failed : " + str(e)
             logging.error(error)
             raise ValueError(error)
-
+        obj_linked[serv_dico["serv_id"]]="serv"
         for hp_dico in serv_dico["hps"]:
-            try:
-                # Update state of honeypot
-                Gotham_state.adapt_state(DB_settings, hp_dico["hp_id"], "hp")
-            except Exception as e:
-                logging.error(
-                    "Error while configuring honeypot state : "+str(e))
-            
-        try:
-            # Update state of server
-            Gotham_state.adapt_state(DB_settings, serv_dico["serv_id"], "serv")
-        except Exception as e:
-            logging.error(
-                "Error while configuring server state : "+str(e))
+            obj_linked[hp_dico["hp_id"]]="hp"
+
+    return obj_linked
