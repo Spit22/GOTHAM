@@ -4,6 +4,7 @@ import Gotham_SSH_SCP
 import Gotham_normalize
 import Gotham_check
 import Gotham_choose
+import Gotham_state
 import add_link
 
 # Logging components
@@ -34,6 +35,14 @@ def replace_honeypot_all_link(DB_settings, datacenter_settings, hp_infos):
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     # Retrieve tag separator in config file
     tag_separator = config['tag']['separator']
+    # Retrieve State list
+    state_list = config['state']['hp_state']
+    
+    if len(state_list)<4:
+        error = "The config file needs 4 differents states for honeypot and server"
+        logging.error(error)
+        raise ValueError(error)
+
     
     # Format honeypot tags to be separate by the tag separator
     hp_tags = tag_separator.join(hp_infos["hp_tags"].split("||"))
@@ -44,9 +53,21 @@ def replace_honeypot_all_link(DB_settings, datacenter_settings, hp_infos):
             DB_settings, tags=hp_tags), tags_hp=hp_tags)
     except Exception as e:
         raise ValueError("Error while checking tags : "+str(e))
+    
+    # Update honeypots in error or down
+    honeypots_bad_state = [hp for hp in honeypots if (
+        hp["hp_state"] == str(state_list[2]).upper() or hp["hp_state"] == str(state_list[3]).upper())]
+    for hp_bad_state in honeypots_bad_state:
+        try:
+            # Update state of honeypot
+            Gotham_state.adapt_state(DB_settings, hp_bad_state["hp_id"], "hp")
+        except Exception as e:
+            logging.error(
+                "Error while configuring honeypot state : "+str(e))
+        
     # Filter honeypots in error, and original hp by id
     honeypots = [hp for hp in honeypots if not(
-        hp["hp_state"] == 'ERROR' or hp["hp_id"] == hp_infos["hp_id"])]
+        hp["hp_state"] == str(state_list[2]).upper() or hp["hp_state"] == str(state_list[3]).upper() or hp["hp_id"] == hp_infos["hp_id"])]
     # If at least one honeypot matches
     if honeypots != []:
         # Choose best honeypots (the lower scored)
@@ -72,6 +93,21 @@ def replace_honeypot_all_link(DB_settings, datacenter_settings, hp_infos):
             Gotham_link_BDD.edit_lhs_DB(DB_settings, modifs, conditions)
         except Exception as e:
             raise ValueError("Error while editing link hp server : "+str(e))
+        
+        try:
+            # Update state of new honeypot
+            Gotham_state.adapt_state(DB_settings, honeypot["hp_id"], "hp")
+        except Exception as e:
+            logging.error(
+                "Error while configuring honeypot state : "+str(e))
+        
+        try:
+            # Update state of old honeypot
+            Gotham_state.adapt_state(DB_settings, hp_infos["hp_id"], "hp")
+        except Exception as e:
+            logging.error(
+                "Error while configuring honeypot state : "+str(e))
+        
         return True
 
     return False
@@ -95,6 +131,14 @@ def replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, d
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     # Retrieve tag separator in config file
     tag_separator = config['tag']['separator']
+    # Retrieve State list
+    state_list = config['state']['hp_state']
+    
+    if len(state_list)<4:
+        error = "The config file needs 4 differents states for honeypot and server"
+        logging.error(error)
+        raise ValueError(error)
+
     
     # Variable declaration and initialisation
     replaced = False
@@ -106,9 +150,22 @@ def replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, d
     # Get all honeypots corresponding to tags
     honeypots = Gotham_check.check_tags("hp", Gotham_link_BDD.get_honeypot_infos(
         DB_settings, tags=link_tags_hp), tags_hp=link_tags_hp)
+    
+    # Update honeypots in error or down
+    honeypots_bad_state = [hp for hp in honeypots if (
+        hp["hp_state"] == str(state_list[2]).upper() or hp["hp_state"] == str(state_list[3]).upper())]
+    for hp_bad_state in honeypots_bad_state:
+        try:
+            # Update state of honeypot
+            Gotham_state.adapt_state(DB_settings, hp_bad_state["hp_id"], "hp")
+        except Exception as e:
+            logging.error(
+                "Error while configuring honeypot state : "+str(e))
+        
+
     # Filter honeypots in error, and original hp by id
     honeypots = [hp for hp in honeypots if not(
-        hp["hp_state"] == 'ERROR' or hp["hp_id"] == hp_infos["hp_id"])]
+        hp["hp_state"] == str(state_list[2]).upper() or hp["hp_state"] == str(state_list[3]).upper() or hp["hp_id"] == hp_infos["hp_id"])]
     
     # If at least one honeypot matches
     if honeypots != []:
@@ -121,7 +178,7 @@ def replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, d
         # Choose best honeypots (the lower scored)
         honeypots = Gotham_choose.choose_honeypots(honeypots, 1, link_tags_hp)
         # If already duplicate or no link configured, just edit the link to redirect to the hp
-        if (honeypots[0]["hp_id"] in duplicate_hp_list or honeypots[0]["hp_state"] == "UNUSED") and link["link_id"] not in honeypots[0]["link_id"]:
+        if (honeypots[0]["hp_id"] in duplicate_hp_list or honeypots[0]["hp_state"] == str(state_list[0]).upper()) and link["link_id"] not in honeypots[0]["link_id"]:
             # Don't duplicate
             honeypot = honeypots[0]
         else:
@@ -146,6 +203,21 @@ def replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, d
             Gotham_link_BDD.edit_lhs_DB(DB_settings, modifs, conditions)
         except Exception as e:
             raise ValueError(e)
+        
+        try:
+            # Update state of new honeypot
+            Gotham_state.adapt_state(DB_settings, honeypot["hp_id"], "hp")
+        except Exception as e:
+            logging.error(
+                "Error while configuring honeypot state : "+str(e))
+        
+        try:
+            # Update state of old honeypot
+            Gotham_state.adapt_state(DB_settings, hp_infos["hp_id"], "hp")
+        except Exception as e:
+            logging.error(
+                "Error while configuring honeypot state : "+str(e))
+        
         replaced = True
 
     return {"replaced": replaced, "duplicate_hp_list": duplicate_hp_list}
@@ -168,7 +240,7 @@ def decrease_link(DB_settings, datacenter_settings, object_infos, link, type_obj
         error = "Error on type object"
         logging.error(error)
         raise ValueError(error)
-
+    
     # Check that the number of objects is greater than 1 and can therefore be decrease 
     if int(link["link_nb_"+type_obj]) > 1:
         if type_obj == "hp":
@@ -199,6 +271,12 @@ def decrease_link(DB_settings, datacenter_settings, object_infos, link, type_obj
             Gotham_link_BDD.edit_link_DB(DB_settings, modifs, conditions)
         except Exception as e:
             raise ValueError(e)
+        try:
+            # Update state of object
+            Gotham_state.adapt_state(DB_settings, object_infos[type_obj+"_id"], type_obj)
+        except Exception as e:
+            raise ValueError(
+                "Error while adapt object state : "+str(e))
     else:
         # If nb=1, error, we can't do nothing, just raise an error
         error = "You tried to remove a running "+str(type_obj)+" with the id ="+str(
@@ -411,6 +489,16 @@ def replace_server_in_link(DB_settings, serv_infos, link, new_tags="", already_u
     tag_separator = config['tag']['separator']
     # Retrieve port separator in config file
     port_separator = config['port']['separator']
+    # Retrieve tag separator in config file
+    tag_separator = config['tag']['separator']
+    # Retrieve State list
+    state_list = config['state']['serv_state']
+    
+    if len(state_list)<4:
+        error = "The config file needs 4 differents states for honeypot and server"
+        logging.error(error)
+        raise ValueError(error)
+
 
     # Define link servers tags either by the new ones if they exist, or by taking those defined in the information of the link and fomat them to be separate by the tag separator
     link_tags_serv = tag_separator.join(
@@ -425,8 +513,19 @@ def replace_server_in_link(DB_settings, serv_infos, link, new_tags="", already_u
         servers, link["link_ports"])
 
     # Filter servers in error, with same link, and original server by id
+    servers_bad_state = [server for server in servers if (
+        server["serv_state"] == str(state_list[2]).upper() or server["serv_state"] == str(state_list[3]).upper())]
+    for serv_bad_state in servers_bad_state:
+        try:
+            # Update state of server
+            Gotham_state.adapt_state(DB_settings, serv_bad_state["serv_id"], "serv")
+        except Exception as e:
+            logging.error(
+                "Error while configuring server state : "+str(e))
+
+    # Filter servers in error, with same link, and original server by id
     servers = [server for server in servers if not(
-        server["serv_state"] == 'ERROR' or link["link_id"] in server["link_id"] or server["serv_id"] in already_used or server["serv_id"] == serv_infos["serv_id"])]
+        server["serv_state"] == str(state_list[2]).upper() or server["serv_state"] == str(state_list[3]).upper() or link["link_id"] in server["link_id"] or server["serv_id"] in already_used or server["serv_id"] == serv_infos["serv_id"])]
     
     # If there is not even a matching server, just return false 
     if servers == []:
@@ -486,6 +585,8 @@ def replace_server_in_link(DB_settings, serv_infos, link, new_tags="", already_u
                 except Exception as e:
                     raise ValueError(e)
 
+
+
         # If honeypots information are in the server information
         elif "hps" in serv_infos.keys():
             # Loop through all of the honeypots used by the link  
@@ -519,6 +620,21 @@ def replace_server_in_link(DB_settings, serv_infos, link, new_tags="", already_u
             error = "Hp not found in objects keys"
             logging.error(error)
             raise ValueError(error)
+
+        try:
+            # Update state of old server
+            Gotham_state.adapt_state(DB_settings, serv_infos["serv_id"], "serv")
+        except Exception as e:
+            logging.error(
+                "Error while configuring server state : "+str(e))
+        
+        try:
+            # Update state of new server
+            Gotham_state.adapt_state(DB_settings, replacement_server[0]["serv_id"], "serv")
+        except Exception as e:
+            logging.error(
+                "Error while configuring server state : "+str(e))
+
 
         # If the optional variable is not used
         if already_used == []:

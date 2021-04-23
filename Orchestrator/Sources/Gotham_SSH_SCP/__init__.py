@@ -40,6 +40,26 @@ def execute_commands(hostname, port, ssh_key, commands):
     remote_server.disconnect()
 
 
+def execute_command_with_return(hostname, port, ssh_key, command):
+    '''
+    Execute command on a remote server
+    
+    ARGUMENTS:
+        hostname (string) : hostname of the remote host
+        port (string) : SSH port of the remote host
+        ssh_key (string) : SSH key that allow the orchestrator to connect to the remote host
+        command (string) : the command we want to execute on the remote server
+    '''
+    # Init remote_server object
+    remote_server = SSH_SCP_classes.GothamServer(hostname, port, ssh_key)
+    # Execute the commands
+    answer=remote_server.command_execution_with_return(command)
+    # Close the connection
+    remote_server.disconnect()
+
+    return answer
+
+
 def send_file_and_execute_commands(hostname, port, ssh_key, file_path, remote_file_path, commands):
     '''
     Send a file to a remote host then execute commands

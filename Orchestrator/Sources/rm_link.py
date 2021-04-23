@@ -3,6 +3,7 @@ import subprocess
 #==========================#
 
 #===Import GOTHAM's libs===#
+import Gotham_state
 from Gotham_SSH_SCP import execute_commands
 from Gotham_link_BDD import remove_link_DB, get_link_serv_hp_infos
 from Gotham_normalize import normalize_id_link, normalize_display_object_infos
@@ -90,3 +91,18 @@ def remove_links_on_servers(DB_settings, result):
                 " removal on servers failed : " + str(e)
             logging.error(error)
             raise ValueError(error)
+
+        for hp_dico in serv_dico["hps"]:
+            try:
+                # Update state of honeypot
+                Gotham_state.adapt_state(DB_settings, hp_dico["hp_id"], "hp")
+            except Exception as e:
+                logging.error(
+                    "Error while configuring honeypot state : "+str(e))
+            
+        try:
+            # Update state of server
+            Gotham_state.adapt_state(DB_settings, serv_dico["serv_id"], "serv")
+        except Exception as e:
+            logging.error(
+                "Error while configuring server state : "+str(e))

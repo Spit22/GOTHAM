@@ -32,6 +32,7 @@ import Gotham_check
 import Gotham_choose
 import Gotham_normalize
 import Gotham_replace
+import Gotham_state
 import Gotham_error
 
 # Create the flask application
@@ -118,6 +119,17 @@ def add_honeypot():
     # dockerfile (string) : dockerfile to generate the honeypot on datacenter, base64 encoded
     # service_port (int) : port on which the honeypot will lcoally listen
 
+    # Retrieve settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    # Retrieve State list
+    state_list = config['state']['hp_state']
+    
+    if len(state_list)<4:
+        error = "The config file needs 4 differents states for honeypot and server"
+        logging.error(error)
+        return Gotham_error.format_usererror(error, str(error), debug_mode), 400
+
     # Get POST data on JSON format
     data = request.get_json()
 
@@ -195,13 +207,20 @@ def add_honeypot():
 
     # Create hp_infos
     hp_infos = {'id': str(id), 'name': str(name), 'descr': str(descr), 'tags': str(tags), 'port_container': port, 'parser': str(
-        parser), 'logs': str(logs), 'source': str(dockerfile_path), 'state': 'UNUSED', 'port': mapped_port}
+        parser), 'logs': str(logs), 'source': str(dockerfile_path), 'state': str(state_list[0]).upper(), 'port': mapped_port}
 
     # Normalize infos
     hp_infos = Gotham_normalize.normalize_honeypot_infos(hp_infos)
 
     # Store new hp and tags in the database
     Gotham_link_BDD.add_honeypot_DB(DB_settings, hp_infos)
+
+    try:
+        # Update state of honeypot
+        Gotham_state.adapt_state(DB_settings, hp_infos["id"], "hp")
+    except Exception as e:
+        logging.error(
+            "Error while configuring honeypot state : "+str(e))
 
     # If all operations succeed, return id of created object
     response = str({"id": str(id)}).replace("\'", "\"")+"\n"
@@ -218,6 +237,18 @@ def add_serv():
     # ip (string) : adresse IP publique du serveur
     # ssh_key (string) : clé SSH à utiliser pour la connexion
     # ssh_port (int) : port d'écoute du service SSH 
+
+    # Retrieve settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    # Retrieve State list
+    state_list = config['state']['serv_state']
+    
+    if len(state_list)<4:
+        error = "The config file needs 4 differents states for honeypot and server"
+        logging.error(error)
+        return Gotham_error.format_usererror(error, str(error), debug_mode), 400
+
 
     # Get POST data on JSON format
     data = request.get_json()
@@ -273,13 +304,20 @@ def add_serv():
 
     # Create serv_infos
     serv_infos = {'id': str(id), 'name': str(name), 'descr': str(descr), 'tags': str(
-        tags), 'ip': str(ip), 'ssh_key': str(ssh_key), 'ssh_port': ssh_port, 'state': 'UNUSED'}
+        tags), 'ip': str(ip), 'ssh_key': str(ssh_key), 'ssh_port': ssh_port, 'state': str(state_list[0]).upper()}
 
     # Normalize infos
     serv_infos = Gotham_normalize.normalize_server_infos(serv_infos)
 
     # Store new server and tags in the internal database
     Gotham_link_BDD.add_server_DB(DB_settings, serv_infos)
+
+    try:
+        # Update state of server
+        Gotham_state.adapt_state(DB_settings, serv_infos["id"], "serv")
+    except Exception as e:
+        logging.error(
+            "Error while configuring server state : "+str(e))
 
     # If all operations succeed, return id of created object
     response = str({"id": str(id)}).replace("\'", "\"")+"\n"
@@ -298,6 +336,18 @@ def add_lk():
 
     # Get POST data on JSON format
     data = request.get_json()
+
+    # Retrieve settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    # Retrieve State list
+    state_list_serv = config['state']['serv_state']
+    state_list_hp = config['state']['hp_state']
+    
+    if len(state_list_serv)<4 or len(state_list_hp)<4:
+        error = "The config file needs 4 differents states for honeypot and server"
+        logging.error(error)
+        return Gotham_error.format_usererror(error, str(error), debug_mode), 400
 
     # Get all function's parameters
     try:
@@ -368,12 +418,34 @@ def add_lk():
     # Filter servers in those who have one of ports open
     servers = Gotham_check.check_servers_ports_matching(servers, exposed_ports)
 
-    # Filter servers in error
-    servers = [server for server in servers if server["serv_state"] != 'ERROR']
+    # Update server state which are in ERROR or DOWN
+    servers_bad_states = [server for server in servers if (server["serv_state"] == str(state_list_serv[2]).upper() or server["serv_state"] == str(state_list_serv[3]).upper())]
+    for server in servers_bad_states:
+        try:
+            # Update state of server
+            Gotham_state.adapt_state(DB_settings, server["serv_id"], "serv")
+        except Exception as e:
+            logging.error(
+                "Error while configuring server state : "+str(e))
 
-    # Filter honeypots in error
+    # Update honeypot state which are in ERROR or DOWN
+    honeypots_bad_states = [
+        honeypot for honeypot in honeypots if (honeypot["hp_state"] == str(state_list_hp[2]).upper() or honeypot["hp_state"] == str(state_list_hp[3]).upper())]
+    for honeypot in honeypots_bad_states:
+        try:
+            # Update state of server
+            Gotham_state.adapt_state(DB_settings, honeypot["hp_id"], "hp")
+        except Exception as e:
+            logging.error(
+                "Error while configuring honeypot state : "+str(e))
+
+
+    # Filter servers in error or down
+    servers = [server for server in servers if (server["serv_state"] != str(state_list_serv[2]).upper() and server["serv_state"] != str(state_list_serv[3]).upper())]
+
+    # Filter honeypots in error or down
     honeypots = [
-        honeypot for honeypot in honeypots if honeypot["hp_state"] != 'ERROR']
+        honeypot for honeypot in honeypots if (honeypot["hp_state"] != str(state_list_hp[2]).upper() and honeypot["hp_state"] != str(state_list_hp[3]).upper())]
 
     if str(nb_serv).lower() == "all":
         nb_serv = len(servers)
@@ -495,17 +567,7 @@ def add_lk():
 
     # Insert data in Link_Hp_Serv
     for server in servers:
-        # Update state of server
-        modifs = {"state": "HEALTHY"}
-        conditions = {"id": server["serv_id"]}
-        Gotham_link_BDD.edit_server_DB(DB_settings, modifs, conditions)
-
         for honeypot in honeypots:
-            # Update state of honeypot
-            modifs = {"state": "HEALTHY"}
-            conditions = {"id": honeypot["hp_id"]}
-            Gotham_link_BDD.edit_honeypot_DB(DB_settings, modifs, conditions)
-
             # Create lhs_infos
             lhs_infos = {"id_link": lk_infos["id"], "id_hp": honeypot["hp_id"],
                          "id_serv": server["serv_id"], "port": server["choosed_port"]}
@@ -513,6 +575,20 @@ def add_lk():
             lhs_infos = Gotham_normalize.normalize_lhs_infos(lhs_infos)
             # Store new link and tags in the internal database
             Gotham_link_BDD.add_lhs_DB(DB_settings, lhs_infos)
+
+            try:
+                # Update state of honeypot
+                Gotham_state.adapt_state(DB_settings, honeypot["hp_id"], "hp")
+            except Exception as e:
+                logging.error(
+                    "Error while configuring honeypot state : "+str(e))
+            
+        try:
+            # Update state of server
+            Gotham_state.adapt_state(DB_settings, server["serv_id"], "serv")
+        except Exception as e:
+            logging.error(
+                "Error while configuring server state : "+str(e))
 
     # If all operations succeed, return id of created object
     response = str({"id": str(id)}).replace("\'", "\"")+"\n"
@@ -576,7 +652,7 @@ def edit_honeypot():
 
     if honeypots == []:
         logging.error(
-            f"You tried to edit a honeypot that doesn't exists with the id = {id}")
+            f"You tried to edit a honeypot that doesn't exists with the id = {hp_infos_received["id"]}")
         error = "Unknown hp id" + hp_infos_received["id"]
         return Gotham_error.format_usererror(error, "", debug_mode), 400
 
@@ -633,6 +709,13 @@ def edit_honeypot():
     if modifs != {}:
         Gotham_link_BDD.edit_honeypot_DB(DB_settings, modifs, conditions)
 
+        try:
+            # Update state of honeypot
+            Gotham_state.adapt_state(DB_settings, hp_infos_received["id"], "hp")
+        except Exception as e:
+            logging.error(
+                "Error while configuring honeypot state : "+str(e))
+        
         honeypots = Gotham_link_BDD.get_honeypot_infos(
             DB_settings, id=hp_infos_received["id"])
         honeypot = Gotham_normalize.normalize_display_object_infos(
@@ -701,7 +784,7 @@ def edit_serv():
 
     if servers == []:
         logging.error(
-            f"You tried to edit a server that doesn't exists with the id = {id}")
+            f"You tried to edit a server that doesn't exists with the id = {serv_infos_received["id"]}")
         error = "Unknown id " + serv_infos_received["id"]
         return Gotham_error.format_usererror(error, "", debug_mode), 400
 
@@ -770,6 +853,14 @@ def edit_serv():
 
     if modifs != {}:
         Gotham_link_BDD.edit_server_DB(DB_settings, modifs, conditions)
+
+        try:
+            # Update state of server
+            Gotham_state.adapt_state(DB_settings, serv_infos_received["id"], "serv")
+        except Exception as e:
+            logging.error(
+                "Error while configuring server state : "+str(e))
+
         servers = Gotham_link_BDD.get_server_infos(
             DB_settings, id=serv_infos_received["id"])
         server = Gotham_normalize.normalize_display_object_infos(

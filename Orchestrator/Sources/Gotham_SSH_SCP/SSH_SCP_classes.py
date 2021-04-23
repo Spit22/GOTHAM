@@ -119,3 +119,23 @@ class GothamServer:
 
         logging.info(
             f"The commands {commands} has just been executed on the server {self.hostname}")
+
+    def command_execution_with_return(self, command):
+        '''
+        Execute a command and return the stdout
+
+        ARGUMENTS:
+            command (string) : command we want to execute on the remote server
+        '''
+        # Start an SSH connection
+        self.is_connected = self.connect()
+
+        # Execute all of the commands
+        stdin, stdout, stderr = self.ssh_session.exec_command(command)
+        answer=[]
+        for line in stdout.read().splitlines():
+            answer.append(str(line))
+
+        logging.info(
+            f"The command {command} has just been executed on the server {self.hostname}")
+        return answer
