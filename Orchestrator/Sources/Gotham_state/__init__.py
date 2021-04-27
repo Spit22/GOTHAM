@@ -106,8 +106,6 @@ def adapt_state(DB_settings, obj_id, obj_type, link_id="", check_all=True, repla
             command='docker inspect --format="{{json .State}}" $(docker ps -a | grep '+object_infos["hp_id"]+' | cut -d " " -f1)'
             try:
                 container_state=json.loads(Gotham_SSH_SCP.execute_command_with_return(dc_ip, dc_ssh_port, dc_ssh_key, command)[0][2:-1])
-                print("DEBUG1")
-                print(container_state)
             except ValueError as e:
                 error = "Error while trying to execute ssh command for docker state check on hp (id: "+object_infos["hp_id"]+") : " + str(e)
                 logging.error(error)
@@ -132,10 +130,15 @@ def adapt_state(DB_settings, obj_id, obj_type, link_id="", check_all=True, repla
                 final_state=str(state_list[3]).upper()
                 logging.debug(
                 f"Honeypot with id {str(obj_id)}, container state defined to Paused, set state to {final_state}")
+            elif str(container_state["Status"]).lower()=="exited":
+                final_state=str(state_list[3]).upper()
+                logging.debug(
+                f"Honeypot with id {str(obj_id)}, container state defined to Exited, set state to {final_state}")
             elif str(container_state["Running"]).lower()=="true":
                 final_state=""
                 logging.debug(
                 f"Honeypot with id {str(obj_id)}, container is running")
+            
             
 
         elif obj_type == "serv":
