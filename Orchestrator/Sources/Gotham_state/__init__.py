@@ -2,6 +2,7 @@
 import Gotham_link_BDD
 import Gotham_check
 import Gotham_SSH_SCP
+import Gotham_replace
 
 from . import state_functions
 
@@ -18,7 +19,7 @@ logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
 
 
 
-def adapt_state(DB_settings, obj_id, obj_type, link_id="", check_all=True):
+def adapt_state(DB_settings, obj_id, obj_type, link_id="", check_all=True, replace_auto=True):
     # Set the object state to appropriate status in the Internal Database after some checks
     #
     #
@@ -27,6 +28,7 @@ def adapt_state(DB_settings, obj_id, obj_type, link_id="", check_all=True):
     # obj_type (string) : type of the object ("hp" or "serv")
     # link_id (string) - optional : id of a link that we don't want to consider (not updated in the database) 
     # check_all (boolean) - optional : check all is true, just the used state if false 
+    # replace_auto (boolean) - optional : replace automaticaly object with bad state 
     #
     # Raise error if something failed
     # 
@@ -51,9 +53,14 @@ def adapt_state(DB_settings, obj_id, obj_type, link_id="", check_all=True):
         dc_ssh_key = config['datacenter']['ssh_key']
         dc_ssh_key = base64.b64decode(dc_ssh_key)  # ssh_key is byte
         dc_ssh_key = dc_ssh_key.decode('ascii')  # ssh_key is ascii string
+        dc_ssh_key_rsyslog = dc_ssh_key  #  ssh_key for rsyslog
     except Exception as e:
         print("Error loading datacenter's SSH key")
         sys.exit(1)
+
+    # Put datacenter settings in a dictionary
+    datacenter_settings = {"hostname": dc_ip, "ssh_key": dc_ssh_key,
+                       "rsyslog_ssh_key": dc_ssh_key_rsyslog, "ssh_port": dc_ssh_port}
 
     # Checking length of states specified in config file
     if len(state_list)<4:
@@ -164,7 +171,7 @@ def adapt_state(DB_settings, obj_id, obj_type, link_id="", check_all=True):
                     error = "Error while trying to execute ssh command for nginx state check on serv (id: "+object_infos["serv_id"]+") : " + str(e)
                     logging.error(error)
                     raise ValueError(error)
-                if nginx_running=="KO":
+                if nginx_running[0]=="KO":
                     final_state=str(state_list[2]).upper()
                     logging.debug(
                     f"Server with id {str(obj_id)}, test verifying that nginx is running failed, set state to {final_state}")
@@ -187,5 +194,23 @@ def adapt_state(DB_settings, obj_id, obj_type, link_id="", check_all=True):
         state_functions.change_state(DB_settings, object_infos[obj_type+"_id"], obj_type, final_state)
     except Exception as e:
         raise ValueError("Error while set state to "+final_state+" : "+str(e))
-    
+
+    # If replace_auto is set and object state is DOWN or ERROR, try to replace it
+    if replace_auto==True and (final_state==str(state_list[2]).upper() or final_state==str(state_list[3]).upper()) and str(object_infos["link_id"]) != "NULL":
+        if obj_type == "hp":
+            try:
+                Gotham_replace.replace_hp_for_rm(DB_settings, datacenter_settings, object_infos)
+            except ValueError as e:
+                error = "Error while trying to replace honeypot (id: "+object_infos[obj_type+"_id"]+") for bad state: " + str(e)
+                logging.error(error)
+                raise ValueError(error)
+
+        elif obj_type == "serv":
+            try:
+                Gotham_replace.replace_serv_for_rm(DB_settings, datacenter_settings, object_infos)
+            except ValueError as e:
+                error = "Error while trying to replace server (id: "+object_infos[obj_type+"_id"]+") for bad state: " + str(e)
+                logging.error(error)
+                raise ValueError(error)
+
     return final_state
