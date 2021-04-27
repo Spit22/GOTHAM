@@ -158,6 +158,16 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
             objects_infos = Gotham_check.check_tags(
                 type_nb, objects_infos, tags_hp=tags_hp, tags_serv=tags_serv)
 
+        # Update object state which are in ERROR or DOWN
+        objects_bad_states = [object_infos for object_infos in objects_infos if (object_infos[type_nb+"_state"] == (str(state_list_hp[2]).upper() if type_nb == "hp" else str(state_list_serv[2]).upper()) or object_infos[type_nb+"_state"] == (str(state_list_hp[3]).upper() if type_nb == "hp" else str(state_list_serv[3]).upper()))]
+        for object_bad_states in objects_bad_states:
+            try:
+                # Update state of object
+                Gotham_state.adapt_state(DB_settings, object_bad_states[type_nb + "_state"], type_nb)
+            except Exception as e:
+                logging.error(
+                    "Error while configuring object state : "+str(e))
+
         # Filter objects in error and already present in link
         objects_infos = [object_infos for object_infos in objects_infos if not(
             object_infos[type_nb+"_state"] == (str(state_list_hp[2]).upper() if type_nb == "hp" else str(state_list_serv[2]).upper()) or object_infos[type_nb+"_state"] == (str(state_list_hp[3]).upper() if type_nb == "hp" else str(state_list_serv[3]).upper()) or object_infos[type_nb+"_id"] in link[type_nb+"_id"])]
