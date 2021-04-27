@@ -110,6 +110,14 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
     # Get already used objects
     present_objects = []
     for object_infos in dsp_link[type_nb+"s"]:
+        # Check objects state
+        try:
+            # Update state of object
+            Gotham_state.adapt_state(DB_settings, object_infos[type_nb+"_id"], type_nb)
+        except Exception as e:
+            logging.error(
+                "Error while configuring object " + type_nb + " state : "+str(e))
+
         if type_nb == "hp":
             present_object = Gotham_link_BDD.get_honeypot_infos(
                 DB_settings, id=object_infos[type_nb+"_id"])[0]
