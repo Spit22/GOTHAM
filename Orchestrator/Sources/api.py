@@ -407,38 +407,30 @@ def add_lk():
     honeypots = Gotham_link_BDD.get_honeypot_infos(DB_settings, tags=tags_hp)
 
     if tags_hp.lower() != "all":
+        # update state
+        try:
+            honeypots = [Gotham_state.adapt_state(DB_settings,
+                honeypot["hp_id"], "hp") for honeypot in honeypots]
+        except Exception as e:
+            logging.error(
+                "Error while configuring honeypot state : "+str(e))
         honeypots = Gotham_check.check_tags("hp", honeypots, tags_hp=tags_hp)
 
     # Get all servers corresponding to tags
     servers = Gotham_link_BDD.get_server_infos(DB_settings, tags=tags_serv)
 
     if tags_serv.lower() != "all":
+        # update state
+        try:
+            servers = [Gotham_state.adapt_state(DB_settings,
+                server["serv_id"], "serv") for server in servers]
+        except Exception as e:
+            logging.error(
+                "Error while configuring server state : "+str(e))
         servers = Gotham_check.check_tags("serv", servers, tags_serv=tags_serv)
 
     # Filter servers in those who have one of ports open
     servers = Gotham_check.check_servers_ports_matching(servers, exposed_ports)
-
-    # Update server state which are in ERROR or DOWN
-    servers_bad_states = [server for server in servers if (server["serv_state"] == str(state_list_serv[2]).upper() or server["serv_state"] == str(state_list_serv[3]).upper())]
-    for server in servers_bad_states:
-        try:
-            # Update state of server
-            Gotham_state.adapt_state(DB_settings, server["serv_id"], "serv")
-        except Exception as e:
-            logging.error(
-                "Error while configuring server state : "+str(e))
-
-    # Update honeypot state which are in ERROR or DOWN
-    honeypots_bad_states = [
-        honeypot for honeypot in honeypots if (honeypot["hp_state"] == str(state_list_hp[2]).upper() or honeypot["hp_state"] == str(state_list_hp[3]).upper())]
-    for honeypot in honeypots_bad_states:
-        try:
-            # Update state of server
-            Gotham_state.adapt_state(DB_settings, honeypot["hp_id"], "hp")
-        except Exception as e:
-            logging.error(
-                "Error while configuring honeypot state : "+str(e))
-
 
     # Filter servers in error or down
     servers = [server for server in servers if (server["serv_state"] != str(state_list_serv[2]).upper() and server["serv_state"] != str(state_list_serv[3]).upper())]
@@ -674,9 +666,8 @@ def edit_honeypot():
             if honeypot['link_id'] != None and honeypot['link_id'] != "NULL":
                 succes = False
                 try:
-                    edit_hp.edit_tags(
+                    succes=edit_hp.edit_tags(
                         DB_settings, datacenter_settings, honeypot, hp_infos_received["tags"])
-                    succes = True
 
                 except Exception as e:
                     succes = False
@@ -711,15 +702,15 @@ def edit_honeypot():
 
         try:
             # Update state of honeypot
-            Gotham_state.adapt_state(DB_settings, hp_infos_received["id"], "hp")
+            honeypot = Gotham_state.adapt_state(DB_settings, hp_infos_received["id"], "hp")
         except Exception as e:
             logging.error(
                 "Error while configuring honeypot state : "+str(e))
+            honeypot = Gotham_link_BDD.get_honeypot_infos(
+                DB_settings, id=hp_infos_received["id"])[0]
         
-        honeypots = Gotham_link_BDD.get_honeypot_infos(
-            DB_settings, id=hp_infos_received["id"])
         honeypot = Gotham_normalize.normalize_display_object_infos(
-            honeypots[0], "hp")
+            honeypot, "hp")
 
         return honeypot, 200
 
@@ -805,9 +796,8 @@ def edit_serv():
             succes = True
             if server['link_id'] != None and server['link_id'] != "NULL":
                 try:
-                    edit_server.edit_tags(
+                    succes=edit_server.edit_tags(
                         DB_settings, datacenter_settings, server, serv_infos_received["tags"])
-                    succes = True
                 except Exception as e:
                     succes = False
                     debug_information = e
@@ -856,15 +846,15 @@ def edit_serv():
 
         try:
             # Update state of server
-            Gotham_state.adapt_state(DB_settings, serv_infos_received["id"], "serv")
+            server = Gotham_state.adapt_state(DB_settings, serv_infos_received["id"], "serv")
         except Exception as e:
             logging.error(
                 "Error while configuring server state : "+str(e))
-
-        servers = Gotham_link_BDD.get_server_infos(
-            DB_settings, id=serv_infos_received["id"])
+            server = Gotham_link_BDD.get_server_infos(
+                DB_settings, id=serv_infos_received["id"])[0]
+        
         server = Gotham_normalize.normalize_display_object_infos(
-            servers[0], "serv")
+            server, "serv")
         return server, 200
 
     return "{\"message\": \"Nothing to change\"}\n", 200
@@ -885,6 +875,7 @@ def edit_lk():
     data = request.get_json()
 
     link_infos_received = {}
+    all_error=""
 
     try:
         # Get all function's parameters
@@ -954,13 +945,16 @@ def edit_lk():
                     error = "Some server tags does not exist"
                     return Gotham_error.format_usererror(error, str(e), debug_mode), 400
                 try:
-                    edit_link.edit_tags(DB_settings, datacenter_settings,
+                    result=dit_link.edit_tags(DB_settings, datacenter_settings,
                                             link_serv_hp, link_infos_received["tags_serv"], "serv")
                 except Exception as e:
                     error = "Tag server edition failed"
                     return Gotham_error.format_usererror(error, str(e), debug_mode), 500
-            
-            modifs["tags_serv"] = link_infos_received["tags_serv"]
+            if result==True:
+                modifs["tags_serv"] = link_infos_received["tags_serv"]
+            else:
+                error="Tag server edition failed, some links cannot be decremented" 
+                return Gotham_error.format_usererror(error, str(e), debug_mode), 500
 
     # Update database in memory
     if modifs != {}:
@@ -992,13 +986,17 @@ def edit_lk():
                     error = "Some honeypot tags does not exist"
                     return Gotham_error.format_usererror(error, str(e), debug_mode), 400
                 try:
-                    edit_link.edit_tags(
+                    result=edit_link.edit_tags(
                         DB_settings, datacenter_settings, link_hp_serv, link_infos_received["tags_hp"], "hp")
                 except Exception as e:
                     error = "Tag honeypot edition failed"
                     return Gotham_error.format_usererror(error, str(e), debug_mode), 500
-
-            modifs["tags_hp"] = link_infos_received["tags_hp"]
+            if result==True:
+                modifs["tags_hp"] = link_infos_received["tags_hp"]
+            else:
+                error="Tag honeypot edition failed, some links cannot be decremented" 
+                return Gotham_error.format_usererror(error, str(e), debug_mode), 500
+            
 
     # Update database
     if modifs != {}:
@@ -1125,22 +1123,24 @@ def rm_honeypot():
     id = data["id"]
 
     try:
-        rm_hp.main(DB_settings, datacenter_settings, id)
+        succes= rm_hp.main(DB_settings, datacenter_settings, id)
 
     except Exception as e:
         error = "Honeypot deletion failed"
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
+    if succes ==True:
+        try:
+            rm_hp.remove_rsyslog_configuration(datacenter_settings, id)
+        except Exception as e:
+            error = "Honeypot rsyslog deletion failed"
+            return Gotham_error.format_usererror(error, str(e), debug_mode), 500
 
-    try:
-        rm_hp.remove_rsyslog_configuration(datacenter_settings, id)
-    except Exception as e:
-        error = "Honeypot rsyslog deletion failed"
+        # If all operations succeed, return id of deleted object
+        response = str({"id": str(id)}).replace("\'", "\"")+"\n"
+        return response, 200
+    else:
+        error = "Honeypot deletion failed"
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
-
-    # If all operations succeed, return id of deleted object
-    response = str({"id": str(id)}).replace("\'", "\"")+"\n"
-    return response, 200
-
 
 @app.route('/delete/server', methods=['POST'])
 def rm_serv():
@@ -1155,14 +1155,18 @@ def rm_serv():
     id = data["id"]
     ##### TODO ??? : ADD ABILITY TO DELETE WITH IP ######
     try:
-        rm_server.main(DB_settings, datacenter_settings, id=id)
+        succes=rm_server.main(DB_settings, datacenter_settings, id=id)
     except Exception as e:
         error = "Server deletion failed"
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
 
-    # If all operations succeed, return id of created object
-    response = str({"id": str(id)}).replace("\'", "\"")+"\n"
-    return response, 200
+    if succes == True
+        # If all operations succeed, return id of created object
+        response = str({"id": str(id)}).replace("\'", "\"")+"\n"
+        return response, 200
+    else:
+        error = "Server deletion failed"
+        return Gotham_error.format_usererror(error, str(e), debug_mode), 500
 
 
 @app.route('/delete/link', methods=['POST'])
@@ -1244,6 +1248,21 @@ def ls_honeypot():
             set_exact = {frozenset(row.items()) for row in honeypots_exact}
             set_others = {frozenset(row.items()) for row in honeypots_others}
             honeypots_others = [dict(i) for i in set_others - set_exact]
+
+            # update state
+            try:
+                honeypots_exact = [Gotham_state.adapt_state(DB_settings,
+                honeypote["hp_id"], "hp") for honeypot in honeypots_exact]
+            except Exception as e:
+                logging.error(
+                    "Error while configuring honeypot state : "+str(e))
+            try:
+                honeypots_others = [Gotham_state.adapt_state(DB_settings,
+                honeypot["hp_id"], "hp") for honeypot in honeypots_others]
+             except Exception as e:
+                logging.error(
+                    "Error while configuring honeypot state : "+str(e))
+
             honeypots_exact = [Gotham_normalize.normalize_display_object_infos(
                 honeypot, "hp") for honeypot in honeypots_exact]
             honeypots_others = [Gotham_normalize.normalize_display_object_infos(
@@ -1331,6 +1350,21 @@ def ls_serv():
             set_exact = {frozenset(row.items()) for row in servers_exact}
             set_others = {frozenset(row.items()) for row in servers_others}
             servers_others = [dict(i) for i in set_others - set_exact]
+
+            # update state
+            try:
+                servers_exact = [Gotham_state.adapt_state(DB_settings,
+                server["serv_id"], "serv") for server in servers_exact]
+            except Exception as e:
+                logging.error(
+                    "Error while configuring server state : "+str(e))
+            try:
+                servers_others = [Gotham_state.adapt_state(DB_settings,
+                server["serv_id"], "serv") for server in servers_others]
+             except Exception as e:
+                logging.error(
+                    "Error while configuring server state : "+str(e))
+            
             servers_exact = [Gotham_normalize.normalize_display_object_infos(
                 server, "serv") for server in servers_exact]
             servers_others = [Gotham_normalize.normalize_display_object_infos(

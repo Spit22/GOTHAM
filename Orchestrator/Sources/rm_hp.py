@@ -54,28 +54,30 @@ def main(DB_settings, datacenter_settings, id):
         hp_infos = normalize_display_object_infos(result[0], "hp")
         # Try to replace
         try:
-            Gotham_replace.replace_hp_for_rm(
+            succes=Gotham_replace.replace_hp_for_rm(
                 DB_settings, datacenter_settings, hp_infos)
         except Exception as e:
             raise ValueError(e)
 
-    # Remove the Honeypot from the datacenter
-    commands = [f"docker container stop {id}",
-                f"docker container rm {id}", "docker network prune -f"]
-    try:
-        execute_commands(
-            datacenter_settings['hostname'], datacenter_settings['ssh_port'], datacenter_settings['ssh_key'], commands)
-    except Exception as e:
-        logging.error(f"Remove container failed : {e}")
-        raise ValueError(e)
-    # Remove the Honeypot from the IDB
-    try:
-        remove_honeypot_DB(DB_settings, id)
-    except Exception as e:
-        logging.error(f"Remove container failed : {e}")
-        raise ValueError(e)
-    return True
-
+    if succes == True:
+        # Remove the Honeypot from the datacenter
+        commands = [f"docker container stop {id}",
+                    f"docker container rm {id}", "docker network prune -f"]
+        try:
+            execute_commands(
+                datacenter_settings['hostname'], datacenter_settings['ssh_port'], datacenter_settings['ssh_key'], commands)
+        except Exception as e:
+            logging.error(f"Remove container failed : {e}")
+            raise ValueError(e)
+        # Remove the Honeypot from the IDB
+        try:
+            remove_honeypot_DB(DB_settings, id)
+        except Exception as e:
+            logging.error(f"Remove container failed : {e}")
+            raise ValueError(e)
+        return True
+    else:
+        return False
 ######### RSYSLOG SECTION ###########
 
 

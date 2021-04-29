@@ -54,25 +54,28 @@ def main(DB_settings, datacenter_settings, id='sv-000000000000000000000000000000
     if result[0]['link_id'] != None and result[0]['link_id'] != "NULL":
         serv_infos = normalize_display_object_infos(result[0], "serv")
         try:
-            Gotham_replace.replace_serv_for_rm(
+            succes = Gotham_replace.replace_serv_for_rm(
                 DB_settings, datacenter_settings, serv_infos)
         except Exception as e:
             raise ValueError(e)
 
-    # Remove Server from the server
-    try:
-        remove_nginx_on_server(
-            result[0]['serv_ip'], result[0]['serv_ssh_port'], result[0]['serv_ssh_key'])
-    except Exception as e:
-        raise ValueError(e)
+    if succes == True:
+        # Remove Server from the server
+        try:
+            remove_nginx_on_server(
+                result[0]['serv_ip'], result[0]['serv_ssh_port'], result[0]['serv_ssh_key'])
+        except Exception as e:
+            raise ValueError(e)
 
-    # Remove Server from the IDB
-    try:
-        remove_server_DB(DB_settings, result[0]['serv_id'])
-    except Exception as e:
-        logging.error(f"Remove server failed : {e}")
-        raise ValueError(e)
-    return True
+        # Remove Server from the IDB
+        try:
+            remove_server_DB(DB_settings, result[0]['serv_id'])
+        except Exception as e:
+            logging.error(f"Remove server failed : {e}")
+            raise ValueError(e)
+        return True
+    else:
+        return False
 
 
 def remove_nginx_on_server(hostname, port, ssh_key):

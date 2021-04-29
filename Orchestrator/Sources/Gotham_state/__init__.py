@@ -218,4 +218,16 @@ def adapt_state(DB_settings, obj_id, obj_type, link_id="", check_all=True, repla
                 logging.error(error)
                 raise ValueError(error)
 
-    return final_state
+        # Get new object infos
+        if obj_type == "hp":
+            object_infos = Gotham_link_BDD.get_honeypot_infos(
+                DB_settings, id=str(object_infos[obj_type+"_id"]))[0] 
+            
+        elif obj_type == "serv":
+            object_infos = Gotham_link_BDD.get_server_infos(
+                DB_settings, id=str(object_infos[obj_type+"_id"]))[0] 
+            
+
+
+    object_infos[obj_type+'_state']=final_state
+    return object_infos

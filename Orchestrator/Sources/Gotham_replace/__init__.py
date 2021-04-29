@@ -26,6 +26,8 @@ def replace_hp_for_rm(DB_settings, datacenter_settings, hp_infos):
         hp_infos = Gotham_normalize.normalize_display_object_infos(
             hp_infos, "hp")
 
+    all_ok = True
+
     # Try to replace with one hp for all link
     result = False
     try:
@@ -35,6 +37,7 @@ def replace_hp_for_rm(DB_settings, datacenter_settings, hp_infos):
         raise ValueError(
             "Error while replacing one hp for all links : "+str(e))
 
+    
     # if we can't, just find a honeypot per link
     if result == False:
         # Save duplicate hps in this change so as not to reduplicate them 
@@ -56,11 +59,15 @@ def replace_hp_for_rm(DB_settings, datacenter_settings, hp_infos):
             # If we can't replace, just edit link to decrease nb hp
             if result == False:
                 try:
-                    replace_functions.decrease_link(
+                    result = replace_functions.decrease_link(
                         DB_settings, datacenter_settings, hp_infos, link, "hp")
                 except Exception as e:
                     raise ValueError(
                         "Error decreasing the hp number of link : "+str(e))
+                if result == False:
+                    all_ok = False
+
+    return all_ok = True
 
 
 def replace_hp_for_deleted_tags(DB_settings, datacenter_settings, hp_infos, deleted_tags):
@@ -83,6 +90,8 @@ def replace_hp_for_deleted_tags(DB_settings, datacenter_settings, hp_infos, dele
     duplicate_hp_list = []
     # Initialization of the variable storing the result
     res = {}
+
+    all_ok = True
     # Loop through all links using honeypot subject to deletion
     for link in hp_infos["links"]:
         # Check if the link uses the tags which are subject to deletaion
@@ -105,11 +114,13 @@ def replace_hp_for_deleted_tags(DB_settings, datacenter_settings, hp_infos, dele
             # If we can't replace, just edit link to decrease nb hp
             if result == False:
                 try:
-                    replace_functions.decrease_link(
+                    result = replace_functions.decrease_link(
                         DB_settings, datacenter_settings, hp_infos, link, "hp")
                 except Exception as e:
                     raise ValueError("Olivier a fait de la merde n2")
-
+                if result == False:
+                    all_ok = False
+    return all_ok
 
 def replace_hp_for_added_tags_in_link(DB_settings, datacenter_settings, link_infos, hp_infos, new_tags):
     # Try to replace the honeypot for its links with additional tags, or take care of its removal in the affected links  
@@ -123,6 +134,8 @@ def replace_hp_for_added_tags_in_link(DB_settings, datacenter_settings, link_inf
     #
     # Raise error if something failed
 
+    all_ok = True
+
     # Try to replace the honeypot in the link
     try:
         res = replace_functions.replace_honeypot_in_link(
@@ -134,10 +147,14 @@ def replace_hp_for_added_tags_in_link(DB_settings, datacenter_settings, link_inf
     # If we can't replace, just edit link to decrease nb hp
     if result == False:
         try:
-            replace_functions.decrease_link(
+            result = replace_functions.decrease_link(
                 DB_settings, datacenter_settings, hp_infos, link_infos, "hp")
         except Exception as e:
             raise ValueError(e)
+        if result == False:
+            all_ok = False
+
+    return all_ok
 
 
 def replace_serv_for_rm(DB_settings, datacenter_settings, serv_infos):
@@ -149,6 +166,8 @@ def replace_serv_for_rm(DB_settings, datacenter_settings, serv_infos):
     # serv_infos (dict) : server information subject to deletion 
     #
     # Raise error if something failed
+
+    all_ok = True
 
     # Formatting in display format of server information if this is not already the case 
     if not("links" in serv_infos.keys()):
@@ -168,11 +187,14 @@ def replace_serv_for_rm(DB_settings, datacenter_settings, serv_infos):
         # If we can't replace, just edit link to decrease nb serv
         if not(result):
             try:
-                replace_functions.decrease_link(
+                result = replace_functions.decrease_link(
                     DB_settings, datacenter_settings, serv_infos, link, "serv")
             except Exception as e:
                 raise ValueError(e)
+            if result == False:
+                all_ok = False
 
+    return all_ok
 
 def replace_serv_for_deleted_tags(DB_settings, datacenter_settings, serv_infos, deleted_tags):
     # Try to replace the server for each of its links with concerned tags, or take care of its removal in the affected links  
@@ -184,6 +206,8 @@ def replace_serv_for_deleted_tags(DB_settings, datacenter_settings, serv_infos, 
     # deleted_tags (string) : list of tags which are subject to deletion
     #
     # Raise error if something failed
+
+    all_ok = True
 
     # Formatting in display format of server information if this is not already the case 
     if not("links" in serv_infos.keys()):
@@ -209,11 +233,12 @@ def replace_serv_for_deleted_tags(DB_settings, datacenter_settings, serv_infos, 
             # If we can't replace, just edit link to decrease nb serv
             if not(result):
                 try:
-                    replace_functions.decrease_link(
+                    result = replace_functions.decrease_link(
                         DB_settings, datacenter_settings, serv_infos, link, "serv")
-                    result = True
                 except Exception as e:
                     raise ValueError(e)
+                if result == False:
+                    all_ok = False
 
             # If we have succeeded in replacing or deleting the server in the link, we delete the nginx conf of the concerned link  
             if result:
@@ -227,6 +252,7 @@ def replace_serv_for_deleted_tags(DB_settings, datacenter_settings, serv_infos, 
                     logging.error(
                         f"{link['link_id']} removal on servers failed : {e}")
                     raise ValueError(e)
+    return all_ok
 
 
 def replace_serv_for_added_tags_in_link(DB_settings, datacenter_settings, link_infos, serv_infos, new_tags, already_used):
@@ -252,11 +278,11 @@ def replace_serv_for_added_tags_in_link(DB_settings, datacenter_settings, link_i
     # If we can't replace, just edit link to decrease nb serv
     if result == False:
         try:
-            replace_functions.decrease_link(
+            result = replace_functions.decrease_link(
                 DB_settings, datacenter_settings, serv_infos, link_infos, "serv")
-            result = True
         except Exception as e:
             raise ValueError(e)
+        
     else:
         return result
 
@@ -272,6 +298,9 @@ def replace_serv_for_added_tags_in_link(DB_settings, datacenter_settings, link_i
             logging.error(
                 f"{link_infos['link_id']} removal on servers failed : {e}")
             raise ValueError(e)
+    else:
+        already_used[0]="KO"
+        return already_used
 
 
 def distrib_servers_on_link_ports(DB_settings, link):

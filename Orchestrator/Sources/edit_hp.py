@@ -42,7 +42,8 @@ def edit_tags(DB_settings, datacenter_settings, honeypot, tags):
         honeypot, "hp")
 
     try:
-        Gotham_replace.replace_hp_for_deleted_tags(
+        result=Gotham_replace.replace_hp_for_deleted_tags(
             DB_settings, datacenter_settings, dsp_honeypot, deleted_tags)
     except Exception as e:
         raise ValueError(e)
+    return result

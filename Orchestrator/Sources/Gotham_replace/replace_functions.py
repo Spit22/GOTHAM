@@ -54,17 +54,14 @@ def replace_honeypot_all_link(DB_settings, datacenter_settings, hp_infos):
     except Exception as e:
         raise ValueError("Error while checking tags : "+str(e))
     
-    # Update honeypots in error or down
-    honeypots_bad_state = [hp for hp in honeypots if (
-        hp["hp_state"] == str(state_list[2]).upper() or hp["hp_state"] == str(state_list[3]).upper())]
-    for hp_bad_state in honeypots_bad_state:
-        try:
-            # Update state of honeypot
-            Gotham_state.adapt_state(DB_settings, hp_bad_state["hp_id"], "hp")
-        except Exception as e:
-            logging.error(
-                "Error while configuring honeypot state : "+str(e))
-        
+     # update state
+    try:
+        honeypots = [Gotham_state.adapt_state(DB_settings,
+            honeypot["hp_id"], "hp") for honeypot in honeypots]
+    except Exception as e:
+        logging.error(
+            "Error while configuring honeypot state : "+str(e))
+
     # Filter honeypots in error, and original hp by id
     honeypots = [hp for hp in honeypots if not(
         hp["hp_state"] == str(state_list[2]).upper() or hp["hp_state"] == str(state_list[3]).upper() or hp["hp_id"] == hp_infos["hp_id"])]
@@ -148,21 +145,21 @@ def replace_honeypot_in_link(DB_settings, datacenter_settings, hp_infos, link, d
         link["link_tags_hp"].split("||")) if new_tags == "" else new_tags
     
     # Get all honeypots corresponding to tags
-    honeypots = Gotham_check.check_tags("hp", Gotham_link_BDD.get_honeypot_infos(
-        DB_settings, tags=link_tags_hp), tags_hp=link_tags_hp)
+    try:
+        honeypots = Gotham_check.check_tags("hp", Gotham_link_BDD.get_honeypot_infos(
+            DB_settings, tags=link_tags_hp), tags_hp=link_tags_hp)
+    except Exception as e:
+        raise ValueError("Error while checking tags : "+str(e))
     
-    # Update honeypots in error or down
-    honeypots_bad_state = [hp for hp in honeypots if (
-        hp["hp_state"] == str(state_list[2]).upper() or hp["hp_state"] == str(state_list[3]).upper())]
-    for hp_bad_state in honeypots_bad_state:
-        try:
-            # Update state of honeypot
-            Gotham_state.adapt_state(DB_settings, hp_bad_state["hp_id"], "hp")
-        except Exception as e:
-            logging.error(
-                "Error while configuring honeypot state : "+str(e))
-        
+     # update state
+    try:
+        honeypots = [Gotham_state.adapt_state(DB_settings,
+            honeypot["hp_id"], "hp") for honeypot in honeypots]
+    except Exception as e:
+        logging.error(
+            "Error while configuring honeypot state : "+str(e))
 
+    
     # Filter honeypots in error, and original hp by id
     honeypots = [hp for hp in honeypots if not(
         hp["hp_state"] == str(state_list[2]).upper() or hp["hp_state"] == str(state_list[3]).upper() or hp["hp_id"] == hp_infos["hp_id"])]
@@ -275,14 +272,15 @@ def decrease_link(DB_settings, datacenter_settings, object_infos, link, type_obj
             # Update state of object
             Gotham_state.adapt_state(DB_settings, object_infos[type_obj+"_id"], type_obj)
         except Exception as e:
-            raise ValueError(
+            logging.error(
                 "Error while adapt object state : "+str(e))
+        return True
     else:
         # If nb=1, error, we can't do nothing, just raise an error
         error = "You tried to remove a running "+str(type_obj)+" with the id ="+str(
             object_infos[type_obj+"_id"])+", and it can't be replaced or deleted"
         logging.error(error)
-        raise ValueError(error)
+        return False
 
 
 def configure_honeypot_replacement(DB_settings, datacenter_settings, old_hp_infos, new_hp_infos={}, link=None):
@@ -508,21 +506,18 @@ def replace_server_in_link(DB_settings, serv_infos, link, new_tags="", already_u
     servers = Gotham_check.check_tags("serv", Gotham_link_BDD.get_server_infos(
         DB_settings, tags=link_tags_serv), tags_serv=link_tags_serv)
 
+    try:
+        # Update state of server
+        servers = [Gotham_state.adapt_state(DB_settings, server["serv_id"], "serv") for server in servers]
+    except Exception as e:
+        logging.error(
+            "Error while configuring server state : "+str(e))
+
     # Filter servers in those who have one of ports open
     servers = Gotham_check.check_servers_ports_matching(
         servers, link["link_ports"])
 
-    # Filter servers in error, with same link, and original server by id
-    servers_bad_state = [server for server in servers if (
-        server["serv_state"] == str(state_list[2]).upper() or server["serv_state"] == str(state_list[3]).upper())]
-    for serv_bad_state in servers_bad_state:
-        try:
-            # Update state of server
-            Gotham_state.adapt_state(DB_settings, serv_bad_state["serv_id"], "serv")
-        except Exception as e:
-            logging.error(
-                "Error while configuring server state : "+str(e))
-
+   
     # Filter servers in error, with same link, and original server by id
     servers = [server for server in servers if not(
         server["serv_state"] == str(state_list[2]).upper() or server["serv_state"] == str(state_list[3]).upper() or link["link_id"] in server["link_id"] or server["serv_id"] in already_used or server["serv_id"] == serv_infos["serv_id"])]
@@ -652,17 +647,13 @@ def replace_server_in_link(DB_settings, serv_infos, link, new_tags="", already_u
 
 
 def distribute_servers_on_link_ports(DB_settings, link):
-    # Try to replace the server for a link by another server
+    # distribution function allowing fair use of the possible ports of the link on the servers 
     #
     #
     # DB_settings (json) : auth information
-    # serv_infos (dict) : server information subject to replacement 
-    # link (dict) : link information subject of the replacement 
-    # new_tags (string) - optional : list of new server tag for the link
-    # already_used (list) - optional : list of server that have been already used for the replacement of this server
+    # link (dict) : link information subject of the redistribution 
     #
-    # Return either a boolean : set to true if the server has been replaced, false otherwise
-    #               or a list : list of servers used for remplacement in the link
+    # Raise an error if something failed
     
     # Retrieve settings from config file    
     config = configparser.ConfigParser()
@@ -676,9 +667,13 @@ def distribute_servers_on_link_ports(DB_settings, link):
     i = 0
     # Iterable browsing the list in reverse way
     j = 1
+
+    # Variable for infinite loop prevent
+    cpt=0
     
     # As long as we can equalize the number of servers using the same port on all the ports specified by the link 
-    while is_possible:
+    while is_possible and cpt<100:
+        cpt+=1
         # Update link information
         links = Gotham_link_BDD.get_link_serv_hp_infos(
             DB_settings, id=link["link_id"])
@@ -814,3 +809,17 @@ def distribute_servers_on_link_ports(DB_settings, link):
             # Can't equalize more the number of servers using the same port on all the ports specified by the link
             is_possible = False
         
+    for server in dsp_link["servs"]:
+        for honeypot in server["hps"]:
+            try:
+                # Update state of hp
+                Gotham_state.adapt_state(DB_settings, honeypot["hp_id"], "hp")
+            except Exception as e:
+                logging.error(
+                    "Error while configuring honeypot state : "+str(e))
+        try:
+            # Update state of server
+            Gotham_state.adapt_state(DB_settings, server["serv_id"], "serv")
+        except Exception as e:
+            logging.error(
+                "Error while configuring server state : "+str(e))
