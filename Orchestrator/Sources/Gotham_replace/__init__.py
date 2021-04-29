@@ -67,7 +67,7 @@ def replace_hp_for_rm(DB_settings, datacenter_settings, hp_infos):
                 if result == False:
                     all_ok = False
 
-    return all_ok = True
+    return all_ok
 
 
 def replace_hp_for_deleted_tags(DB_settings, datacenter_settings, hp_infos, deleted_tags):

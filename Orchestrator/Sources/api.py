@@ -1160,7 +1160,7 @@ def rm_serv():
         error = "Server deletion failed"
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
 
-    if succes == True
+    if succes == True:
         # If all operations succeed, return id of created object
         response = str({"id": str(id)}).replace("\'", "\"")+"\n"
         return response, 200
@@ -1259,7 +1259,7 @@ def ls_honeypot():
             try:
                 honeypots_others = [Gotham_state.adapt_state(DB_settings,
                 honeypot["hp_id"], "hp") for honeypot in honeypots_others]
-             except Exception as e:
+            except Exception as e:
                 logging.error(
                     "Error while configuring honeypot state : "+str(e))
 
@@ -1361,7 +1361,7 @@ def ls_serv():
             try:
                 servers_others = [Gotham_state.adapt_state(DB_settings,
                 server["serv_id"], "serv") for server in servers_others]
-             except Exception as e:
+            except Exception as e:
                 logging.error(
                     "Error while configuring server state : "+str(e))
             
