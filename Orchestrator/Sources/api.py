@@ -34,6 +34,7 @@ import Gotham_normalize
 import Gotham_replace
 import Gotham_state
 import Gotham_error
+import Gotham_autotags
 
 # Create the flask application
 app = flask.Flask(__name__)
@@ -124,6 +125,7 @@ def add_honeypot():
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     # Retrieve State list
     state_list = config['state']['hp_state'].split(",")
+    separator = config['tag']['separator']
    
     if len(state_list)<4:
         error = "The config file needs 4 differents states for honeypot and server"
@@ -132,6 +134,8 @@ def add_honeypot():
 
     # Get POST data on JSON format
     data = request.get_json()
+
+    autotags = True if "autotags" in data and int(data["autotags"]) == 1 else False
 
     try:
         # Normalize infos
@@ -204,6 +208,11 @@ def add_honeypot():
     except Exception as e:
         error = "Rsyslog configuration failed"
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
+
+    # Create tag automaticaly
+    if autotags==True:
+        autotags_list=Gotham_autotags.honeypot(id)
+        tags=str(tags)+separator+autotags_list
 
     # Create hp_infos
     hp_infos = {'id': str(id), 'name': str(name), 'descr': str(descr), 'tags': str(tags), 'port_container': port, 'parser': str(
