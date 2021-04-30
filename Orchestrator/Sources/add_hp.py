@@ -32,8 +32,13 @@ def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_
     # Configure container name
     dockercompose.write('    container_name: '+str(id)+'\n')
     # Add volumes for logs
-    dockercompose.write('    volumes:\n')
-    dockercompose.write('      - /data/'+str(id)+'/logs:'+str(log_path)+'\n')
+    #dockercompose.write('    volumes:\n')
+    #dockercompose.write('      - /data/'+str(id)+'/logs:'+str(log_path)+'\n')
+    # Change logging facility
+    dockercompose.write('    logging:\n')
+    dockercompose.write('      driver: syslog\n')
+    dockercompose.write('      options:\n')
+    dockercompose.write('        tag: ' + str(id) + '\n')
     # Build options
     dockercompose.write('    build:\n')
     dockercompose.write('      context: .\n')
@@ -91,16 +96,13 @@ def generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, 
         rsyslog_conf_file = open(
             rsyslog_conf_datacenter_local_path + id_hp + ".conf", "a")
         # Monitor the log file of the honeypot
-        rsyslog_conf_file.write(
-            'input(Type="imfile" File="' + remote_hp_log_file_path + '" Tag="' + id_hp + '")\n')
+        rsyslog_conf_file.write('if $programname == "' + str(id) + '" then {\n')
         # Apply parsing rules
-        rsyslog_conf_file.write(
-            'action(Type="mmnormalize" ruleBase="' + str(rulebase_path) + '")\n')
+        rsyslog_conf_file.write('action(Type="mmnormalize" ruleBase="' + str(rulebase_path) + '")\n')
         # Send to orchestrator in JSON format
-        rsyslog_conf_file.write('action(Type="omfwd" Target="' + str(orch_ip) + '" Port="' + str(
-            orch_rsyslog_port) + '" Protocol="tcp" Template="JSON_template")\n')
+        rsyslog_conf_file.write('action(Type="omfwd" Target="' + str(orch_ip) + '" Port="' + str(orch_rsyslog_port) + '" Protocol="tcp" Template="JSON_template")\n')
         # Stop dealing with these logs
-        rsyslog_conf_file.write('stop\n')
+        rsyslog_conf_file.write('stop}\n')
     except Exception as e:
         error = "Fail to create rsyslog configuration for datacenter : " + \
             str(e)
@@ -120,12 +122,11 @@ def generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_pa
         rsyslog_conf_file = open(
             rsyslog_conf_orchestrator_local_path + id_hp + ".conf", "a")
         # Filter the logs with honeypot tag
-        rsyslog_conf_file.write(':msg, contains, "' + id_hp + '"\n')
+        rsyslog_conf_file.write('if $msg contains "' + str(id_hp) + '" then {\n')
         # Dump the logs in local log file
-        rsyslog_conf_file.write(
-            'action(type="omfile" File="' + local_hp_log_file_path + '")\n')
+        rsyslog_conf_file.write('action(type="omfile" File="' + str(local_hp_log_file_path) + '")\n')
         # Stop dealing with these logs
-        rsyslog_conf_file.write('stop\n')
+        rsyslog_conf_file.write('stop}\n')
     except Exception as e:
         error = "Fail to create rsyslog configuration for orchestrator : " + \
             str(e)

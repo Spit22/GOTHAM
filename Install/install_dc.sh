@@ -47,6 +47,15 @@ apt install -y openssh-server
 # Create GOTHAM user as an alias for the root account
 /usr/sbin/useradd -o -u 0 -g 0 -N -d /root/ -M gotham
 
+# Pre-configure rsyslog
+touch /etc/rsyslog.d/00-JSON_template.conf
+echo """
+template(name='JSON_template' type='list'){property(name='$!all-json')}
+""" > /etc/rsyslog.d/00-JSON_template.conf
+
+# Restart rsyslog
+systemctl restart rsyslog
+
 # Harden SSH configuration
 echo """
 # OPENSSH CONFIGURATION POC FOR GOTHAM USE ONLY

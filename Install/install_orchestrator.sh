@@ -39,6 +39,16 @@ mkdir -p /data/rsyslog/datacenter-configuration
 mkdir -p /data/honeypot-log
 mkdir -p /data/rsyslog/rulebase
 
+# Pre-configure rsyslog
+touch /etc/rsyslog.d/00-syslog_server.conf
+echo """
+module(load='imtcp')
+input(type='imtcp' port='1514')
+""" > /etc/rsyslog.d/00-syslog_server.conf
+
+# Restart rsyslog
+systemctl restart rsyslog
+
 # Copy configuration template to /etc/gotham
 #mkdir /etc/gotham/
 #cp $GOTHAM_HOME/Orchestrator/Config/config.ini
