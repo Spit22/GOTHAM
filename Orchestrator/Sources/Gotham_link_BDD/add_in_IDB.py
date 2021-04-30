@@ -148,8 +148,8 @@ def honeypot(DB_connection, hp_infos):
     # Try to execute SQL request
     try:
         # Insert values in Honeypot table
-        cur.execute("INSERT INTO Honeypot (id,name,descr,port,parser,logs,source,port_container,state) VALUES (?,?,?,?,?,?,?,?,?)",
-                    (hp_infos["id"], hp_infos["name"], hp_infos["descr"],  hp_infos["port"], hp_infos["parser"],  hp_infos["logs"],  hp_infos["source"], hp_infos["port_container"], hp_infos["state"]))
+        cur.execute("INSERT INTO Honeypot (id,name,descr,port,parser,logs,source,port_container,state, duplicat) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                    (hp_infos["id"], hp_infos["name"], hp_infos["descr"],  hp_infos["port"], hp_infos["parser"],  hp_infos["logs"],  hp_infos["source"], hp_infos["port_container"], hp_infos["state"], hp_infos["duplicat"]))
         DB_connection.commit()
         # Then link the tags to the honeypot
         tag_list = hp_infos['tags'].split(_separator)

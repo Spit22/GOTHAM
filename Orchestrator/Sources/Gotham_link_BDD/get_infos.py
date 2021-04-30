@@ -179,7 +179,7 @@ def server(DB_connection, mode=False, ip="%", id="%", name="%", tags="%", state=
 ############################### HONEYPOT SECTION ###############################
 
 
-def honeypot(DB_connection, mode=False, id="%", name="%", tags="%", state="%", descr="%", port="%", parser="%", logs="%", source="%", port_container="%"):
+def honeypot(DB_connection, mode=False, id="%", name="%", tags="%", state="%", descr="%", port="%", parser="%", logs="%", source="%", port_container="%", duplicat="%"):
     '''
     Retrieve a JSON with all the data of one or several honeypots from the internal database
 
@@ -213,7 +213,7 @@ def honeypot(DB_connection, mode=False, id="%", name="%", tags="%", state="%", d
     cur = DB_connection.cursor()
     # Execute SQL request
     cur.execute("SELECT * FROM v_hp_full WHERE hp_id LIKE ? AND hp_name LIKE ? AND "+tags_request +
-                " AND hp_state LIKE ? AND hp_descr LIKE ? AND hp_port LIKE ? AND hp_parser LIKE ? AND hp_logs LIKE ? AND hp_source LIKE ? AND hp_port_container LIKE ?", (id, name, state, descr, port, parser, logs, source, port_container))
+                " AND hp_state LIKE ? AND hp_descr LIKE ? AND hp_port LIKE ? AND hp_parser LIKE ? AND hp_logs LIKE ? AND hp_source LIKE ? AND hp_port_container LIKE ? AND hp_duplicat LIKE ?", (id, name, state, descr, port, parser, logs, source, port_container, duplicat))
     # Convert answer to JSON
     row_headers = [x[0] for x in cur.description]
     rv = cur.fetchall()

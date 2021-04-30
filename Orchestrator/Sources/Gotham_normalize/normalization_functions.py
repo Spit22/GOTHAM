@@ -59,6 +59,17 @@ def normalize_port(port):
             f"port has a invalid value : {port} : port must be between 1 and 65536 !")
     return port
 
+def normalize_duplicat(duplicat):
+    try:
+        duplicat=int(duplicat)
+    except:
+        logging.warning(
+            f"duplicat has a invalid type : {duplicat} : duplicat must be an interger !")
+    if duplicat != 1 and duplicat != 0:
+        logging.warning(
+            f"duplicat has a invalid value : {duplicat} : duplicat must be 1 or 0 !")
+    return duplicat
+
 
 def normalize_parser(parser):
     return parser

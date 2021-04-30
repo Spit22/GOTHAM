@@ -445,7 +445,7 @@ def duplicate_hp(DB_settings, honeypot_infos):
     descr = "Duplication of " + honeypot_infos["hp_descr"]
     # Prepare information of the new honeypot as a dict
     duplicate_hp_infos = {"name": str(name), "descr": str(descr), "tags": str(honeypot_infos["hp_tags"].replace("||", tag_separator)), "logs": str(
-        honeypot_infos["hp_logs"]), "parser": str(honeypot_infos["hp_parser"]), "port": str(honeypot_infos["hp_port"]), "dockerfile": str(encoded_dockerfile.decode("utf-8"))}
+        honeypot_infos["hp_logs"]), "parser": str(honeypot_infos["hp_parser"]), "port": str(honeypot_infos["hp_port"]), "dockerfile": str(encoded_dockerfile.decode("utf-8")), "duplicat":1}
     
     # Send all information to the api for duplication
     try:

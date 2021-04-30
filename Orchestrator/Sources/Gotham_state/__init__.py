@@ -227,7 +227,23 @@ def adapt_state(DB_settings, obj_id, obj_type, link_id="", check_all=True, repla
             object_infos = Gotham_link_BDD.get_server_infos(
                 DB_settings, id=str(object_infos[obj_type+"_id"]))[0] 
             
+    # If the hp is unused and is a duplicat, we delete it
+    if obj_type=="hp" and final_state==str(state_list[0]).upper() and int(object_infos[obj_type+"_duplicat"]) == 1:
+        try:
+            succes= rm_hp.main(DB_settings, datacenter_settings, str(object_infos[obj_type+"_id"]))
 
-
-    object_infos[obj_type+'_state']=final_state
-    return object_infos
+        except Exception as e:
+            error = "Honeypot deletion failed"
+            raise ValueError(error)
+        if succes ==True:
+            try:
+                rm_hp.remove_rsyslog_configuration(datacenter_settings, str(object_infos[obj_type+"_id"]))
+            except Exception as e:
+                error = "Honeypot rsyslog deletion failed"
+                raise ValueError(error)
+        else:
+            error = "Honeypot deletion failed"
+            raise ValueError(error)
+    else:
+        object_infos[obj_type+'_state']=final_state
+        return object_infos

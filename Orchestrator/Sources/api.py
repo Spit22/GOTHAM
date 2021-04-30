@@ -136,11 +136,12 @@ def add_honeypot():
     data = request.get_json()
 
     autotags = True if "autotags" in data and int(data["autotags"]) == 1 else False
+    duplicat = 1 if "duplicat" in data and int(data["duplicat"]) == 1 else 0
 
     try:
         # Normalize infos
         hp_infos_received = {"name": data["name"], "descr": data["descr"], "tags": data["tags"],
-                             "logs": data["logs"], "parser": data["parser"], "port": data["port"]}
+                             "logs": data["logs"], "parser": data["parser"], "port": data["port"],"duplicat":duplicat}
         hp_infos_received = Gotham_normalize.normalize_honeypot_infos(
             hp_infos_received)
 
@@ -216,7 +217,7 @@ def add_honeypot():
 
     # Create hp_infos
     hp_infos = {'id': str(id), 'name': str(name), 'descr': str(descr), 'tags': str(tags), 'port_container': port, 'parser': str(
-        parser), 'logs': str(logs), 'source': str(dockerfile_path), 'state': str(state_list[0]).upper(), 'port': mapped_port}
+        parser), 'logs': str(logs), 'source': str(dockerfile_path), 'state': str(state_list[0]).upper(), 'port': mapped_port, "duplicat":duplicat}
 
     # Normalize infos
     hp_infos = Gotham_normalize.normalize_honeypot_infos(hp_infos)
@@ -483,7 +484,7 @@ def add_lk():
                                                                                 "_Duplicat") <= 128 else honeypots[i % len(honeypots)]["hp_name"][:(128-len("_Duplicat"))]+"_Duplicat")
             descr = "Duplication of "+honeypots[i % len(honeypots)]["hp_descr"]
             duplicate_hp_infos = {"name": str(name), "descr": str(descr), "tags": str(honeypots[i % len(honeypots)]["hp_tags"].replace("||", tags_separator)), "logs": str(honeypots[i % len(
-                honeypots)]["hp_logs"]), "parser": str(honeypots[i % len(honeypots)]["hp_parser"]), "port": int(honeypots[i % len(honeypots)]["hp_port_container"]), "dockerfile": str(encoded_dockerfile.decode("utf-8"))}
+                honeypots)]["hp_logs"]), "parser": str(honeypots[i % len(honeypots)]["hp_parser"]), "port": int(honeypots[i % len(honeypots)]["hp_port_container"]), "dockerfile": str(encoded_dockerfile.decode("utf-8")), "duplicat":1}
             try:
                 jsondata = json.dumps(duplicate_hp_infos)
                 url = "http://localhost:5000/add/honeypot"

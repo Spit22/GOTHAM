@@ -212,7 +212,7 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                 descr = "Duplication of " + \
                     selected_objects[i % len(selected_objects)]["hp_descr"]
                 duplicate_hp_infos = {"name": str(name), "descr": str(descr), "tags": str(selected_objects[i % len(selected_objects)]["hp_tags"].replace("||", tags_separator)), "logs": str(selected_objects[i % len(selected_objects)]["hp_logs"]), "parser": str(
-                    selected_objects[i % len(selected_objects)]["hp_parser"]), "port": str(selected_objects[i % len(selected_objects)]["hp_port_container"]), "dockerfile": str(encoded_dockerfile.decode("utf-8"))}
+                    selected_objects[i % len(selected_objects)]["hp_parser"]), "port": str(selected_objects[i % len(selected_objects)]["hp_port_container"]), "dockerfile": str(encoded_dockerfile.decode("utf-8")), "duplicat": 1}
 
                 try:
                     jsondata = json.dumps(duplicate_hp_infos)
