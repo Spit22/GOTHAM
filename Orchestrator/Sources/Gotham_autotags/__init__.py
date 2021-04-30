@@ -36,7 +36,6 @@ def honeypot(hp_id):
     try:
         docker_tags = autotags_functions.autotag_by_docker_top(hp_id)
     except ValueError as e:
-        except ValueError as e:
         error = "Error while trying to execute ssh command for docker top on hp (id: "+hp_id+") : " + str(e)
         logging.error(error)
         raise ValueError(error)
