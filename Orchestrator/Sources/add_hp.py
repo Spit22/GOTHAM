@@ -25,6 +25,11 @@ def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_
     dockercompose = open(str(dockerfile_path)+"docker-compose.yml", "a")
     # Write the docker-compose version
     dockercompose.write('version: "3"\n')
+    # Change logging facility
+    dockercompose.write('logging:\n')
+    dockercompose.write('  driver: syslog\n')
+    dockercompose.write('  options:\n')
+    dockercompose.write('    tag: ' + str(id) + '\n')
     # Add the 'service' tag for honeypot service
     dockercompose.write('services:\n')
     # Add the honeypot service
@@ -34,11 +39,6 @@ def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_
     # Add volumes for logs
     #dockercompose.write('    volumes:\n')
     #dockercompose.write('      - /data/'+str(id)+'/logs:'+str(log_path)+'\n')
-    # Change logging facility
-    dockercompose.write('    logging:\n')
-    dockercompose.write('      driver: syslog\n')
-    dockercompose.write('      options:\n')
-    dockercompose.write('        tag: ' + str(id) + '\n')
     # Build options
     dockercompose.write('    build:\n')
     dockercompose.write('      context: .\n')
