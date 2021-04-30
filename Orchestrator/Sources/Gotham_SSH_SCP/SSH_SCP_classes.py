@@ -134,6 +134,8 @@ class GothamServer:
         stdin, stdout, stderr = self.ssh_session.exec_command(command)
         answer=[]
         for line in stdout.read().splitlines():
+            if str(line)[0:2] == "b'" or str(line)[0:2] == 'b"':
+                line=str(line)[2:-1]
             answer.append(str(line))
 
         logging.info(

@@ -192,7 +192,7 @@ def normalize_tag(tag):
         tag = config['tag']['default_value']
     tag = tag.strip()
     tag = tag[0].upper() + tag[1:]
-    if not(re.match(r"^[a-zA-Z0-9_\-]*$", tag)):
+    if not(re.match(r"^[a-zA-Z0-9_\-+:.]*$", tag)):
         logging.warning(f"tag has a invalid syntax : {tag}")
     return tag
 
