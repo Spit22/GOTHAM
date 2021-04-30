@@ -49,7 +49,7 @@ def honeypot(hp_id):
 
 
 
-def server(serv_id):
+#def server(serv_id):
     # Find tags automatically for server
     #
     #
