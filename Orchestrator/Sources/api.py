@@ -49,7 +49,7 @@ logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
 #===Retrieve settings from configuration file===#
 # General settings
 app.config["DEBUG"] = True
-version = "0.0"
+version = "0.1.0"
 debug_mode = True
 
 # Retrieve  internaldb settings from config file
@@ -1129,28 +1129,82 @@ def rm_honeypot():
     # Get POST data on JSON format
     data = request.get_json()
 
-    # Get all function's parameters
-    id = data["id"]
 
-    try:
-        succes= rm_hp.main(DB_settings, datacenter_settings, id)
-
-    except Exception as e:
-        error = "Honeypot deletion failed"
-        return Gotham_error.format_usererror(error, str(e), debug_mode), 500
-    if succes ==True:
-        try:
-            rm_hp.remove_rsyslog_configuration(datacenter_settings, id)
-        except Exception as e:
-            error = "Honeypot rsyslog deletion failed"
-            return Gotham_error.format_usererror(error, str(e), debug_mode), 500
-
-        # If all operations succeed, return id of deleted object
-        response = str({"id": str(id)}).replace("\'", "\"")+"\n"
-        return response, 200
+    if "confirm" in data and int(data["confirm"]) == 1:
+        confirm = True 
+        del data["confirm"]
+    elif "confirm" in data:
+        confirm = False
+        del data["confirm"]
     else:
-        error = "Honeypot deletion failed"
+        confirm = False
+
+    # Get all hp possibilities
+    try:
+        jsondata = json.dumps(data)
+        url = "http://localhost:5000/list/honeypot"
+        headers = {'Content-type': 'application/json'}
+        r = requests.get(url, data=jsondata, headers=headers)
+        jsonresponse = r.json()
+    except Exception as e:
+        error = "Hp finding failed"
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
+
+    response=""
+    error=""
+    if "error" in jsonresponse:
+        return jsonresponse, 500
+    elif "exact" in jsonresponse and jsonresponse["exact"]!=[]:
+        if confirm == False:
+            return {"message": "Are you sure you want to remove these honeypots ? (Y/n)", "hps": jsonresponse["exact"]}
+        else:
+            for hp in jsonresponse["exact"]:
+                try:
+                    succes= rm_hp.main(DB_settings, datacenter_settings, hp["hp_id"])
+
+                except Exception as e:
+                    error += "Honeypot deletion failed for id: "+ hp["hp_id"]+"\n"
+                if succes ==True:
+                    try:
+                        rm_hp.remove_rsyslog_configuration(datacenter_settings, hp["hp_id"])
+                    except Exception as e:
+                        error += "Honeypot rsyslog deletion failed for id: "+ hp["hp_id"]+"\n"
+
+                    # If all operations succeed, return id of deleted object
+                    response += str({"id": str(hp["hp_id"])}).replace("\'", "\"")+"\n"
+                    
+                else:
+                    error += "Honeypot deletion failed for id: "+ hp["hp_id"]+"\n"
+            if error=="":
+                return response, 200
+            else:
+                return response+error, 500
+
+    elif "others" in jsonresponse and jsonresponse["others"]!=[]:
+        if confirm == False:
+            return {"message": "Are you sure you want to remove these honeypots ? (Y/n)", "hps": jsonresponse["others"]}
+        else:
+            for hp in jsonresponse["others"]:
+                try:
+                    succes= rm_hp.main(DB_settings, datacenter_settings, hp["hp_id"])
+
+                except Exception as e:
+                    error += "Honeypot deletion failed for id: "+ hp["hp_id"]+"\n"
+                if succes ==True:
+                    try:
+                        rm_hp.remove_rsyslog_configuration(datacenter_settings, hp["hp_id"])
+                    except Exception as e:
+                        error += "Honeypot rsyslog deletion failed for id: "+ hp["hp_id"]+"\n"
+
+                    # If all operations succeed, return id of deleted object
+                    response += str({"id": str(hp["hp_id"])}).replace("\'", "\"")+"\n"
+                else:
+                    error += "Honeypot deletion failed for id: "+ hp["hp_id"]+"\n"
+
+            if error=="":
+                return response, 200
+            else:
+                return response+error, 500
 
 @app.route('/delete/server', methods=['POST'])
 def rm_serv():
@@ -1160,23 +1214,73 @@ def rm_serv():
 
     # Get POST data on JSON format
     data = request.get_json()
-
-    # Get all function's parameters
-    id = data["id"]
-    ##### TODO ??? : ADD ABILITY TO DELETE WITH IP ######
-    try:
-        succes=rm_server.main(DB_settings, datacenter_settings, id=id)
-    except Exception as e:
-        error = "Server deletion failed"
-        return Gotham_error.format_usererror(error, str(e), debug_mode), 500
-
-    if succes == True:
-        # If all operations succeed, return id of created object
-        response = str({"id": str(id)}).replace("\'", "\"")+"\n"
-        return response, 200
+    
+    if "confirm" in data and int(data["confirm"]) == 1:
+        confirm = True 
+        del data["confirm"]
+    elif "confirm" in data:
+        confirm = False
+        del data["confirm"]
     else:
-        error = "Server deletion failed"
+        confirm = False
+
+    # Get all serv possibilities
+    try:
+        jsondata = json.dumps(data)
+        url = "http://localhost:5000/list/server"
+        headers = {'Content-type': 'application/json'}
+        r = requests.get(url, data=jsondata, headers=headers)
+        jsonresponse = r.json()
+    except Exception as e:
+        error = "Serv finding failed"
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
+
+    response=""
+    error=""
+    if "error" in jsonresponse:
+        return jsonresponse, 500
+    elif "exact" in jsonresponse and jsonresponse["exact"]!=[]:
+        if confirm == False:
+            return {"message": "Are you sure you want to remove these servers ? (Y/n)", "servs": jsonresponse["exact"]}
+        else:
+            for serv in jsonresponse["exact"]:
+                try:
+                    succes= rm_server.main(DB_settings, datacenter_settings, serv["serv_id"])
+
+                except Exception as e:
+                    error += "Server deletion failed for id: "+ serv["serv_id"]+"\n"
+                if succes ==True:
+                    # If all operations succeed, return id of deleted object
+                    response += str({"id": str(serv["serv_id"])}).replace("\'", "\"")+"\n"
+                    
+                else:
+                    error += "Server deletion failed for id: "+ serv["serv_id"]+"\n"
+            if error=="":
+                return response, 200
+            else:
+                return response+error, 500
+
+    elif "others" in jsonresponse and jsonresponse["others"]!=[]:
+        if confirm == False:
+            return {"message": "Are you sure you want to remove these servers ? (Y/n)", "servs": jsonresponse["others"]}
+        else:
+            for serv in jsonresponse["others"]:
+                try:
+                    succes= rm_server.main(DB_settings, datacenter_settings, serv["serv_id"])
+
+                except Exception as e:
+                    error += "Server deletion failed for id: "+ serv["serv_id"]+"\n"
+                if succes ==True:
+                    # If all operations succeed, return id of deleted object
+                    response += str({"id": str(serv["serv_id"])}).replace("\'", "\"")+"\n"
+                else:
+                    error += "Server deletion failed for id: "+ serv["serv_id"]+"\n"
+
+            if error=="":
+                return response, 200
+            else:
+                return response+error, 500
+    
 
 
 @app.route('/delete/link', methods=['POST'])
@@ -1188,18 +1292,61 @@ def rm_lk():
     # Get POST data on JSON format
     data = request.get_json()
 
-    # Get all function's parameters
-    id = data["id"]
-    # Remove the honeypot
+    if "confirm" in data and int(data["confirm"]) == 1:
+        confirm = True 
+        del data["confirm"]
+    elif "confirm" in data:
+        confirm = False
+        del data["confirm"]
+    else:
+        confirm = False
+
+    # Get all links possibilities
     try:
-        rm_link.main(DB_settings, id=id)
+        jsondata = json.dumps(data)
+        url = "http://localhost:5000/list/link"
+        headers = {'Content-type': 'application/json'}
+        r = requests.get(url, data=jsondata, headers=headers)
+        jsonresponse = r.json()
     except Exception as e:
-        error = "Link deletion failed"
+        error = "Link finding failed"
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
 
-    # If all operations succeed, return id of created object
-    response = str({"id": str(id)}).replace("\'", "\"")+"\n"
-    return response, 200
+    response=""
+    error=""
+    if "error" in jsonresponse:
+        return jsonresponse, 500
+    elif "exact" in jsonresponse and jsonresponse["exact"]!=[]:
+        if confirm == False:
+            return {"message": "Are you sure you want to remove these links ? (Y/n)", "links": jsonresponse["exact"]}
+        else:
+            for link in jsonresponse["exact"]:
+                try:
+                    rm_link.main(DB_settings, id=link["link_id"])
+
+                except Exception as e:
+                    error += "Link deletion failed for id: "+ link["link_id"]+"\n"
+                
+            if error=="":
+                return response, 200
+            else:
+                return response+error, 500
+
+    elif "others" in jsonresponse and jsonresponse["others"]!=[]:
+        if confirm == False:
+            return {"message": "Are you sure you want to remove these links ? (Y/n)", "links": jsonresponse["others"]}
+        else:
+            for link in jsonresponse["others"]:
+                try:
+                    rm_link.main(DB_settings, id=link["link_id"])
+
+                except Exception as e:
+                    error += "Link deletion failed for id: "+ link["link_id"]+"\n"
+
+            if error=="":
+                return response, 200
+            else:
+                return response+error, 500
 
 
 @app.route('/list/honeypot', methods=['GET'])
@@ -1217,40 +1364,64 @@ def ls_honeypot():
     port = request.args.get('port')
     state = request.args.get('state')
 
+    find_exact=True
+
     if (id) or (tags) or (name) or (descr) or (port) or (state):
 
         if (id):
             hp_infos_received["id"] = id
+            if "*" in str(hp_infos_received["id"]):
+                hp_infos_received["id"]=str(hp_infos_received["id"]).replace("*","%")
+                find_exact=False
         else:
             hp_infos_received["id"] = "%"
 
         if (tags):
             hp_infos_received["tags"] = tags
+            if "*" in str(hp_infos_received["tags"]):
+                hp_infos_received["tags"]=str(hp_infos_received["tags"]).replace("*","%")
+                find_exact=False
         else:
             hp_infos_received["tags"] = "%"
 
         if (name):
             hp_infos_received["name"] = name
+            if "*" in str(hp_infos_received["name"]):
+                hp_infos_received["name"]=str(hp_infos_received["name"]).replace("*","%")
+                find_exact=False
         else:
             hp_infos_received["name"] = "%"
 
         if (descr):
             hp_infos_received["descr"] = descr
+            if "*" in str(hp_infos_received["descr"]):
+                hp_infos_received["descr"]=str(hp_infos_received["descr"]).replace("*","%")
+                find_exact=False
         else:
             hp_infos_received["descr"] = "%"
 
         if (port):
             hp_infos_received["port"] = port
+            if "*" in str(hp_infos_received["port"]):
+                hp_infos_received["port"]=str(hp_infos_received["port"]).replace("*","%")
+                find_exact=False
         else:
             hp_infos_received["port"] = "%"
 
         if (state):
             hp_infos_received["state"] = state
+            if "*" in str(hp_infos_received["state"]):
+                hp_infos_received["state"]=str(hp_infos_received["state"]).replace("*","%")
+                find_exact=False
         else:
             hp_infos_received["state"] = "%"
 
-        honeypots_exact = Gotham_link_BDD.get_honeypot_infos(DB_settings, mode=False, id=hp_infos_received["id"], name=hp_infos_received[
+        if find_exact == True:
+            honeypots_exact = Gotham_link_BDD.get_honeypot_infos(DB_settings, mode=False, id=hp_infos_received["id"], name=hp_infos_received[
                                                              "name"], tags=hp_infos_received["tags"], state=hp_infos_received["state"], descr=hp_infos_received["descr"], port=hp_infos_received["port"])
+        else:
+            honeypots_exact=[]
+        
         honeypots_others = Gotham_link_BDD.get_honeypot_infos(DB_settings, mode=True, id=hp_infos_received["id"], name=hp_infos_received[
                                                               "name"], tags=hp_infos_received["tags"], state=hp_infos_received["state"], descr=hp_infos_received["descr"], port=hp_infos_received["port"])
 
@@ -1314,45 +1485,72 @@ def ls_serv():
     descr = request.args.get("descr")
     ssh_port = request.args.get("ssh_port")
 
+    find_exact=True
+
     if (id) or (ip) or (name) or (tags) or (state) or (descr) or (ssh_port):
 
         if (id):
             serv_infos_received["id"] = id
+            if "*" in str(serv_infos_received["id"]):
+                serv_infos_received["id"]=str(serv_infos_received["id"]).replace("*","%")
+                find_exact=False
         else:
             serv_infos_received["id"] = "%"
 
         if (ip):
             serv_infos_received["ip"] = ip
+            if "*" in str(serv_infos_received["ip"]):
+                serv_infos_received["ip"]=str(serv_infos_received["ip"]).replace("*","%")
+                find_exact=False
         else:
             serv_infos_received["ip"] = "%"
 
         if (tags):
             serv_infos_received["tags"] = tags
+            if "*" in str(serv_infos_received["tags"]):
+                serv_infos_received["tags"]=str(serv_infos_received["tags"]).replace("*","%")
+                find_exact=False
         else:
             serv_infos_received["tags"] = "%"
 
         if (name):
             serv_infos_received["name"] = name
+            if "*" in str(serv_infos_received["name"]):
+                serv_infos_received["name"]=str(serv_infos_received["name"]).replace("*","%")
+                find_exact=False
         else:
             serv_infos_received["name"] = "%"
 
         if (descr):
             serv_infos_received["descr"] = descr
+            if "*" in str(serv_infos_received["descr"]):
+                serv_infos_received["descr"]=str(serv_infos_received["descr"]).replace("*","%")
+                find_exact=False
         else:
             serv_infos_received["descr"] = "%"
 
         if (ssh_port):
             serv_infos_received["ssh_port"] = ssh_port
+            if "*" in str(serv_infos_received["ssh_port"]):
+                serv_infos_received["ssh_port"]=str(serv_infos_received["ssh_port"]).replace("*","%")
+                find_exact=False
         else:
             serv_infos_received["ssh_port"] = "%"
 
         if (state):
             serv_infos_received["state"] = state
+            if "*" in str(serv_infos_received["state"]):
+                serv_infos_received["state"]=str(serv_infos_received["state"]).replace("*","%")
+                find_exact=False
         else:
             serv_infos_received["state"] = "%"
 
-        servers_exact = Gotham_link_BDD.get_server_infos(DB_settings, mode=False, id=serv_infos_received["id"], ip=serv_infos_received["ip"],  name=serv_infos_received[
+        if find_exact==True:
+            servers_exact = Gotham_link_BDD.get_server_infos(DB_settings, mode=False, id=serv_infos_received["id"], ip=serv_infos_received["ip"],  name=serv_infos_received[
                                                          "name"], tags=serv_infos_received["tags"], state=serv_infos_received["state"], descr=serv_infos_received["descr"], ssh_port=serv_infos_received["ssh_port"])
+        else:
+            servers_exact= []
+        
         servers_others = Gotham_link_BDD.get_server_infos(DB_settings, mode=True, id=serv_infos_received["id"], ip=serv_infos_received["ip"],  name=serv_infos_received[
                                                           "name"], tags=serv_infos_received["tags"], state=serv_infos_received["state"], descr=serv_infos_received["descr"], ssh_port=serv_infos_received["ssh_port"])
 
@@ -1413,35 +1611,56 @@ def ls_lk():
     tags_hp = request.args.get("tags_hp")
     tags_serv = request.args.get("tags_serv")
 
+    find_exact=True
+
     if (id) or (nb_hp) or (nb_serv) or (tags_hp) or (tags_serv):
 
         if (id):
             link_infos_received["id"] = id
+            if "*" in str(link_infos_received["id"]):
+                link_infos_received["id"]=str(link_infos_received["id"]).replace("*","%")
+                find_exact=False
         else:
             link_infos_received["id"] = "%"
 
         if (nb_hp):
             link_infos_received["nb_hp"] = nb_hp
+            if "*" in str(link_infos_received["nb_hp"]):
+                link_infos_received["nb_hp"]=str(link_infos_received["nb_hp"]).replace("*","%")
+                find_exact=False
         else:
             link_infos_received["nb_hp"] = "%"
 
         if (nb_serv):
             link_infos_received["nb_serv"] = nb_serv
+            if "*" in str(link_infos_received["nb_serv"]):
+                link_infos_received["nb_serv"]=str(link_infos_received["nb_serv"]).replace("*","%")
+                find_exact=False
         else:
             link_infos_received["nb_serv"] = "%"
 
         if (tags_hp):
             link_infos_received["tags_hp"] = tags_hp
+            if "*" in str(link_infos_received["tags_hp"]):
+                link_infos_received["tags_hp"]=str(link_infos_received["tags_hp"]).replace("*","%")
+                find_exact=False
         else:
             link_infos_received["tags_hp"] = "%"
 
         if (tags_serv):
             link_infos_received["tags_serv"] = tags_serv
+            if "*" in str(link_infos_received["tags_serv"]):
+                link_infos_received["tags_serv"]=str(link_infos_received["tags_serv"]).replace("*","%")
+                find_exact=False
         else:
             link_infos_received["tags_serv"] = "%"
 
-        links_exact = Gotham_link_BDD.get_link_infos(DB_settings, mode=False, id=link_infos_received["id"], nb_hp=link_infos_received[
+        if find_exact==True:
+            links_exact = Gotham_link_BDD.get_link_infos(DB_settings, mode=False, id=link_infos_received["id"], nb_hp=link_infos_received[
                                                      "nb_hp"], nb_serv=link_infos_received["nb_serv"], tags_hp=link_infos_received["tags_hp"], tags_serv=link_infos_received["tags_serv"])
+        else:
+            links_exact=[]
+        
         links_others = Gotham_link_BDD.get_link_infos(DB_settings, mode=True, id=link_infos_received["id"], nb_hp=link_infos_received[
                                                       "nb_hp"], nb_serv=link_infos_received["nb_serv"], tags_hp=link_infos_received["tags_hp"], tags_serv=link_infos_received["tags_serv"])
 

@@ -17,33 +17,27 @@ logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
 #=======================#
 
 
-def main(DB_settings, datacenter_settings, id='sv-00000000000000000000000000000000', ip='255.255.255.255'):
+def main(DB_settings, datacenter_settings, id):
     # Execute a server deletion attempt
     #
     # DB_settings (dict) : all authentication information to connect to db
     # datacenter_settings (dict) : all authentication information to connect to datacenter
     # id (string) : id of the server we want to delete
-    # ip (string) : ip of the server we want to delete
     #
     # Return true if deletion succeed, false in the other case
 
     # Check id format
     try:
-        serv_infos = {'id': id, 'ip': ip}
+        serv_infos = {'id': id}
         serv_infos = normalize_server_infos(serv_infos)
     except Exception as e:
-        logging.error(f"Can't remove the server : its infos is invalid")
+        logging.error(f"Can't remove the server : its id is invalid")
         raise ValueError(e)
 
     # Check if the server exists in the IDB
-    if id != 'sv-00000000000000000000000000000000':
-        result = get_server_infos(DB_settings, id=id)
-    elif ip != '255.255.255.255':
-        result = get_server_infos(DB_settings, ip=ip)
-    else:
-        logging.error(f"Remove server failed : no arguments")
-        raise ValueError("Remove server failed : no arguments")
 
+    result = get_server_infos(DB_settings, id=id)
+    
     if result == []:
         logging.error(
             f"You tried to remove a server that doesn't exists with the id = {id}")
