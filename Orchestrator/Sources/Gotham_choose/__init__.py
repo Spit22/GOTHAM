@@ -50,6 +50,10 @@ def choose_honeypots(hps_infos, nb_hp, tags_hp, del_weight=False):
     weighted_hps_infos = selection_function.weighting_nb_port(
         weighted_hps_infos)
 
+    # Add weight if the hp is a duplicat    
+    weighted_hps_infos = selection_function.weighting_duplicat(
+        weighted_hps_infos)
+
     # Add weight based on the state of each hp
     weighted_hps_infos = selection_function.weighting_state(
         object_type, weighted_hps_infos)

@@ -150,6 +150,29 @@ def weighting_nb_free_port(servs_infos):
     return servs_infos
 
 
+def weighting_duplicat(hps_infos):
+    # Add a weight if the honeypot is a duplicat 
+    #
+    #
+    # hps_infos (list of dict) : list of potentials honeypots
+    # 
+    # Return list of dict of honeypot with additional weight if the honeypot is a duplicat
+
+
+    GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+    # Retrieve settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    # Retrieve the corresponding weight
+    weight = int(config['hp_weight']["duplicat"])
+    
+
+    # Apply weight if the hp is a duplicat 
+    hps_infos = [{**hp_infos, **{"weight": (int(hp_infos["weight"])+int(weight) if int(hp_infos["hp_duplicat"])!=0 else int(hp_infos["weight"]))}} for hp_infos in hps_infos]
+
+    return hps_infos
+
+
 def weighting_time(object_type, objects_infos, column):
     # Add a weight corresponding to the creation and modification timestamp associated with each object 
     #
