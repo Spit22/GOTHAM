@@ -41,6 +41,7 @@ mkdir -p /data/rsyslog/rulebase
 # Pre-configure rsyslog
 touch /etc/rsyslog.d/00-syslog_server.conf
 echo '''
+$template RawFormat,"%msg%\n"
 module(load="imtcp")
 input(type="imtcp" port="1514")
 ''' > /etc/rsyslog.d/00-syslog_server.conf

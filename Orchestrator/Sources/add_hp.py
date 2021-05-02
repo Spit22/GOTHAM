@@ -97,7 +97,7 @@ def generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, 
         # Monitor the log file of the honeypot
         rsyslog_conf_file.write('if $programname == "' + str(id_hp) + '" then {\n')
         # Apply parsing rules
-        rsyslog_conf_file.write('action(Type="mmnormalize" ruleBase="' + str(rulebase_path) + '")\n')
+        rsyslog_conf_file.write('action(Type="mmnormalize" ruleBase="' + str(rulebase_path) + str(id_hp) + '.rb")\n')
         # Send to orchestrator in JSON format
         rsyslog_conf_file.write('action(Type="omfwd" Target="' + str(orch_ip) + '" Port="' + str(orch_rsyslog_port) + '" Protocol="tcp" Template="JSON_template")\n')
         # Stop dealing with these logs
@@ -123,7 +123,7 @@ def generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_pa
         # Filter the logs with honeypot tag
         rsyslog_conf_file.write('if $msg contains "' + str(id_hp) + '" then {\n')
         # Dump the logs in local log file
-        rsyslog_conf_file.write('action(type="omfile" File="' + str(local_hp_log_file_path) + '")\n')
+        rsyslog_conf_file.write('action(type="omfile" File="' + str(local_hp_log_file_path) + '" Template="RawFormat")\n')
         # Stop dealing with these logs
         rsyslog_conf_file.write('stop}\n')
     except Exception as e:
@@ -164,10 +164,11 @@ def deploy_rsyslog_conf(datacenter_settings, orchestrateur_settings, id_hp, rule
     # On effectue 2 connexions SSH
     dc_ssh_key_1 = datacenter_settings["ssh_key"]
     dc_ssh_key_2 = datacenter_settings["ssh_key"]
+
     # PATH ON ORCHESTRATOR
     # Configuration
     rsyslog_conf_datacenter_local_path = "/data/rsyslog/datacenter-configuration/"
-    rsyslog_conf_orchestrator_local_path = "/data/rsyslog/"
+    rsyslog_conf_orchestrator_local_path = "/etc/rsyslog/"
     # Log files
     local_hp_log_file_path = "/data/honeypot-log/"
     # Rulebase

@@ -49,7 +49,18 @@ apt install -y openssh-server
 # Pre-configure rsyslog
 touch /etc/rsyslog.d/00-JSON_template.conf
 echo '''
-template(name="JSON_template" type="list"){property(name="$!all-json")}
+module(load="mmnormalize")
+
+template(name="JSON_template" type="list"){
+    constant(value="{")
+        property(name="timereported" dateFormat="rfc3339" format="jsonf" outname="@timestamp")
+    constant(value=",")
+        property(name="hostname" format="jsonf" outname="host")
+    constant(value=",")
+        property(name="syslogtag" format="jsonf" outname="tag")
+    constant(value=",")
+        property(name="$!all-json")
+}
 ''' > /etc/rsyslog.d/00-JSON_template.conf
 
 # Restart rsyslog
