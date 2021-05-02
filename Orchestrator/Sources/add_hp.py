@@ -81,7 +81,7 @@ def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id_hp):
     return True
 
 
-def generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, id_hp, rsyslog_conf_datacenter_local_path, remote_hp_log_file_path):
+def generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, id_hp, rsyslog_conf_datacenter_local_path):
     # Generates Rsyslog configuration for datacenter-side
     #
     # orch_ip (string) : Orchestrator's IP
@@ -89,7 +89,6 @@ def generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, 
     # rulebase_path (string) : intern path of the rulebase
     # id_hp (string) : id of the honeypot we are configuring logging
     # rsyslog_conf_datacenter_local_path (string) : intern path of rsyslog datacenter configuration
-    # remote_hp_log_file_path (string) : remote honeypot log files
 
     try:
         # Create the configuration file
@@ -177,9 +176,7 @@ def deploy_rsyslog_conf(datacenter_settings, orchestrateur_settings, id_hp, rule
     # PATH ON DATACENTER
     # Configuration
     #remote_path = "/data/"+str(id_hp)+"/"
-    rsyslog_conf_datacenter_remote_path = "/data/rsyslog/"
-    # Log files
-    remote_hp_log_file_path = "/data/"+str(id_hp)+"/logs/syslog"
+    rsyslog_conf_datacenter_remote_path = "/etc/rsyslog.d/"
     # Rulebase
     remote_rulebase_path = "/data/rsyslog/rulebase/"
 
@@ -190,7 +187,7 @@ def deploy_rsyslog_conf(datacenter_settings, orchestrateur_settings, id_hp, rule
     try:
         generate_rulebase(id_hp, rules, local_rulebase_path)
         generate_datacenter_rsyslog_conf(orchestrateur_settings["hostname"], orchestrateur_settings["syslog_port"],
-                                         remote_rulebase_path, id_hp, rsyslog_conf_datacenter_local_path, remote_hp_log_file_path)
+                                         remote_rulebase_path, id_hp, rsyslog_conf_datacenter_local_path)
         generate_orchestrator_rsyslog_conf(
             id_hp, rsyslog_conf_orchestrator_local_path, local_hp_log_file_path)
     except Exception as e:

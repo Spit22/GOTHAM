@@ -39,7 +39,6 @@ docker run hello-world
 # Create the folder used by GOTHAM
 mkdir -p /data/tmp
 mkdir -p /data/rsyslog/rulebase
-mkdir -p /data/logs/syslog
 
 # Installation of openssh and base64
 apt install -y openssh-server
@@ -49,9 +48,9 @@ apt install -y openssh-server
 
 # Pre-configure rsyslog
 touch /etc/rsyslog.d/00-JSON_template.conf
-echo """
-template(name='JSON_template' type='list'){property(name='$!all-json')}
-""" > /etc/rsyslog.d/00-JSON_template.conf
+echo '''
+template(name="JSON_template" type="list"){property(name="$!all-json")}
+''' > /etc/rsyslog.d/00-JSON_template.conf
 
 # Restart rsyslog
 systemctl restart rsyslog

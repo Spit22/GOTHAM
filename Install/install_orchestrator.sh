@@ -9,11 +9,6 @@ apt install -y python3 python3-pip git mariadb-server
 # Install libs
 apt install -y libmariadb-dev
 
-# Configure $GOTHAM_HOME var
-echo -e "\nexport GOTHAM_HOME=/opt/GOTHAM/" >> /etc/profile
-GOTHAM_HOME=/opt/GOTHAM/
-source /etc/profile
-
 # Going to /opt to install GOTHAM
 cd /opt
 
@@ -21,6 +16,10 @@ cd /opt
 git clone https://github.com/Spit22/GOTHAM
 chown -R gotham:root $GOTHAM_HOME
 
+# Configure $GOTHAM_HOME var
+echo -e "\nexport GOTHAM_HOME=/opt/GOTHAM/" >> /etc/profile
+GOTHAM_HOME=/opt/GOTHAM/
+source /etc/profile
 
 # Going on the repository folder
 cd $GOTHAM_HOME/Orchestrator/Sources
@@ -41,10 +40,10 @@ mkdir -p /data/rsyslog/rulebase
 
 # Pre-configure rsyslog
 touch /etc/rsyslog.d/00-syslog_server.conf
-echo """
-module(load='imtcp')
-input(type='imtcp' port='1514')
-""" > /etc/rsyslog.d/00-syslog_server.conf
+echo '''
+module(load="imtcp")
+input(type="imtcp" port="1514")
+''' > /etc/rsyslog.d/00-syslog_server.conf
 
 # Restart rsyslog
 systemctl restart rsyslog
@@ -56,3 +55,5 @@ systemctl restart rsyslog
 # Configure database
 mysql -u root -e "CREATE DATABASE GOTHAM;"
 mysql -u root GOTHAM < $GOTHAM_HOME/Orchestrator/Internal_Database/gotham.sql
+
+source /etc/profile
