@@ -95,7 +95,7 @@ def generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, 
         rsyslog_conf_file = open(
             rsyslog_conf_datacenter_local_path + id_hp + ".conf", "a")
         # Monitor the log file of the honeypot
-        rsyslog_conf_file.write('if $programname == "' + str(id) + '" then {\n')
+        rsyslog_conf_file.write('if $programname == "' + str(id_hp) + '" then {\n')
         # Apply parsing rules
         rsyslog_conf_file.write('action(Type="mmnormalize" ruleBase="' + str(rulebase_path) + '")\n')
         # Send to orchestrator in JSON format
