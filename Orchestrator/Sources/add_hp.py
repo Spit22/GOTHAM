@@ -168,7 +168,7 @@ def deploy_rsyslog_conf(datacenter_settings, orchestrateur_settings, id_hp, rule
     # PATH ON ORCHESTRATOR
     # Configuration
     rsyslog_conf_datacenter_local_path = "/data/rsyslog/datacenter-configuration/"
-    rsyslog_conf_orchestrator_local_path = "/etc/rsyslog/"
+    rsyslog_conf_orchestrator_local_path = "/etc/rsyslog.d/"
     # Log files
     local_hp_log_file_path = "/data/honeypot-log/"
     # Rulebase
