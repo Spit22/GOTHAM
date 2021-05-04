@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import subprocess
 
 #===Import GOTHAM's libs===#
 from Gotham_SSH_SCP import send_file_and_execute_commands, send_file
@@ -123,7 +124,7 @@ def generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_pa
         # Filter the logs with honeypot tag
         rsyslog_conf_file.write('if $msg contains "' + str(id_hp) + '" then {\n')
         # Dump the logs in local log file
-        rsyslog_conf_file.write('action(type="omfile" File="' + str(local_hp_log_file_path) + '" Template="RawFormat")\n')
+        rsyslog_conf_file.write('action(type="omfile" File="' + str(local_hp_log_file_path) + str(id_hp) + '.log" Template="RawFormat")\n')
         # Stop dealing with these logs
         rsyslog_conf_file.write('stop}\n')
     except Exception as e:
@@ -195,7 +196,7 @@ def deploy_rsyslog_conf(datacenter_settings, orchestrateur_settings, id_hp, rule
         error = "Fail to generate rsyslog configuration : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    # Send datacenter rsyslog configuration to the datacenter
+    # Send and apply datacenter rsyslog configuration to the datacenter
     try:
         # Send the rulebase
         send_file(datacenter_settings["hostname"], datacenter_settings["ssh_port"], dc_ssh_key_1, [
@@ -207,3 +208,13 @@ def deploy_rsyslog_conf(datacenter_settings, orchestrateur_settings, id_hp, rule
         error = "Fail to deploy rsyslog configuration : " + str(e)
         logging.error(error)
         raise ValueError(error)
+    
+    #subprocess.run(["ls", "-l"])
+    # Try to apply orchestrator rsyslog configuration
+    try:
+        subprocess.run(["systemctl", "restart", "rsyslog"])
+    except Exception as e:
+        error = "Fail to deploy rsyslog configuration : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
+
