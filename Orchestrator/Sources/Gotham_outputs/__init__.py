@@ -12,7 +12,7 @@ def syslog(hostname, syslog_port, protocol):
         port (string) : syslog port of the remote syslog server
     '''
     try:
-        syslog_output.main(hostname, syslog_port)
+        syslog_output.main(hostname, syslog_port, protocol)
     except Exception as e:
         error = "Fail to create syslog output"
         raise ValueError(error)
