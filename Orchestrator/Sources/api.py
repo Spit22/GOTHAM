@@ -1742,7 +1742,7 @@ def syslog_output():
     except Exception as e:
         error = "Fail to create syslog output"
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
-    return "OK", 200
+    return "OK\n", 200
 
 
 @app.route('/version', methods=['GET'])

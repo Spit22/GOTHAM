@@ -209,7 +209,6 @@ def deploy_rsyslog_conf(datacenter_settings, orchestrateur_settings, id_hp, rule
         logging.error(error)
         raise ValueError(error)
     
-    #subprocess.run(["ls", "-l"])
     # Try to apply orchestrator rsyslog configuration
     try:
         subprocess.run(["systemctl", "restart", "rsyslog"])
