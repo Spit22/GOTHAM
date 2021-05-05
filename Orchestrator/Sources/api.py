@@ -1743,9 +1743,9 @@ def syslog_output():
         # Apply parsing rules
         rsyslog_conf_file.write('action(Type="omfwd" Target="' + str(ip) + '" Port="1514" Protocol="' + str(syslog_port) + '" Template="RawFormat")}\n')
     except Exception as e:
-        error = "Fail to create syslog output : " + str(e)
+        error = "Fail to create syslog output"
         logging.error(error)
-        return error
+        return Gotham_error.format_usererror(error, str(e), debug_mode), 500
 
 
 @app.route('/version', methods=['GET'])
