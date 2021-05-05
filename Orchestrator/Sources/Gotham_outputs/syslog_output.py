@@ -29,7 +29,7 @@ def main(hostname, syslog_port, protocol):
         logging.error(error)
         raise ValueError(error)
     try:
-        subprocess.run(["systemctl", "restart", "rsyslog"])
+        subprocess.call(["systemctl", "restart", "rsyslog"])
     except Exception as e:
         error = "Fail to deploy syslog output configuration : " + str(e)
         logging.error(error)
