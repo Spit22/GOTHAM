@@ -3,7 +3,7 @@ from . import syslog_output
 #==========================#
 
 
-def syslog(hostname, syslog_port):
+def syslog(hostname, syslog_port, protocol):
     '''
     Create a syslog output
 

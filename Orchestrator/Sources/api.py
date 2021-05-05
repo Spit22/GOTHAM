@@ -1736,8 +1736,9 @@ def syslog_output():
     data = request.get_json()
     hostname = data["hostname"]
     syslog_port = data["port"]
+    protocol = data["protocol"]
     try:
-        Gotham_outputs.syslog(hostname, syslog_port)
+        Gotham_outputs.syslog(hostname, syslog_port, protocol)
     except Exception as e:
         error = "Fail to create syslog output"
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
