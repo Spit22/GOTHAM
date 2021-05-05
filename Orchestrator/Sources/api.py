@@ -1724,7 +1724,7 @@ def ls_all():
     return {"honeypots": honeypots, "servers": servers, "links": links}, 200
 
 
-@app.route('output/syslog', methods=['POST'])
+@app.route('/output/syslog', methods=['POST'])
 def syslog_output():
     # Create a syslog output
     #
