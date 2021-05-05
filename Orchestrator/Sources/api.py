@@ -1724,6 +1724,30 @@ def ls_all():
     return {"honeypots": honeypots, "servers": servers, "links": links}, 200
 
 
+@app.route('output/syslog', methods=['POST'])
+def syslog_output():
+    # Create a syslog output
+    #
+    # ip (string) : ip address of syslog server
+    # port (string) : port of syslog server
+
+    # Get POST data on JSON format
+    data = request.get_json()
+    ip = data["ip"]
+    syslog_port = data["port"]
+    try:
+        # Create the configuration file
+        rsyslog_conf_file = open("/etc/rsyslog.d/10-syslog-" + str(ip) + ".conf", "a")
+        # Monitor the log file of the honeypot
+        rsyslog_conf_file.write('if $msg contains "hp-" then {\n')
+        # Apply parsing rules
+        rsyslog_conf_file.write('action(Type="omfwd" Target="' + str(ip) + '" Port="1514" Protocol="' + str(syslog_port) + '" Template="RawFormat")}\n')
+    except Exception as e:
+        error = "Fail to create syslog output : " + str(e)
+        logging.error(error)
+        return error
+
+
 @app.route('/version', methods=['GET'])
 def get_version():
     # Return the orchestrator's version
