@@ -1144,8 +1144,7 @@ def rm_honeypot():
     try:
         jsondata = json.dumps(data)
         url = "http://localhost:5000/list/honeypot"
-        headers = {'Content-type': 'application/json'}
-        r = requests.get(url, data=jsondata, headers=headers)
+        r = requests.get(url, params=jsondata)
         jsonresponse = r.json()
     except Exception as e:
         error = "Hp finding failed"
@@ -1229,8 +1228,7 @@ def rm_serv():
     try:
         jsondata = json.dumps(data)
         url = "http://localhost:5000/list/server"
-        headers = {'Content-type': 'application/json'}
-        r = requests.get(url, data=jsondata, headers=headers)
+        r = requests.get(url, params=jsondata)
         jsonresponse = r.json()
     except Exception as e:
         error = "Serv finding failed"
@@ -1306,8 +1304,7 @@ def rm_lk():
     try:
         jsondata = json.dumps(data)
         url = "http://localhost:5000/list/link"
-        headers = {'Content-type': 'application/json'}
-        r = requests.get(url, data=jsondata, headers=headers)
+        r = requests.get(url, params=jsondata)
         jsonresponse = r.json()
     except Exception as e:
         error = "Link finding failed"
