@@ -136,17 +136,94 @@ def add_link(args):
     print(data.json())
 
 def rm_server(args):
+    # Query /delete/server to delete server
+    #
+    # args (obj) : passed commandline argument
+    #
+    # Show id of deleted server id
+
     id = args.id
+
+    # Define the queried endpoint
+    endpoint = "/delete/server"
+
+    # Before external configuration
+    port = args.gotham_port
     gh = args.gotham_hostname
-    print(id, gh)
+
+    # Forge url
+    url = gh + ":" + port + endpoint
+
+    # Forge POST data
+    data = {
+        "id": id
+    }
+
+    # Query URL and get json
+    data = requests.post(url, json=data)
+
+    # Show result
+    print(data.json())
 
 def rm_hp(args):
+    # Query /delete/honeypot to delete honeypot
+    #
+    # args (obj) : passed commandline argument
+    #
+    # Show id of deleted honeypot id
+
     id = args.id
-    print(id)
+
+    # Define the queried endpoint
+    endpoint = "/delete/honeypot"
+
+    # Before external configuration
+    port = args.gotham_port
+    gh = args.gotham_hostname
+
+    # Forge url
+    url = gh + ":" + port + endpoint
+
+    # Forge POST data
+    data = {
+        "id": id
+    }
+
+    # Query URL and get json
+    data = requests.post(url, json=data)
+
+    # Show result
+    print(data.text)
 
 def rm_link(args):
+    # Query /delete/link to delete link
+    #
+    # args (obj) : passed commandline argument
+    #
+    # Show id of deleted link id
+
     id = args.id
-    print(id)
+
+    # Define the queried endpoint
+    endpoint = "/delete/link"
+
+    # Before external configuration
+    port = args.gotham_port
+    gh = args.gotham_hostname
+
+    # Forge url
+    url = gh + ":" + port + endpoint
+
+    # Forge POST data
+    data = {
+        "id": id
+    }
+
+    # Query URL and get json
+    data = requests.post(url, json=data)
+
+    # Show result
+    print(data.json())
 
 def edit_server(args):
     name = args.name
