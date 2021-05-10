@@ -88,7 +88,7 @@ def server(DB_settings, serv_id="",cserv_ip=""):
         # Check if the server exists in the IDB
         if object_infos == []:
             logging.error(
-                f"You tried to autotag a server that doesn't exists ({str(serv_id if serv_id != "" else serv_ip)})")
+                f"You tried to autotag a server that doesn't exists ("+str(serv_id if serv_id != "" else serv_ip)+")")
             error = "Unknown serv " + str(serv_id if serv_id != "" else serv_ip)
             raise ValueError(error)
         else:
