@@ -28,11 +28,11 @@ def add_server(args):
     endpoint = "/add/server"
 
     # Before external configuration
-    port = args.gotham_port
+    gp = args.gotham_port
     gh = args.gotham_hostname
 
     # Forge url
-    url = gh + ":" + port + endpoint
+    url = gh + ":" + gp + endpoint
 
     # Forge POST data
     data = {
@@ -73,11 +73,11 @@ def add_hp(args):
     endpoint = "/add/honeypot"
 
     # Before external configuration
-    port = args.gotham_port
+    gp = args.gotham_port
     gh = args.gotham_hostname
 
     # Forge url
-    url = gh + ":" + port + endpoint
+    url = gh + ":" + gp + endpoint
 
     # Forge POST data
     data = {
@@ -113,17 +113,16 @@ def add_link(args):
     endpoint = "/add/link"
 
     # Before external configuration
-    port = args.gotham_port
+    gp = args.gotham_port
     gh = args.gotham_hostname
 
     # Forge url
-    url = gh + ":" + port + endpoint
+    url = gh + ":" + gp + endpoint
 
     # Forge POST data
     data = {
         "tags_serv": tags_serv,
         "tags_hp": tags_hp,
-        "port": port,
         "nb_hp": nb_hp,
         "nb_serv": nb_serv,
         "exposed_ports": exposed_ports,
@@ -148,11 +147,11 @@ def rm_server(args):
     endpoint = "/delete/server"
 
     # Before external configuration
-    port = args.gotham_port
+    gp = args.gotham_port
     gh = args.gotham_hostname
 
     # Forge url
-    url = gh + ":" + port + endpoint
+    url = gh + ":" + gp + endpoint
 
     # Forge POST data
     data = {
@@ -178,11 +177,11 @@ def rm_hp(args):
     endpoint = "/delete/honeypot"
 
     # Before external configuration
-    port = args.gotham_port
+    gp = args.gotham_port
     gh = args.gotham_hostname
 
     # Forge url
-    url = gh + ":" + port + endpoint
+    url = gh + ":" + gp + endpoint
 
     # Forge POST data
     data = {
@@ -208,11 +207,11 @@ def rm_link(args):
     endpoint = "/delete/link"
 
     # Before external configuration
-    port = args.gotham_port
+    gp = args.gotham_port
     gh = args.gotham_hostname
 
     # Forge url
-    url = gh + ":" + port + endpoint
+    url = gh + ":" + gp + endpoint
 
     # Forge POST data
     data = {
@@ -226,27 +225,159 @@ def rm_link(args):
     print(data.json())
 
 def edit_server(args):
+    # Query /edit/server to edit server
+    #
+    # args (obj) : passed commandline argument
+    #
+    # Show modified server
+
+    # id of the object we want to edit
+    id = args.id
+
     name = args.name
     descr = args.descr
-    tag = args.tag
+    tags = args.tag
     ip = args.ip
-    print(name, descr, tag, ip)
+    if args.key:
+        ssh_key = str(base64.b64encode(args.key.read().encode("ascii")).decode("ascii"))
+    else:
+        ssh_key = False
+
+    ssh_port = args.port
+
+    # Define the queried endpoint
+    endpoint = "/edit/server"
+
+    # Before external configuration
+    gp = args.gotham_port
+    gh = args.gotham_hostname
+
+    # Forge url
+    url = gh + ":" + gp + endpoint
+
+    # Forge POST data
+    data = {"id": id}
+    if ip:
+        data["ip"] = ip
+    if name:
+        data["name"] = name
+    if descr:
+        data["descr"] = descr
+    if tags:
+        data["tags"] = tags
+    if ssh_key:
+        data["ssh_key"] = ssh_key
+    if ssh_port:
+        data["ssh_port"] = ssh_port
+
+    # Query URL and get json
+    data = requests.post(url, json=data)
+
+    # Show result
+    print(data.json())
+
     
 def edit_hp(args):
+    # Query /edit/honeypot to edit honeypot
+    #
+    # args (obj) : passed commandline argument
+    #
+    # Show modified honeypot
+
+    # id of the object we want to edit
+    id = args.id
+
     name = args.name
     descr = args.descr
-    tag = args.tag
+    tags = args.tag
     parser = args.parser
     logs = args.logs
-    src = args.src
-    print(name, descr, tag, parser, logs, src)
+    port = args.port
+
+    if args.src:
+        src = str(base64.b64encode(args.src.read().encode("ascii")).decode("ascii"))
+    else:
+        src = False
+
+    # Define the queried endpoint
+    endpoint = "/edit/honeypot"
+
+    # Before external configuration
+    gp = args.gotham_port
+    gh = args.gotham_hostname
+
+    # Forge url
+    url = gh + ":" + gp + endpoint
+
+    # Forge POST data
+    data = {"id": id}
+    if name:
+        data["name"] = name
+    if descr:
+        data["descr"] = descr
+    if tags:
+        data["tags"] = tags
+    if parser:
+        data["parser"] = parser
+    if logs:
+        data["logs"] = logs
+    if src:
+        data["dockerfile"] = src
+        print("hi")
+    if port:
+        data["port"] = port
+
+    # Query URL and get json
+    data = requests.post(url, json=data)
+
+    # Show result
+    print(data.json())
 
 def edit_link(args):
-    tag_hp = args.tag_hp
-    tag_serv = args.tag_serv
+    # Query /edit/link to edit link
+    #
+    # args (obj) : passed commandline argument
+    #
+    # Show modified link
+
+    # id of the object we want to edit
+    id = args.id
+
+    tags_hp = args.tags_hp
+    tags_serv = args.tags_serv
     nb_hp = args.nb_hp
     nb_serv = args.nb_serv
-    print(tag_hp, tag_serv, nb_hp, nb_serv)
+    exposed_ports = args.ports
+
+    # Define the queried endpoint
+    endpoint = "/edit/link"
+
+    # Before external configuration
+    gp = args.gotham_port
+    gh = args.gotham_hostname
+
+    # Forge url
+    url = gh + ":" + gp + endpoint
+
+    # Forge POST data
+    data = {"id": id}
+    if tags_serv:
+        data["tags_serv"] = tags_serv
+    if tags_hp:
+        data["tags_hp"] = tags_hp
+    if nb_hp:
+        data["nb_hp"] = nb_hp
+    if nb_serv:
+        data["nb_serv"] = nb_serv
+    if exposed_ports:
+        data["exposed_ports"] = exposed_ports
+
+
+    # Query URL and get json
+    data = requests.post(url, json=data)
+
+    # Show result
+    print(data.json())
 
 def list_server(args):
     # Query /list/server and format data into a table
@@ -259,7 +390,7 @@ def list_server(args):
     endpoint = "/list/server"
 
     # Before external configuration
-    port = args.gotham_port
+    gp = args.gotham_port
     gh = args.gotham_hostname
 
     # Get id of server
@@ -268,11 +399,11 @@ def list_server(args):
     # If id set, query only for 1 server
     if id:
         # Forge url
-        url = gh + ":" + port + endpoint + "?id=" + id
+        url = gh + ":" + gp + endpoint + "?id=" + id
     else:
         # Else query all servers in db
         # Forge url
-        url = gh + ":" + port + endpoint
+        url = gh + ":" + gp + endpoint
 
     # Query URL and get json
     data = requests.get(url)
@@ -291,7 +422,7 @@ def list_hp(args):
     endpoint = "/list/honeypot"
 
     # Before external configuration
-    port = args.gotham_port
+    gp = args.gotham_port
     gh = args.gotham_hostname
 
     # Get id of honeypot
@@ -300,11 +431,11 @@ def list_hp(args):
     # If id set, query only for 1 honeypot
     if id:
         # Forge url
-        url = gh + ":" + port + endpoint + "?id=" + id
+        url = gh + ":" + gp + endpoint + "?id=" + id
     else:
         # Else query all honeypots in db
         # Forge url
-        url = gh + ":" + port + endpoint
+        url = gh + ":" + gp + endpoint
 
     # Query URL and get json
     data = requests.get(url)
@@ -323,7 +454,7 @@ def list_link(args):
     endpoint = "/list/link"
 
     # Before external configuration
-    port = args.gotham_port
+    gp = args.gotham_port
     gh = args.gotham_hostname
 
     # Get id of link
@@ -332,11 +463,11 @@ def list_link(args):
     # If id set, query only for 1 link
     if id:
         # Forge url
-        url = gh + ":" + port + endpoint + "?id=" + id
+        url = gh + ":" + gp + endpoint + "?id=" + id
     else:
         # Else query all links in db
         # Forge url
-        url = gh + ":" + port + endpoint
+        url = gh + ":" + gp + endpoint
 
     # Query URL and get json
     data = requests.get(url)
@@ -433,23 +564,30 @@ if __name__ == "__main__":
     parser_remove_server.add_argument('-id', help='ID of the server', required=True)
     parser_remove_link.add_argument('-id', help='ID of the link', required=True)
     #=====EDIT ARGUMENTS=====#
-    # Create add_hp arguments
-    parser_edit_hp.add_argument('-name', help='Name of the honeypot', required=True)
-    parser_edit_hp.add_argument('-descr', help='Description of the honeypot', required=True)
-    parser_edit_hp.add_argument('-tag', help='Tags of the honeypot', required=True)
-    parser_edit_hp.add_argument('-parser', help='Parsing rules for logs of the honeypot', required=True)
-    parser_edit_hp.add_argument('-logs', help='Path of log files of the honeypot', required=True)
-    parser_edit_hp.add_argument('-src', help='Sources of the honepot (Dockerfile)', required=True)
-    # Create add_server arguments
-    parser_edit_server.add_argument('-name', help='Name of the server', required=True)
-    parser_edit_server.add_argument('-descr', help='Description of the server', required=True)
-    parser_edit_server.add_argument('-tag', help='Tags of the server', required=True)
-    parser_edit_server.add_argument('-ip', help='IP address of the server', required=True)
-    # Create add_link arguments
-    parser_edit_link.add_argument('-tags_hp', help='Tags of the honeypots', required=True)
-    parser_edit_link.add_argument('-tags_serv', help='Tags of the servers', required=True)
-    parser_edit_link.add_argument('-nb_hp', help='Amount of honeypot', required=True)
-    parser_edit_link.add_argument('-nb_serv', help='Amount of server', required=True)
+    # Create edit_hp arguments
+    parser_edit_hp.add_argument('-id', help='Id of the honeypot', required=True)
+    parser_edit_hp.add_argument('-name', help='Name of the honeypot', required=False)
+    parser_edit_hp.add_argument('-descr', help='Description of the honeypot', required=False)
+    parser_edit_hp.add_argument('-tag', help='Tags of the honeypot', required=False)
+    parser_edit_hp.add_argument('-parser', help='Parsing rules for logs of the honeypot', required=False)
+    parser_edit_hp.add_argument('-logs', help='Path of log files of the honeypot', required=False)
+    parser_edit_hp.add_argument('-src', help='Base64 Encoded Sourcefile of the honeypot (Dockerfile)', required=False)
+    parser_edit_hp.add_argument('-port', help='Port the honeypot service listen on', required=False)
+    # Create edit_server arguments
+    parser_edit_server.add_argument('-id', help='Id of the server', required=True)
+    parser_edit_server.add_argument('-name', help='Name of the server', required=False)
+    parser_edit_server.add_argument('-descr', help='Description of the server', required=False)
+    parser_edit_server.add_argument('-tag', help='Tags of the server', required=False)
+    parser_edit_server.add_argument('-ip', help='IP address of the server', required=False)
+    parser_edit_server.add_argument('-key', help='Base64 encoded ssh key file of the server', required=False)
+    parser_edit_server.add_argument('-port', help='SSH port of the server', required=False)
+    # Create edit_link arguments
+    parser_edit_link.add_argument('-id', help='Id of the link', required=True)
+    parser_edit_link.add_argument('-tags_hp', help='Tags of the honeypots', required=False)
+    parser_edit_link.add_argument('-tags_serv', help='Tags of the servers', required=False)
+    parser_edit_link.add_argument('-nb_hp', help='Amount of honeypot', required=False)
+    parser_edit_link.add_argument('-nb_serv', help='Amount of server', required=False)
+    parser_edit_link.add_argument('-ports', help='Ports to expose with link', required=False)
     #=====LIST ARGUMENTS=====#
     # There are all optionals here
     parser_list_hp.add_argument('-id', help='ID of the honeypot', required=False)
