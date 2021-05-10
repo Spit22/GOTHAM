@@ -30,7 +30,7 @@ def add_link(args):
     port = args.port
     nb_hp = args.nb_hp
     nb_serv = args.nb_serv
-    print(tag_hp, tag_serv, port, nb-hp, nb-serv)
+    print(tag_hp, tag_serv, port, nb_hp, nb_serv)
 
 def rm_server(args):
     id = args.id
@@ -66,19 +66,103 @@ def edit_link(args):
     tag_serv = args.tag_serv
     nb_hp = args.nb_hp
     nb_serv = args.nb_serv
-    print(tag_hp, tag_serv, nb-hp, nb-serv)
+    print(tag_hp, tag_serv, nb_hp, nb_serv)
 
 def list_server(args):
+    # Query /list/server and format data into a table
+    #
+    # args (obj) : passed commandline argument
+    #
+    # Print string formatted table
+
+    # Define the queried endpoint
+    endpoint = "/list/server"
+
+    # Before external configuration
+    port = args.gotham_port
+    gh = args.gotham_hostname
+
+    # Get id of server
     id = args.id
-    print(id)
+
+    # If id set, query only for 1 server
+    if id:
+        # Forge url
+        url = gh + ":" + port + endpoint + "?id=" + id
+    else:
+        # Else query all servers in db
+        # Forge url
+        url = gh + ":" + port + endpoint
+
+    # Query URL and get json
+    data = requests.get(url)
+
+    # Show result
+    print(data.json())
 
 def list_hp(args):
+    # Query /list/honeypot and format data into a table
+    #
+    # args (obj) : passed commandline argument
+    #
+    # Print string formatted table
+
+    # Define the queried endpoint
+    endpoint = "/list/honeypot"
+
+    # Before external configuration
+    port = args.gotham_port
+    gh = args.gotham_hostname
+
+    # Get id of honeypot
     id = args.id
-    print(id)
+
+    # If id set, query only for 1 honeypot
+    if id:
+        # Forge url
+        url = gh + ":" + port + endpoint + "?id=" + id
+    else:
+        # Else query all honeypots in db
+        # Forge url
+        url = gh + ":" + port + endpoint
+
+    # Query URL and get json
+    data = requests.get(url)
+
+    # Show result
+    print(data.json())
 
 def list_link(args):
+    # Query /list/link and format data into a table
+    #
+    # args (obj) : passed commandline argument
+    #
+    # Print string formatted table
+
+    # Define the queried endpoint
+    endpoint = "/list/link"
+
+    # Before external configuration
+    port = args.gotham_port
+    gh = args.gotham_hostname
+
+    # Get id of link
     id = args.id
-    print(id)
+
+    # If id set, query only for 1 link
+    if id:
+        # Forge url
+        url = gh + ":" + port + endpoint + "?id=" + id
+    else:
+        # Else query all links in db
+        # Forge url
+        url = gh + ":" + port + endpoint
+
+    # Query URL and get json
+    data = requests.get(url)
+
+    # Show result
+    print(url)
 
 # Create the parser
 parser = argparse.ArgumentParser(description='Gothamctl')
@@ -128,17 +212,17 @@ parser_edit_hp = subparsers_edit.add_parser('hp', help='honeypot')
 parser_edit_server = subparsers_edit.add_parser('server', help='server')
 parser_edit_link = subparsers_edit.add_parser('link', help='link')
 # Affect functions to parsers
-parser_add_hp.set_defaults(func=edit_hp)
-parser_add_server.set_defaults(func=edit_server)
-parser_add_link.set_defaults(func=edit_link)
+parser_edit_hp.set_defaults(func=edit_hp)
+parser_edit_server.set_defaults(func=edit_server)
+parser_edit_link.set_defaults(func=edit_link)
 # Create list parsers
 parser_list_hp = subparsers_list.add_parser('hp', help='honeypot')
 parser_list_server = subparsers_list.add_parser('server', help='server')
 parser_list_link = subparsers_list.add_parser('link', help='link')
 # Affect functions to parsers
-parser_add_hp.set_defaults(func=list_hp)
-parser_add_server.set_defaults(func=list_server)
-parser_add_link.set_defaults(func=list_link)
+parser_list_hp.set_defaults(func=list_hp)
+parser_list_server.set_defaults(func=list_server)
+parser_list_link.set_defaults(func=list_link)
 
 #=====ADD ARGUMENTS=====#
 # Create add_hp arguments
@@ -184,9 +268,10 @@ parser_edit_link.add_argument('-tags_serv', help='Tags of the servers', required
 parser_edit_link.add_argument('-nb_hp', help='Amount of honeypot', required=True)
 parser_edit_link.add_argument('-nb_serv', help='Amount of server', required=True)
 #=====LIST ARGUMENTS=====#
-parser_list_hp.add_argument('-id', help='ID of the honeypot', required=True)
-parser_list_server.add_argument('-id', help='ID of the server', required=True)
-parser_list_link.add_argument('-id', help='ID of the link', required=True)
+# There are all optionals here
+parser_list_hp.add_argument('-id', help='ID of the honeypot', required=False)
+parser_list_server.add_argument('-id', help='ID of the server', required=False)
+parser_list_link.add_argument('-id', help='ID of the link', required=False)
 
 # Execute parse_args()
 args = parser.parse_args()
