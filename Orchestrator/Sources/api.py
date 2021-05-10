@@ -254,7 +254,8 @@ def add_serv():
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     # Retrieve State list
     state_list = config['state']['serv_state'].split(",")
-    
+    separator = config['tag']['separator']
+   
     if len(state_list)<4:
         error = "The config file needs 4 differents states for honeypot and server"
         logging.error(error)
@@ -263,6 +264,9 @@ def add_serv():
 
     # Get POST data on JSON format
     data = request.get_json()
+
+    autotags = True if "autotags" in data and int(data["autotags"]) == 1 else False
+    
 
     # Get all function's parameters
     try:
@@ -312,6 +316,11 @@ def add_serv():
     except Exception as e:
         error = "Server deployment failed"
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
+
+    # Create tag automaticaly
+    if autotags==True:
+        autotags_list=Gotham_autotags.server(serv_ip=ip)
+        tags=str(tags)+separator+autotags_list
 
     # Create serv_infos
     serv_infos = {'id': str(id), 'name': str(name), 'descr': str(descr), 'tags': str(

@@ -50,7 +50,7 @@ def honeypot(hp_id):
 
 
 
-def server(DB_settings, serv_id="",cserv_ip=""):
+def server(DB_settings, serv_id="",serv_ip=""):
     # Find tags automatically for server
     #
     #
