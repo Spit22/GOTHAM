@@ -319,7 +319,7 @@ def add_serv():
 
     # Create tag automaticaly
     if autotags==True:
-        autotags_list=Gotham_autotags.server(serv_ip=ip)
+        autotags_list=Gotham_autotags.server(DB_settings,serv_id=id,serv_ip=ip)
         tags=str(tags)+separator+autotags_list
 
     # Create serv_infos

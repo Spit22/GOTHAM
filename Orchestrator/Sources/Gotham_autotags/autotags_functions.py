@@ -141,8 +141,13 @@ def autotag_by_ipstack(serv_ip):
         key_list=item.split(":")
         value=jsonresponse
         for key in key_list:
-            value=value[key]
-        tags.append(str(value))
+            if key in value.keys():
+                value=value[key]
+            else:
+                value=""
+                break
+        if value != "" and str(value).upper()!="NULL" and value != None:
+            tags.append(str(value))
 
 
 
