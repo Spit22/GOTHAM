@@ -4,6 +4,7 @@ import argparse
 import os
 import sys
 import requests
+import base64
 
 def add_server(args):
     # Query /add/server to create server
@@ -16,7 +17,11 @@ def add_server(args):
     descr = args.descr
     tags = args.tag
     ip = args.ip
-    ssh_key = args.key
+    try:
+        ssh_key = str(base64.b64encode(args.key.read().encode("ascii")).decode("ascii"))
+    except:
+        print("Key not seems to be b64 encoded")
+        sys.exit(1)
     ssh_port = args.port
 
     # Define the queried endpoint
@@ -57,7 +62,11 @@ def add_hp(args):
     tags = args.tag
     parser = args.parser
     logs = args.logs
-    src = args.src
+    try:
+        src = str(base64.b64encode(args.src.read().encode("ascii")).decode("ascii"))
+    except:
+        print("Source not seems to be b64 encoded")
+        sys.exit(1)
     port = args.port
 
     # Define the queried endpoint
@@ -327,14 +336,14 @@ if __name__ == "__main__":
     parser_add_hp.add_argument('-tag', help='Tags of the honeypot', required=True)
     parser_add_hp.add_argument('-parser', help='Parsing rules for logs of the honeypot', required=True)
     parser_add_hp.add_argument('-logs', help='Path of log files of the honeypot', required=True)
-    parser_add_hp.add_argument('-src', help='Sources of the honepot (Dockerfile)', required=True)
+    parser_add_hp.add_argument('-src', type=argparse.FileType('r'), help='Base64 encoded source file of the honepot (Dockerfile)', required=True)
     parser_add_hp.add_argument('-port', help='Port where the honeypot service run (Dockerfile)', required=True)
     # Create add_server arguments
     parser_add_server.add_argument('-name', help='Name of the server', required=True)
     parser_add_server.add_argument('-descr', help='Description of the server', required=True)
     parser_add_server.add_argument('-tag', help='Tags of the server', required=True)
     parser_add_server.add_argument('-ip', help='IP address of the server', required=True)
-    parser_add_server.add_argument('-key', help='Encoded SSH key to connnect to the server', required=True)
+    parser_add_server.add_argument('-key', type=argparse.FileType('r'), help='Base64 encoded SSH key file to connect to the server', required=True)
     parser_add_server.add_argument('-port', help='SSH port of the server', required=True)
     # Create add_link arguments
     parser_add_link.add_argument('-tags_hp', help='Tags of the honeypots', required=True)
