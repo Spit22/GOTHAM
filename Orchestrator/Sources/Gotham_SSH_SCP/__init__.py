@@ -17,9 +17,15 @@ def send_file(hostname, port, ssh_key, file_path, remote_file_path):
     # Init remote_server object
     remote_server = SSH_SCP_classes.GothamServer(hostname, port, ssh_key)
     # Upload the file
-    remote_server.upload_files(file_path, remote_file_path)
+    try:
+        remote_server.upload_files(file_path, remote_file_path)
+    except Exception as e:
+        raise ValueError(e)
     # Close the connection
-    remote_server.disconnect()
+    try:
+        remote_server.disconnect()
+    except Exception as e:
+        raise ValueError(e)
 
 
 def execute_commands(hostname, port, ssh_key, commands):
@@ -35,9 +41,15 @@ def execute_commands(hostname, port, ssh_key, commands):
     # Init remote_server object
     remote_server = SSH_SCP_classes.GothamServer(hostname, port, ssh_key)
     # Execute the commands
-    remote_server.commands_execution(commands)
+    try:
+        remote_server.commands_execution(commands)
+    except Exception as e:
+        raise ValueError(e)
     # Close the connection
-    remote_server.disconnect()
+    try:
+        remote_server.disconnect()
+    except Exception as e:
+        raise ValueError(e)
 
 
 def execute_command_with_return(hostname, port, ssh_key, command):
@@ -53,10 +65,15 @@ def execute_command_with_return(hostname, port, ssh_key, command):
     # Init remote_server object
     remote_server = SSH_SCP_classes.GothamServer(hostname, port, ssh_key)
     # Execute the commands
-    answer=remote_server.command_execution_with_return(command)
+    try:
+        answer=remote_server.command_execution_with_return(command)
+    except Exception as e:
+        raise ValueError(e)
     # Close the connection
-    remote_server.disconnect()
-
+    try:
+        remote_server.disconnect()
+    except Exception as e:
+        raise ValueError(e)
     return answer
 
 
@@ -75,8 +92,17 @@ def send_file_and_execute_commands(hostname, port, ssh_key, file_path, remote_fi
     # Init remote_server object
     remote_server = SSH_SCP_classes.GothamServer(hostname, port, ssh_key)
     # Upload the file
-    remote_server.upload_files(file_path, remote_file_path)
+    try:
+        remote_server.upload_files(file_path, remote_file_path)
+    except Exception as e:
+        raise ValueError(e)
     # Execute the commands
-    remote_server.commands_execution(commands)
+    try:
+        remote_server.commands_execution(commands)
+    except Exception as e:
+        raise ValueError(e)
     # Close the connection
-    remote_server.disconnect()
+    try:
+        remote_server.disconnect()
+    except Exception as e:
+        raise ValueError(e)
