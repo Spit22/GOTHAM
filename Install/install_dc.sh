@@ -39,6 +39,7 @@ docker run hello-world
 # Create the folder used by GOTHAM
 mkdir -p /data/tmp
 mkdir -p /data/rsyslog/rulebase
+mkdir -p /etc/rsyslog.d
 
 # Installation of openssh and base64
 apt install -y openssh-server

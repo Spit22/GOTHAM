@@ -37,6 +37,7 @@ mkdir -p /data/template
 mkdir -p /data/rsyslog/datacenter-configuration
 mkdir -p /data/honeypot-log
 mkdir -p /data/rsyslog/rulebase
+mkdir -p /etc/rsyslog.d
 
 # Pre-configure rsyslog
 touch /etc/rsyslog.d/00-syslog_server.conf
