@@ -2,7 +2,7 @@
 import subprocess
 
 #===Import GOTHAM's libs===#
-from Gotham_SSH_SCP import send_file_and_execute_commands, send_file
+from Gotham_SSH_SCP import send_file_and_execute_commands, send_file, execute_commands
 #==========================#
 
 #===Logging components===#
@@ -32,9 +32,10 @@ def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_
     dockercompose.write('  honeypot:\n')
     # Configure container name
     dockercompose.write('    container_name: '+str(id)+'\n')
-    # Add volumes for logs
-    #dockercompose.write('    volumes:\n')
-    #dockercompose.write('      - /data/'+str(id)+'/logs:'+str(log_path)+'\n')
+    # Add symlinks for log files
+    log_path_list = log_path.split(",")
+    for path in log_path_list:
+        dockercompose.write('    command: ln -sf /dev/stdout ' + str(path) + '\n')
     # Build options
     dockercompose.write('    build:\n')
     dockercompose.write('      context: .\n')
