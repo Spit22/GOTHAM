@@ -1,3 +1,4 @@
+'''
 from Gotham_link_BDD import get_server_infos, get_honeypot_infos, get_tag_infos, get_link_infos
 from Gotham_link_BDD import add_server_DB, add_honeypot_DB, add_link_DB, add_lhs_DB
 from Gotham_link_BDD import remove_server_DB, remove_honeypot_DB, remove_link_DB
@@ -15,8 +16,8 @@ import os
 import random
 from io import StringIO  # a suppr
 
-from termcolor import colored, cprint
-
+#from termcolor import colored, cprint
+'''
 import rm_server
 import os
 import sys
@@ -39,7 +40,16 @@ honeypot_infos = {"id": "hp-1F5B3AFE32EE71EFB1D25EFFFC2CA666", 'name': 'hp-test-
                   'port': 22, 'parser': 'TO_ADD', 'logs': 'TO_ADD', 'source': "TO_ADD", "port_container": 22, 'state': 'UNUSED'}
 ##########-SETTINGS-##########
 
+import Gotham_outputs
+print(Gotham_outputs.syslog())
 
+'''
+try:
+    print(Gotham_outputs.syslog())
+except:
+    print("KO")
+'''
+'''
 print(colored("########## ########## ADD SECTION ########## ##########", 'blue'))
 try:
     print(colored("########## Add Server ##########", 'yellow'))
@@ -230,3 +240,4 @@ serv_infos = normalize_server_infos(serv_infos)
 print(serv_infos)
 # Store new server and tags in the internal database
 print(add_server_DB(DB_settings, serv_infos))
+'''

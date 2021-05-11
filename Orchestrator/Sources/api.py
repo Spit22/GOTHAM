@@ -35,7 +35,6 @@ import Gotham_replace
 import Gotham_state
 import Gotham_error
 import Gotham_autotags
-import Gotham_outputs
 
 # Create the flask application
 app = flask.Flask(__name__)
@@ -1729,26 +1728,6 @@ def ls_all():
         links = "No link in database"
 
     return {"honeypots": honeypots, "servers": servers, "links": links}, 200
-
-
-@app.route('/output/syslog', methods=['POST'])
-def syslog_output():
-    # Create a syslog output
-    #
-    # hostname (string) : hostname of syslog server
-    # port (string) : port of syslog server
-
-    # Get POST data on JSON format
-    data = request.get_json()
-    hostname = data["hostname"]
-    syslog_port = data["port"]
-    protocol = data["protocol"]
-    try:
-        Gotham_outputs.syslog(hostname, syslog_port, protocol)
-    except Exception as e:
-        error = "Fail to create syslog output"
-        return Gotham_error.format_usererror(error, str(e), debug_mode), 500
-    return "OK\n", 200
 
 
 @app.route('/version', methods=['GET'])
