@@ -14,7 +14,7 @@ logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
 #=======================#
 
 
-def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_port):
+def generate_dockercompose(id, dockerfile_path, honeypot_port, mapped_port):
     # Generates a docker-compose.yml file  from given information
     #
     # id (string) : id of the honeypot
@@ -32,11 +32,6 @@ def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_
     dockercompose.write('  honeypot:\n')
     # Configure container name
     dockercompose.write('    container_name: '+str(id)+'\n')
-    # Add symlinks for log files
-    dockercompose.write('    command: tail -f /dev/null\n')
-    log_path_list = log_path.split(",")
-    for path in log_path_list:
-        dockercompose.write('    command: ln -sf /dev/stdout ' + str(path) + '\n')
     # Build options
     dockercompose.write('    build:\n')
     dockercompose.write('      context: .\n')
@@ -50,13 +45,11 @@ def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_
     dockercompose.write('      driver: syslog\n')
     dockercompose.write('      options:\n')
     dockercompose.write('        tag: ' + str(id) + '\n')
-    # Add a TTY
-    dockercompose.write('    tty: true\n')
     # Close file
     dockercompose.close()
 
 
-def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id_hp):
+def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id_hp, logs):
     # Install and deploy an Nginx Reverse-Proxy on a given server
     #
     # ip_dc (string): ip of remote server
@@ -78,10 +71,20 @@ def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id_hp):
         send_file_and_execute_commands(
             dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, docker_dest, command_exec_compose)
     except Exception as e:
-        logging.error(e)
-        return False
-    # If deployment is OK, return True
-    return True
+        error = "Container deployement failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
+    # Create symlinks between log files and /dev/stdout
+    try:
+        log_path_list = logs.split(",")
+        commands = []
+        for path in log_path_list:
+            commands.append(f'docker exec {str(id_hp)} ln -sf /dev/stdout {str(path)}\n')
+        execute_commands(dc_ip, dc_ssh_port, dc_ssh_key, commands)
+    except Exception as e:
+        error = "Symlinks creation failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 
 def generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, id_hp, rsyslog_conf_datacenter_local_path):

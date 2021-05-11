@@ -190,12 +190,11 @@ def add_honeypot():
         return Gotham_error.format_usererror(error, "", debug_mode), 500
 
     # Generate docker-compose.yml from information
-    add_hp.generate_dockercompose(id, dockerfile_path, logs, port, mapped_port)
+    add_hp.generate_dockercompose(id, dockerfile_path, port, mapped_port)
 
     # Deploy the hp's container on datacenter
     try:
-        add_hp.deploy_container(
-            dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id)
+        add_hp.deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id, logs)
 
     except Exception as e:
         error = "SSH connection failed"
