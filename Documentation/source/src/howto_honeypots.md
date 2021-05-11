@@ -90,7 +90,7 @@ If GOTHAM returns new honeypot information, the honeypot was successfully edited
 
 The gothamctl command is easier than the previous method :
 ```
- gothamctl.py edit hp -id HP_ID -name NAME -descr DESCR -tag TAGS -parser PARSER -logs LOGS -src DOCKERFILE_PATH -port PORT
+gothamctl.py edit hp -id ID [-name NAME] [-descr DESCR] [-tag TAG] [-parser PARSER] [-logs LOGS] [-src SRC] [-port PORT]
 ```
 
 ### How to list all honeypots on GOTHAM ?
@@ -113,7 +113,7 @@ The gothamctl command is easier than the previous method :
 
 ##### Using direct API requests
 
-Following command return a json formatted list of all honeypots managed by GOTHAM :
+Following command return a json formatted information list of provided honeypot :
 ```
 curl -X GET http://[gotham's api]:[port]/list/honeypot?id=[hp_id]
 ```
