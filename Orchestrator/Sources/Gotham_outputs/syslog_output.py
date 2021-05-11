@@ -13,6 +13,7 @@ def create(new_syslog_output, hostname, syslog_port, protocol):
     '''
     Create a syslog output
     
+    ARGUMENTS:
         new_syslog_output (string) : name of the new configuration file
         hostname (string) : hostname of the syslog server
         syslog_port (string) : port of the syslog server
@@ -43,6 +44,9 @@ def delete(obsolete_syslog_output):
     '''
     Delete obsolete syslog output
     An output is considered as obsolete if it exists but it is not required in the configuration anymore
+
+    ARGUMENT:
+        obsolete_syslog_output (string) : name of the configuration file of the obsolete syslog output
     '''
     os.remove(f"/etc/rsyslog.d/{str(obsolete_syslog_output)}")
 
@@ -50,6 +54,12 @@ def delete(obsolete_syslog_output):
 def naming(name, hostname, port, protocol):
     '''
     Generate the name of syslog configuration files, based on its parameters
+
+    ARGUMENTS:
+        name (string) : name of the required configuration
+        hostname (string) : hostname of the syslog server
+        syslog_port (string) : port of the syslog server
+        protocol (string) : protocol to use with the syslog server
     '''
     # Hash the parameters
     hash_obj = hashlib.sha1()
