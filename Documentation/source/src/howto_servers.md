@@ -47,6 +47,8 @@ gothamctl.py add server -name NAME -descr DESCR -tag TAG -ip IP -key KEY -port P
 ```
 
 ### How to remove a server on GOTHAM ?
+Note : if the server is actually used by a link, GOTHAM will automatically try to replace it with another server. If there is no other server available, GOTHAM will warn you with an error message and the server will not be removed.
+
 ##### Using direct API requests
 Following command permits to remove a server from its id :
 ```
