@@ -33,6 +33,7 @@ def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_
     # Configure container name
     dockercompose.write('    container_name: '+str(id)+'\n')
     # Add symlinks for log files
+    dockercompose.write('    command: tail -f /dev/null\n')
     log_path_list = log_path.split(",")
     for path in log_path_list:
         dockercompose.write('    command: ln -sf /dev/stdout ' + str(path) + '\n')
