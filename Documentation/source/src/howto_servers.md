@@ -8,7 +8,7 @@ In GOTHAM projet, a server is a reverse-proxy exposing honeypots on the internet
 
 ##### Using direct API requests
 
-First, you have to create the honeypot-definition file :
+First, you have to create the server-definition file :
 
 ```
    {
@@ -29,7 +29,7 @@ Here some explanations :
 * 'tags' field permits to add some tags (coma separated) that describes the server (Geolocation, logical-location, CVEs, network, OS, etc.)
 * 'ssh_key' field define the ssh key that has to be used for ssh connection
 * 'port' field define which port has to be used for ssh connection
-* 'autotags' field contains a boolean (1 or 0) to decide if you want orchestrator to automatically add tags to honeypot (using a Trivy scan)
+* 'autotags' field contains a boolean (1 or 0) to decide if you want orchestrator to automatically add tags to server
 
 Once you have created you own definition file, you can send it to the orchestrator's api :
 
@@ -106,11 +106,11 @@ The gothamctl command is easier than the previous method :
  gothamctl.py ls server
 ```
 
-### How to show information of a specific honeypot on GOTHAM ?
+### How to show information of a specific server on GOTHAM ?
 
 ##### Using direct API requests
 
-Following command return a json formatted description of provided honeypot :
+Following command return a json formatted description of provided server :
 ```
 curl -X GET http://[gotham's api]:[port]/list/server?id=[server_id]
 ```
