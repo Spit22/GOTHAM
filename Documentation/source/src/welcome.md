@@ -1,7 +1,33 @@
-# Welcome
+# GOTHAM
+Global Orchestrator for Threat-intel through Honeypot Army Management
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ac leo sit amet lacus scelerisque egestas. Phasellus blandit orci a porta sagittis. Maecenas condimentum turpis nec aliquet blandit. Quisque mollis ornare elit, et tristique mauris placerat eget. Nulla bibendum faucibus nibh, sed fermentum odio ullamcorper nec. Nulla tempor porta blandit. Proin viverra sed purus ac luctus. Morbi dapibus urna nec tortor tincidunt feugiat. Integer posuere scelerisque eros, ut maximus ex egestas sed. Nam id congue tellus, ac ultricies arcu. Suspendisse sagittis magna efficitur turpis posuere, ut iaculis est euismod. Sed imperdiet nisl consectetur erat mollis, non fringilla neque interdum. Mauris lacinia lacus at lobortis semper. Duis euismod ac elit eu aliquet. Nullam eu nunc sagittis lectus scelerisque faucibus. Proin varius faucibus imperdiet. 
+# Presentation
 
-## Welcome again
+The aim of this project is to respond to 3 challenges : 
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ac leo sit amet lacus scelerisque egestas. Phasellus blandit orci a porta sagittis. Maecenas condimentum turpis nec aliquet blandit. Quisque mollis ornare elit, et tristique mauris placerat eget. Nulla bibendum faucibus nibh, sed fermentum odio ullamcorper nec. Nulla tempor porta blandit. Proin viverra sed purus ac luctus. Morbi dapibus urna nec tortor tincidunt feugiat. Integer posuere scelerisque eros, ut maximus ex egestas sed. Nam id congue tellus, ac ultricies arcu. Suspendisse sagittis magna efficitur turpis posuere, ut iaculis est euismod. Sed imperdiet nisl consectetur erat mollis, non fringilla neque interdum. Mauris lacinia lacus at lobortis semper. Duis euismod ac elit eu aliquet. Nullam eu nunc sagittis lectus scelerisque faucibus. Proin varius faucibus imperdiet. 
+* Honeypots generates heterogenous data
+* the relevance of a honeypot's location varies over time
+* a large number of honeypots are need to cover as many vulnerabilities as possible
+
+The GOTHAM project presents itself as an orchestrator. At first, this orchestrator is able to collect and harmonize data from many honeypots. Then, it proposes to ease the administration of honeypots by adding an abstraction layer over technical things (honeypots, servers, etc...). Therefore the user no longer needs to know where and how a honeypot is hosted.
+
+Honeypots are made accessible through reverse-proxies which are scattered across different networks and geographic areas. This specificity allows users to modify the perceptible location of a honeypot.
+
+Overall, the orchestrator follows a simple logic : it deals with 3 objects only.
+
+* Honeypots :containers hosting vulnerable services
+* Severs : servers hosting reverse-proxy service
+* Network links : redirection of flows from reverse-proxies to honeypots
+
+# This documentation
+
+Firstly, this documentation cover installation subjects :
+
+* Preparation & installation of the orchestrator
+* Preparation of datacenter
+* Preparation of servers
+
+Secondly, the documentation presents some usecase :
+* How to manage honeypots
+* How to manage servers
+* How to manage links
