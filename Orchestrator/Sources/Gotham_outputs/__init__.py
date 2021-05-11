@@ -36,10 +36,7 @@ def syslog():
         hostname = value[0]
         syslog_port = value[1]
         protocol = value[2]
-
-        digit_list = hostname.split('.')
-        name_of_host = digit_list[0] + "-" + digit_list[1] + "-" + digit_list[2] + "-" + digit_list[3]
-        configuration_required.append("10-syslog_" + str(protocol) + "_" + str(name_of_host) + "_" + str(syslog_port) + ".conf")
+        configuration_required.append(syslog_output.naming(key, hostname, syslog_port, protocol))
 
     # Find new outputs and outputs to delete
     outputs_to_create = list(set(configuration_required) - set(existing_configuration))

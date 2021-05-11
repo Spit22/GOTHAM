@@ -1,4 +1,5 @@
 import subprocess
+import hashlib
 
 #===Logging components===#
 import os
@@ -17,7 +18,7 @@ def create(new_syslog_output, hostname, syslog_port, protocol):
     # Get POST data on JSON format
     try:
         # Create the configuration file
-        rsyslog_conf_file = open("/etc/rsyslog.d/" + str(new_syslog_output), "a")
+        rsyslog_conf_file = open(f"/etc/rsyslog.d/{str(new_syslog_output)}", "a")
         # Monitor the log file of the honeypot
         rsyslog_conf_file.write('if $msg contains "hp-" then {\n')
         # Apply parsing rules
@@ -36,3 +37,9 @@ def create(new_syslog_output, hostname, syslog_port, protocol):
 def delete(obsolete_syslog_output):
     # Delete a syslog output
     os.remove("/etc/rsyslog.d/" + str(obsolete_syslog_output))
+
+def naming(name, hostname, port, protocol):
+    hash_obj = hashlib.sha1()
+    hash_obj.update(str(name).encode() + str(hostname).encode() + str(port).encode() + str(protocol).encode())
+    hash_name = hash_obj.hexdigest()
+    return(f"10-syslog_{str(hash_name)}.conf")
