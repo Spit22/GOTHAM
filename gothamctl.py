@@ -17,6 +17,8 @@ def add_server(args):
     descr = args.descr
     tags = args.tag
     ip = args.ip
+    autotags = args.autotags
+
     try:
         ssh_key = str(base64.b64encode(args.key.read().encode("ascii")).decode("ascii"))
     except:
@@ -41,8 +43,14 @@ def add_server(args):
         "descr": descr,
         "tags": tags,
         "ssh_key": ssh_key,
-        "ssh_port": ssh_port,
+        "ssh_port": ssh_port
     }
+
+    if autotags:
+        data["autotags"] = "1"
+    else:
+        data["autotags"] = "0"
+
 
     # Query URL and get json
     data = requests.post(url, json=data)
@@ -553,6 +561,7 @@ if __name__ == "__main__":
     parser_add_server.add_argument('-ip', help='IP address of the server', required=True)
     parser_add_server.add_argument('-key', type=argparse.FileType('r'), help='Base64 encoded SSH key file to connect to the server', required=True)
     parser_add_server.add_argument('-port', help='SSH port of the server', required=True)
+    parser_add_server.add_argument('-autotags', action='store_true', help='Choose if you want to automatically add tags to server', required=False)
     # Create add_link arguments
     parser_add_link.add_argument('-tags_hp', help='Tags of the honeypots', required=True)
     parser_add_link.add_argument('-tags_serv', help='Tags of the servers', required=True)
