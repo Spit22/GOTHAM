@@ -50,6 +50,7 @@ The gothamctl command is easier than the previous method :
 ```
 
 ### How to remove a honeypot on GOTHAM ?
+Note : if you try to remove a honeypot that is used by a link, GOTHAM will automatically duplicate the removed honeypot on another container, to maintain the link definition terms. If you want to totally remove a honeypot, you have to check that it is not used on some links.
 ##### Using direct API requests
 Following command permits to remove a honeypot from its id :
 ```
