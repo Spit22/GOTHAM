@@ -6,7 +6,7 @@ In GOTHAM projet, a link is an abstract object that permit a honeypot to be expo
 
 ### How to add a link to GOTHAM ?
 
-##### Using direct API requests
+#### Using direct API requests
 
 First, you have to create the link-definition file :
 
@@ -38,7 +38,7 @@ curl -X POST http://[gotham's api]:[port]/add/link --data-binary @new_link.json 
 
 If GOTHAM returns an id, the link is now completely configured.
 
-### Using gothamctl
+#### Using gothamctl
 
 The gothamctl command is easier than the previous method :
 ```
@@ -47,13 +47,13 @@ gothamctl.py add link [-h] -tags_hp TAGS_HP -tags_serv TAGS_SERV -ports PORTS -n
 
 ### How to remove a link on GOTHAM ?
 
-##### Using direct API requests
+#### Using direct API requests
 Following command permits to remove a link from its id :
 ```
 curl -X POST http://[gotham's api]:[port]/rm/link -d {"id": "[link_id]"} -H "Content-Type: application/json"
 ```
 
-### Using gothamctl
+#### Using gothamctl
 
 The gothamctl command is easier than the previous method :
 ```
@@ -62,7 +62,7 @@ The gothamctl command is easier than the previous method :
 
 ### How to edit a link on GOTHAM ?
 
-##### Using direct API requests
+#### Using direct API requests
 
 First, you have to create the link-definition file (which only contains information you want to change) :
 
@@ -83,7 +83,7 @@ curl -X POST http://[gotham's api]:[port]/edit/link --data-binary @edit_link.jso
 
 If GOTHAM returns new link information, the link was successfully edited.
 
-### Using gothamctl
+#### Using gothamctl
 
 The gothamctl command is easier than the previous method :
 ```
@@ -92,14 +92,14 @@ gothamctl.py edit link -id ID [-tags_hp TAGS_HP] [-tags_serv TAGS_SERV] [-nb_hp 
 
 ### How to list all links on GOTHAM ?
 
-##### Using direct API requests
+#### Using direct API requests
 
 Following command return a json formatted list of all links configured by GOTHAM :
 ```
 curl -X GET http://[gotham's api]:[port]/list/links
 ```
 
-### Using gothamctl
+#### Using gothamctl
 
 The gothamctl command is easier than the previous method :
 ```
@@ -108,14 +108,14 @@ The gothamctl command is easier than the previous method :
 
 ### How to show information of a specific link on GOTHAM ?
 
-##### Using direct API requests
+#### Using direct API requests
 
 Following command return a json formatted description of provided link :
 ```
 curl -X GET http://[gotham's api]:[port]/list/link?id=[link_id]
 ```
 
-### Using gothamctl
+#### Using gothamctl
 
 The gothamctl command is easier than the previous method :
 ```
