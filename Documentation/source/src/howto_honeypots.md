@@ -6,7 +6,7 @@ In GOTHAM projet, a honeypot is a docker container that expose a vulnerable serv
 
 ### How to add a honeypot to GOTHAM ?
 
-##### Using direct API requests
+#### Using direct API requests
 
 First, you have to create the honeypot-definition file :
 
@@ -42,7 +42,7 @@ curl -X POST http://[gotham's api]:[port]/add/honeypot --data-binary @new_hp.jso
 
 If GOTHAM returns an id, the honeypot was successfully generated on the datacenter.
 
-### Using gothamctl
+#### Using gothamctl
 
 The gothamctl command is easier than the previous method :
 ```
@@ -51,13 +51,13 @@ The gothamctl command is easier than the previous method :
 
 ### How to remove a honeypot on GOTHAM ?
 Note : if you try to remove a honeypot that is used by a link, GOTHAM will automatically duplicate the removed honeypot on another container, to maintain the link definition terms. If you want to totally remove a honeypot, you have to check that it is not used on some links.
-##### Using direct API requests
+#### Using direct API requests
 Following command permits to remove a honeypot from its id :
 ```
 curl -X POST http://[gotham's api]:[port]/rm/honeypot -d {"id": "[hp_id]"} -H "Content-Type: application/json"
 ```
 
-### Using gothamctl
+#### Using gothamctl
 
 The gothamctl command is easier than the previous method :
 ```
@@ -66,7 +66,7 @@ The gothamctl command is easier than the previous method :
 
 ### How to edit a honeypot on GOTHAM ?
 
-##### Using direct API requests
+#### Using direct API requests
 
 First, you have to create the honeypot-definition file (which only contains information you want to change) :
 
@@ -87,7 +87,7 @@ curl -X POST http://[gotham's api]:[port]/edit/honeypot --data-binary @edit_hp.j
 
 If GOTHAM returns new honeypot information, the honeypot was successfully edited on the datacenter.
 
-### Using gothamctl
+#### Using gothamctl
 
 The gothamctl command is easier than the previous method :
 ```
@@ -96,14 +96,14 @@ gothamctl.py edit hp -id ID [-name NAME] [-descr DESCR] [-tag TAG] [-parser PARS
 
 ### How to list all honeypots on GOTHAM ?
 
-##### Using direct API requests
+#### Using direct API requests
 
 Following command return a json formatted list of all honeypots managed by GOTHAM :
 ```
 curl -X GET http://[gotham's api]:[port]/list/honeypot
 ```
 
-### Using gothamctl
+#### Using gothamctl
 
 The gothamctl command is easier than the previous method :
 ```
@@ -112,14 +112,14 @@ The gothamctl command is easier than the previous method :
 
 ### How to show information of a specific honeypot on GOTHAM ?
 
-##### Using direct API requests
+#### Using direct API requests
 
 Following command return a json formatted information list of provided honeypot :
 ```
 curl -X GET http://[gotham's api]:[port]/list/honeypot?id=[hp_id]
 ```
 
-### Using gothamctl
+#### Using gothamctl
 
 The gothamctl command is easier than the previous method :
 ```
