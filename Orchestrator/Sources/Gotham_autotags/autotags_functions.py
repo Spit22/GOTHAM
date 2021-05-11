@@ -1,5 +1,7 @@
 # GOTHAM'S LIB
 import Gotham_SSH_SCP
+import json
+import requests
 
 # Logging components
 import configparser
@@ -67,7 +69,7 @@ def autotag_by_trivy(hp_id):
   
 
 def autotag_by_docker_top(hp_id):
-    # Find tags automatically for honeypot by docker top commande
+    # Find tags automatically for honeypot by docker top command
     #
     #
     # hp_id (string) : id of the honeypot
@@ -107,3 +109,47 @@ def autotag_by_docker_top(hp_id):
     return list(set(tags))
     
 
+def autotag_by_ipstack(serv_ip):
+    # Find tags automatically for server by ipstack command
+    #
+    #
+    # serv_ip (string) : ip of the server
+    #
+    # Return tags list
+
+    # Retrieve settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+
+    access_key = config['ipstack']['access_key']
+    parser = config['ipstack']['parser']
+
+    tags=[]
+
+    try:
+        url = "http://api.ipstack.com/"+serv_ip
+        params={"access_key": access_key}
+        r = requests.get(url, params=params)
+        jsonresponse = r.json()
+    except Exception as e:
+        error = "Error while trying to get ipstack information on the ip " + \
+            str(serv_ip)+" : "+str(e)
+        logging.error(error)
+        raise ValueError(error)
+
+    for item in parser.split(","):
+        key_list=item.split(":")
+        value=jsonresponse
+        for key in key_list:
+            if key in value.keys():
+                value=value[key]
+            else:
+                value=""
+                break
+        if value != "" and str(value).upper()!="NULL" and value != None:
+            tags.append(str(value))
+
+
+
+
+    return list(set(tags))

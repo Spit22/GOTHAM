@@ -35,7 +35,6 @@ import Gotham_replace
 import Gotham_state
 import Gotham_error
 import Gotham_autotags
-import Gotham_outputs
 
 # Create the flask application
 app = flask.Flask(__name__)
@@ -254,7 +253,8 @@ def add_serv():
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     # Retrieve State list
     state_list = config['state']['serv_state'].split(",")
-    
+    separator = config['tag']['separator']
+   
     if len(state_list)<4:
         error = "The config file needs 4 differents states for honeypot and server"
         logging.error(error)
@@ -263,6 +263,9 @@ def add_serv():
 
     # Get POST data on JSON format
     data = request.get_json()
+
+    autotags = True if "autotags" in data and int(data["autotags"]) == 1 else False
+    
 
     # Get all function's parameters
     try:
@@ -312,6 +315,11 @@ def add_serv():
     except Exception as e:
         error = "Server deployment failed"
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
+
+    # Create tag automaticaly
+    if autotags==True:
+        autotags_list=Gotham_autotags.server(DB_settings,serv_id=id,serv_ip=ip)
+        tags=str(tags)+separator+autotags_list
 
     # Create serv_infos
     serv_infos = {'id': str(id), 'name': str(name), 'descr': str(descr), 'tags': str(
@@ -1144,8 +1152,7 @@ def rm_honeypot():
     try:
         jsondata = json.dumps(data)
         url = "http://localhost:5000/list/honeypot"
-        headers = {'Content-type': 'application/json'}
-        r = requests.get(url, data=jsondata, headers=headers)
+        r = requests.get(url, params=jsondata)
         jsonresponse = r.json()
     except Exception as e:
         error = "Hp finding failed"
@@ -1229,8 +1236,7 @@ def rm_serv():
     try:
         jsondata = json.dumps(data)
         url = "http://localhost:5000/list/server"
-        headers = {'Content-type': 'application/json'}
-        r = requests.get(url, data=jsondata, headers=headers)
+        r = requests.get(url, params=jsondata)
         jsonresponse = r.json()
     except Exception as e:
         error = "Serv finding failed"
@@ -1306,8 +1312,7 @@ def rm_lk():
     try:
         jsondata = json.dumps(data)
         url = "http://localhost:5000/list/link"
-        headers = {'Content-type': 'application/json'}
-        r = requests.get(url, data=jsondata, headers=headers)
+        r = requests.get(url, params=jsondata)
         jsonresponse = r.json()
     except Exception as e:
         error = "Link finding failed"
@@ -1723,26 +1728,6 @@ def ls_all():
         links = "No link in database"
 
     return {"honeypots": honeypots, "servers": servers, "links": links}, 200
-
-
-@app.route('/output/syslog', methods=['POST'])
-def syslog_output():
-    # Create a syslog output
-    #
-    # hostname (string) : hostname of syslog server
-    # port (string) : port of syslog server
-
-    # Get POST data on JSON format
-    data = request.get_json()
-    hostname = data["hostname"]
-    syslog_port = data["port"]
-    protocol = data["protocol"]
-    try:
-        Gotham_outputs.syslog(hostname, syslog_port, protocol)
-    except Exception as e:
-        error = "Fail to create syslog output"
-        return Gotham_error.format_usererror(error, str(e), debug_mode), 500
-    return "OK\n", 200
 
 
 @app.route('/version', methods=['GET'])

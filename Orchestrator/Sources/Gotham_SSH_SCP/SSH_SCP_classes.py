@@ -48,7 +48,7 @@ class GothamServer:
 
     def connect(self):
         '''
-        Open SSH and SCP session to the remote server
+        Open SSH and SCP session with the remote server
         '''
         if self.is_connected is False:
             # Init an SSH session
@@ -66,8 +66,7 @@ class GothamServer:
             )
             # Init an SCP session using the SSH session just created
             self.scp_session = scp.SCPClient(self.ssh_session.get_transport())
-        logging.info(
-            f"[+] SSH connection to the remote server {self.hostname} has just started")
+        logging.info(f"[+] SSH connection with the remote server {self.hostname} has just started")
         return self.ssh_session
 
     def disconnect(self):
@@ -75,11 +74,20 @@ class GothamServer:
         Close SSH & SCP connections
         '''
         if self.ssh_session:
-            self.ssh_session.close()
-            logging.info(
-                f"[-] SSH connection to the remote server {self.hostname} has just been closed")
+            try:
+                self.ssh_session.close()
+                logging.info(f"[-] SSH connection with the remote server {self.hostname} has just been closed")
+            except Exception as e:
+                error = f"SSH disconnection with {self.hostname} failed : {e}"
+                logging.error(error)
+                raise ValueError(error)
         if self.scp_session:
-            self.scp_session.close()
+            try:
+                self.scp_session.close()
+            except Exception as e:
+                error = f"SCP disconnection with {self.hostname} failed : {e}"
+                logging.error(error)
+                raise ValueError(error)
 
     def upload_files(self, file_paths, remote_file_path):
         '''
@@ -90,7 +98,12 @@ class GothamServer:
             remote_file_path (string) : path on the remote host we want to put the file(s)
         '''
         # Start an SCP connection
-        self.is_connected = self.connect()
+        try:
+            self.is_connected = self.connect()
+        except Exception as e:
+            error = f"Connection with {self.hostname} failed : {e}"
+            logging.error(error)
+            raise ValueError(error)
         # Send files
         for file_path in file_paths:
             self.scp_session.put(
@@ -109,7 +122,12 @@ class GothamServer:
             commands (list) : list of the commands we want to execute on the remote server
         '''
         # Start an SSH connection
-        self.is_connected = self.connect()
+        try:
+            self.is_connected = self.connect()
+        except Exception as e:
+            error = f"Connection with {self.hostname} failed : {e}"
+            logging.error(error)
+            raise ValueError(error)
 
         # Execute all of the commands
         for cmd in commands:
@@ -128,7 +146,12 @@ class GothamServer:
             command (string) : command we want to execute on the remote server
         '''
         # Start an SSH connection
-        self.is_connected = self.connect()
+        try:
+            self.is_connected = self.connect()
+        except Exception as e:
+            error = f"Connection with {self.hostname} failed : {e}"
+            logging.error(error)
+            raise ValueError(error)
 
         # Execute all of the commands
         stdin, stdout, stderr = self.ssh_session.exec_command(command)

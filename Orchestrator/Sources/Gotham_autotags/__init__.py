@@ -1,5 +1,6 @@
 #===Import GOTHAM's libs===#
 import Gotham_SSH_SCP
+import Gotham_link_BDD
 
 from . import autotags_functions
 
@@ -49,10 +50,60 @@ def honeypot(hp_id):
 
 
 
-#def server(serv_id):
+def server(DB_settings, serv_id="",serv_ip=""):
     # Find tags automatically for server
     #
     #
+    # DB_settings (json) : auth information
     # serv_id (string) : id of the server
+    # serv_ip (string) : ip of the server
     #
     # Return tags list (string)
+    # Retrieve settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    separator = config['tag']['separator']
+
+    if serv_id == "" and serv_ip == "":
+        error = "Need id or ip of the serv in autotags_server function"
+        logging.error(error)
+        raise ValueError(error)
+    elif (serv_id != "" and serv_ip == "") or (serv_id == "" and serv_ip != ""):
+        if serv_id != "" and serv_ip == "":
+            try:
+                object_infos = Gotham_link_BDD.get_server_infos(
+                    DB_settings, id=str(serv_id))
+            except ValueError as e:
+                logging.error(error)
+                raise ValueError(error)
+
+        elif serv_id == "" and serv_ip != "":
+            try:
+                object_infos = Gotham_link_BDD.get_server_infos(
+                    DB_settings, ip=str(serv_ip))
+            except ValueError as e:
+                logging.error(error)
+                raise ValueError(error)
+
+        # Check if the server exists in the IDB
+        if object_infos == []:
+            logging.error(
+                f"You tried to autotag a server that doesn't exists ("+str(serv_id if serv_id != "" else serv_ip)+")")
+            error = "Unknown serv " + str(serv_id if serv_id != "" else serv_ip)
+            raise ValueError(error)
+        else:
+            serv_id=object_infos[0]["serv_id"]
+            serv_ip=object_infos[0]["serv_ip"]
+
+    try:
+        ipstack_tags=autotags_functions.autotag_by_ipstack(serv_ip)
+    except ValueError as e:
+        error = "Error while trying to get geolocation informations on serv (id: "+serv_id+") : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
+
+    tags_list=list(set(ipstack_tags))
+
+    tags=separator.join(tags_list)
+
+    return tags
