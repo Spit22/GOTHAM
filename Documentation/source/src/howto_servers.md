@@ -6,7 +6,7 @@ In GOTHAM projet, a server is a reverse-proxy exposing honeypots on the internet
 
 ### How to add a server to GOTHAM ?
 
-##### Using direct API requests
+#### Using direct API requests
 
 First, you have to create the server-definition file :
 
@@ -39,7 +39,7 @@ curl -X POST http://[gotham's api]:[port]/add/server --data-binary @new_server.j
 
 If GOTHAM returns an id, the server is now completely managed.
 
-### Using gothamctl
+#### Using gothamctl
 
 The gothamctl command is easier than the previous method :
 ```
@@ -49,13 +49,13 @@ gothamctl.py add server -name NAME -descr DESCR -tag TAG -ip IP -key KEY -port P
 ### How to remove a server on GOTHAM ?
 Note : if the server is actually used by a link, GOTHAM will automatically try to replace it with another server. If there is no other server available, GOTHAM will warn you with an error message and the server will not be removed.
 
-##### Using direct API requests
+#### Using direct API requests
 Following command permits to remove a server from its id :
 ```
 curl -X POST http://[gotham's api]:[port]/rm/server -d {"id": "[server_id]"} -H "Content-Type: application/json"
 ```
 
-### Using gothamctl
+#### Using gothamctl
 
 The gothamctl command is easier than the previous method :
 ```
@@ -64,7 +64,7 @@ The gothamctl command is easier than the previous method :
 
 ### How to edit a server on GOTHAM ?
 
-##### Using direct API requests
+#### Using direct API requests
 
 First, you have to create the server-definition file (which only contains information you want to change) :
 
@@ -85,7 +85,7 @@ curl -X POST http://[gotham's api]:[port]/edit/server --data-binary @edit_server
 
 If GOTHAM returns new server information, the server was successfully edited.
 
-### Using gothamctl
+#### Using gothamctl
 
 The gothamctl command is easier than the previous method :
 ```
@@ -94,14 +94,14 @@ gothamctl.py edit server -id SERVER_ID [-name NAME] [-descr DESCR] [-tag TAG] [-
 
 ### How to list all servers on GOTHAM ?
 
-##### Using direct API requests
+#### Using direct API requests
 
 Following command return a json formatted list of all servers managed by GOTHAM :
 ```
 curl -X GET http://[gotham's api]:[port]/list/server
 ```
 
-### Using gothamctl
+#### Using gothamctl
 
 The gothamctl command is easier than the previous method :
 ```
@@ -110,14 +110,14 @@ The gothamctl command is easier than the previous method :
 
 ### How to show information of a specific server on GOTHAM ?
 
-##### Using direct API requests
+#### Using direct API requests
 
 Following command return a json formatted description of provided server :
 ```
 curl -X GET http://[gotham's api]:[port]/list/server?id=[server_id]
 ```
 
-### Using gothamctl
+#### Using gothamctl
 
 The gothamctl command is easier than the previous method :
 ```
