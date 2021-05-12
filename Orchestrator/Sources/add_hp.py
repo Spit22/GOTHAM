@@ -2,7 +2,7 @@
 import subprocess
 
 #===Import GOTHAM's libs===#
-from Gotham_SSH_SCP import send_file_and_execute_commands, send_file, execute_commands
+from Gotham_SSH_SCP import send_file_and_execute_commands, send_file, execute_command_with_return
 #==========================#
 
 #===Logging components===#
@@ -190,6 +190,24 @@ def deploy_rsyslog_conf(datacenter_settings, orchestrateur_settings, id_hp, rule
     # SSH SCP ARGUMENTS
     exec_restart_rsyslog = ["service rsyslog restart"]
 
+    # Check if required directories on orchestrator exists
+    rsyslog_conf_datacenter_local_path_exists = os.path.exists(rsyslog_conf_datacenter_local_path)
+    rsyslog_conf_orchestrator_local_path_exists = os.path.exists(rsyslog_conf_orchestrator_local_path)
+    local_hp_log_file_path_exists = os.path.exists(local_hp_log_file_path)
+    local_rulebase_path_exists = os.path.exists(remote_rulebase_path)
+    if not(rsyslog_conf_datacenter_local_path_exists and rsyslog_conf_orchestrator_local_path_exists and local_hp_log_file_path_exists and local_rulebase_path_exists):
+        error = "At least one directory on orchestrator is missing"
+        logging.error(error)
+        raise ValueError(error)
+    
+    # Check if required directories on datacenter exists
+    rsyslog_conf_datacenter_remote_path_exists = execute_command_with_return(orchestrateur_settings["hostname"], datacenter_settings["ssh_port"], datacenter_settings["ssh_key"], f"[[ -d {rsyslog_conf_datacenter_remote_path} ]] && echo 'OK'")
+    remote_rulebase_path_exists = execute_command_with_return(orchestrateur_settings["hostname"], datacenter_settings["ssh_port"], datacenter_settings["ssh_key"], f"[[ -d {remote_rulebase_path} ]] && echo 'OK'")
+    if not(rsyslog_conf_datacenter_remote_path_exists == 'OK' and remote_rulebase_path_exists == 'OK'):
+        error = "At least one directory on datacenter is missing"
+        logging.error(error)
+        raise ValueError(error)
+    
     # Generate configuration files and rulebase
     try:
         generate_rulebase(id_hp, rules, local_rulebase_path)
