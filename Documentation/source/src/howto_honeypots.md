@@ -1,4 +1,4 @@
-# Honeypots Management
+# Honeypot Management
 
 ### Quésaco ?
 
