@@ -41,8 +41,6 @@ def syslog():
     # Find new outputs and outputs to delete
     outputs_to_create = list(set(configuration_required) - set(existing_configuration))
     outputs_to_delete = list(set(existing_configuration) - set(configuration_required))
-    print(outputs_to_create)
-    print(outputs_to_delete)
 
     # Create required outputs
     for new_syslog_output in outputs_to_create:
