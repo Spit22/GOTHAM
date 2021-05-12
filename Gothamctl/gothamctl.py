@@ -7,6 +7,7 @@ import requests
 import base64
 import configparser
 import tabulate
+import json
 
 #===Logging components===#
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
@@ -409,8 +410,10 @@ def list_server(args):
     # Retrieve  internaldb settings from config file
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Gothamctl/Config/config.ini')
-    serv_display = {"default": config['serv_display']['default'], "wide": config['serv_display']['wide'],
-               "tree": config['serv_display']['tree'], "json": config['serv_display']['json']}
+    
+    hp_display = {"normal": config['hp_display']['normal'], "wide": config['hp_display']['wide']}
+    serv_display = {"normal": config['serv_display']['normal'], "wide": config['serv_display']['wide']}
+    link_display = {"normal": config['link_display']['normal'], "wide": config['link_display']['wide']}
 
     # Define the queried endpoint
     endpoint = "/list/server"
@@ -435,10 +438,10 @@ def list_server(args):
         url = gh + ":" + gp + endpoint
 
     # Query URL and get json
-    data = requests.get(url)
+    data = requests.get(url).json()
 
     # Show result
-    print(data.json())
+    
     if format not in serv_display.keys():
         print("Error Format") #A modifier
     else:
@@ -453,7 +456,7 @@ def list_server(args):
                 for key in serv_keys_display:
                    server_infos[key] = server['serv_' + key]
                 servers_infos.append(server_infos)
-            print(tabulate.tabulate(servers_infos, headers = 'keys')
+            print(tabulate.tabulate(servers_infos, headers = 'keys'))
         elif 'exact' in data.keys() and 'others' in data.keys():
             # A faire
         else:
@@ -470,9 +473,14 @@ def list_hp(args):
     # Retrieve  internaldb settings from config file
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Gothamctl/Config/config.ini')
-    hp_display = {"default": config['hp_display']['default'], "wide": config['hp_display']['wide'],
-               "tree": config['hp_display']['tree'], "json": config['hp_display']['json']}
 
+    hp_display = config['hp_display']
+    del hp_display["default"]
+    serv_display = config['serv_display']
+    del serv_display["default"]
+    link_display = config['link_display']
+    del link_display["default"]
+    
     # Define the queried endpoint
     endpoint = "/list/honeypot"
 
@@ -484,7 +492,10 @@ def list_hp(args):
     id = args.id
 
     # Get format of the display
-    format = args.o
+    output_format = args.o
+    detail_lvl = args.d
+    overplus = args.p
+
 
     # If id set, query only for 1 honeypot
     if id:
@@ -496,30 +507,150 @@ def list_hp(args):
         url = gh + ":" + gp + endpoint
 
     # Query URL and get json
-    data = requests.get(url)
+    data = requests.get(url).json()
 
     # Show result
-    print(data.json())
+    
+    hps_infos = [] 
+    hps_infos_others = []
 
-    if format not in hp_display.keys(): #On check si le format est bien présent parmi les keys du dictionnaire hp_display
-        print("Error Format") #A modifier #Si le format n'est pas présent alors on retourne "error format"
-    else: #s'il n'y a pas d'erreur on passe à la suite
-        hp_keys_display = hp_display[format].split(',') #On place le résultat du split du dico hp_display selon un certain format (default, wide, etc) dans une variable hp_keys_display
-        if 'error' in data.keys(): #Si l'output est une erreur
-            print(data['error']) #on retourne "error"
-        elif 'hps' in data.keys(): #Si l'output est un hps
-            hps = data['hps'] #alors on récupère dans la variable hps (qui est un dico) les dico contenus derrière hps (l'output)
-            hps_infos = [] #et on édite la liste vide hps_infos
-            for hp in hps: #pour tous les hp (variable ici) dans le dico hps
-                hp_infos = {} #on édite le dico hp_infos
-                for key in hp_keys_display: #pour toutes les keys splitées dans la variable hp_keys_display
-                   hp_infos[key] = hp['hp_' + key] #on récupère toutes les valeurs avec pour titre hp_key (hp_id, hp_name, etc)
-                hps_infos.append(hp_infos) #on insert les valeurs dans le dico hp_infos
-            print(tabulate.tabulate(hps_infos, headers = 'keys') #on crée la table avec pour headers toutes les keys qui étaient contenues dans hp_keys_display
-        elif 'exact' in data.keys() and 'others' in data.keys(): #On check si l'output est un exact ou un other 
-            # A faire
+    if detail_lvl not in hp_display.keys(): 
+        print("Error Format")
+    else:
+        if detail_lvl != "full":
+            hp_keys_display = hp_display[detail_lvl].split(',')
+        else:
+            hp_keys_display = hp_display[hp_display[detail_lvl]].split(',')
+        
+        if 'error' in data.keys():
+            print(data['error']) 
+        elif 'honeypots' in data.keys(): 
+            hps = data['honeypots'] 
+            
+        elif 'exact' in data.keys() and 'others' in data.keys(): 
+            hps = data['exact']
+            hps_other = data['others']
+            for hp in hps_other: 
+                for key in hp_keys_display: 
+                   hp_infos[key] = hp['hp_' + key] 
+                
+                if str(detail_lvl).lower == "full":
+                    hp_infos["links"] = []
+                    lk_keys_display = link_display[hp_display[detail_lvl]].split(',')
+                    lk_infos={}
+                    for link in hp["links"]:
+                        for key in lk_keys_display: 
+                            lk_infos[key] = link['link_' + key]
+                        lk_infos["servs"] = []
+                        serv_keys_display = serv_display[hp_display[detail_lvl]].split(',')
+                        serv_infos={}
+                        for serv in link["servs"]:
+                            for key in serv_keys_display: 
+                                serv_infos[key] = serv['serv_' + key]
+                            lk_infos["servs"].append(serv_infos)
+                        if str(output_format).lower() == "table":
+                            lk_infos["servers"]=tabulate.tabulate(lk_infos["servs"], headers = 'keys')
+                            del lk_infos["servs"]
+                        hp_infos["links"].append(lk_infos)
+                    if str(output_format).lower() == "table":
+                        links_tab=tabulate.tabulate(hp_infos["links"], headers = 'keys')
+                        del hp_infos["links"]
+                        hp_infos["links"]=links_tab
+                hps_infos_others.append(hp_infos)
+
         else:
             print("ERROR") # A modifier
+        
+        for hp in hps: 
+            for key in hp_keys_display: 
+                hp_infos[key] = hp['hp_' + key] 
+            
+            if str(detail_lvl).lower == "full":
+                hp_infos["links"] = []
+                lk_keys_display = link_display[hp_display[detail_lvl]].split(',')
+                lk_infos={}
+                for link in hp["links"]:
+                    for key in lk_keys_display: 
+                        lk_infos[key] = link['link_' + key]
+                    lk_infos["servs"] = []
+                    serv_keys_display = serv_display[hp_display[detail_lvl]].split(',')
+                    serv_infos={}
+                    for serv in link["servs"]:
+                        for key in serv_keys_display: 
+                            serv_infos[key] = serv['serv_' + key]
+                        lk_infos["servs"].append(serv_infos)
+                    if str(output_format).lower() == "table":
+                        lk_infos["servers"]=tabulate.tabulate(lk_infos["servs"], headers = 'keys')
+                        del lk_infos["servs"]
+                    hp_infos["links"].append(lk_infos)
+                if str(output_format).lower() == "table":
+                    links_tab=tabulate.tabulate(hp_infos["links"], headers = 'keys')
+                    del hp_infos["links"]
+                    hp_infos["links"]=links_tab
+            hps_infos.append(hp_infos) 
+        
+        
+        if str(output_format).lower() == "json":
+            if hps_infos_others != []:
+                result={"hps":hps_infos,"hps_others":hps_infos_others[0:overplus]}
+            else:
+                result={"hps":hps_infos}
+            
+            print(json.dump(result,indent=4))
+        elif str(output_format).lower() == "tree":
+            print("Not implemented")
+        elif str(output_format).lower() == "text":
+            print("Honeypots:\n")
+            print("==========\n")
+
+            for hp in hps_infos:
+                for key in hp.keys():
+                    if key != "links":
+                        print("\t- "+key+": "+ hp[key]+"\n")
+                if "links" in hp.keys(): 
+                    if hp["links"] == []:
+                        print("\t- links: Not linked\n")
+                    else:
+                        print("\t- links:\n")
+                        for link in hp["links"]:
+                            for key in link.keys():
+                                if key != "servs":
+                                    print("\t\t- "+key+": "+ link[key]+"\n")
+                            print("\t\t- servs:\n")
+                            for serv in link["servs"]:
+                                for key in serv.keys():
+                                    print("\t\t\t- "+key+": "+ serv[key]+"\n")
+            if hps_infos_others != []:
+                print("\nOthers:\n")
+                print("==========\n")
+                for hp in hps_infos_others:
+                    for key in hp.keys():
+                        if key != "links":
+                            print("\t- "+key+": "+ hp[key]+"\n")
+                    if "links" in hp.keys(): 
+                        if hp["links"] == []:
+                            print("\t- links: Not linked\n")
+                        else:
+                            print("\t- links:\n")
+                            for link in hp["links"]:
+                                for key in link.keys():
+                                    if key != "servs":
+                                        print("\t\t- "+key+": "+ link[key]+"\n")
+                                print("\t\t- servs:\n")
+                                for serv in link["servs"]:
+                                    for key in serv.keys():
+                                        print("\t\t\t- "+key+": "+ serv[key]+"\n")
+
+        elif str(output_format).lower() == "table":
+            print("Honeypots:\n")
+            print("==========\n")
+            print(tabulate.tabulate(hps_infos, headers = 'keys'))
+            if hps_infos_others != []:
+                print("\nOthers:\n")
+                print("==========\n")
+                print(tabulate.tabulate(hps_infos_others, headers = 'keys')) 
+        else :
+            print("Wrong Format")
 
 
 def list_link(args):
@@ -532,9 +663,10 @@ def list_link(args):
     # Retrieve  internaldb settings from config file
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Gothamctl/Config/config.ini')
-    link_display = {"default": config['link_display']['default'], "wide": config['link_display']['wide'],
-               "tree": config['link_display']['tree'], "json": config['link_display']['json']}
-    # Define the queried endpoint
+    hp_display = {"normal": config['hp_display']['normal'], "wide": config['hp_display']['wide']}
+    serv_display = {"normal": config['serv_display']['normal'], "wide": config['serv_display']['wide']}
+    link_display = {"normal": config['link_display']['normal'], "wide": config['link_display']['wide']}    # Define the queried endpoint
+    
     endpoint = "/list/link"
 
     # Before external configuration
@@ -545,7 +677,8 @@ def list_link(args):
     id = args.id
 
     # Get format of the display
-    format = args.o
+    output_format = args.o
+    detail_lvl = args.d
 
     # If id set, query only for 1 link
     if id:
@@ -564,7 +697,7 @@ def list_link(args):
     if format not in link_display.keys():
         print("Error Format") #A modifier
     else:
-        link_keys_display = link_display[format].split(',')
+        link_keys_display = link_display[detail_lvl].split(',')
         if 'error' in data.keys():
             print(data['error'])
         elif 'links' in data.keys():
@@ -575,13 +708,24 @@ def list_link(args):
                 for key in link_keys_display:
                    link_infos[key] = link['lk_' + key]
                 links_infos.append(link_infos)
-            print(tabulate.tabulate(links_infos, headers = 'keys')
+            
         elif 'exact' in data.keys() and 'others' in data.keys():
             # A faire
         else:
             print("ERROR") # A modifier
+print(tabulate.tabulate(links_infos, headers = 'keys'))
 
 if __name__ == "__main__":
+    # Retrieve  internaldb settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Gothamctl/Config/config.ini')
+
+    gh = config["orchestrator_infos"]["host"]
+    gp = config["orchestrator_infos"]["port"]
+    default_hp = config["hp_display"]["default"]
+    default_serv = config["serv_display"]["default"]
+    default_link = config["link_display"]["default"]
+
     # Create the parser
     parser = argparse.ArgumentParser(description='Gothamctl')
 
@@ -590,8 +734,8 @@ if __name__ == "__main__":
     parser._optionals.title = 'OPTIONS'
 
     # URL arguments
-    parser.add_argument('-host', dest="gotham_hostname", help='hostname of the orchestrator', required=True)
-    parser.add_argument('-port', dest="gotham_port", help='administration port of the orchestrator', required=True)
+    parser.add_argument('-host', dest="gotham_hostname", help='hostname of the orchestrator',default=gh, required=False)
+    parser.add_argument('-port', dest="gotham_port", help='administration port of the orchestrator',default=gp, required=False)
 
     # Create main subparsers
     subparsers = parser.add_subparsers(help='sub-command help')
@@ -697,13 +841,19 @@ if __name__ == "__main__":
     parser_edit_link.add_argument('-nb_serv', help='Amount of server', required=False)
     parser_edit_link.add_argument('-ports', help='Ports to expose with link', required=False)
     # =====LIST ARGUMENTS=====#
-    # There are all optionals here
+    # Create list_hp arguments
     parser_list_hp.add_argument('-id', help='ID of the honeypot', required=False)
+    parser_list_hp.add_argument('-o', help='Specify output format to display',default=default_hp, choices=["json","table","text","tree"], required=False)
+    parser_list_hp.add_argument('-d', help='Specify detail level to display',default="normal", required=False)
+    parser_list_hp.add_argument('-p', help='Specify number of additional honeypot to display',default="4", required=False)
+    # Create list_server arguments
     parser_list_server.add_argument('-id', help='ID of the server', required=False)
+    parser_list_server.add_argument('-o', help='Specify output format to display',default=default_serv, choices=["json","table","text","tree"], required=False)
+    parser_list_server.add_argument('-d', help='Specify detail level to display',default="normal", required=False)
+    # Create list_link arguments
     parser_list_link.add_argument('-id', help='ID of the link', required=False)
-    parser_list_server.add_argument('-o', help='Specify output format to display',default='default', required=False)
-    parser_list_hp.add_argument('-o', help='Specify output format to display',default='default', required=False)
-    parser_list_link.add_argument('-o', help='Specify output format to display',default='default', required=False)
+    parser_list_link.add_argument('-o', help='Specify output format to display',default=default_link, choices=["json","table","text","tree"], required=False)
+    parser_list_link.add_argument('-d', help='Specify detail level to display',default="normal", required=False)
 
     # Execute parse_args()
     args = parser.parse_args()
