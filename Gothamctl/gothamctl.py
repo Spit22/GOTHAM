@@ -597,9 +597,8 @@ def list_hp(args):
                 result={"hps":hps_infos,"hps_others":hps_infos_others[0:overplus]}
             else:
                 result={"hps":hps_infos}
-            #######TEST##########
-            print(result)
-            res = json.dump(result.json(),indent=4)
+
+            res = json.dumps(result, indent=4)
             print(res)
         elif str(output_format).lower() == "tree":
             print("Not implemented")
