@@ -5,12 +5,7 @@ import os
 import sys
 import requests
 import base64
-import configparser
-import tabulate
 
-#===Logging components===#
-GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-    #A modifier
 
 def add_server(args):
     # Query /add/server to create server
@@ -57,13 +52,13 @@ def add_server(args):
     else:
         data["autotags"] = "0"
 
-
     # Query URL and get json
     data = requests.post(url, json=data)
 
     # Show result
     print(data.json())
-    
+
+
 def add_hp(args):
     # Query /add/honeypot to create honeypot
     #
@@ -110,6 +105,7 @@ def add_hp(args):
     # Show result
     print(data.json())
 
+
 def add_link(args):
     # Query /add/link to create link
     #
@@ -148,6 +144,7 @@ def add_link(args):
     # Show result
     print(data.json())
 
+
 def rm_server(args):
     # Query /delete/server to delete server
     #
@@ -177,6 +174,7 @@ def rm_server(args):
 
     # Show result
     print(data.json())
+
 
 def rm_hp(args):
     # Query /delete/honeypot to delete honeypot
@@ -208,6 +206,7 @@ def rm_hp(args):
     # Show result
     print(data.text)
 
+
 def rm_link(args):
     # Query /delete/link to delete link
     #
@@ -237,6 +236,7 @@ def rm_link(args):
 
     # Show result
     print(data.json())
+
 
 def edit_server(args):
     # Query /edit/server to edit server
@@ -290,7 +290,7 @@ def edit_server(args):
     # Show result
     print(data.json())
 
-    
+
 def edit_hp(args):
     # Query /edit/honeypot to edit honeypot
     #
@@ -347,6 +347,7 @@ def edit_hp(args):
     # Show result
     print(data.json())
 
+
 def edit_link(args):
     # Query /edit/link to edit link
     #
@@ -386,12 +387,12 @@ def edit_link(args):
     if exposed_ports:
         data["exposed_ports"] = exposed_ports
 
-
     # Query URL and get json
     data = requests.post(url, json=data)
 
     # Show result
     print(data.json())
+
 
 def list_server(args):
     # Query /list/server and format data into a table
@@ -399,12 +400,6 @@ def list_server(args):
     # args (obj) : passed commandline argument
     #
     # Print string formatted table
-
-    # Retrieve  internaldb settings from config file
-    config = configparser.ConfigParser()
-    config.read(GOTHAM_HOME + 'Gothamctl/Config/config.ini')
-    serv_display = {"default": config['serv_display']['default'], "wide": config['serv_display']['wide'],
-               "tree": config['serv_display']['tree'], "json": config['serv_display']['json']}
 
     # Define the queried endpoint
     endpoint = "/list/server"
@@ -415,9 +410,6 @@ def list_server(args):
 
     # Get id of server
     id = args.id
-    
-    # Get format of the display
-    format = args.o
 
     # If id set, query only for 1 server
     if id:
@@ -433,26 +425,8 @@ def list_server(args):
 
     # Show result
     print(data.json())
-    if format not in serv_display.keys():
-        print("Error Format") #A modifier
-    else:
-        serv_keys_display = serv_display[format].split(',')
-        if 'error' in data.keys():
-            print(data['error'])
-        elif 'servers' in data.keys():
-            servers = data['servers']
-            servers_infos = []
-            for server in servers:
-                server_infos = {}
-                for key in serv_keys_display:
-                   server_infos[key] = server['serv_' + key]
-                servers_infos.append(server_infos)
-            print(tabulate.tabulate(servers_infos, headers = 'keys')
-        elif 'exact' in data.keys() and 'others' in data.keys():
-            # A faire
-        else:
-            print("ERROR") # A modifier
-            
+
+
 def list_hp(args):
     # Query /list/honeypot and format data into a table
     #
@@ -476,7 +450,18 @@ def list_hp(args):
         url = gh + ":" + gp + endpoint + "?id=" + id
     else:
         # Else query all honeypots in db
-        # Forge urlparser_list_hp
+        # Forge url
+        url = gh + ":" + gp + endpoint
+
+    # Query URL and get json
+    data = requests.get(url)
+
+    # Show result
+    print(data.json())
+
+
+def list_link(args):
+    # Query /list/link and format data into a table
     #
     # args (obj) : passed commandline argument
     #
@@ -496,11 +481,19 @@ def list_hp(args):
     if id:
         # Forge url
         url = gh + ":" + gp + endpoint + "?id=" + id
-    else:parser_list_hp
+    else:
+        # Else query all links in db
+        # Forge url
+        url = gh + ":" + gp + endpoint
+
+    # Query URL and get json
+    data = requests.get(url)
+
+    # Show result
     print(data.json())
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     # Create the parser
     parser = argparse.ArgumentParser(description='Gothamctl')
 
@@ -514,7 +507,6 @@ if __name__ == "__main__":
 
     # Create main subparsers
     subparsers = parser.add_subparsers(help='sub-command help')
-
 
     # Create operation parsers
     parser_add = subparsers.add_parser('add', help='operation add')
@@ -540,7 +532,20 @@ if __name__ == "__main__":
     parser_remove_hp = subparsers_remove.add_parser('hp', help='honeypot')
     parser_remove_server = subparsers_remove.add_parser('server', help='server')
     parser_remove_link = subparsers_remove.add_parser('link', help='link')
-    # Affect functions to parsersparser_list_hpelp='honeypot')
+    # Affect functions to parsers
+    parser_remove_hp.set_defaults(func=rm_hp)
+    parser_remove_server.set_defaults(func=rm_server)
+    parser_remove_link.set_defaults(func=rm_link)
+    # Create edit parsers
+    parser_edit_hp = subparsers_edit.add_parser('hp', help='honeypot')
+    parser_edit_server = subparsers_edit.add_parser('server', help='server')
+    parser_edit_link = subparsers_edit.add_parser('link', help='link')
+    # Affect functions to parsers
+    parser_edit_hp.set_defaults(func=edit_hp)
+    parser_edit_server.set_defaults(func=edit_server)
+    parser_edit_link.set_defaults(func=edit_link)
+    # Create list parsers
+    parser_list_hp = subparsers_list.add_parser('hp', help='honeypot')
     parser_list_server = subparsers_list.add_parser('server', help='server')
     parser_list_link = subparsers_list.add_parser('link', help='link')
     # Affect functions to parsers
@@ -548,26 +553,37 @@ if __name__ == "__main__":
     parser_list_server.set_defaults(func=list_server)
     parser_list_link.set_defaults(func=list_link)
 
-    #=====ADD ARGUMENTS=====#
+    # =====ADD ARGUMENTS=====#
     # Create add_hp arguments
     parser_add_hp.add_argument('-name', help='Name of the honeypot', required=True)
     parser_add_hp.add_argument('-descr', help='Description of the honeypot', required=True)
     parser_add_hp.add_argument('-tag', help='Tags of the honeypot', required=True)
     parser_add_hp.add_argument('-parser', help='Parsing rules for logs of the honeypot', required=True)
     parser_add_hp.add_argument('-logs', help='Path of log files of the honeypot', required=True)
-    parser_add_hp.add_argument('-src', type=argparse.FileType('r'), help='Base64 encoded source file of the honepot (Dockerfile)', required=True)
+    parser_add_hp.add_argument('-src', type=argparse.FileType('r'),
+                               help='Base64 encoded source file of the honepot (Dockerfile)', required=True)
     parser_add_hp.add_argument('-port', help='Port where the honeypot service run (Dockerfile)', required=True)
     # Create add_server arguments
     parser_add_server.add_argument('-name', help='Name of the server', required=True)
-    parser_add_server.add_argument('-descr', help='Desparser_list_hpags of the servers', required=True)
+    parser_add_server.add_argument('-descr', help='Description of the server', required=True)
+    parser_add_server.add_argument('-tag', help='Tags of the server', required=True)
+    parser_add_server.add_argument('-ip', help='IP address of the server', required=True)
+    parser_add_server.add_argument('-key', type=argparse.FileType('r'),
+                                   help='Base64 encoded SSH key file to connect to the server', required=True)
+    parser_add_server.add_argument('-port', help='SSH port of the server', required=True)
+    parser_add_server.add_argument('-autotags', action='store_true',
+                                   help='Choose if you want to automatically add tags to server', required=False)
+    # Create add_link arguments
+    parser_add_link.add_argument('-tags_hp', help='Tags of the honeypots', required=True)
+    parser_add_link.add_argument('-tags_serv', help='Tags of the servers', required=True)
     parser_add_link.add_argument('-ports', help='List of exposed ports', required=True)
     parser_add_link.add_argument('-nb_hp', help='Amount of honeypot', required=True)
     parser_add_link.add_argument('-nb_serv', help='Amount of server', required=True)
-    #=====REMOVE ARGUMENTS=====#
+    # =====REMOVE ARGUMENTS=====#
     parser_remove_hp.add_argument('-id', help='ID of the honeypot', required=True)
     parser_remove_server.add_argument('-id', help='ID of the server', required=True)
     parser_remove_link.add_argument('-id', help='ID of the link', required=True)
-    #=====EDIT ARGUMENTS=====#
+    # =====EDIT ARGUMENTS=====#
     # Create edit_hp arguments
     parser_edit_hp.add_argument('-id', help='Id of the honeypot', required=True)
     parser_edit_hp.add_argument('-name', help='Name of the honeypot', required=False)
@@ -580,7 +596,9 @@ if __name__ == "__main__":
     # Create edit_server arguments
     parser_edit_server.add_argument('-id', help='Id of the server', required=True)
     parser_edit_server.add_argument('-name', help='Name of the server', required=False)
-    parser_edit_server.add_argument('-descr', help='Deparser_list_hpress of the server', required=False)
+    parser_edit_server.add_argument('-descr', help='Description of the server', required=False)
+    parser_edit_server.add_argument('-tag', help='Tags of the server', required=False)
+    parser_edit_server.add_argument('-ip', help='IP address of the server', required=False)
     parser_edit_server.add_argument('-key', help='Base64 encoded ssh key file of the server', required=False)
     parser_edit_server.add_argument('-port', help='SSH port of the server', required=False)
     # Create edit_link arguments
@@ -590,12 +608,11 @@ if __name__ == "__main__":
     parser_edit_link.add_argument('-nb_hp', help='Amount of honeypot', required=False)
     parser_edit_link.add_argument('-nb_serv', help='Amount of server', required=False)
     parser_edit_link.add_argument('-ports', help='Ports to expose with link', required=False)
-    #=====LIST ARGUMENTS=====#
+    # =====LIST ARGUMENTS=====#
     # There are all optionals here
     parser_list_hp.add_argument('-id', help='ID of the honeypot', required=False)
     parser_list_server.add_argument('-id', help='ID of the server', required=False)
     parser_list_link.add_argument('-id', help='ID of the link', required=False)
-    parser_list_server.add_argument('-o', help='Specify output format to display',default='default', required=False)
 
     # Execute parse_args()
     args = parser.parse_args()
