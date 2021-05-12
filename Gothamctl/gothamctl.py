@@ -598,57 +598,58 @@ def list_hp(args):
             else:
                 result={"hps":hps_infos}
             
-            print(json.dump(result,indent=4))
+            res = json.dump(result,indent=4)
+            print(res)
         elif str(output_format).lower() == "tree":
             print("Not implemented")
         elif str(output_format).lower() == "text":
-            print("Honeypots:\n")
+            print("Honeypots:")
             print("==========\n")
 
             for hp in hps_infos:
                 for key in hp.keys():
                     if key != "links":
-                        print("\t- "+key+": "+ hp[key]+"\n")
+                        print("\t- "+key+": "+ hp[key])
                 if "links" in hp.keys(): 
                     if hp["links"] == []:
-                        print("\t- links: Not linked\n")
+                        print("\t- links: Not linked")
                     else:
-                        print("\t- links:\n")
+                        print("\t- links:")
                         for link in hp["links"]:
                             for key in link.keys():
                                 if key != "servs":
-                                    print("\t\t- "+key+": "+ link[key]+"\n")
-                            print("\t\t- servs:\n")
+                                    print("\t\t- "+key+": "+ link[key])
+                            print("\t\t- servs:")
                             for serv in link["servs"]:
                                 for key in serv.keys():
-                                    print("\t\t\t- "+key+": "+ serv[key]+"\n")
+                                    print("\t\t\t- "+key+": "+ serv[key])
             if hps_infos_others != []:
-                print("\nOthers:\n")
+                print("\nOthers:")
                 print("==========\n")
                 for hp in hps_infos_others:
                     for key in hp.keys():
                         if key != "links":
-                            print("\t- "+key+": "+ hp[key]+"\n")
+                            print("\t- "+key+": "+ hp[key])
                     if "links" in hp.keys(): 
                         if hp["links"] == []:
-                            print("\t- links: Not linked\n")
+                            print("\t- links: Not linked")
                         else:
-                            print("\t- links:\n")
+                            print("\t- links:")
                             for link in hp["links"]:
                                 for key in link.keys():
                                     if key != "servs":
-                                        print("\t\t- "+key+": "+ link[key]+"\n")
-                                print("\t\t- servs:\n")
+                                        print("\t\t- "+key+": "+ link[key])
+                                print("\t\t- servs:")
                                 for serv in link["servs"]:
                                     for key in serv.keys():
-                                        print("\t\t\t- "+key+": "+ serv[key]+"\n")
+                                        print("\t\t\t- "+key+": "+ serv[key])
 
         elif str(output_format).lower() == "table":
-            print("Honeypots:\n")
+            print("Honeypots:")
             print("==========\n")
             print(tabulate.tabulate(hps_infos, headers = 'keys'))
             if hps_infos_others != []:
-                print("\nOthers:\n")
+                print("\nOthers:")
                 print("==========\n")
                 print(tabulate.tabulate(hps_infos_others, headers = 'keys')) 
         else :
