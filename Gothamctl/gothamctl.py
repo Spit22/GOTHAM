@@ -495,7 +495,7 @@ def list_hp(args):
     # Get format of the display
     output_format = args.o
     detail_lvl = args.d
-    overplus = args.p
+    overplus = int(args.p)
 
 
     # If id set, query only for 1 honeypot
@@ -564,9 +564,7 @@ def list_hp(args):
         else:
             print("ERROR") # A modifier
         
-        print(hps)
         for hp in hps:
-            print(hp)
             hp_infos = {}
             for key in hp_keys_display: 
                 hp_infos[key] = hp['hp_' + key] 
@@ -629,8 +627,9 @@ def list_hp(args):
                                     print("\t\t\t- "+key+": "+ serv[key])
                 print("\n")
             if hps_infos_others != []:
-                print("\nOthers:")
-                print("==========\n")
+                if hps_infos != []:
+                    print("\nOthers:")
+                    print("==========\n")
                 for hp in hps_infos_others:
                     for key in hp.keys():
                         if key != "links":
@@ -655,8 +654,9 @@ def list_hp(args):
             print("==========\n")
             print(tabulate.tabulate(hps_infos, headers = 'keys'))
             if hps_infos_others != []:
-                print("\nOthers:")
-                print("==========\n")
+                if hps_infos != []:
+                    print("\nOthers:")
+                    print("==========\n")
                 print(tabulate.tabulate(hps_infos_others, headers = 'keys')) 
         else :
             print("Wrong Format")
