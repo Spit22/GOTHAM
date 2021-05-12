@@ -5,7 +5,12 @@ import os
 import sys
 import requests
 import base64
+import configparser
+import tabulate
 
+#===Logging components===#
+GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+    #A modifier
 
 def add_server(args):
     # Query /add/server to create server
@@ -401,6 +406,12 @@ def list_server(args):
     #
     # Print string formatted table
 
+    # Retrieve  internaldb settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Gothamctl/Config/config.ini')
+    serv_display = {"default": config['serv_display']['default'], "wide": config['serv_display']['wide'],
+               "tree": config['serv_display']['tree'], "json": config['serv_display']['json']}
+
     # Define the queried endpoint
     endpoint = "/list/server"
 
@@ -410,6 +421,9 @@ def list_server(args):
 
     # Get id of server
     id = args.id
+
+    # Get format of the display
+    format = args.o
 
     # If id set, query only for 1 server
     if id:
@@ -425,6 +439,25 @@ def list_server(args):
 
     # Show result
     print(data.json())
+    if format not in serv_display.keys():
+        print("Error Format") #A modifier
+    else:
+        serv_keys_display = serv_display[format].split(',')
+        if 'error' in data.keys():
+            print(data['error'])
+        elif 'servers' in data.keys():
+            servers = data['servers']
+            servers_infos = []
+            for server in servers:
+                server_infos = {}
+                for key in serv_keys_display:
+                   server_infos[key] = server['serv_' + key]
+                servers_infos.append(server_infos)
+            print(tabulate.tabulate(servers_infos, headers = 'keys')
+        elif 'exact' in data.keys() and 'others' in data.keys():
+            # A faire
+        else:
+            print("ERROR") # A modifier
 
 
 def list_hp(args):
@@ -433,6 +466,12 @@ def list_hp(args):
     # args (obj) : passed commandline argument
     #
     # Print string formatted table
+
+    # Retrieve  internaldb settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Gothamctl/Config/config.ini')
+    hp_display = {"default": config['hp_display']['default'], "wide": config['hp_display']['wide'],
+               "tree": config['hp_display']['tree'], "json": config['hp_display']['json']}
 
     # Define the queried endpoint
     endpoint = "/list/honeypot"
@@ -443,6 +482,9 @@ def list_hp(args):
 
     # Get id of honeypot
     id = args.id
+
+    # Get format of the display
+    format = args.o
 
     # If id set, query only for 1 honeypot
     if id:
@@ -459,6 +501,26 @@ def list_hp(args):
     # Show result
     print(data.json())
 
+    if format not in hp_display.keys(): #On check si le format est bien présent parmi les keys du dictionnaire hp_display
+        print("Error Format") #A modifier #Si le format n'est pas présent alors on retourne "error format"
+    else: #s'il n'y a pas d'erreur on passe à la suite
+        hp_keys_display = hp_display[format].split(',') #On place le résultat du split du dico hp_display selon un certain format (default, wide, etc) dans une variable hp_keys_display
+        if 'error' in data.keys(): #Si l'output est une erreur
+            print(data['error']) #on retourne "error"
+        elif 'hps' in data.keys(): #Si l'output est un hps
+            hps = data['hps'] #alors on récupère dans la variable hps (qui est un dico) les dico contenus derrière hps (l'output)
+            hps_infos = [] #et on édite la liste vide hps_infos
+            for hp in hps: #pour tous les hp (variable ici) dans le dico hps
+                hp_infos = {} #on édite le dico hp_infos
+                for key in hp_keys_display: #pour toutes les keys splitées dans la variable hp_keys_display
+                   hp_infos[key] = hp['hp_' + key] #on récupère toutes les valeurs avec pour titre hp_key (hp_id, hp_name, etc)
+                hps_infos.append(hp_infos) #on insert les valeurs dans le dico hp_infos
+            print(tabulate.tabulate(hps_infos, headers = 'keys') #on crée la table avec pour headers toutes les keys qui étaient contenues dans hp_keys_display
+        elif 'exact' in data.keys() and 'others' in data.keys(): #On check si l'output est un exact ou un other 
+            # A faire
+        else:
+            print("ERROR") # A modifier
+
 
 def list_link(args):
     # Query /list/link and format data into a table
@@ -467,6 +529,11 @@ def list_link(args):
     #
     # Print string formatted table
 
+    # Retrieve  internaldb settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Gothamctl/Config/config.ini')
+    link_display = {"default": config['link_display']['default'], "wide": config['link_display']['wide'],
+               "tree": config['link_display']['tree'], "json": config['link_display']['json']}
     # Define the queried endpoint
     endpoint = "/list/link"
 
@@ -476,6 +543,9 @@ def list_link(args):
 
     # Get id of link
     id = args.id
+
+    # Get format of the display
+    format = args.o
 
     # If id set, query only for 1 link
     if id:
@@ -491,7 +561,25 @@ def list_link(args):
 
     # Show result
     print(data.json())
-
+    if format not in link_display.keys():
+        print("Error Format") #A modifier
+    else:
+        link_keys_display = link_display[format].split(',')
+        if 'error' in data.keys():
+            print(data['error'])
+        elif 'links' in data.keys():
+            links = data['links']
+            links_infos = []
+            for link in linkss:
+                link_infos = {}
+                for key in link_keys_display:
+                   link_infos[key] = link['lk_' + key]
+                links_infos.append(link_infos)
+            print(tabulate.tabulate(links_infos, headers = 'keys')
+        elif 'exact' in data.keys() and 'others' in data.keys():
+            # A faire
+        else:
+            print("ERROR") # A modifier
 
 if __name__ == "__main__":
     # Create the parser
@@ -613,6 +701,9 @@ if __name__ == "__main__":
     parser_list_hp.add_argument('-id', help='ID of the honeypot', required=False)
     parser_list_server.add_argument('-id', help='ID of the server', required=False)
     parser_list_link.add_argument('-id', help='ID of the link', required=False)
+    parser_list_server.add_argument('-o', help='Specify output format to display',default='default', required=False)
+    parser_list_hp.add_argument('-o', help='Specify output format to display',default='default', required=False)
+    parser_list_link.add_argument('-o', help='Specify output format to display',default='default', required=False)
 
     # Execute parse_args()
     args = parser.parse_args()
