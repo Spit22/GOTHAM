@@ -514,6 +514,7 @@ def list_hp(args):
     
     hps_infos = [] 
     hps_infos_others = []
+    hp_infos = {}
 
     if detail_lvl not in hp_display.keys(): 
         print("Error Format")
@@ -531,7 +532,6 @@ def list_hp(args):
         elif 'exact' in data.keys() and 'others' in data.keys(): 
             hps = data['exact']
             hps_other = data['others']
-            hp_infos = {}
             for hp in hps_other: 
                 for key in hp_keys_display: 
                    hp_infos[key] = hp['hp_' + key] 
