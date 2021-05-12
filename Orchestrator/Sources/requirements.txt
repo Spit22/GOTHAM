@@ -3,3 +3,5 @@ paramiko
 scp
 mariadb
 configparser
+watchdog
+tabulate

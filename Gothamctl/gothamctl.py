@@ -41,7 +41,7 @@ def add_server(args):
     gh = args.gotham_hostname
 
     # Forge url
-    url = gh + ":" + gp + endpoint
+    url = "http://" + gh + ":" + gp + endpoint
 
     # Forge POST data
     data = {
@@ -92,7 +92,7 @@ def add_hp(args):
     gh = args.gotham_hostname
 
     # Forge url
-    url = gh + ":" + gp + endpoint
+    url = "http://" + gh + ":" + gp + endpoint
 
     # Forge POST data
     data = {
@@ -133,7 +133,7 @@ def add_link(args):
     gh = args.gotham_hostname
 
     # Forge url
-    url = gh + ":" + gp + endpoint
+    url = "http://" + gh + ":" + gp + endpoint
 
     # Forge POST data
     data = {
@@ -168,7 +168,7 @@ def rm_server(args):
     gh = args.gotham_hostname
 
     # Forge url
-    url = gh + ":" + gp + endpoint
+    url = "http://" + gh + ":" + gp + endpoint
 
     # Forge POST data
     data = {
@@ -199,7 +199,7 @@ def rm_hp(args):
     gh = args.gotham_hostname
 
     # Forge url
-    url = gh + ":" + gp + endpoint
+    url = "http://" + gh + ":" + gp + endpoint
 
     # Forge POST data
     data = {
@@ -230,7 +230,7 @@ def rm_link(args):
     gh = args.gotham_hostname
 
     # Forge url
-    url = gh + ":" + gp + endpoint
+    url = "http://" + gh + ":" + gp + endpoint
 
     # Forge POST data
     data = {
@@ -273,7 +273,7 @@ def edit_server(args):
     gh = args.gotham_hostname
 
     # Forge url
-    url = gh + ":" + gp + endpoint
+    url = "http://" + gh + ":" + gp + endpoint
 
     # Forge POST data
     data = {"id": id}
@@ -327,7 +327,7 @@ def edit_hp(args):
     gh = args.gotham_hostname
 
     # Forge url
-    url = gh + ":" + gp + endpoint
+    url = "http://" + gh + ":" + gp + endpoint
 
     # Forge POST data
     data = {"id": id}
@@ -378,7 +378,7 @@ def edit_link(args):
     gh = args.gotham_hostname
 
     # Forge url
-    url = gh + ":" + gp + endpoint
+    url = "http://" + gh + ":" + gp + endpoint
 
     # Forge POST data
     data = {"id": id}
@@ -431,11 +431,11 @@ def list_server(args):
     # If id set, query only for 1 server
     if id:
         # Forge url
-        url = gh + ":" + gp + endpoint + "?id=" + id
+        url = "http://" + gh + ":" + gp + endpoint + "?id=" + id
     else:
         # Else query all servers in db
         # Forge url
-        url = gh + ":" + gp + endpoint
+        url = "http://" + gh + ":" + gp + endpoint
 
     # Query URL and get json
     data = requests.get(url).json()
@@ -501,11 +501,11 @@ def list_hp(args):
     # If id set, query only for 1 honeypot
     if id:
         # Forge url
-        url = gh + ":" + gp + endpoint + "?id=" + id
+        url = "http://" + gh + ":" + gp + endpoint + "?id=" + id
     else:
         # Else query all honeypots in db
         # Forge url
-        url = gh + ":" + gp + endpoint
+        url = "http://" + gh + ":" + gp + endpoint
 
     # Query URL and get json
     data = requests.get(url).json()
@@ -685,11 +685,11 @@ def list_link(args):
     # If id set, query only for 1 link
     if id:
         # Forge url
-        url = gh + ":" + gp + endpoint + "?id=" + id
+        url = "http://" + gh + ":" + gp + endpoint + "?id=" + id
     else:
         # Else query all links in db
         # Forge url
-        url = gh + ":" + gp + endpoint
+        url = "http://" + gh + ":" + gp + endpoint
 
     # Query URL and get json
     data = requests.get(url)
