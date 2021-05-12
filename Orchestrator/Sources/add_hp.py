@@ -203,7 +203,7 @@ def deploy_rsyslog_conf(datacenter_settings, orchestrateur_settings, id_hp, rule
     # Check if required directories on datacenter exists
     rsyslog_conf_datacenter_remote_path_exists = execute_command_with_return(datacenter_settings["hostname"], datacenter_settings["ssh_port"], datacenter_settings["ssh_key"], f"[[ -d {rsyslog_conf_datacenter_remote_path} ]] && echo 'OK'")
     remote_rulebase_path_exists = execute_command_with_return(datacenter_settings["hostname"], datacenter_settings["ssh_port"], datacenter_settings["ssh_key"], f"[[ -d {remote_rulebase_path} ]] && echo 'OK'")
-    if not(rsyslog_conf_datacenter_remote_path_exists == 'OK' and remote_rulebase_path_exists == 'OK'):
+    if not(rsyslog_conf_datacenter_remote_path_exists == ['OK'] and remote_rulebase_path_exists == ['OK']):
         error = "At least one directory on datacenter is missing"
         logging.error(error)
         raise ValueError(error)
