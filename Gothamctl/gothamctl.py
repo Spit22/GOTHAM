@@ -532,7 +532,8 @@ def list_hp(args):
         elif 'exact' in data.keys() and 'others' in data.keys(): 
             hps = data['exact']
             hps_other = data['others']
-            for hp in hps_other: 
+            for hp in hps_other:
+                hp_infos = {}
                 for key in hp_keys_display: 
                    hp_infos[key] = hp['hp_' + key] 
                 
@@ -563,7 +564,10 @@ def list_hp(args):
         else:
             print("ERROR") # A modifier
         
-        for hp in hps: 
+        print(hps)
+        for hp in hps:
+            print(hp)
+            hp_infos = {}
             for key in hp_keys_display: 
                 hp_infos[key] = hp['hp_' + key] 
             
@@ -605,8 +609,7 @@ def list_hp(args):
         elif str(output_format).lower() == "text":
             print("Honeypots:")
             print("==========\n")
-            #######TEST##########
-            print(hps_infos)
+            
             for hp in hps_infos:
                 for key in hp.keys():
                     if key != "links":
@@ -624,6 +627,7 @@ def list_hp(args):
                             for serv in link["servs"]:
                                 for key in serv.keys():
                                     print("\t\t\t- "+key+": "+ serv[key])
+                print("\n")
             if hps_infos_others != []:
                 print("\nOthers:")
                 print("==========\n")
@@ -644,6 +648,7 @@ def list_hp(args):
                                 for serv in link["servs"]:
                                     for key in serv.keys():
                                         print("\t\t\t- "+key+": "+ serv[key])
+                    print("\n")
 
         elif str(output_format).lower() == "table":
             print("Honeypots:")
