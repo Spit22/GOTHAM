@@ -2,7 +2,7 @@
 import subprocess
 
 #===Import GOTHAM's libs===#
-from Gotham_SSH_SCP import send_file_and_execute_commands, send_file, execute_command_with_return
+from Gotham_SSH_SCP import send_file_and_execute_commands, send_file, execute_command_with_return, execute_commands
 #==========================#
 
 #===Logging components===#

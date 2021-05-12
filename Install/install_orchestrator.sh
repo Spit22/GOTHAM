@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Create GOTHAM user as an alias for the root account
+/usr/sbin/useradd -o -u 0 -g 0 -N -d /root/ -M gotham
+
 # Update repository
 apt update
 
@@ -12,14 +15,14 @@ apt install -y libmariadb-dev
 # Going to /opt to install GOTHAM
 cd /opt
 
+# Configure $GOTHAM_HOME var
+echo -e "\nexport GOTHAM_HOME=/opt/GOTHAM/" >> /etc/profile
+GOTHAM_HOME=/opt/GOTHAM/
+
 # Clone repository on this directory
 git clone https://github.com/Spit22/GOTHAM
 chown -R gotham:root $GOTHAM_HOME
 
-# Configure $GOTHAM_HOME var
-echo -e "\nexport GOTHAM_HOME=/opt/GOTHAM/" >> /etc/profile
-GOTHAM_HOME=/opt/GOTHAM/
-source /etc/profile
 
 # Going on the repository folder
 cd $GOTHAM_HOME/Orchestrator/Sources
