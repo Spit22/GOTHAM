@@ -1,4 +1,4 @@
-# GOTHAM configuration
+# Orchestrator configuration
 
 You can configure your orchestrator under $INSTALL_PATH/Orchestrator/Config/config.ini.
 
