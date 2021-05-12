@@ -11,6 +11,7 @@ Welcome to GOTHAM's documentation!
    :caption: Contents:
 
    src/welcome.md
+   src/configure_orchestrator.md
 
 Indices and tables
 ==================
