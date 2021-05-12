@@ -593,10 +593,10 @@ def list_hp(args):
                     hp_infos["links"]=links_tab
             hps_infos.append(hp_infos) 
         
-        
+        hps_infos_others = hps_infos_others[0:overplus]
         if str(output_format).lower() == "json":
             if hps_infos_others != []:
-                result={"hps":hps_infos,"hps_others":hps_infos_others[0:overplus]}
+                result={"hps":hps_infos,"hps_others":hps_infos_others}
             else:
                 result={"hps":hps_infos}
 
@@ -606,7 +606,7 @@ def list_hp(args):
             print("Not implemented")
         elif str(output_format).lower() == "text":
             print("Honeypots:")
-            print("==========\n")
+            print("==========")
             
             for hp in hps_infos:
                 for key in hp.keys():
@@ -629,7 +629,7 @@ def list_hp(args):
             if hps_infos_others != []:
                 if hps_infos != []:
                     print("\nOthers:")
-                    print("==========\n")
+                    print("==========")
                 for hp in hps_infos_others:
                     for key in hp.keys():
                         if key != "links":
@@ -651,12 +651,12 @@ def list_hp(args):
 
         elif str(output_format).lower() == "table":
             print("Honeypots:")
-            print("==========\n")
+            print("==========")
             print(tabulate.tabulate(hps_infos, headers = 'keys'))
             if hps_infos_others != []:
                 if hps_infos != []:
                     print("\nOthers:")
-                    print("==========\n")
+                    print("==========")
                 print(tabulate.tabulate(hps_infos_others, headers = 'keys')) 
         else :
             print("Wrong Format")
