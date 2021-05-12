@@ -459,6 +459,7 @@ def list_server(args):
             print(tabulate.tabulate(servers_infos, headers = 'keys'))
         elif 'exact' in data.keys() and 'others' in data.keys():
             # A faire
+            print("")
         else:
             print("ERROR") # A modifier
 
@@ -530,6 +531,7 @@ def list_hp(args):
         elif 'exact' in data.keys() and 'others' in data.keys(): 
             hps = data['exact']
             hps_other = data['others']
+            hp_infos = {}
             for hp in hps_other: 
                 for key in hp_keys_display: 
                    hp_infos[key] = hp['hp_' + key] 
@@ -703,7 +705,7 @@ def list_link(args):
         elif 'links' in data.keys():
             links = data['links']
             links_infos = []
-            for link in linkss:
+            for link in links:
                 link_infos = {}
                 for key in link_keys_display:
                    link_infos[key] = link['lk_' + key]
@@ -711,9 +713,10 @@ def list_link(args):
             
         elif 'exact' in data.keys() and 'others' in data.keys():
             # A faire
+            print("")
         else:
             print("ERROR") # A modifier
-print(tabulate.tabulate(links_infos, headers = 'keys'))
+    print(tabulate.tabulate(links_infos, headers = 'keys'))
 
 if __name__ == "__main__":
     # Retrieve  internaldb settings from config file
