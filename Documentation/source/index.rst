@@ -13,6 +13,8 @@ Welcome to GOTHAM's documentation!
    src/welcome.md
    src/install_orchestrator.md
    src/configure_orchestrator.md
+   src/prepare_datacenter.md
+   src/prepare_servers.md
    src/howto_honeypots.md
    src/howto_servers.md
    src/howto_links.md
