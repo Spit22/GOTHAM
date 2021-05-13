@@ -77,6 +77,8 @@ def add_hp(args):
     tags = args.tag
     parser = args.parser
     logs = args.logs
+    autotags = args.autotags
+
     try:
         src = str(base64.b64encode(args.src.read().encode("ascii")).decode("ascii"))
     except:
@@ -102,8 +104,13 @@ def add_hp(args):
         "parser": parser,
         "logs": logs,
         "dockerfile": src,
-        "port": port
+        "port": port,
     }
+
+    if autotags:
+        data["autotags"] = "1"
+    else:
+        data["autotags"] = "0"
 
     # Query URL and get json
     data = requests.post(url, json=data)
@@ -343,7 +350,6 @@ def edit_hp(args):
         data["logs"] = logs
     if src:
         data["dockerfile"] = src
-        print("hi")
     if port:
         data["port"] = port
 
@@ -584,7 +590,7 @@ def list_server(args):
             for serv in servs_infos:
                 for key in serv.keys():
                     if key != "links":
-                        print("\t- "+key+": "+ serv[key])
+                        print("\t- "+key+": "+ str(serv[key]))
                 if "links" in serv.keys(): 
                     if serv["links"] == []:
                         print("\t- links: Not linked")
@@ -593,11 +599,11 @@ def list_server(args):
                         for link in serv["links"]:
                             for key in link.keys():
                                 if key != "servs":
-                                    print("\t\t- "+key+": "+ link[key])
+                                    print("\t\t- "+key+": "+ str(link[key]))
                             print("\t\t- servs:")
                             for serv in link["servs"]:
                                 for key in serv.keys():
-                                    print("\t\t\t- "+key+": "+ serv[key])
+                                    print("\t\t\t- "+key+": "+ str(serv[key]))
                 print("\n")
             if servs_infos_others != []:
                 if servs_infos != []:
@@ -606,7 +612,7 @@ def list_server(args):
                 for serv in servs_infos_others:
                     for key in serv.keys():
                         if key != "links":
-                            print("\t- "+key+": "+ serv[key])
+                            print("\t- "+key+": "+ str(serv[key]))
                     if "links" in serv.keys(): 
                         if serv["links"] == []:
                             print("\t- links: Not linked")
@@ -615,11 +621,11 @@ def list_server(args):
                             for link in serv["links"]:
                                 for key in link.keys():
                                     if key != "servs":
-                                        print("\t\t- "+key+": "+ link[key])
+                                        print("\t\t- "+key+": "+ str(link[key]))
                                 print("\t\t- servs:")
                                 for serv in link["servs"]:
                                     for key in serv.keys():
-                                        print("\t\t\t- "+key+": "+ serv[key])
+                                        print("\t\t\t- "+key+": "+ str(serv[key]))
                     print("\n")
 
         elif str(output_format).lower() == "table":
@@ -664,7 +670,7 @@ def list_hp(args):
     id = args.id
     tags = args.tags
     name = args.name
-    descr = args  descr
+    descr = args.descr
     port = args.port
     state = args.state
 
@@ -815,7 +821,7 @@ def list_hp(args):
             for hp in hps_infos:
                 for key in hp.keys():
                     if key != "links":
-                        print("\t- "+key+": "+ hp[key])
+                        print("\t- "+key+": "+ str(hp[key]))
                 if "links" in hp.keys(): 
                     if hp["links"] == []:
                         print("\t- links: Not linked")
@@ -824,11 +830,11 @@ def list_hp(args):
                         for link in hp["links"]:
                             for key in link.keys():
                                 if key != "servs":
-                                    print("\t\t- "+key+": "+ link[key])
+                                    print("\t\t- "+key+": "+ str(link[key]))
                             print("\t\t- servs:")
                             for serv in link["servs"]:
                                 for key in serv.keys():
-                                    print("\t\t\t- "+key+": "+ serv[key])
+                                    print("\t\t\t- "+key+": "+ str(serv[key]))
                 print("\n")
             if hps_infos_others != []:
                 if hps_infos != []:
@@ -837,7 +843,7 @@ def list_hp(args):
                 for hp in hps_infos_others:
                     for key in hp.keys():
                         if key != "links":
-                            print("\t- "+key+": "+ hp[key])
+                            print("\t- "+key+": "+ str(hp[key]))
                     if "links" in hp.keys(): 
                         if hp["links"] == []:
                             print("\t- links: Not linked")
@@ -846,11 +852,11 @@ def list_hp(args):
                             for link in hp["links"]:
                                 for key in link.keys():
                                     if key != "servs":
-                                        print("\t\t- "+key+": "+ link[key])
+                                        print("\t\t- "+key+": "+ str(link[key]))
                                 print("\t\t- servs:")
                                 for serv in link["servs"]:
                                     for key in serv.keys():
-                                        print("\t\t\t- "+key+": "+ serv[key])
+                                        print("\t\t\t- "+key+": "+ str(serv[key]))
                     print("\n")
 
         elif str(output_format).lower() == "table":
@@ -967,7 +973,7 @@ def list_link(args):
             links_other = data['others']
             for link in links_other:
                 link_infos = {}
-                for key in lk_keys_display: 
+                for key in link_keys_display: 
                    link_infos[key] = link['link_' + key] 
                 
                 if str(detail_lvl).lower == "full":
@@ -1018,7 +1024,7 @@ def list_link(args):
         
         for link in links:
             link_infos = {}
-            for key in lk_keys_display: 
+            for key in link_keys_display: 
                link_infos[key] = link['link_' + key] 
             
             if str(detail_lvl).lower == "full":
@@ -1082,27 +1088,27 @@ def list_link(args):
             for link in links_infos:
                 for key in link.keys():
                     if key != "hps" and key != "servs":
-                        print("\t- "+key+": "+ hp[key])
+                        print("\t- "+key+": "+ str(link[key]))
                 if "hps" in link.keys():
                     print("\t- hps:")
                     for hp in link["hps"]:
                         for key in hp.keys():
                             if key != "servs":
-                                print("\t\t- "+key+": "+ hp[key])
+                                print("\t\t- "+key+": "+ str(hp[key]))
                         print("\t\t- servs:")
                         for serv in hp["servs"]:
                             for key in serv.keys():
-                                print("\t\t\t- "+key+": "+ serv[key])
+                                print("\t\t\t- "+key+": "+ str(serv[key]))
                 elif "servs" in link.keys():
                     print("\t- servs:")
                     for serv in link["servs"]:
                         for key in serv.keys():
                             if key != "hps":
-                                print("\t\t- "+key+": "+ serv[key])
+                                print("\t\t- "+key+": "+ str(serv[key]))
                         print("\t\t- hps:")
                         for hp in serv["servs"]:
                             for key in hp.keys():
-                                print("\t\t\t- "+key+": "+ hp[key])
+                                print("\t\t\t- "+key+": "+ str(hp[key]))
                 print("\n")
             if links_infos_others != []:
                 if links_infos != []:
@@ -1111,27 +1117,27 @@ def list_link(args):
                 for link in links_infos_others:
                     for key in link.keys():
                         if key != "hps" and key != "servs":
-                            print("\t- "+key+": "+ hp[key])
+                            print("\t- "+key+": "+ str(hp[key]))
                     if "hps" in link.keys():
                         print("\t- hps:")
                         for hp in link["hps"]:
                             for key in hp.keys():
                                 if key != "servs":
-                                    print("\t\t- "+key+": "+ hp[key])
+                                    print("\t\t- "+key+": "+ str(hp[key]))
                             print("\t\t- servs:")
                             for serv in hp["servs"]:
                                 for key in serv.keys():
-                                    print("\t\t\t- "+key+": "+ serv[key])
+                                    print("\t\t\t- "+key+": "+ str(serv[key]))
                     elif "servs" in link.keys():
                         print("\t- servs:")
                         for serv in link["servs"]:
                             for key in serv.keys():
                                 if key != "hps":
-                                    print("\t\t- "+key+": "+ serv[key])
+                                    print("\t\t- "+key+": "+ str(serv[key]))
                             print("\t\t- hps:")
                             for hp in serv["servs"]:
                                 for key in hp.keys():
-                                    print("\t\t\t- "+key+": "+ hp[key])
+                                    print("\t\t\t- "+key+": "+ str(hp[key]))
                     print("\n")
 
         elif str(output_format).lower() == "table":
@@ -1145,34 +1151,6 @@ def list_link(args):
                 print(tabulate.tabulate(links_infos_others, headers = 'keys')) 
         else :
             print("Wrong Format")
-
-
-
-
-
-
-
-    if format not in link_display.keys():
-        print("Error Format") #A modifier
-    else:
-        link_keys_display = link_display[detail_lvl].split(',')
-        if 'error' in data.keys():
-            print(data['error'])
-        elif 'links' in data.keys():
-            links = data['links']
-            links_infos = []
-            for link in links:
-                link_infos = {}
-                for key in link_keys_display:
-                   link_infos[key] = link['lk_' + key]
-                links_infos.append(link_infos)
-            
-        elif 'exact' in data.keys() and 'others' in data.keys():
-            # A faire
-            print("")
-        else:
-            print("ERROR") # A modifier
-    print(tabulate.tabulate(links_infos, headers = 'keys'))
 
 if __name__ == "__main__":
     # Retrieve  internaldb settings from config file
@@ -1254,6 +1232,9 @@ if __name__ == "__main__":
     parser_add_hp.add_argument('-src', type=argparse.FileType('r'),
                                help='Base64 encoded source file of the honepot (Dockerfile)', required=True)
     parser_add_hp.add_argument('-port', help='Port where the honeypot service run (Dockerfile)', required=True)
+    parser_add_hp.add_argument('-autotags', action='store_true',
+                                   help='Choose if you want to automatically add tags to honeypot', required=False)
+
     # Create add_server arguments
     parser_add_server.add_argument('-name', help='Name of the server', required=True)
     parser_add_server.add_argument('-descr', help='Description of the server', required=True)
@@ -1320,6 +1301,7 @@ if __name__ == "__main__":
     parser_list_server.add_argument('-ssh_port', help='SSH port of the server', required=False)
     parser_list_server.add_argument('-o', help='Specify output format to display',default=default_serv, choices=["json","table","text","tree"], required=False)
     parser_list_server.add_argument('-d', help='Specify detail level to display',default="normal", required=False)
+    parser_list_server.add_argument('-p', help='Specify number of additional server to display',default="4", required=False)
     # Create list_link arguments
     parser_list_link.add_argument('-id', help='ID of the link', required=False)
     parser_list_link.add_argument('-nb_hp', help='Number of honeypots of the link', required=False)
@@ -1329,7 +1311,7 @@ if __name__ == "__main__":
     parser_list_link.add_argument('-ports', help='Ports used for the link', required=False)
     parser_list_link.add_argument('-o', help='Specify output format to display',default=default_link, choices=["json","table","text","tree"], required=False)
     parser_list_link.add_argument('-d', help='Specify detail level to display',default="normal", required=False)
-
+    parser_list_link.add_argument('-p', help='Specify number of additional link to display',default="4", required=False)
     # Execute parse_args()
     args = parser.parse_args()
     args.func(args)
