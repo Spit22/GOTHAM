@@ -309,7 +309,8 @@ def add_serv():
 
     # Deploy the reverse-proxy service on the new server
     try:
-        add_server.deploy(ip, ssh_port, deploy_ssh_key)
+        print("bypassed")
+        #add_server.deploy(ip, ssh_port, deploy_ssh_key)
 
     except Exception as e:
         error = "Server deployment failed"
@@ -1605,7 +1606,7 @@ def ls_serv():
             except Exception as e:
                 logging.error(
                     "Error while configuring server state : "+str(e))
-            servers = [Gotham_normalize.normalize_display_object_infos_with_tags(Gotham_normalize.normalize_display_object_infos(server, "serv"),serv) for server in servers]
+            servers = [Gotham_normalize.normalize_display_object_infos_with_tags(Gotham_normalize.normalize_display_object_infos(server, "serv"),"serv") for server in servers]
             return {"servers": servers}
         else:
             logging.error(f"You tried to list servers but no one exists")
