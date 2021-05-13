@@ -410,11 +410,14 @@ def list_server(args):
     # Retrieve  internaldb settings from config file
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Gothamctl/Config/config.ini')
-    
-    hp_display = {"normal": config['hp_display']['normal'], "wide": config['hp_display']['wide']}
-    serv_display = {"normal": config['serv_display']['normal'], "wide": config['serv_display']['wide']}
-    link_display = {"normal": config['link_display']['normal'], "wide": config['link_display']['wide']}
 
+    hp_display = config['hp_display']
+    del hp_display["default"]
+    serv_display = config['serv_display']
+    del serv_display["default"]
+    link_display = config['link_display']
+    del link_display["default"]
+    
     # Define the queried endpoint
     endpoint = "/list/server"
 
@@ -426,7 +429,10 @@ def list_server(args):
     id = args.id
 
     # Get format of the display
-    format = args.o
+    output_format = args.o
+    detail_lvl = args.d
+    overplus = int(args.p)
+
 
     # If id set, query only for 1 server
     if id:
@@ -442,26 +448,154 @@ def list_server(args):
 
     # Show result
     
-    if format not in serv_display.keys():
-        print("Error Format") #A modifier
+    servs_infos = [] 
+    servs_infos_others = []
+    serv_infos = {}
+
+    if detail_lvl not in serv_display.keys(): 
+        print("Error Format")
     else:
-        serv_keys_display = serv_display[format].split(',')
+        if detail_lvl != "full":
+            serv_keys_display = serv_display[detail_lvl].split(',')
+        else:
+            serv_keys_display = serv_display[serv_display[detail_lvl]].split(',')
+        
         if 'error' in data.keys():
-            print(data['error'])
-        elif 'servers' in data.keys():
-            servers = data['servers']
-            servers_infos = []
-            for server in servers:
-                server_infos = {}
-                for key in serv_keys_display:
-                   server_infos[key] = server['serv_' + key]
-                servers_infos.append(server_infos)
-            print(tabulate.tabulate(servers_infos, headers = 'keys'))
-        elif 'exact' in data.keys() and 'others' in data.keys():
-            # A faire
-            print("")
+            print(data['error']) 
+        elif 'servers' in data.keys(): 
+            servs = data['servers'] 
+            
+        elif 'exact' in data.keys() and 'others' in data.keys(): 
+            servs = data['exact']
+            servs_other = data['others']
+            for serv in servs_other:
+                serv_infos = {}
+                for key in serv_keys_display: 
+                   serv_infos[key] = serv['serv_' + key] 
+                
+                if str(detail_lvl).lower == "full":
+                    serv_infos["links"] = []
+                    lk_keys_display = link_display[serv_display[detail_lvl]].split(',')
+                    
+                    for link in serv["links"]:
+                        lk_infos={}
+                        for key in lk_keys_display: 
+                            lk_infos[key] = link['link_' + key]
+                        lk_infos["hps"] = []
+                        hp_keys_display = hp_display[serv_display[detail_lvl]].split(',')
+                        
+                        for hp in link["hps"]:
+                            hp_infos={}
+                            for key in hp_keys_display: 
+                                hp_infos[key] = hp['hp_' + key]
+                            lk_infos["hps"].append(hp_infos)
+                        if str(output_format).lower() == "table":
+                            lk_infos["hps"]=tabulate.tabulate(lk_infos["hps"], headers = 'keys')
+                        serv_infos["links"].append(lk_infos)
+                    if str(output_format).lower() == "table":
+                        serv_infos["links"]=tabulate.tabulate(serv_infos["links"], headers = 'keys')
+                        
+                servs_infos_others.append(serv_infos)
+
         else:
             print("ERROR") # A modifier
+        
+        for serv in servs:
+            serv_infos = {}
+            for key in serv_keys_display: 
+               serv_infos[key] = serv['serv_' + key] 
+            
+            if str(detail_lvl).lower == "full":
+                serv_infos["links"] = []
+                lk_keys_display = link_display[serv_display[detail_lvl]].split(',')
+                
+                for link in serv["links"]:
+                    lk_infos={}
+                    for key in lk_keys_display: 
+                        lk_infos[key] = link['link_' + key]
+                    lk_infos["hps"] = []
+                    hp_keys_display = hp_display[serv_display[detail_lvl]].split(',')
+                    
+                    for hp in link["hps"]:
+                        hp_infos={}
+                        for key in hp_keys_display: 
+                            hp_infos[key] = hp['hp_' + key]
+                        lk_infos["hps"].append(hp_infos)
+                    if str(output_format).lower() == "table":
+                        lk_infos["hps"]=tabulate.tabulate(lk_infos["hps"], headers = 'keys')
+                    serv_infos["links"].append(lk_infos)
+                if str(output_format).lower() == "table":
+                    serv_infos["links"]=tabulate.tabulate(serv_infos["links"], headers = 'keys')
+                    
+            servs_infos.append(serv_infos)
+        
+        servs_infos_others = servs_infos_others[0:overplus]
+        if str(output_format).lower() == "json":
+            if servs_infos_others != []:
+                result={"servs":servs_infos,"servs_others":servs_infos_others}
+            else:
+                result={"servs":servs_infos}
+
+            res = json.dumps(result, indent=4)
+            print(res)
+        elif str(output_format).lower() == "tree":
+            print("Not implemented")
+        elif str(output_format).lower() == "text":
+            print("Servers:")
+            print("==========")
+            
+            for serv in servs_infos:
+                for key in serv.keys():
+                    if key != "links":
+                        print("\t- "+key+": "+ serv[key])
+                if "links" in serv.keys(): 
+                    if serv["links"] == []:
+                        print("\t- links: Not linked")
+                    else:
+                        print("\t- links:")
+                        for link in serv["links"]:
+                            for key in link.keys():
+                                if key != "servs":
+                                    print("\t\t- "+key+": "+ link[key])
+                            print("\t\t- servs:")
+                            for serv in link["servs"]:
+                                for key in serv.keys():
+                                    print("\t\t\t- "+key+": "+ serv[key])
+                print("\n")
+            if servs_infos_others != []:
+                if servs_infos != []:
+                    print("\nOthers:")
+                    print("==========")
+                for serv in servs_infos_others:
+                    for key in serv.keys():
+                        if key != "links":
+                            print("\t- "+key+": "+ serv[key])
+                    if "links" in serv.keys(): 
+                        if serv["links"] == []:
+                            print("\t- links: Not linked")
+                        else:
+                            print("\t- links:")
+                            for link in serv["links"]:
+                                for key in link.keys():
+                                    if key != "servs":
+                                        print("\t\t- "+key+": "+ link[key])
+                                print("\t\t- servs:")
+                                for serv in link["servs"]:
+                                    for key in serv.keys():
+                                        print("\t\t\t- "+key+": "+ serv[key])
+                    print("\n")
+
+        elif str(output_format).lower() == "table":
+            print("Servers:")
+            print("==========")
+            print(tabulate.tabulate(servs_infos, headers = 'keys'))
+            if servs_infos_others != []:
+                if servs_infos != []:
+                    print("\nOthers:")
+                    print("==========")
+                print(tabulate.tabulate(servs_infos_others, headers = 'keys')) 
+        else :
+            print("Wrong Format")
 
 
 def list_hp(args):
@@ -540,25 +674,26 @@ def list_hp(args):
                 if str(detail_lvl).lower == "full":
                     hp_infos["links"] = []
                     lk_keys_display = link_display[hp_display[detail_lvl]].split(',')
-                    lk_infos={}
+                    
                     for link in hp["links"]:
+                        lk_infos={}
                         for key in lk_keys_display: 
                             lk_infos[key] = link['link_' + key]
                         lk_infos["servs"] = []
                         serv_keys_display = serv_display[hp_display[detail_lvl]].split(',')
-                        serv_infos={}
+                        
                         for serv in link["servs"]:
+                            serv_infos={}
                             for key in serv_keys_display: 
                                 serv_infos[key] = serv['serv_' + key]
                             lk_infos["servs"].append(serv_infos)
                         if str(output_format).lower() == "table":
-                            lk_infos["servers"]=tabulate.tabulate(lk_infos["servs"], headers = 'keys')
-                            del lk_infos["servs"]
+                            lk_infos["servs"]=tabulate.tabulate(lk_infos["servs"], headers = 'keys')
+                            
                         hp_infos["links"].append(lk_infos)
                     if str(output_format).lower() == "table":
-                        links_tab=tabulate.tabulate(hp_infos["links"], headers = 'keys')
-                        del hp_infos["links"]
-                        hp_infos["links"]=links_tab
+                        hp_infos["links"]=tabulate.tabulate(hp_infos["links"], headers = 'keys')
+                        
                 hps_infos_others.append(hp_infos)
 
         else:
@@ -572,25 +707,26 @@ def list_hp(args):
             if str(detail_lvl).lower == "full":
                 hp_infos["links"] = []
                 lk_keys_display = link_display[hp_display[detail_lvl]].split(',')
-                lk_infos={}
+                
                 for link in hp["links"]:
+                    lk_infos={}
                     for key in lk_keys_display: 
                         lk_infos[key] = link['link_' + key]
                     lk_infos["servs"] = []
                     serv_keys_display = serv_display[hp_display[detail_lvl]].split(',')
-                    serv_infos={}
+                    
                     for serv in link["servs"]:
+                        serv_infos={}
                         for key in serv_keys_display: 
                             serv_infos[key] = serv['serv_' + key]
                         lk_infos["servs"].append(serv_infos)
                     if str(output_format).lower() == "table":
-                        lk_infos["servers"]=tabulate.tabulate(lk_infos["servs"], headers = 'keys')
-                        del lk_infos["servs"]
+                        lk_infos["servs"]=tabulate.tabulate(lk_infos["servs"], headers = 'keys')
+                        
                     hp_infos["links"].append(lk_infos)
                 if str(output_format).lower() == "table":
-                    links_tab=tabulate.tabulate(hp_infos["links"], headers = 'keys')
-                    del hp_infos["links"]
-                    hp_infos["links"]=links_tab
+                    hp_infos["links"]=tabulate.tabulate(hp_infos["links"], headers = 'keys')
+                    
             hps_infos.append(hp_infos) 
         
         hps_infos_others = hps_infos_others[0:overplus]
