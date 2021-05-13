@@ -151,7 +151,7 @@ def generate_rulebase(id_hp, rules, rulebase_path):
         # Specify the liblognorm version
         rulebase.write('version=2\n')
         # Write each rule in the rulebase
-        for rule in rules:
+        for rule in rules.split(","):
             rulebase.write(str(rule) + '\n')
     except Exception as e:
         error = "Fail to create rulebase : " + str(e)
