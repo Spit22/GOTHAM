@@ -427,6 +427,12 @@ def list_server(args):
 
     # Get id of server
     id = args.id
+    ip = args.ip
+    name = args.name
+    tags = args.tags
+    state = args.state
+    descr = args.descr
+    ssh_port = args.ssh_port
 
     # Get format of the display
     output_format = args.o
@@ -434,14 +440,45 @@ def list_server(args):
     overplus = int(args.p)
 
 
-    # If id set, query only for 1 server
-    if id:
-        # Forge url
-        url = "http://" + gh + ":" + gp + endpoint + "?id=" + id
-    else:
-        # Else query all servers in db
-        # Forge url
-        url = "http://" + gh + ":" + gp + endpoint
+    prot="http"
+    # Forge url
+    url = prot+"://" + gh + ":" + gp + endpoint
+
+    if id :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"id="+id
+        else:
+            url += "&"+"id="+id
+    if ip :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"ip="+ip
+        else:
+            url += "&"+"ip="+ip
+    if name :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"name="+name
+        else:
+            url += "&"+"name="+name
+    if tags :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"tags="+tags
+        else:
+            url += "&"+"tags="+tags
+    if state :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"state="+state
+        else:
+            url += "&"+"state="+state
+    if descr :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"descr="+descr
+        else:
+            url += "&"+"descr="+descr
+    if ssh_port :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"ssh_port="+ssh_port
+        else:
+            url += "&"+"ssh_port="+ssh_port
 
     # Query URL and get json
     data = requests.get(url).json()
@@ -623,8 +660,13 @@ def list_hp(args):
     gp = args.gotham_port
     gh = args.gotham_hostname
 
-    # Get id of honeypot
+    # Get infos of honeypot
     id = args.id
+    tags = args.tags
+    name = args.name
+    descr = args  descr
+    port = args.port
+    state = args.state
 
     # Get format of the display
     output_format = args.o
@@ -632,14 +674,40 @@ def list_hp(args):
     overplus = int(args.p)
 
 
-    # If id set, query only for 1 honeypot
-    if id:
-        # Forge url
-        url = "http://" + gh + ":" + gp + endpoint + "?id=" + id
-    else:
-        # Else query all honeypots in db
-        # Forge url
-        url = "http://" + gh + ":" + gp + endpoint
+    prot="http"
+    # Forge url
+    url = prot+"://" + gh + ":" + gp + endpoint
+
+    if id :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"id="+id
+        else:
+            url += "&"+"id="+id
+    if tags :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"tags="+tags
+        else:
+            url += "&"+"tags="+tags
+    if name :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"name="+name
+        else:
+            url += "&"+"name="+name
+    if descr :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"descr="+descr
+        else:
+            url += "&"+"descr="+descr
+    if port :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"port="+port
+        else:
+            url += "&"+"port="+port
+    if state :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"state="+state
+        else:
+            url += "&"+"state="+state
 
     # Query URL and get json
     data = requests.get(url).json()
@@ -808,37 +876,282 @@ def list_link(args):
     # Retrieve  internaldb settings from config file
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Gothamctl/Config/config.ini')
-    hp_display = {"normal": config['hp_display']['normal'], "wide": config['hp_display']['wide']}
-    serv_display = {"normal": config['serv_display']['normal'], "wide": config['serv_display']['wide']}
-    link_display = {"normal": config['link_display']['normal'], "wide": config['link_display']['wide']}    # Define the queried endpoint
     
+    hp_display = config['hp_display']
+    del hp_display["default"]
+    serv_display = config['serv_display']
+    del serv_display["default"]
+    link_display = config['link_display']
+    del link_display["default"]
+    
+
     endpoint = "/list/link"
 
     # Before external configuration
     gp = args.gotham_port
     gh = args.gotham_hostname
 
-    # Get id of link
+    # Get infos of link
     id = args.id
+    nb_hp = args.nb_hp
+    nb_serv = args.nb_serv
+    tags_hp = args.tags_hp
+    tags_serv = args.tags_serv
+    ports = args.ports
 
     # Get format of the display
     output_format = args.o
     detail_lvl = args.d
+    overplus = int(args.p)
 
-    # If id set, query only for 1 link
-    if id:
-        # Forge url
-        url = "http://" + gh + ":" + gp + endpoint + "?id=" + id
-    else:
-        # Else query all links in db
-        # Forge url
-        url = "http://" + gh + ":" + gp + endpoint
+    prot="http"
+    # Forge url
+    url = prot+"://" + gh + ":" + gp + endpoint
+
+    if id :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"id="+id
+        else:
+            url += "&"+"id="+id
+    if nb_hp :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"nb_hp="+nb_hp
+        else:
+            url += "&"+"nb_hp="+nb_hp
+    if nb_serv :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"nb_serv="+nb_serv
+        else:
+            url += "&"+"nb_serv="+nb_serv
+    if tags_hp :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"tags_hp="+tags_hp
+        else:
+            url += "&"+"tags_hp="+tags_hp
+    if tags_serv :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"tags_serv="+tags_serv
+        else:
+            url += "&"+"tags_serv="+tags_serv
+    if ports :
+        if url == prot+"://" + gh + ":" + gp + endpoint:
+            url += "?"+"ports="+ports
+        else:
+            url += "&"+"ports="+ports
 
     # Query URL and get json
-    data = requests.get(url)
+    data = requests.get(url).json()
 
+    
     # Show result
-    print(data.json())
+    
+    links_infos = [] 
+    links_infos_others = []
+    link_infos = {}
+
+    if detail_lvl not in link_display.keys(): 
+        print("Error Format")
+    else:
+        if detail_lvl != "full":
+            link_keys_display = link_display[detail_lvl].split(',')
+        else:
+            link_keys_display = link_display[link_display[detail_lvl]].split(',')
+        
+        if 'error' in data.keys():
+            print(data['error']) 
+        elif 'links' in data.keys(): 
+            links = data['links'] 
+            
+        elif 'exact' in data.keys() and 'others' in data.keys(): 
+            links = data['exact']
+            links_other = data['others']
+            for link in links_other:
+                link_infos = {}
+                for key in lk_keys_display: 
+                   link_infos[key] = link['link_' + key] 
+                
+                if str(detail_lvl).lower == "full":
+                    if "hps" in link.keys():
+                        next_type="hp"
+                    elif "servs" in link.keys():
+                        next_type="serv"
+                    
+                    link_infos[next_type+"s"] = []
+                    hp_keys_display = hp_display[link_display[detail_lvl]].split(',')
+                    serv_keys_display = serv_display[link_display[detail_lvl]].split(',')
+
+                    for obj in link[next_type+"s"]:
+                        obj_infos={}
+                        if next_type=="hp":
+                            for key in hp_keys_display: 
+                                obj_infos[key] = obj[next_type+'_' + key]
+                        if next_type=="serv":
+                            for key in serv_keys_display: 
+                                obj_infos[key] = obj[next_type+'_' + key]
+                        
+                        if next_type=="hp":
+                            last_type="serv"
+                        if next_type=="serv":
+                            last_type="hp"
+                        obj_infos[last_type+"s"] = []
+
+                        for last_obj in obj[last_type+"s"]:
+                            last_obj_infos={}
+                            if last_type=="hp":
+                                for key in hp_keys_display: 
+                                    last_obj_infos[key] = last_obj[last_type+'_' + key]
+                            if last_type=="serv":
+                                for key in serv_keys_display: 
+                                    last_obj_infos[key] = last_obj[last_type+'_' + key]
+                            obj_infos[last_type+"s"].append(last_obj_infos)
+                        if str(output_format).lower() == "table":
+                            obj_infos[last_type+"s"]=tabulate.tabulate(obj_infos[last_type+"s"], headers = 'keys')
+                            
+                        link_infos[next_type+"s"].append(obj_infos)
+                    if str(output_format).lower() == "table":
+                        link_infos[next_type+"s"]=tabulate.tabulate(link_infos[next_type+"s"], headers = 'keys')
+                        
+                links_infos_others.append(link_infos)
+
+        else:
+            print("ERROR") # A modifier
+        
+        for link in links:
+            link_infos = {}
+            for key in lk_keys_display: 
+               link_infos[key] = link['link_' + key] 
+            
+            if str(detail_lvl).lower == "full":
+                if "hps" in link.keys():
+                    next_type="hp"
+                elif "servs" in link.keys():
+                    next_type="serv"
+                
+                link_infos[next_type+"s"] = []
+                hp_keys_display = hp_display[link_display[detail_lvl]].split(',')
+                serv_keys_display = serv_display[link_display[detail_lvl]].split(',')
+
+                for obj in link[next_type+"s"]:
+                    obj_infos={}
+                    if next_type=="hp":
+                        for key in hp_keys_display: 
+                            obj_infos[key] = obj[next_type+'_' + key]
+                    if next_type=="serv":
+                        for key in serv_keys_display: 
+                            obj_infos[key] = obj[next_type+'_' + key]
+                    
+                    if next_type=="hp":
+                        last_type="serv"
+                    if next_type=="serv":
+                        last_type="hp"
+                    obj_infos[last_type+"s"] = []
+
+                    for last_obj in obj[last_type+"s"]:
+                        last_obj_infos={}
+                        if last_type=="hp":
+                            for key in hp_keys_display: 
+                                last_obj_infos[key] = last_obj[last_type+'_' + key]
+                        if last_type=="serv":
+                            for key in serv_keys_display: 
+                                last_obj_infos[key] = last_obj[last_type+'_' + key]
+                        obj_infos[last_type+"s"].append(last_obj_infos)
+                    if str(output_format).lower() == "table":
+                        obj_infos[last_type+"s"]=tabulate.tabulate(obj_infos[last_type+"s"], headers = 'keys')
+                        
+                    link_infos[next_type+"s"].append(obj_infos)
+                if str(output_format).lower() == "table":
+                    link_infos[next_type+"s"]=tabulate.tabulate(link_infos[next_type+"s"], headers = 'keys')
+                    
+            links_infos.append(link_infos) 
+        
+        links_infos_others = links_infos_others[0:overplus]
+        if str(output_format).lower() == "json":
+            if links_infos_others != []:
+                result={"links":links_infos,"links_others":links_infos_others}
+            else:
+                result={"links":links_infos}
+
+            res = json.dumps(result, indent=4)
+            print(res)
+        elif str(output_format).lower() == "tree":
+            print("Not implemented")
+        elif str(output_format).lower() == "text":
+            print("Links:")
+            print("==========")
+            
+            for link in links_infos:
+                for key in link.keys():
+                    if key != "hps" and key != "servs":
+                        print("\t- "+key+": "+ hp[key])
+                if "hps" in link.keys():
+                    print("\t- hps:")
+                    for hp in link["hps"]:
+                        for key in hp.keys():
+                            if key != "servs":
+                                print("\t\t- "+key+": "+ hp[key])
+                        print("\t\t- servs:")
+                        for serv in hp["servs"]:
+                            for key in serv.keys():
+                                print("\t\t\t- "+key+": "+ serv[key])
+                elif "servs" in link.keys():
+                    print("\t- servs:")
+                    for serv in link["servs"]:
+                        for key in serv.keys():
+                            if key != "hps":
+                                print("\t\t- "+key+": "+ serv[key])
+                        print("\t\t- hps:")
+                        for hp in serv["servs"]:
+                            for key in hp.keys():
+                                print("\t\t\t- "+key+": "+ hp[key])
+                print("\n")
+            if links_infos_others != []:
+                if links_infos != []:
+                    print("\nOthers:")
+                    print("==========")
+                for link in links_infos_others:
+                    for key in link.keys():
+                        if key != "hps" and key != "servs":
+                            print("\t- "+key+": "+ hp[key])
+                    if "hps" in link.keys():
+                        print("\t- hps:")
+                        for hp in link["hps"]:
+                            for key in hp.keys():
+                                if key != "servs":
+                                    print("\t\t- "+key+": "+ hp[key])
+                            print("\t\t- servs:")
+                            for serv in hp["servs"]:
+                                for key in serv.keys():
+                                    print("\t\t\t- "+key+": "+ serv[key])
+                    elif "servs" in link.keys():
+                        print("\t- servs:")
+                        for serv in link["servs"]:
+                            for key in serv.keys():
+                                if key != "hps":
+                                    print("\t\t- "+key+": "+ serv[key])
+                            print("\t\t- hps:")
+                            for hp in serv["servs"]:
+                                for key in hp.keys():
+                                    print("\t\t\t- "+key+": "+ hp[key])
+                    print("\n")
+
+        elif str(output_format).lower() == "table":
+            print("Linkss:")
+            print("==========")
+            print(tabulate.tabulate(links_infos, headers = 'keys'))
+            if links_infos_others != []:
+                if links_infos != []:
+                    print("\nOthers:")
+                    print("==========")
+                print(tabulate.tabulate(links_infos_others, headers = 'keys')) 
+        else :
+            print("Wrong Format")
+
+
+
+
+
+
+
     if format not in link_display.keys():
         print("Error Format") #A modifier
     else:
@@ -989,15 +1302,31 @@ if __name__ == "__main__":
     # =====LIST ARGUMENTS=====#
     # Create list_hp arguments
     parser_list_hp.add_argument('-id', help='ID of the honeypot', required=False)
+    parser_list_hp.add_argument('-tags', help='Tags of the honeypot', required=False)
+    parser_list_hp.add_argument('-name', help='Name of the honeypot', required=False)
+    parser_list_hp.add_argument('-descr', help='Description of the honeypot', required=False)
+    parser_list_hp.add_argument('-port', help='Port of the honeypot', required=False)
+    parser_list_hp.add_argument('-state', help='State of the honeypot', required=False)
     parser_list_hp.add_argument('-o', help='Specify output format to display',default=default_hp, choices=["json","table","text","tree"], required=False)
     parser_list_hp.add_argument('-d', help='Specify detail level to display',default="normal", required=False)
     parser_list_hp.add_argument('-p', help='Specify number of additional honeypot to display',default="4", required=False)
     # Create list_server arguments
     parser_list_server.add_argument('-id', help='ID of the server', required=False)
+    parser_list_server.add_argument('-ip', help='IP of the server', required=False)
+    parser_list_server.add_argument('-name', help='Name of the server', required=False)
+    parser_list_server.add_argument('-tags', help='Tags of the server', required=False)
+    parser_list_server.add_argument('-state', help='State of the server', required=False)
+    parser_list_server.add_argument('-descr', help='Description of the server', required=False)
+    parser_list_server.add_argument('-ssh_port', help='SSH port of the server', required=False)
     parser_list_server.add_argument('-o', help='Specify output format to display',default=default_serv, choices=["json","table","text","tree"], required=False)
     parser_list_server.add_argument('-d', help='Specify detail level to display',default="normal", required=False)
     # Create list_link arguments
     parser_list_link.add_argument('-id', help='ID of the link', required=False)
+    parser_list_link.add_argument('-nb_hp', help='Number of honeypots of the link', required=False)
+    parser_list_link.add_argument('-nb_serv', help='Number of server of the link', required=False)
+    parser_list_link.add_argument('-tags_hp', help='Tag of honeypots of the link', required=False)
+    parser_list_link.add_argument('-tags_serv', help='Tag of servers of the link', required=False)
+    parser_list_link.add_argument('-ports', help='Ports used for the link', required=False)
     parser_list_link.add_argument('-o', help='Specify output format to display',default=default_link, choices=["json","table","text","tree"], required=False)
     parser_list_link.add_argument('-d', help='Specify detail level to display',default="normal", required=False)
 
