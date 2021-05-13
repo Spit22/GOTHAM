@@ -59,10 +59,17 @@ def add_server(args):
         data["autotags"] = "0"
 
     # Query URL and get json
-    data = requests.post(url, json=data)
+    data = requests.post(url, json=data).json()
 
     # Show result
-    print(data.json())
+    if "id" in data.keys():
+        print(data["id"]+" created")
+    elif "error" in data.keys():
+        print(data["error"])
+    elif "message" in data.keys():
+        print(data["message"])
+    else:
+        print(str(data))
 
 
 def add_hp(args):
@@ -113,10 +120,17 @@ def add_hp(args):
         data["autotags"] = "0"
 
     # Query URL and get json
-    data = requests.post(url, json=data)
+    data = requests.post(url, json=data).json()
 
     # Show result
-    print(data.json())
+    if "id" in data.keys():
+        print(data["id"]+" created")
+    elif "error" in data.keys():
+        print(data["error"])
+    elif "message" in data.keys():
+        print(data["message"])
+    else:
+        print(str(data))
 
 
 def add_link(args):
@@ -152,10 +166,18 @@ def add_link(args):
     }
 
     # Query URL and get json
-    data = requests.post(url, json=data)
+    data = requests.post(url, json=data).json()
 
+    
     # Show result
-    print(data.json())
+    if "id" in data.keys():
+        print(data["id"]+" created")
+    elif "error" in data.keys():
+        print(data["error"])
+    elif "message" in data.keys():
+        print(data["message"])
+    else:
+        print(str(data))
 
 
 def rm_server(args):
@@ -183,10 +205,17 @@ def rm_server(args):
     }
 
     # Query URL and get json
-    data = requests.post(url, json=data)
+    data = requests.post(url, json=data).json()
 
     # Show result
-    print(data.json())
+    if "id" in data.keys():
+        print(data["id"]+" deleted")
+    elif "error" in data.keys():
+        print(data["error"])
+    elif "message" in data.keys():
+        print(data["message"])
+    else:
+        print(str(data))
 
 
 def rm_hp(args):
@@ -214,10 +243,17 @@ def rm_hp(args):
     }
 
     # Query URL and get json
-    data = requests.post(url, json=data)
+    data = requests.post(url, json=data).json()
 
     # Show result
-    print(data.text)
+    if "id" in data.keys():
+        print(data["id"]+" deleted")
+    elif "error" in data.keys():
+        print(data["error"])
+    elif "message" in data.keys():
+        print(data["message"])
+    else:
+        print(str(data))
 
 
 def rm_link(args):
@@ -245,10 +281,17 @@ def rm_link(args):
     }
 
     # Query URL and get json
-    data = requests.post(url, json=data)
+    data = requests.post(url, json=data).json()
 
     # Show result
-    print(data.json())
+    if "id" in data.keys():
+        print(data["id"]+" deleted")
+    elif "error" in data.keys():
+        print(data["error"])
+    elif "message" in data.keys():
+        print(data["message"])
+    else:
+        print(str(data))
 
 
 def edit_server(args):
@@ -444,8 +487,6 @@ def list_server(args):
     output_format = args.o
     detail_lvl = args.d
     overplus = int(args.p)
-    print(detail_lvl)
-
 
     prot="http"
     # Forge url
@@ -500,9 +541,9 @@ def list_server(args):
         print("Error Format")
     else:
         if detail_lvl != "full":
-            serv_keys_display = serv_display[detail_lvl].split(',')
+            serv_keys_display = [key.strip() for key in serv_display[detail_lvl].split(',')]
         else:
-            serv_keys_display = serv_display[serv_display[detail_lvl]].split(',')
+            serv_keys_display = [key.strip() for key in serv_display[serv_display[detail_lvl]].split(',')]
         
         if 'error' in data.keys():
             print(data['error']) 
@@ -519,14 +560,14 @@ def list_server(args):
                 
                 if str(detail_lvl).lower() == "full":
                     serv_infos["links"] = []
-                    lk_keys_display = link_display[serv_display[detail_lvl]].split(',')
+                    lk_keys_display = [key.strip() for key in link_display[serv_display[detail_lvl]].split(',')]
                     
                     for link in serv["links"]:
                         lk_infos={}
                         for key in lk_keys_display: 
                             lk_infos[key] = link['link_' + key]
                         lk_infos["hps"] = []
-                        hp_keys_display = hp_display[serv_display[detail_lvl]].split(',')
+                        hp_keys_display = [key.strip() for key in hp_display[serv_display[detail_lvl]].split(',')]
                         
                         for hp in link["hps"]:
                             hp_infos={}
@@ -550,16 +591,15 @@ def list_server(args):
                serv_infos[key] = serv['serv_' + key] 
             
             if str(detail_lvl).lower() == "full":
-                print("on est bien en full")
                 serv_infos["links"] = []
-                lk_keys_display = link_display[serv_display[detail_lvl]].split(',')
+                lk_keys_display = [key.strip() for key in link_display[serv_display[detail_lvl]].split(',')]
                 
                 for link in serv["links"]:
                     lk_infos={}
                     for key in lk_keys_display: 
                         lk_infos[key] = link['link_' + key]
                     lk_infos["hps"] = []
-                    hp_keys_display = hp_display[serv_display[detail_lvl]].split(',')
+                    hp_keys_display = [key.strip() for key in hp_display[serv_display[detail_lvl]].split(',')]
                     
                     for hp in link["hps"]:
                         hp_infos={}
@@ -606,6 +646,8 @@ def list_server(args):
                             for hp in link["hps"]:
                                 for key in hp.keys():
                                     print("\t\t\t- "+key+": "+ str(hp[key]))
+                                print("\n")
+                            print("\n")
                 print("\n")
             if servs_infos_others != []:
                 if servs_infos != []:
@@ -628,6 +670,8 @@ def list_server(args):
                                 for hp in link["hps"]:
                                     for key in hp.keys():
                                         print("\t\t\t- "+key+": "+ str(hp[key]))
+                                    print("\n")
+                                print("\n")
                     print("\n")
 
         elif str(output_format).lower() == "table":
@@ -730,9 +774,9 @@ def list_hp(args):
         print("Error Format")
     else:
         if detail_lvl != "full":
-            hp_keys_display = hp_display[detail_lvl].split(',')
+            hp_keys_display = [key.strip() for key in hp_display[detail_lvl].split(',')]
         else:
-            hp_keys_display = hp_display[hp_display[detail_lvl]].split(',')
+            hp_keys_display = [key.strip() for key in hp_display[hp_display[detail_lvl]].split(',')]
         
         if 'error' in data.keys():
             print(data['error']) 
@@ -749,14 +793,14 @@ def list_hp(args):
                 
                 if str(detail_lvl).lower() == "full":
                     hp_infos["links"] = []
-                    lk_keys_display = link_display[hp_display[detail_lvl]].split(',')
+                    lk_keys_display = [key.strip() for key in link_display[hp_display[detail_lvl]].split(',')]
                     
                     for link in hp["links"]:
                         lk_infos={}
                         for key in lk_keys_display: 
                             lk_infos[key] = link['link_' + key]
                         lk_infos["servs"] = []
-                        serv_keys_display = serv_display[hp_display[detail_lvl]].split(',')
+                        serv_keys_display = [key.strip() for key in serv_display[hp_display[detail_lvl]].split(',')]
                         
                         for serv in link["servs"]:
                             serv_infos={}
@@ -782,14 +826,14 @@ def list_hp(args):
             
             if str(detail_lvl).lower() == "full":
                 hp_infos["links"] = []
-                lk_keys_display = link_display[hp_display[detail_lvl]].split(',')
+                lk_keys_display = [key.strip() for key in link_display[hp_display[detail_lvl]].split(',')]
                 
                 for link in hp["links"]:
                     lk_infos={}
                     for key in lk_keys_display: 
                         lk_infos[key] = link['link_' + key]
                     lk_infos["servs"] = []
-                    serv_keys_display = serv_display[hp_display[detail_lvl]].split(',')
+                    serv_keys_display = [key.strip() for key in serv_display[hp_display[detail_lvl]].split(',')]
                     
                     for serv in link["servs"]:
                         serv_infos={}
@@ -837,6 +881,8 @@ def list_hp(args):
                             for serv in link["servs"]:
                                 for key in serv.keys():
                                     print("\t\t\t- "+key+": "+ str(serv[key]))
+                                print("\n")
+                            print("\n")
                 print("\n")
             if hps_infos_others != []:
                 if hps_infos != []:
@@ -859,6 +905,9 @@ def list_hp(args):
                                 for serv in link["servs"]:
                                     for key in serv.keys():
                                         print("\t\t\t- "+key+": "+ str(serv[key]))
+                                    print("\n")
+                                print("\n")
+
                     print("\n")
 
         elif str(output_format).lower() == "table":
@@ -961,9 +1010,9 @@ def list_link(args):
         print("Error Format")
     else:
         if detail_lvl != "full":
-            link_keys_display = link_display[detail_lvl].split(',')
+            link_keys_display = [key.strip() for key in link_display[detail_lvl].split(',')]
         else:
-            link_keys_display = link_display[link_display[detail_lvl]].split(',')
+            link_keys_display = [key.strip() for key in link_display[link_display[detail_lvl]].split(',')]
         
         if 'error' in data.keys():
             print(data['error']) 
@@ -985,8 +1034,8 @@ def list_link(args):
                         next_type="serv"
                     
                     link_infos[next_type+"s"] = []
-                    hp_keys_display = hp_display[link_display[detail_lvl]].split(',')
-                    serv_keys_display = serv_display[link_display[detail_lvl]].split(',')
+                    hp_keys_display = [key.strip() for key in hp_display[link_display[detail_lvl]].split(',')]
+                    serv_keys_display = [key.strip() for key in serv_display[link_display[detail_lvl]].split(',')]
 
                     for obj in link[next_type+"s"]:
                         obj_infos={}
@@ -1036,8 +1085,8 @@ def list_link(args):
                     next_type="serv"
                 
                 link_infos[next_type+"s"] = []
-                hp_keys_display = hp_display[link_display[detail_lvl]].split(',')
-                serv_keys_display = serv_display[link_display[detail_lvl]].split(',')
+                hp_keys_display = [key.strip() for key in hp_display[link_display[detail_lvl]].split(',')]
+                serv_keys_display = [key.strip() for key in serv_display[link_display[detail_lvl]].split(',')]
 
                 for obj in link[next_type+"s"]:
                     obj_infos={}
@@ -1101,6 +1150,8 @@ def list_link(args):
                         for serv in hp["servs"]:
                             for key in serv.keys():
                                 print("\t\t\t- "+key+": "+ str(serv[key]))
+                            print("\n")
+                        print("\n")
                 elif "servs" in link.keys():
                     print("\t- servs:")
                     for serv in link["servs"]:
@@ -1111,6 +1162,8 @@ def list_link(args):
                         for hp in serv["hps"]:
                             for key in hp.keys():
                                 print("\t\t\t- "+key+": "+ str(hp[key]))
+                            print("\n")
+                        print("\n")
                 print("\n")
             if links_infos_others != []:
                 if links_infos != []:
@@ -1130,6 +1183,8 @@ def list_link(args):
                             for serv in hp["servs"]:
                                 for key in serv.keys():
                                     print("\t\t\t- "+key+": "+ str(serv[key]))
+                                print("\n")
+                            print("\n")
                     elif "servs" in link.keys():
                         print("\t- servs:")
                         for serv in link["servs"]:
@@ -1140,6 +1195,8 @@ def list_link(args):
                             for hp in serv["hps"]:
                                 for key in hp.keys():
                                     print("\t\t\t- "+key+": "+ str(hp[key]))
+                                print("\n")
+                            print("\n")
                     print("\n")
 
         elif str(output_format).lower() == "table":
