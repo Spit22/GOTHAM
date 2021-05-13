@@ -1,7 +1,7 @@
 # GOTHAM
 Global Orchestrator for Threat-intel through Honeypot Army Management
 
-# Presentation
+## What is GOTHAM ?
 
 The aim of this project is to respond to 3 challenges : 
 
@@ -19,7 +19,17 @@ Overall, the orchestrator follows a simple logic : it deals with 3 objects only.
 * Severs : servers hosting reverse-proxy service
 * Network links : redirection of flows from reverse-proxies to honeypots
 
-# This documentation
+## GOTHAM environment
+
+As described, GOTHAM evolve on a specific environment. The following scheam show how this environment can be implemented :
+![](img/implemantation.png)
+
+## GOTHAM internal modules
+
+The following schema show the principles modules that permit the orchestrator implementing all its features :
+![](img/internal_arch.png)
+
+## This documentation
 
 Firstly, this documentation cover installation subjects :
 
