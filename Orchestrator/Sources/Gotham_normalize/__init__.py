@@ -241,7 +241,7 @@ def normalize_display_object_infos_with_tags(object_infos, obj_type, next_type='
         else:
             object_infos[next_type+"s"][i][next_type+"_tags_hp"]=object_infos[next_type+"s"][i][next_type+"_tags_hp"].replace("||",separator+" ")
             object_infos[next_type+"s"][i][next_type+"_tags_serv"]=object_infos[next_type+"s"][i][next_type+"_tags_serv"].replace("||",separator+" ")
-        for j in range(len(object_infos[next_type+"s"][i][last_type+"s"]))
+        for j in range(len(object_infos[next_type+"s"][i][last_type+"s"])):
             object_infos[next_type+"s"][i][last_type+"s"][j][last_type+"_tags"]=object_infos[next_type+"s"][i][last_type+"s"][j][last_type+"_tags"].replace("||",separator+" ")
 
 
