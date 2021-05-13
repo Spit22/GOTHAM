@@ -1438,13 +1438,13 @@ def ls_honeypot():
             # update state
             try:
                 honeypots_exact = [Gotham_state.adapt_state(DB_settings,
-                honeypote["hp_id"], "hp") for honeypot in honeypots_exact]
+                    honeypote["hp_id"], "hp") for honeypot in honeypots_exact]
             except Exception as e:
                 logging.error(
                     "Error while configuring honeypot state : "+str(e))
             try:
                 honeypots_others = [Gotham_state.adapt_state(DB_settings,
-                honeypot["hp_id"], "hp") for honeypot in honeypots_others]
+                    honeypot["hp_id"], "hp") for honeypot in honeypots_others]
             except Exception as e:
                 logging.error(
                     "Error while configuring honeypot state : "+str(e))
@@ -1465,6 +1465,12 @@ def ls_honeypot():
         honeypots = Gotham_link_BDD.get_honeypot_infos(DB_settings)
 
         if honeypots != []:
+            try:
+                honeypots = [Gotham_state.adapt_state(DB_settings,
+                    honeypot["hp_id"], "hp") for honeypot in honeypots]
+            except Exception as e:
+                logging.error(
+                    "Error while configuring honeypot state : "+str(e))
             honeypots = [Gotham_normalize.normalize_display_object_infos(
                 honeypot, "hp") for honeypot in honeypots]
             return {"honeypots": honeypots}, 200
@@ -1593,8 +1599,13 @@ def ls_serv():
         servers = Gotham_link_BDD.get_server_infos(DB_settings)
 
         if servers != []:
-            servers = [Gotham_normalize.normalize_display_object_infos(
-                server, "serv") for server in servers]
+            try:
+                servers = [Gotham_state.adapt_state(DB_settings,
+                server["serv_id"], "serv") for server in servers]
+            except Exception as e:
+                logging.error(
+                    "Error while configuring server state : "+str(e))
+            servers = [Gotham_normalize.normalize_display_object_infos(server, "serv") for server in servers]
             return {"servers": servers}
         else:
             logging.error(f"You tried to list servers but no one exists")
