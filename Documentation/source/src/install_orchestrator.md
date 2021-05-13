@@ -25,4 +25,6 @@ To run the orchestrator's api, you have to execute the following command :
 $ python3 /opt/GOTHAM/Orchestrator/Sources/api.py
 ```
 
+The api will listen on port 5000 on localhost by default. Please use Apache or Nginx for reverse proxying and expose api to another network. 
+
 /!\ Note that in a production environment, we recommand you to create an init script, to run GOTHAM as a service and not as a simple python command.
