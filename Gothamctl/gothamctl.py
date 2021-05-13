@@ -444,6 +444,7 @@ def list_server(args):
     output_format = args.o
     detail_lvl = args.d
     overplus = int(args.p)
+    print(detail_lvl)
 
 
     prot="http"
@@ -516,7 +517,7 @@ def list_server(args):
                 for key in serv_keys_display: 
                    serv_infos[key] = serv['serv_' + key] 
                 
-                if str(detail_lvl).lower == "full":
+                if str(detail_lvl).lower() == "full":
                     serv_infos["links"] = []
                     lk_keys_display = link_display[serv_display[detail_lvl]].split(',')
                     
@@ -548,7 +549,8 @@ def list_server(args):
             for key in serv_keys_display: 
                serv_infos[key] = serv['serv_' + key] 
             
-            if str(detail_lvl).lower == "full":
+            if str(detail_lvl).lower() == "full":
+                print("on est bien en full")
                 serv_infos["links"] = []
                 lk_keys_display = link_display[serv_display[detail_lvl]].split(',')
                 
@@ -600,10 +602,10 @@ def list_server(args):
                             for key in link.keys():
                                 if key != "servs":
                                     print("\t\t- "+key+": "+ str(link[key]))
-                            print("\t\t- servs:")
-                            for serv in link["servs"]:
-                                for key in serv.keys():
-                                    print("\t\t\t- "+key+": "+ str(serv[key]))
+                            print("\t\t- hps:")
+                            for hp in link["hps"]:
+                                for key in hp.keys():
+                                    print("\t\t\t- "+key+": "+ str(hp[key]))
                 print("\n")
             if servs_infos_others != []:
                 if servs_infos != []:
@@ -622,10 +624,10 @@ def list_server(args):
                                 for key in link.keys():
                                     if key != "servs":
                                         print("\t\t- "+key+": "+ str(link[key]))
-                                print("\t\t- servs:")
-                                for serv in link["servs"]:
-                                    for key in serv.keys():
-                                        print("\t\t\t- "+key+": "+ str(serv[key]))
+                                print("\t\t- hps:")
+                                for hp in link["hps"]:
+                                    for key in hp.keys():
+                                        print("\t\t\t- "+key+": "+ str(hp[key]))
                     print("\n")
 
         elif str(output_format).lower() == "table":
@@ -745,7 +747,7 @@ def list_hp(args):
                 for key in hp_keys_display: 
                    hp_infos[key] = hp['hp_' + key] 
                 
-                if str(detail_lvl).lower == "full":
+                if str(detail_lvl).lower() == "full":
                     hp_infos["links"] = []
                     lk_keys_display = link_display[hp_display[detail_lvl]].split(',')
                     
@@ -778,7 +780,7 @@ def list_hp(args):
             for key in hp_keys_display: 
                 hp_infos[key] = hp['hp_' + key] 
             
-            if str(detail_lvl).lower == "full":
+            if str(detail_lvl).lower() == "full":
                 hp_infos["links"] = []
                 lk_keys_display = link_display[hp_display[detail_lvl]].split(',')
                 
@@ -976,7 +978,7 @@ def list_link(args):
                 for key in link_keys_display: 
                    link_infos[key] = link['link_' + key] 
                 
-                if str(detail_lvl).lower == "full":
+                if str(detail_lvl).lower() == "full":
                     if "hps" in link.keys():
                         next_type="hp"
                     elif "servs" in link.keys():
@@ -1027,7 +1029,7 @@ def list_link(args):
             for key in link_keys_display: 
                link_infos[key] = link['link_' + key] 
             
-            if str(detail_lvl).lower == "full":
+            if str(detail_lvl).lower() == "full":
                 if "hps" in link.keys():
                     next_type="hp"
                 elif "servs" in link.keys():
@@ -1106,7 +1108,7 @@ def list_link(args):
                             if key != "hps":
                                 print("\t\t- "+key+": "+ str(serv[key]))
                         print("\t\t- hps:")
-                        for hp in serv["servs"]:
+                        for hp in serv["hps"]:
                             for key in hp.keys():
                                 print("\t\t\t- "+key+": "+ str(hp[key]))
                 print("\n")
@@ -1135,7 +1137,7 @@ def list_link(args):
                                 if key != "hps":
                                     print("\t\t- "+key+": "+ str(serv[key]))
                             print("\t\t- hps:")
-                            for hp in serv["servs"]:
+                            for hp in serv["hps"]:
                                 for key in hp.keys():
                                     print("\t\t\t- "+key+": "+ str(hp[key]))
                     print("\n")
