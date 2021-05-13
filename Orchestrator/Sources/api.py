@@ -1626,6 +1626,7 @@ def ls_lk():
     nb_serv = request.args.get("nb_serv")
     tags_hp = request.args.get("tags_hp")
     tags_serv = request.args.get("tags_serv")
+    ports = request.args.get("ports")
 
     find_exact=True
 
@@ -1667,6 +1668,14 @@ def ls_lk():
             link_infos_received["tags_serv"] = tags_serv
             if "*" in str(link_infos_received["tags_serv"]):
                 link_infos_received["tags_serv"]=str(link_infos_received["tags_serv"]).replace("*","%")
+                find_exact=False
+        else:
+            link_infos_received["tags_serv"] = "%"
+
+        if (ports):
+            link_infos_received["ports"] = ports
+            if "*" in str(link_infos_received["ports"]):
+                link_infos_received["ports"]=str(link_infos_received["ports"]).replace("*","%")
                 find_exact=False
         else:
             link_infos_received["tags_serv"] = "%"
