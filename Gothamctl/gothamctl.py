@@ -1143,7 +1143,7 @@ def list_link(args):
                     print("\n")
 
         elif str(output_format).lower() == "table":
-            print("Linkss:")
+            print("Links:")
             print("==========")
             print(tabulate.tabulate(links_infos, headers = 'keys'))
             if links_infos_others != []:
