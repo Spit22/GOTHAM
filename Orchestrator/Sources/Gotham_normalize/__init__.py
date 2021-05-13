@@ -210,6 +210,43 @@ def normalize_display_object_infos(object_infos, obj_type, next_type=''):
             resultat[next_type+'s'][i], next_type, "||||", last_type)
     return resultat
 
+def normalize_display_object_infos_with_tags(object_infos, obj_type, next_type=''):
+    GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    separator = config['tag']["separator"]
+
+    obj_types_possible = ["hp", "serv", "link"]
+    if not(obj_type in obj_types_possible and (next_type in obj_types_possible or next_type == '')):
+        error = str(id) + "Wrong value of " + str(obj_type)
+        logging.error(error)
+        raise ValueError(error)
+    if obj_type != "link":
+        next_type = "link"
+        object_infos[obj_type+"_tags"]=object_infos[obj_type+"_tags"].replace("||",separator+" ")
+    elif next_type == '':
+        if object_infos["link_nb_hp"] <= object_infos["link_nb_serv"]:
+            next_type = "hp"
+        else:
+            next_type = "serv"
+    if obj_type == "link": 
+        object_infos[obj_type+"_tags_hp"]=object_infos[obj_type+"_tags_hp"].replace("||",separator+" ")
+        object_infos[obj_type+"_tags_serv"]=object_infos[obj_type+"_tags_serv"].replace("||",separator+" ")
+
+    last_type = list(set(obj_types_possible) - set([obj_type, next_type]))[0]
+    
+    for i in range(len(object_infos[next_type+"s"])):
+        if next_type != "link":
+            object_infos[next_type+"s"][i][next_type+"_tags"]=object_infos[next_type+"s"][i][next_type+"_tags"].replace("||",separator+" ")
+        else:
+            object_infos[next_type+"s"][i][next_type+"_tags_hp"]=object_infos[next_type+"s"][i][next_type+"_tags_hp"].replace("||",separator+" ")
+            object_infos[next_type+"s"][i][next_type+"_tags_serv"]=object_infos[next_type+"s"][i][next_type+"_tags_serv"].replace("||",separator+" ")
+        for j in range(len(object_infos[next_type+"s"][i][last_type+"s"]))
+            object_infos[next_type+"s"][i][last_type+"s"][j][last_type+"_tags"]=object_infos[next_type+"s"][i][last_type+"s"][j][last_type+"_tags"].replace("||",separator+" ")
+
+
+    return object_infos
+
 ########## NORMALIZE ID SECTION ##########
 
 

@@ -727,8 +727,8 @@ def edit_honeypot():
             honeypot = Gotham_link_BDD.get_honeypot_infos(
                 DB_settings, id=hp_infos_received["id"])[0]
         
-        honeypot = Gotham_normalize.normalize_display_object_infos(
-            honeypot, "hp")
+        honeypot = Gotham_normalize.normalize_display_object_infos_with_tags(Gotham_normalize.normalize_display_object_infos(
+            honeypot, "hp"),"hp")
 
         return honeypot, 200
 
@@ -871,8 +871,8 @@ def edit_serv():
             server = Gotham_link_BDD.get_server_infos(
                 DB_settings, id=serv_infos_received["id"])[0]
         
-        server = Gotham_normalize.normalize_display_object_infos(
-            server, "serv")
+        server = Gotham_normalize.normalize_display_object_infos_with_tags(Gotham_normalize.normalize_display_object_infos(
+            server, "serv"),"serv")
         return server, 200
 
     return "{\"message\": \"Nothing to change\"}\n", 200
@@ -1123,7 +1123,7 @@ def edit_lk():
         modifications = True
 
     if modifications == True:
-        return link, 200
+        return Gotham_normalize.normalize_display_object_infos_with_tags(link,"link"), 200
     else:
         return "{\"message\": \"Nothing to change\"}\n", 200
 
@@ -1449,10 +1449,10 @@ def ls_honeypot():
                 logging.error(
                     "Error while configuring honeypot state : "+str(e))
 
-            honeypots_exact = [Gotham_normalize.normalize_display_object_infos(
-                honeypot, "hp") for honeypot in honeypots_exact]
-            honeypots_others = [Gotham_normalize.normalize_display_object_infos(
-                honeypot, "hp") for honeypot in honeypots_others]
+            honeypots_exact = [Gotham_normalize.normalize_display_object_infos_with_tags(Gotham_normalize.normalize_display_object_infos(
+                honeypot, "hp"),"hp") for honeypot in honeypots_exact]
+            honeypots_others = [Gotham_normalize.normalize_display_object_infos_with_tags(Gotham_normalize.normalize_display_object_infos(
+                honeypot, "hp"),"hp") for honeypot in honeypots_others]
             return {"exact": honeypots_exact, "others": honeypots_others}, 200
 
         else:
@@ -1471,8 +1471,8 @@ def ls_honeypot():
             except Exception as e:
                 logging.error(
                     "Error while configuring honeypot state : "+str(e))
-            honeypots = [Gotham_normalize.normalize_display_object_infos(
-                honeypot, "hp") for honeypot in honeypots]
+            honeypots = [Gotham_normalize.normalize_display_object_infos_with_tags(Gotham_normalize.normalize_display_object_infos(
+                honeypot, "hp"),"hp") for honeypot in honeypots]
             return {"honeypots": honeypots}, 200
         else:
             logging.error(f"You tried to list honeypots but no one exists")
@@ -1584,10 +1584,10 @@ def ls_serv():
                 logging.error(
                     "Error while configuring server state : "+str(e))
             
-            servers_exact = [Gotham_normalize.normalize_display_object_infos(
-                server, "serv") for server in servers_exact]
-            servers_others = [Gotham_normalize.normalize_display_object_infos(
-                server, "serv") for server in servers_others]
+            servers_exact = [Gotham_normalize.normalize_display_object_infos_with_tags(Gotham_normalize.normalize_display_object_infos(
+                server, "serv"),"serv") for server in servers_exact]
+            servers_others = [Gotham_normalize.normalize_display_object_infos_with_tags(Gotham_normalize.normalize_display_object_infos(
+                server, "serv"),"serv") for server in servers_others]
             return {"exact": servers_exact, "others": servers_others}, 200
 
         else:
@@ -1605,7 +1605,7 @@ def ls_serv():
             except Exception as e:
                 logging.error(
                     "Error while configuring server state : "+str(e))
-            servers = [Gotham_normalize.normalize_display_object_infos(server, "serv") for server in servers]
+            servers = [Gotham_normalize.normalize_display_object_infos_with_tags(Gotham_normalize.normalize_display_object_infos(server, "serv"),serv) for server in servers]
             return {"servers": servers}
         else:
             logging.error(f"You tried to list servers but no one exists")
@@ -1684,10 +1684,10 @@ def ls_lk():
             set_exact = {frozenset(row.items()) for row in links_exact}
             set_others = {frozenset(row.items()) for row in links_others}
             links_others = [dict(i) for i in set_others - set_exact]
-            links_exact = [Gotham_normalize.normalize_display_object_infos(
-                link, "link") for link in links_exact]
-            links_others = [Gotham_normalize.normalize_display_object_infos(
-                link, "link") for link in links_others]
+            links_exact = [Gotham_normalize.normalize_display_object_infos_with_tags(Gotham_normalize.normalize_display_object_infos(
+                link, "link"),"link") for link in links_exact]
+            links_others = [Gotham_normalize.normalize_display_object_infos_with_tags(Gotham_normalize.normalize_display_object_infos(
+                link, "link"),"link") for link in links_others]
             return {"exact": links_exact, "others": links_others}, 200
 
         else:
@@ -1700,8 +1700,8 @@ def ls_lk():
         links = Gotham_link_BDD.get_link_infos(DB_settings)
 
         if links != []:
-            links = [Gotham_normalize.normalize_display_object_infos(
-                link, "link") for link in links]
+            links = [Gotham_normalize.normalize_display_object_infos_with_tags(Gotham_normalize.normalize_display_object_infos(
+                link, "link"),"link") for link in links]
             return {"links": links}, 200
         else:
             logging.error(f"You tried to list links but no one exists")
@@ -1716,24 +1716,24 @@ def ls_all():
     honeypots = Gotham_link_BDD.get_honeypot_infos(DB_settings)
 
     if honeypots != []:
-        honeypots = [Gotham_normalize.normalize_display_object_infos(
-            honeypot, "hp") for honeypot in honeypots]
+        honeypots = [Gotham_normalize.normalize_display_object_infos_with_tags(Gotham_normalize.normalize_display_object_infos(
+            honeypot, "hp"),"hp") for honeypot in honeypots]
     else:
         honeypots = "No honeypot in database"
 
     servers = Gotham_link_BDD.get_server_infos(DB_settings)
 
     if servers != []:
-        servers = [Gotham_normalize.normalize_display_object_infos(
-            server, "serv") for server in servers]
+        servers = [Gotham_normalize.normalize_display_object_infos_with_tags(Gotham_normalize.normalize_display_object_infos(
+            server, "serv"),"serv") for server in servers]
     else:
         servers = "No server in database"
 
     links = Gotham_link_BDD.get_link_infos(DB_settings)
 
     if links != []:
-        links = [Gotham_normalize.normalize_display_object_infos(
-            link, "link") for link in links]
+        links = [Gotham_normalize.normalize_display_object_infos_with_tags(Gotham_normalize.normalize_display_object_infos(
+            link, "link"),"link") for link in links]
     else:
         links = "No link in database"
 
