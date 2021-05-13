@@ -17,6 +17,12 @@ Please note that this script is under development, so we don't provide any warra
 
 Once the script finished, you can retrieve GOTHAM on /opt/GOTHAM.
 
+Then you have to define GOTHAM_HOME by :
+
+```
+$ source /etc/profile
+```
+
 And it's all. You can now configure your orchestrator under /opt/GOTHAM/Orchestrator/Config/config.ini. Please refer to the configuration documentation for that part.
 
 To run the orchestrator's api, you have to execute the following command :
