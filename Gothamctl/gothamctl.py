@@ -546,145 +546,148 @@ def list_server(args):
             serv_keys_display = [key.strip() for key in serv_display[serv_display[detail_lvl]].split(',')]
         
         if 'error' in data.keys():
-            print(data['error']) 
-        elif 'servers' in data.keys(): 
-            servs = data['servers'] 
-            
-        elif 'exact' in data.keys() and 'others' in data.keys(): 
-            servs = data['exact']
-            servs_other = data['others']
-            for serv in servs_other:
-                serv_infos = {}
-                for key in serv_keys_display: 
-                   serv_infos[key] = serv['serv_' + key] 
-                
-                if str(detail_lvl).lower() == "full":
-                    serv_infos["links"] = []
-                    lk_keys_display = [key.strip() for key in link_display[serv_display[detail_lvl]].split(',')]
-                    
-                    for link in serv["links"]:
-                        lk_infos={}
-                        for key in lk_keys_display: 
-                            lk_infos[key] = link['link_' + key]
-                        lk_infos["hps"] = []
-                        hp_keys_display = [key.strip() for key in hp_display[serv_display[detail_lvl]].split(',')]
-                        
-                        for hp in link["hps"]:
-                            hp_infos={}
-                            for key in hp_keys_display: 
-                                hp_infos[key] = hp['hp_' + key]
-                            lk_infos["hps"].append(hp_infos)
-                        if str(output_format).lower() == "table":
-                            lk_infos["hps"]=tabulate.tabulate(lk_infos["hps"], headers = 'keys')
-                        serv_infos["links"].append(lk_infos)
-                    if str(output_format).lower() == "table":
-                        serv_infos["links"]=tabulate.tabulate(serv_infos["links"], headers = 'keys')
-                        
-                servs_infos_others.append(serv_infos)
-
+            print(data['error'])
         else:
-            print("ERROR") # A modifier
-        
-        for serv in servs:
-            serv_infos = {}
-            for key in serv_keys_display: 
-               serv_infos[key] = serv['serv_' + key] 
-            
-            if str(detail_lvl).lower() == "full":
-                serv_infos["links"] = []
-                lk_keys_display = [key.strip() for key in link_display[serv_display[detail_lvl]].split(',')]
+            if 'servers' in data.keys(): 
+                servs = data['servers'] 
                 
-                for link in serv["links"]:
-                    lk_infos={}
-                    for key in lk_keys_display: 
-                        lk_infos[key] = link['link_' + key]
-                    lk_infos["hps"] = []
-                    hp_keys_display = [key.strip() for key in hp_display[serv_display[detail_lvl]].split(',')]
+            elif 'exact' in data.keys() and 'others' in data.keys(): 
+                servs = data['exact']
+                servs_other = data['others']
+                for serv in servs_other:
+                    serv_infos = {}
+                    for key in serv_keys_display: 
+                       serv_infos[key] = serv['serv_' + key] 
                     
-                    for hp in link["hps"]:
-                        hp_infos={}
-                        for key in hp_keys_display: 
-                            hp_infos[key] = hp['hp_' + key]
-                        lk_infos["hps"].append(hp_infos)
-                    if str(output_format).lower() == "table":
-                        lk_infos["hps"]=tabulate.tabulate(lk_infos["hps"], headers = 'keys')
-                    serv_infos["links"].append(lk_infos)
-                if str(output_format).lower() == "table":
-                    serv_infos["links"]=tabulate.tabulate(serv_infos["links"], headers = 'keys')
-                    
-            servs_infos.append(serv_infos)
-        
-        servs_infos_others = servs_infos_others[0:overplus]
-        if str(output_format).lower() == "json":
-            if servs_infos_others != []:
-                result={"servs":servs_infos,"servs_others":servs_infos_others}
-            else:
-                result={"servs":servs_infos}
-
-            res = json.dumps(result, indent=4)
-            print(res)
-        elif str(output_format).lower() == "tree":
-            print("Not implemented")
-        elif str(output_format).lower() == "text":
-            print("Servers:")
-            print("==========")
-            
-            for serv in servs_infos:
-                for key in serv.keys():
-                    if key != "links":
-                        print("\t- "+key+": "+ str(serv[key]))
-                if "links" in serv.keys(): 
-                    if serv["links"] == []:
-                        print("\t- links: Not linked")
-                    else:
-                        print("\t- links:")
+                    if str(detail_lvl).lower() == "full":
+                        serv_infos["links"] = []
+                        lk_keys_display = [key.strip() for key in link_display[serv_display[detail_lvl]].split(',')]
+                        
                         for link in serv["links"]:
-                            for key in link.keys():
-                                if key != "servs":
-                                    print("\t\t- "+key+": "+ str(link[key]))
-                            print("\t\t- hps:")
+                            lk_infos={}
+                            for key in lk_keys_display: 
+                                lk_infos[key] = link['link_' + key]
+                            lk_infos["hps"] = []
+                            hp_keys_display = [key.strip() for key in hp_display[serv_display[detail_lvl]].split(',')]
+                            
                             for hp in link["hps"]:
-                                for key in hp.keys():
-                                    print("\t\t\t- "+key+": "+ str(hp[key]))
-                                print("\n")
-                            print("\n")
-                print("\n")
-            if servs_infos_others != []:
-                if servs_infos != []:
-                    print("\nOthers:")
-                    print("==========")
-                for serv in servs_infos_others:
-                    for key in serv.keys():
-                        if key != "links":
-                            print("\t- "+key+": "+ str(serv[key]))
-                    if "links" in serv.keys(): 
-                        if serv["links"] == []:
-                            print("\t- links: Not linked")
-                        else:
-                            print("\t- links:")
-                            for link in serv["links"]:
-                                for key in link.keys():
-                                    if key != "servs":
-                                        print("\t\t- "+key+": "+ str(link[key]))
-                                print("\t\t- hps:")
-                                for hp in link["hps"]:
-                                    for key in hp.keys():
-                                        print("\t\t\t- "+key+": "+ str(hp[key]))
-                                    print("\n")
-                                print("\n")
-                    print("\n")
+                                hp_infos={}
+                                for key in hp_keys_display: 
+                                    hp_infos[key] = hp['hp_' + key]
+                                lk_infos["hps"].append(hp_infos)
+                            if str(output_format).lower() == "table":
+                                lk_infos["hps"]=tabulate.tabulate(lk_infos["hps"], headers = 'keys')
+                            serv_infos["links"].append(lk_infos)
+                        if str(output_format).lower() == "table":
+                            serv_infos["links"]=tabulate.tabulate(serv_infos["links"], headers = 'keys')
+                            
+                    servs_infos_others.append(serv_infos)
 
-        elif str(output_format).lower() == "table":
-            print("Servers:")
-            print("==========")
-            print(tabulate.tabulate(servs_infos, headers = 'keys'))
-            if servs_infos_others != []:
-                if servs_infos != []:
-                    print("\nOthers:")
+            else:
+                servs=0
+                print("ERROR") # A modifier
+            
+            if servs!=0:
+                for serv in servs:
+                    serv_infos = {}
+                    for key in serv_keys_display: 
+                       serv_infos[key] = serv['serv_' + key] 
+                    
+                    if str(detail_lvl).lower() == "full":
+                        serv_infos["links"] = []
+                        lk_keys_display = [key.strip() for key in link_display[serv_display[detail_lvl]].split(',')]
+                        
+                        for link in serv["links"]:
+                            lk_infos={}
+                            for key in lk_keys_display: 
+                                lk_infos[key] = link['link_' + key]
+                            lk_infos["hps"] = []
+                            hp_keys_display = [key.strip() for key in hp_display[serv_display[detail_lvl]].split(',')]
+                            
+                            for hp in link["hps"]:
+                                hp_infos={}
+                                for key in hp_keys_display: 
+                                    hp_infos[key] = hp['hp_' + key]
+                                lk_infos["hps"].append(hp_infos)
+                            if str(output_format).lower() == "table":
+                                lk_infos["hps"]=tabulate.tabulate(lk_infos["hps"], headers = 'keys')
+                            serv_infos["links"].append(lk_infos)
+                        if str(output_format).lower() == "table":
+                            serv_infos["links"]=tabulate.tabulate(serv_infos["links"], headers = 'keys')
+                            
+                    servs_infos.append(serv_infos)
+                
+                servs_infos_others = servs_infos_others[0:overplus]
+                if str(output_format).lower() == "json":
+                    if servs_infos_others != []:
+                        result={"servs":servs_infos,"servs_others":servs_infos_others}
+                    else:
+                        result={"servs":servs_infos}
+
+                    res = json.dumps(result, indent=4)
+                    print(res)
+                elif str(output_format).lower() == "tree":
+                    print("Not implemented")
+                elif str(output_format).lower() == "text":
+                    print("Servers:")
                     print("==========")
-                print(tabulate.tabulate(servs_infos_others, headers = 'keys')) 
-        else :
-            print("Wrong Format")
+                    
+                    for serv in servs_infos:
+                        for key in serv.keys():
+                            if key != "links":
+                                print("\t- "+key+": "+ str(serv[key]))
+                        if "links" in serv.keys(): 
+                            if serv["links"] == []:
+                                print("\t- links: Not linked")
+                            else:
+                                print("\t- links:")
+                                for link in serv["links"]:
+                                    for key in link.keys():
+                                        if key != "servs":
+                                            print("\t\t- "+key+": "+ str(link[key]))
+                                    print("\t\t- hps:")
+                                    for hp in link["hps"]:
+                                        for key in hp.keys():
+                                            print("\t\t\t- "+key+": "+ str(hp[key]))
+                                        print("\n")
+                                    print("\n")
+                        print("\n")
+                    if servs_infos_others != []:
+                        if servs_infos != []:
+                            print("\nOthers:")
+                            print("==========")
+                        for serv in servs_infos_others:
+                            for key in serv.keys():
+                                if key != "links":
+                                    print("\t- "+key+": "+ str(serv[key]))
+                            if "links" in serv.keys(): 
+                                if serv["links"] == []:
+                                    print("\t- links: Not linked")
+                                else:
+                                    print("\t- links:")
+                                    for link in serv["links"]:
+                                        for key in link.keys():
+                                            if key != "servs":
+                                                print("\t\t- "+key+": "+ str(link[key]))
+                                        print("\t\t- hps:")
+                                        for hp in link["hps"]:
+                                            for key in hp.keys():
+                                                print("\t\t\t- "+key+": "+ str(hp[key]))
+                                            print("\n")
+                                        print("\n")
+                            print("\n")
+
+                elif str(output_format).lower() == "table":
+                    print("Servers:")
+                    print("==========")
+                    print(tabulate.tabulate(servs_infos, headers = 'keys'))
+                    if servs_infos_others != []:
+                        if servs_infos != []:
+                            print("\nOthers:")
+                            print("==========")
+                        print(tabulate.tabulate(servs_infos_others, headers = 'keys')) 
+                else :
+                    print("Wrong Format")
 
 
 def list_hp(args):
@@ -779,148 +782,151 @@ def list_hp(args):
             hp_keys_display = [key.strip() for key in hp_display[hp_display[detail_lvl]].split(',')]
         
         if 'error' in data.keys():
-            print(data['error']) 
-        elif 'honeypots' in data.keys(): 
-            hps = data['honeypots'] 
-            
-        elif 'exact' in data.keys() and 'others' in data.keys(): 
-            hps = data['exact']
-            hps_other = data['others']
-            for hp in hps_other:
-                hp_infos = {}
-                for key in hp_keys_display: 
-                   hp_infos[key] = hp['hp_' + key] 
+            print(data['error'])
+        else: 
+            if 'honeypots' in data.keys(): 
+                hps = data['honeypots'] 
                 
-                if str(detail_lvl).lower() == "full":
-                    hp_infos["links"] = []
-                    lk_keys_display = [key.strip() for key in link_display[hp_display[detail_lvl]].split(',')]
+            elif 'exact' in data.keys() and 'others' in data.keys(): 
+                hps = data['exact']
+                hps_other = data['others']
+                for hp in hps_other:
+                    hp_infos = {}
+                    for key in hp_keys_display: 
+                       hp_infos[key] = hp['hp_' + key] 
                     
-                    for link in hp["links"]:
-                        lk_infos={}
-                        for key in lk_keys_display: 
-                            lk_infos[key] = link['link_' + key]
-                        lk_infos["servs"] = []
-                        serv_keys_display = [key.strip() for key in serv_display[hp_display[detail_lvl]].split(',')]
+                    if str(detail_lvl).lower() == "full":
+                        hp_infos["links"] = []
+                        lk_keys_display = [key.strip() for key in link_display[hp_display[detail_lvl]].split(',')]
                         
-                        for serv in link["servs"]:
-                            serv_infos={}
-                            for key in serv_keys_display: 
-                                serv_infos[key] = serv['serv_' + key]
-                            lk_infos["servs"].append(serv_infos)
-                        if str(output_format).lower() == "table":
-                            lk_infos["servs"]=tabulate.tabulate(lk_infos["servs"], headers = 'keys')
-                            
-                        hp_infos["links"].append(lk_infos)
-                    if str(output_format).lower() == "table":
-                        hp_infos["links"]=tabulate.tabulate(hp_infos["links"], headers = 'keys')
-                        
-                hps_infos_others.append(hp_infos)
-
-        else:
-            print("ERROR") # A modifier
-        
-        for hp in hps:
-            hp_infos = {}
-            for key in hp_keys_display: 
-                hp_infos[key] = hp['hp_' + key] 
-            
-            if str(detail_lvl).lower() == "full":
-                hp_infos["links"] = []
-                lk_keys_display = [key.strip() for key in link_display[hp_display[detail_lvl]].split(',')]
-                
-                for link in hp["links"]:
-                    lk_infos={}
-                    for key in lk_keys_display: 
-                        lk_infos[key] = link['link_' + key]
-                    lk_infos["servs"] = []
-                    serv_keys_display = [key.strip() for key in serv_display[hp_display[detail_lvl]].split(',')]
-                    
-                    for serv in link["servs"]:
-                        serv_infos={}
-                        for key in serv_keys_display: 
-                            serv_infos[key] = serv['serv_' + key]
-                        lk_infos["servs"].append(serv_infos)
-                    if str(output_format).lower() == "table":
-                        lk_infos["servs"]=tabulate.tabulate(lk_infos["servs"], headers = 'keys')
-                        
-                    hp_infos["links"].append(lk_infos)
-                if str(output_format).lower() == "table":
-                    hp_infos["links"]=tabulate.tabulate(hp_infos["links"], headers = 'keys')
-                    
-            hps_infos.append(hp_infos) 
-        
-        hps_infos_others = hps_infos_others[0:overplus]
-        if str(output_format).lower() == "json":
-            if hps_infos_others != []:
-                result={"hps":hps_infos,"hps_others":hps_infos_others}
-            else:
-                result={"hps":hps_infos}
-
-            res = json.dumps(result, indent=4)
-            print(res)
-        elif str(output_format).lower() == "tree":
-            print("Not implemented")
-        elif str(output_format).lower() == "text":
-            print("Honeypots:")
-            print("==========")
-            
-            for hp in hps_infos:
-                for key in hp.keys():
-                    if key != "links":
-                        print("\t- "+key+": "+ str(hp[key]))
-                if "links" in hp.keys(): 
-                    if hp["links"] == []:
-                        print("\t- links: Not linked")
-                    else:
-                        print("\t- links:")
                         for link in hp["links"]:
-                            for key in link.keys():
-                                if key != "servs":
-                                    print("\t\t- "+key+": "+ str(link[key]))
-                            print("\t\t- servs:")
+                            lk_infos={}
+                            for key in lk_keys_display: 
+                                lk_infos[key] = link['link_' + key]
+                            lk_infos["servs"] = []
+                            serv_keys_display = [key.strip() for key in serv_display[hp_display[detail_lvl]].split(',')]
+                            
                             for serv in link["servs"]:
-                                for key in serv.keys():
-                                    print("\t\t\t- "+key+": "+ str(serv[key]))
-                                print("\n")
-                            print("\n")
-                print("\n")
-            if hps_infos_others != []:
-                if hps_infos != []:
-                    print("\nOthers:")
+                                serv_infos={}
+                                for key in serv_keys_display: 
+                                    serv_infos[key] = serv['serv_' + key]
+                                lk_infos["servs"].append(serv_infos)
+                            if str(output_format).lower() == "table":
+                                lk_infos["servs"]=tabulate.tabulate(lk_infos["servs"], headers = 'keys')
+                                
+                            hp_infos["links"].append(lk_infos)
+                        if str(output_format).lower() == "table":
+                            hp_infos["links"]=tabulate.tabulate(hp_infos["links"], headers = 'keys')
+                            
+                    hps_infos_others.append(hp_infos)
+
+            else:
+                hps=0
+                print("ERROR") # A modifier
+            
+            if hps!=0:
+                for hp in hps:
+                    hp_infos = {}
+                    for key in hp_keys_display: 
+                        hp_infos[key] = hp['hp_' + key] 
+                    
+                    if str(detail_lvl).lower() == "full":
+                        hp_infos["links"] = []
+                        lk_keys_display = [key.strip() for key in link_display[hp_display[detail_lvl]].split(',')]
+                        
+                        for link in hp["links"]:
+                            lk_infos={}
+                            for key in lk_keys_display: 
+                                lk_infos[key] = link['link_' + key]
+                            lk_infos["servs"] = []
+                            serv_keys_display = [key.strip() for key in serv_display[hp_display[detail_lvl]].split(',')]
+                            
+                            for serv in link["servs"]:
+                                serv_infos={}
+                                for key in serv_keys_display: 
+                                    serv_infos[key] = serv['serv_' + key]
+                                lk_infos["servs"].append(serv_infos)
+                            if str(output_format).lower() == "table":
+                                lk_infos["servs"]=tabulate.tabulate(lk_infos["servs"], headers = 'keys')
+                                
+                            hp_infos["links"].append(lk_infos)
+                        if str(output_format).lower() == "table":
+                            hp_infos["links"]=tabulate.tabulate(hp_infos["links"], headers = 'keys')
+                            
+                    hps_infos.append(hp_infos) 
+                
+                hps_infos_others = hps_infos_others[0:overplus]
+                if str(output_format).lower() == "json":
+                    if hps_infos_others != []:
+                        result={"hps":hps_infos,"hps_others":hps_infos_others}
+                    else:
+                        result={"hps":hps_infos}
+
+                    res = json.dumps(result, indent=4)
+                    print(res)
+                elif str(output_format).lower() == "tree":
+                    print("Not implemented")
+                elif str(output_format).lower() == "text":
+                    print("Honeypots:")
                     print("==========")
-                for hp in hps_infos_others:
-                    for key in hp.keys():
-                        if key != "links":
-                            print("\t- "+key+": "+ str(hp[key]))
-                    if "links" in hp.keys(): 
-                        if hp["links"] == []:
-                            print("\t- links: Not linked")
-                        else:
-                            print("\t- links:")
-                            for link in hp["links"]:
-                                for key in link.keys():
-                                    if key != "servs":
-                                        print("\t\t- "+key+": "+ str(link[key]))
-                                print("\t\t- servs:")
-                                for serv in link["servs"]:
-                                    for key in serv.keys():
-                                        print("\t\t\t- "+key+": "+ str(serv[key]))
+                    
+                    for hp in hps_infos:
+                        for key in hp.keys():
+                            if key != "links":
+                                print("\t- "+key+": "+ str(hp[key]))
+                        if "links" in hp.keys(): 
+                            if hp["links"] == []:
+                                print("\t- links: Not linked")
+                            else:
+                                print("\t- links:")
+                                for link in hp["links"]:
+                                    for key in link.keys():
+                                        if key != "servs":
+                                            print("\t\t- "+key+": "+ str(link[key]))
+                                    print("\t\t- servs:")
+                                    for serv in link["servs"]:
+                                        for key in serv.keys():
+                                            print("\t\t\t- "+key+": "+ str(serv[key]))
+                                        print("\n")
                                     print("\n")
-                                print("\n")
+                        print("\n")
+                    if hps_infos_others != []:
+                        if hps_infos != []:
+                            print("\nOthers:")
+                            print("==========")
+                        for hp in hps_infos_others:
+                            for key in hp.keys():
+                                if key != "links":
+                                    print("\t- "+key+": "+ str(hp[key]))
+                            if "links" in hp.keys(): 
+                                if hp["links"] == []:
+                                    print("\t- links: Not linked")
+                                else:
+                                    print("\t- links:")
+                                    for link in hp["links"]:
+                                        for key in link.keys():
+                                            if key != "servs":
+                                                print("\t\t- "+key+": "+ str(link[key]))
+                                        print("\t\t- servs:")
+                                        for serv in link["servs"]:
+                                            for key in serv.keys():
+                                                print("\t\t\t- "+key+": "+ str(serv[key]))
+                                            print("\n")
+                                        print("\n")
 
-                    print("\n")
+                            print("\n")
 
-        elif str(output_format).lower() == "table":
-            print("Honeypots:")
-            print("==========")
-            print(tabulate.tabulate(hps_infos, headers = 'keys'))
-            if hps_infos_others != []:
-                if hps_infos != []:
-                    print("\nOthers:")
+                elif str(output_format).lower() == "table":
+                    print("Honeypots:")
                     print("==========")
-                print(tabulate.tabulate(hps_infos_others, headers = 'keys')) 
-        else :
-            print("Wrong Format")
+                    print(tabulate.tabulate(hps_infos, headers = 'keys'))
+                    if hps_infos_others != []:
+                        if hps_infos != []:
+                            print("\nOthers:")
+                            print("==========")
+                        print(tabulate.tabulate(hps_infos_others, headers = 'keys')) 
+                else :
+                    print("Wrong Format")
 
 
 def list_link(args):
@@ -1015,201 +1021,204 @@ def list_link(args):
             link_keys_display = [key.strip() for key in link_display[link_display[detail_lvl]].split(',')]
         
         if 'error' in data.keys():
-            print(data['error']) 
-        elif 'links' in data.keys(): 
-            links = data['links'] 
-            
-        elif 'exact' in data.keys() and 'others' in data.keys(): 
-            links = data['exact']
-            links_other = data['others']
-            for link in links_other:
-                link_infos = {}
-                for key in link_keys_display: 
-                   link_infos[key] = link['link_' + key] 
-                
-                if str(detail_lvl).lower() == "full":
-                    if "hps" in link.keys():
-                        next_type="hp"
-                    elif "servs" in link.keys():
-                        next_type="serv"
-                    
-                    link_infos[next_type+"s"] = []
-                    hp_keys_display = [key.strip() for key in hp_display[link_display[detail_lvl]].split(',')]
-                    serv_keys_display = [key.strip() for key in serv_display[link_display[detail_lvl]].split(',')]
-
-                    for obj in link[next_type+"s"]:
-                        obj_infos={}
-                        if next_type=="hp":
-                            for key in hp_keys_display: 
-                                obj_infos[key] = obj[next_type+'_' + key]
-                        if next_type=="serv":
-                            for key in serv_keys_display: 
-                                obj_infos[key] = obj[next_type+'_' + key]
-                        
-                        if next_type=="hp":
-                            last_type="serv"
-                        if next_type=="serv":
-                            last_type="hp"
-                        obj_infos[last_type+"s"] = []
-
-                        for last_obj in obj[last_type+"s"]:
-                            last_obj_infos={}
-                            if last_type=="hp":
-                                for key in hp_keys_display: 
-                                    last_obj_infos[key] = last_obj[last_type+'_' + key]
-                            if last_type=="serv":
-                                for key in serv_keys_display: 
-                                    last_obj_infos[key] = last_obj[last_type+'_' + key]
-                            obj_infos[last_type+"s"].append(last_obj_infos)
-                        if str(output_format).lower() == "table":
-                            obj_infos[last_type+"s"]=tabulate.tabulate(obj_infos[last_type+"s"], headers = 'keys')
-                            
-                        link_infos[next_type+"s"].append(obj_infos)
-                    if str(output_format).lower() == "table":
-                        link_infos[next_type+"s"]=tabulate.tabulate(link_infos[next_type+"s"], headers = 'keys')
-                        
-                links_infos_others.append(link_infos)
-
+            print(data['error'])
         else:
-            print("ERROR") # A modifier
-        
-        for link in links:
-            link_infos = {}
-            for key in link_keys_display: 
-               link_infos[key] = link['link_' + key] 
-            
-            if str(detail_lvl).lower() == "full":
-                if "hps" in link.keys():
-                    next_type="hp"
-                elif "servs" in link.keys():
-                    next_type="serv"
+            if 'links' in data.keys(): 
+                links = data['links'] 
                 
-                link_infos[next_type+"s"] = []
-                hp_keys_display = [key.strip() for key in hp_display[link_display[detail_lvl]].split(',')]
-                serv_keys_display = [key.strip() for key in serv_display[link_display[detail_lvl]].split(',')]
-
-                for obj in link[next_type+"s"]:
-                    obj_infos={}
-                    if next_type=="hp":
-                        for key in hp_keys_display: 
-                            obj_infos[key] = obj[next_type+'_' + key]
-                    if next_type=="serv":
-                        for key in serv_keys_display: 
-                            obj_infos[key] = obj[next_type+'_' + key]
+            elif 'exact' in data.keys() and 'others' in data.keys(): 
+                links = data['exact']
+                links_other = data['others']
+                for link in links_other:
+                    link_infos = {}
+                    for key in link_keys_display: 
+                       link_infos[key] = link['link_' + key] 
                     
-                    if next_type=="hp":
-                        last_type="serv"
-                    if next_type=="serv":
-                        last_type="hp"
-                    obj_infos[last_type+"s"] = []
-
-                    for last_obj in obj[last_type+"s"]:
-                        last_obj_infos={}
-                        if last_type=="hp":
-                            for key in hp_keys_display: 
-                                last_obj_infos[key] = last_obj[last_type+'_' + key]
-                        if last_type=="serv":
-                            for key in serv_keys_display: 
-                                last_obj_infos[key] = last_obj[last_type+'_' + key]
-                        obj_infos[last_type+"s"].append(last_obj_infos)
-                    if str(output_format).lower() == "table":
-                        obj_infos[last_type+"s"]=tabulate.tabulate(obj_infos[last_type+"s"], headers = 'keys')
+                    if str(detail_lvl).lower() == "full":
+                        if "hps" in link.keys():
+                            next_type="hp"
+                        elif "servs" in link.keys():
+                            next_type="serv"
                         
-                    link_infos[next_type+"s"].append(obj_infos)
-                if str(output_format).lower() == "table":
-                    link_infos[next_type+"s"]=tabulate.tabulate(link_infos[next_type+"s"], headers = 'keys')
-                    
-            links_infos.append(link_infos) 
-        
-        links_infos_others = links_infos_others[0:overplus]
-        if str(output_format).lower() == "json":
-            if links_infos_others != []:
-                result={"links":links_infos,"links_others":links_infos_others}
+                        link_infos[next_type+"s"] = []
+                        hp_keys_display = [key.strip() for key in hp_display[link_display[detail_lvl]].split(',')]
+                        serv_keys_display = [key.strip() for key in serv_display[link_display[detail_lvl]].split(',')]
+
+                        for obj in link[next_type+"s"]:
+                            obj_infos={}
+                            if next_type=="hp":
+                                for key in hp_keys_display: 
+                                    obj_infos[key] = obj[next_type+'_' + key]
+                            if next_type=="serv":
+                                for key in serv_keys_display: 
+                                    obj_infos[key] = obj[next_type+'_' + key]
+                            
+                            if next_type=="hp":
+                                last_type="serv"
+                            if next_type=="serv":
+                                last_type="hp"
+                            obj_infos[last_type+"s"] = []
+
+                            for last_obj in obj[last_type+"s"]:
+                                last_obj_infos={}
+                                if last_type=="hp":
+                                    for key in hp_keys_display: 
+                                        last_obj_infos[key] = last_obj[last_type+'_' + key]
+                                if last_type=="serv":
+                                    for key in serv_keys_display: 
+                                        last_obj_infos[key] = last_obj[last_type+'_' + key]
+                                obj_infos[last_type+"s"].append(last_obj_infos)
+                            if str(output_format).lower() == "table":
+                                obj_infos[last_type+"s"]=tabulate.tabulate(obj_infos[last_type+"s"], headers = 'keys')
+                                
+                            link_infos[next_type+"s"].append(obj_infos)
+                        if str(output_format).lower() == "table":
+                            link_infos[next_type+"s"]=tabulate.tabulate(link_infos[next_type+"s"], headers = 'keys')
+                            
+                    links_infos_others.append(link_infos)
+
             else:
-                result={"links":links_infos}
-
-            res = json.dumps(result, indent=4)
-            print(res)
-        elif str(output_format).lower() == "tree":
-            print("Not implemented")
-        elif str(output_format).lower() == "text":
-            print("Links:")
-            print("==========")
+                links=0
+                print("ERROR") # A modifier
             
-            for link in links_infos:
-                for key in link.keys():
-                    if key != "hps" and key != "servs":
-                        print("\t- "+key+": "+ str(link[key]))
-                if "hps" in link.keys():
-                    print("\t- hps:")
-                    for hp in link["hps"]:
-                        for key in hp.keys():
-                            if key != "servs":
-                                print("\t\t- "+key+": "+ str(hp[key]))
-                        print("\t\t- servs:")
-                        for serv in hp["servs"]:
-                            for key in serv.keys():
-                                print("\t\t\t- "+key+": "+ str(serv[key]))
-                            print("\n")
-                        print("\n")
-                elif "servs" in link.keys():
-                    print("\t- servs:")
-                    for serv in link["servs"]:
-                        for key in serv.keys():
-                            if key != "hps":
-                                print("\t\t- "+key+": "+ str(serv[key]))
-                        print("\t\t- hps:")
-                        for hp in serv["hps"]:
-                            for key in hp.keys():
-                                print("\t\t\t- "+key+": "+ str(hp[key]))
-                            print("\n")
-                        print("\n")
-                print("\n")
-            if links_infos_others != []:
-                if links_infos != []:
-                    print("\nOthers:")
-                    print("==========")
-                for link in links_infos_others:
-                    for key in link.keys():
-                        if key != "hps" and key != "servs":
-                            print("\t- "+key+": "+ str(hp[key]))
-                    if "hps" in link.keys():
-                        print("\t- hps:")
-                        for hp in link["hps"]:
-                            for key in hp.keys():
-                                if key != "servs":
-                                    print("\t\t- "+key+": "+ str(hp[key]))
-                            print("\t\t- servs:")
-                            for serv in hp["servs"]:
-                                for key in serv.keys():
-                                    print("\t\t\t- "+key+": "+ str(serv[key]))
-                                print("\n")
-                            print("\n")
-                    elif "servs" in link.keys():
-                        print("\t- servs:")
-                        for serv in link["servs"]:
-                            for key in serv.keys():
-                                if key != "hps":
-                                    print("\t\t- "+key+": "+ str(serv[key]))
-                            print("\t\t- hps:")
-                            for hp in serv["hps"]:
-                                for key in hp.keys():
-                                    print("\t\t\t- "+key+": "+ str(hp[key]))
-                                print("\n")
-                            print("\n")
-                    print("\n")
+            if links!=0:
+                for link in links:
+                    link_infos = {}
+                    for key in link_keys_display: 
+                       link_infos[key] = link['link_' + key] 
+                    
+                    if str(detail_lvl).lower() == "full":
+                        if "hps" in link.keys():
+                            next_type="hp"
+                        elif "servs" in link.keys():
+                            next_type="serv"
+                        
+                        link_infos[next_type+"s"] = []
+                        hp_keys_display = [key.strip() for key in hp_display[link_display[detail_lvl]].split(',')]
+                        serv_keys_display = [key.strip() for key in serv_display[link_display[detail_lvl]].split(',')]
 
-        elif str(output_format).lower() == "table":
-            print("Links:")
-            print("==========")
-            print(tabulate.tabulate(links_infos, headers = 'keys'))
-            if links_infos_others != []:
-                if links_infos != []:
-                    print("\nOthers:")
+                        for obj in link[next_type+"s"]:
+                            obj_infos={}
+                            if next_type=="hp":
+                                for key in hp_keys_display: 
+                                    obj_infos[key] = obj[next_type+'_' + key]
+                            if next_type=="serv":
+                                for key in serv_keys_display: 
+                                    obj_infos[key] = obj[next_type+'_' + key]
+                            
+                            if next_type=="hp":
+                                last_type="serv"
+                            if next_type=="serv":
+                                last_type="hp"
+                            obj_infos[last_type+"s"] = []
+
+                            for last_obj in obj[last_type+"s"]:
+                                last_obj_infos={}
+                                if last_type=="hp":
+                                    for key in hp_keys_display: 
+                                        last_obj_infos[key] = last_obj[last_type+'_' + key]
+                                if last_type=="serv":
+                                    for key in serv_keys_display: 
+                                        last_obj_infos[key] = last_obj[last_type+'_' + key]
+                                obj_infos[last_type+"s"].append(last_obj_infos)
+                            if str(output_format).lower() == "table":
+                                obj_infos[last_type+"s"]=tabulate.tabulate(obj_infos[last_type+"s"], headers = 'keys')
+                                
+                            link_infos[next_type+"s"].append(obj_infos)
+                        if str(output_format).lower() == "table":
+                            link_infos[next_type+"s"]=tabulate.tabulate(link_infos[next_type+"s"], headers = 'keys')
+                            
+                    links_infos.append(link_infos) 
+                
+                links_infos_others = links_infos_others[0:overplus]
+                if str(output_format).lower() == "json":
+                    if links_infos_others != []:
+                        result={"links":links_infos,"links_others":links_infos_others}
+                    else:
+                        result={"links":links_infos}
+
+                    res = json.dumps(result, indent=4)
+                    print(res)
+                elif str(output_format).lower() == "tree":
+                    print("Not implemented")
+                elif str(output_format).lower() == "text":
+                    print("Links:")
                     print("==========")
-                print(tabulate.tabulate(links_infos_others, headers = 'keys')) 
-        else :
-            print("Wrong Format")
+                    
+                    for link in links_infos:
+                        for key in link.keys():
+                            if key != "hps" and key != "servs":
+                                print("\t- "+key+": "+ str(link[key]))
+                        if "hps" in link.keys():
+                            print("\t- hps:")
+                            for hp in link["hps"]:
+                                for key in hp.keys():
+                                    if key != "servs":
+                                        print("\t\t- "+key+": "+ str(hp[key]))
+                                print("\t\t- servs:")
+                                for serv in hp["servs"]:
+                                    for key in serv.keys():
+                                        print("\t\t\t- "+key+": "+ str(serv[key]))
+                                    print("\n")
+                                print("\n")
+                        elif "servs" in link.keys():
+                            print("\t- servs:")
+                            for serv in link["servs"]:
+                                for key in serv.keys():
+                                    if key != "hps":
+                                        print("\t\t- "+key+": "+ str(serv[key]))
+                                print("\t\t- hps:")
+                                for hp in serv["hps"]:
+                                    for key in hp.keys():
+                                        print("\t\t\t- "+key+": "+ str(hp[key]))
+                                    print("\n")
+                                print("\n")
+                        print("\n")
+                    if links_infos_others != []:
+                        if links_infos != []:
+                            print("\nOthers:")
+                            print("==========")
+                        for link in links_infos_others:
+                            for key in link.keys():
+                                if key != "hps" and key != "servs":
+                                    print("\t- "+key+": "+ str(hp[key]))
+                            if "hps" in link.keys():
+                                print("\t- hps:")
+                                for hp in link["hps"]:
+                                    for key in hp.keys():
+                                        if key != "servs":
+                                            print("\t\t- "+key+": "+ str(hp[key]))
+                                    print("\t\t- servs:")
+                                    for serv in hp["servs"]:
+                                        for key in serv.keys():
+                                            print("\t\t\t- "+key+": "+ str(serv[key]))
+                                        print("\n")
+                                    print("\n")
+                            elif "servs" in link.keys():
+                                print("\t- servs:")
+                                for serv in link["servs"]:
+                                    for key in serv.keys():
+                                        if key != "hps":
+                                            print("\t\t- "+key+": "+ str(serv[key]))
+                                    print("\t\t- hps:")
+                                    for hp in serv["hps"]:
+                                        for key in hp.keys():
+                                            print("\t\t\t- "+key+": "+ str(hp[key]))
+                                        print("\n")
+                                    print("\n")
+                            print("\n")
+
+                elif str(output_format).lower() == "table":
+                    print("Links:")
+                    print("==========")
+                    print(tabulate.tabulate(links_infos, headers = 'keys'))
+                    if links_infos_others != []:
+                        if links_infos != []:
+                            print("\nOthers:")
+                            print("==========")
+                        print(tabulate.tabulate(links_infos_others, headers = 'keys')) 
+                else :
+                    print("Wrong Format")
 
 if __name__ == "__main__":
     # Retrieve  internaldb settings from config file
