@@ -38,3 +38,5 @@ jobs:
       run: |
         pip install pytest
         pytest
+      env:
+        - GOTHAM_HOME: $GITHUB_WORKSPACE
