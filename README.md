@@ -1,6 +1,8 @@
 # GOTHAM
 Global Orchestrator for Threat-intel through Honeypot Army Management
 
+[![Documentation Status](https://readthedocs.org/projects/gotham/badge/?version=latest)](https://gotham.readthedocs.io/en/latest/?badge=latest)
+
 # The project
 
 The aim of this project is to respond to 3 challenges : 
