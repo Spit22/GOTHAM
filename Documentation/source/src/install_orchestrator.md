@@ -28,8 +28,12 @@ And it's all. You can now configure your orchestrator under /opt/GOTHAM/Orchestr
 To run the orchestrator's api, you have to execute the following command :
 
 ```
-$ python3 /opt/GOTHAM/Orchestrator/Sources/api.py
+# Run API
+$ python3 /opt/GOTHAM/Orchestrator/Sources/api.py3
+# Run the watchconfig daemon
+$ python3 /opt/GOTHAM/Orchestrator/Sources/watchconfig.py
 ```
+
 
 The api will listen on port 5000 on localhost by default. Please use Apache or Nginx for reverse proxying and expose api to another network. 
 
