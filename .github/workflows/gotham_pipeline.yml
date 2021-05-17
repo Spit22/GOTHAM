@@ -5,7 +5,10 @@ name: GOTHAM application
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+      - dev_V0_1
+      - dev_V1
   pull_request:
     branches: [ master ]
 
