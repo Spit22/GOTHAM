@@ -3,6 +3,12 @@ Global Orchestrator for Threat-intel through Honeypot Army Management
 
 [![Documentation Status](https://readthedocs.org/projects/gotham/badge/?version=latest)](https://gotham.readthedocs.io/en/latest/?badge=latest)
 
+![Language used](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+
+![GitHub](https://img.shields.io/github/license/spit22/GOTHAM)
+
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/spit22/GOTHAM)
+
 # The project
 
 The aim of this project is to respond to 3 challenges : 
