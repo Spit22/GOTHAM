@@ -619,11 +619,12 @@ def list_server(args):
             url += "&"+"ssh_port="+ssh_port
 
     # Query URL and get json
-    response = requests.get(url).json()
-	status_code = response.status_code
-		
-	if status_code == 200:
+    response = requests.get(url)
+    status_code = response.status_code
+    
+    if status_code == 200:
         # Show result
+        data = response.json()
         servs_infos = [] 
         servs_infos_others = []
         serv_infos = {}
@@ -861,12 +862,12 @@ def list_hp(args):
             url += "&"+"state="+state
 
     # Query URL and get json
-    response = requests.get(url).json()
+    response = requests.get(url)
     status_code = response.status_code
         
     if status_code == 200:
         # Show result
-        
+        data = response.json()
         hps_infos = [] 
         hps_infos_others = []
         hp_infos = {}
@@ -1107,12 +1108,12 @@ def list_link(args):
             url += "&"+"ports="+ports
 
     # Query URL and get json
-    response = requests.get(url).json()
+    response = requests.get(url)
     status_code = response.status_code
         
-        if status_code == 200:
-        
+    if status_code == 200:
         # Show result
+        data = response.json()
         
         links_infos = [] 
         links_infos_others = []
