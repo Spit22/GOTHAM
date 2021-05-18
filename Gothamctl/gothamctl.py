@@ -10,8 +10,12 @@ import tabulate
 import json
 
 #===Logging components===#
-GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-    #A modifier
+
+CONFIG_PATH = "./Config/config.ini"
+
+# Retrieve  GOTHAMCTL settings from config file
+config = configparser.ConfigParser()
+config.read(CONFIG_PATH)
 
 def add_server(args):
     # Query /add/server to create server
@@ -456,10 +460,6 @@ def list_server(args):
     #
     # Print string formatted table
 
-    # Retrieve  internaldb settings from config file
-    config = configparser.ConfigParser()
-    config.read(GOTHAM_HOME + 'Gothamctl/Config/config.ini')
-
     hp_display = config['hp_display']
     del hp_display["default"]
     serv_display = config['serv_display']
@@ -697,10 +697,6 @@ def list_hp(args):
     #
     # Print string formatted table
 
-    # Retrieve  internaldb settings from config file
-    config = configparser.ConfigParser()
-    config.read(GOTHAM_HOME + 'Gothamctl/Config/config.ini')
-
     hp_display = config['hp_display']
     del hp_display["default"]
     serv_display = config['serv_display']
@@ -935,10 +931,6 @@ def list_link(args):
     # args (obj) : passed commandline argument
     #
     # Print string formatted table
-
-    # Retrieve  internaldb settings from config file
-    config = configparser.ConfigParser()
-    config.read(GOTHAM_HOME + 'Gothamctl/Config/config.ini')
     
     hp_display = config['hp_display']
     del hp_display["default"]
@@ -1221,9 +1213,6 @@ def list_link(args):
                     print("Wrong Format")
 
 if __name__ == "__main__":
-    # Retrieve  internaldb settings from config file
-    config = configparser.ConfigParser()
-    config.read(GOTHAM_HOME + 'Gothamctl/Config/config.ini')
 
     gh = config["orchestrator_infos"]["host"]
     gp = config["orchestrator_infos"]["port"]
@@ -1383,4 +1372,3 @@ if __name__ == "__main__":
     # Execute parse_args()
     args = parser.parse_args()
     args.func(args)
-
