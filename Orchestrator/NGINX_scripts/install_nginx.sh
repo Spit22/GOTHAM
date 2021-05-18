@@ -57,7 +57,6 @@ cd nginx-1.19.5
 
 # Let's build NGINX !
 make
-
 make install
 
 # Create directory for links configurations
@@ -66,18 +65,17 @@ mkdir -p /etc/nginx/conf.d/links
 # Edit nginx.conf
 rm /etc/nginx/nginx.conf
 
-echo "events {}
+echo "user root;
+events {}
 stream{
+    log_format combined '[\$time_local] - - Proxying $\protocol from $\remote_addr:$\remote_port to $\upstream_addr';
     include conf.d/links/*.conf;
 }" > /etc/nginx/nginx.conf
 
 # Add nginx user
 /usr/sbin/useradd nginx
 
-# Apply the configuration
-#/usr/sbin/nginx
-#/usr/sbin/nginx -s reload
-
+# Create nginx service
 echo "[Unit]
 Description=The NGINX HTTP and reverse proxy server
 After=syslog.target network-online.target remote-fs.target nss-lookup.target
@@ -89,7 +87,7 @@ PIDFile=/run/nginx.pid
 ExecStartPre=/usr/sbin/nginx -t
 ExecStart=/usr/sbin/nginx
 ExecReload=/usr/sbin/nginx -s reload
-ExecStop=/bin/kill -s QUIT $MAINPID
+ExecStop=/bin/kill -s QUIT \$MAINPID
 PrivateTmp=true
 
 [Install]
@@ -97,6 +95,11 @@ WantedBy=multi-user.target" > /lib/systemd/system/nginx.service
 
 # Enable nginx for future reboot
 systemctl enable nginx
+
+# Apply rights on /var/log/nginx/
+chown -R root:root /var/log/nginx
+chmod 750 /var/log/nginx
+chmod -R 640 /var/log/nginx/*
 
 # Start nginx
 systemctl start nginx
