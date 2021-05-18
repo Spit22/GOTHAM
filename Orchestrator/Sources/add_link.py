@@ -32,6 +32,7 @@ def generate_nginxConf(db_settings, link_id, dc_ip, honeypots, exposed_port):
     nginxRedirectionFile.write("server {\n")
     nginxRedirectionFile.write("  listen " + str(exposed_port) + ";\n")
     nginxRedirectionFile.write("  proxy_pass " + str(link_id) + ";\n")
+    nginxRedirectionFile.write("  access_log /var/log/nginx/" + str(link_id) + ".log combined;\n")
     nginxRedirectionFile.write("}\n")
 
 
