@@ -63,17 +63,26 @@ def add_server(args):
         data["autotags"] = "0"
 
     # Query URL and get json
-    data = requests.post(url, json=data).json()
+    response = requests.post(url, json=data)
+    status_code = response.status_code
 
-    # Show result
-    if "id" in data.keys():
+    if status_code == 200:
+      data = response.json()
+      # Show result
+      if "id" in data.keys():
         print(data["id"]+" created")
-    elif "error" in data.keys():
-        print(data["error"])
-    elif "message" in data.keys():
-        print(data["message"])
-    else:
+      else:
         print(str(data))
+
+    else:
+      try:
+        data = response.json()
+        if "error" in data.keys():
+          print("Error: "+str(data["error"]))
+        else:
+          print("Error: Unknown error.")
+      except:
+        print("Error: api return a " + str(status_code) + " http code.")
 
 
 def add_hp(args):
@@ -124,18 +133,26 @@ def add_hp(args):
         data["autotags"] = "0"
 
     # Query URL and get json
-    data = requests.post(url, json=data).json()
+    response = requests.post(url, json=data)
+    status_code = response.status_code
 
-    # Show result
-    if "id" in data.keys():
+    if status_code == 200:
+      data = response.json()
+      # Show result
+      if "id" in data.keys():
         print(data["id"]+" created")
-    elif "error" in data.keys():
-        print(data["error"])
-    elif "message" in data.keys():
-        print(data["message"])
-    else:
+      else:
         print(str(data))
 
+    else:
+      try:
+        data = response.json()
+        if "error" in data.keys():
+          print("Error: "+str(data["error"]))
+        else:
+          print("Error: Unknown error.")
+      except:
+        print("Error: api return a " + str(status_code) + " http code.")
 
 def add_link(args):
     # Query /add/link to create link
@@ -170,18 +187,26 @@ def add_link(args):
     }
 
     # Query URL and get json
-    data = requests.post(url, json=data).json()
+    response = requests.post(url, json=data)
+    status_code = response.status_code
 
-    
-    # Show result
-    if "id" in data.keys():
+    if status_code == 200:
+      data = response.json()
+      # Show result
+      if "id" in data.keys():
         print(data["id"]+" created")
-    elif "error" in data.keys():
-        print(data["error"])
-    elif "message" in data.keys():
-        print(data["message"])
-    else:
+      else:
         print(str(data))
+
+    else:
+      try:
+        data = response.json()
+        if "error" in data.keys():
+          print("Error: "+str(data["error"]))
+        else:
+          print("Error: Unknown error.")
+      except:
+        print("Error: api return a " + str(status_code) + " http code.")
 
 
 def rm_server(args):
@@ -209,17 +234,26 @@ def rm_server(args):
     }
 
     # Query URL and get json
-    data = requests.post(url, json=data).json()
+    response = requests.post(url, json=data)
+    status_code = response.status_code
 
-    # Show result
-    if "id" in data.keys():
+    if status_code == 200:
+      data = response.json()
+      # Show result
+      if "id" in data.keys():
         print(data["id"]+" deleted")
-    elif "error" in data.keys():
-        print(data["error"])
-    elif "message" in data.keys():
-        print(data["message"])
-    else:
+      else:
         print(str(data))
+
+    else:
+      try:
+        data = response.json()
+        if "error" in data.keys():
+          print("Error: "+str(data["error"]))
+        else:
+          print("Error: Unknown error.")
+      except:
+        print("Error: api return a " + str(status_code) + " http code.")
 
 
 def rm_hp(args):
@@ -247,17 +281,26 @@ def rm_hp(args):
     }
 
     # Query URL and get json
-    data = requests.post(url, json=data).json()
+    response = requests.post(url, json=data)
+    status_code = response.status_code
 
-    # Show result
-    if "id" in data.keys():
+    if status_code == 200:
+      data = response.json()
+      # Show result
+      if "id" in data.keys():
         print(data["id"]+" deleted")
-    elif "error" in data.keys():
-        print(data["error"])
-    elif "message" in data.keys():
-        print(data["message"])
-    else:
+      else:
         print(str(data))
+
+    else:
+      try:
+        data = response.json()
+        if "error" in data.keys():
+          print("Error: "+str(data["error"]))
+        else:
+          print("Error: Unknown error.")
+      except:
+        print("Error: api return a " + str(status_code) + " http code.")
 
 
 def rm_link(args):
@@ -285,17 +328,26 @@ def rm_link(args):
     }
 
     # Query URL and get json
-    data = requests.post(url, json=data).json()
+    response = requests.post(url, json=data)
+    status_code = response.status_code
 
-    # Show result
-    if "id" in data.keys():
+    if status_code == 200:
+      data = response.json()
+      # Show result
+      if "id" in data.keys():
         print(data["id"]+" deleted")
-    elif "error" in data.keys():
-        print(data["error"])
-    elif "message" in data.keys():
-        print(data["message"])
-    else:
+      else:
         print(str(data))
+
+    else:
+      try:
+        data = response.json()
+        if "error" in data.keys():
+          print("Error: "+str(data["error"]))
+        else:
+          print("Error: Unknown error.")
+      except:
+        print("Error: api return a " + str(status_code) + " http code.")
 
 
 def edit_server(args):
@@ -345,10 +397,23 @@ def edit_server(args):
         data["ssh_port"] = ssh_port
 
     # Query URL and get json
-    data = requests.post(url, json=data)
+    response = requests.post(url, json=data)
+    status_code = response.status_code
 
-    # Show result
-    print(data.json())
+    if status_code == 200:
+      data = response.json()
+      # Show result
+      print(data.json())
+
+    else:
+      try:
+        data = response.json()
+        if "error" in data.keys():
+          print("Error: "+str(data["error"]))
+        else:
+          print("Error: Unknown error.")
+      except:
+        print("Error: api return a " + str(status_code) + " http code.")
 
 
 def edit_hp(args):
@@ -401,10 +466,22 @@ def edit_hp(args):
         data["port"] = port
 
     # Query URL and get json
-    data = requests.post(url, json=data)
+    response = requests.post(url, json=data)
+    status_code = response.status_code
 
-    # Show result
-    print(data.json())
+    if status_code == 200:
+      data = response.json()
+      print(data.json())
+
+    else:
+      try:
+        data = response.json()
+        if "error" in data.keys():
+          print("Error: "+str(data["error"]))
+        else:
+          print("Error: Unknown error.")
+      except:
+        print("Error: api return a " + str(status_code) + " http code.")
 
 
 def edit_link(args):
@@ -447,10 +524,23 @@ def edit_link(args):
         data["exposed_ports"] = exposed_ports
 
     # Query URL and get json
-    data = requests.post(url, json=data)
+    response = requests.post(url, json=data)
+    status_code = response.status_code
 
-    # Show result
-    print(data.json())
+    if status_code == 200:
+      data = response.json()
+      # Show result
+      print(data.json())
+
+    else:
+      try:
+        data = response.json()
+        if "error" in data.keys():
+          print("Error: "+str(data["error"]))
+        else:
+          print("Error: Unknown error.")
+      except:
+        print("Error: api return a " + str(status_code) + " http code.")
 
 
 def list_server(args):
@@ -529,10 +619,11 @@ def list_server(args):
             url += "&"+"ssh_port="+ssh_port
 
     # Query URL and get json
-    data = requests.get(url).json()
-
+    response = requests.get(url).json()
+		status_code = response.status_code
+		
+		if status_code == 200:
     # Show result
-    
     servs_infos = [] 
     servs_infos_others = []
     serv_infos = {}
