@@ -15,16 +15,6 @@ template(name="all-json-template" type="list"){
     property(name="$!all-json")
 }
 
-template(name="default-template" type="list") {
-    constant(value="{")
-        constant(value="\"timestamp\":\"")     property(name="timereported" dateFormat="rfc3339")
-        constant(value="\",\"host\":\"")        property(name="hostname")
-        constant(value="\",\"severity\":\"")    property(name="syslogseverity-text")
-        constant(value="\",\"tag\":\"")   property(name="syslogtag" format="json")
-        constant(value="\",\"message\":\"")    property(name="msg" format="json")
-    constant(value="\"}")
-}
-
 ''' > /etc/rsyslog.d/00-JSON_template.conf
 
 # Restart rsyslog

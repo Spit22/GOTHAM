@@ -38,6 +38,7 @@ pip3 install -r requirements.txt
 mkdir -p $GOTHAM_HOME/Orchestrator/Logs
 mkdir -p /data/template
 mkdir -p /data/rsyslog/datacenter-configuration
+mkdir -p /data/rsyslog/servers-configuration
 mkdir -p /data/honeypot-log
 mkdir -p /data/link-log
 mkdir -p /data/rsyslog/rulebase
