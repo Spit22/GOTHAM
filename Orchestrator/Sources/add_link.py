@@ -110,7 +110,7 @@ def generate_orchestrator_rsyslog_conf(id_lk, rsyslog_conf_orchestrator_local_pa
         # Create the configuration file
         rsyslog_conf_file = open(
             rsyslog_conf_orchestrator_local_path + id_lk + ".conf", "a")
-        # Filter the logs with honeypot tag
+        # Filter the logs with link tag
         rsyslog_conf_file.write('if $msg contains "' + str(id_lk) + '" then {\n')
         # Dump the logs in local log file
         rsyslog_conf_file.write('action(type="omfile" File="' + str(local_lk_log_file_path) + str(id_lk) + '.log" Template="RawFormat")\n')
@@ -122,7 +122,7 @@ def generate_orchestrator_rsyslog_conf(id_lk, rsyslog_conf_orchestrator_local_pa
         raise ValueError(error)
 
 def generate_rulebase(id_lk, rules, rulebase_path):
-    # Generates the specific rulebase for honeypot
+    # Generates the specific rulebase for link
     #
     # id_lk (string) : Id of the link we are configuring
     # rules (string) : Link rsyslog rules
@@ -153,7 +153,7 @@ def deploy_rsyslog_conf(servers, orchestrateur_settings, id_lk, rules):
     rsyslog_conf_server_local_path = "/data/rsyslog/datacenter-configuration/"
     rsyslog_conf_orchestrator_local_path = "/etc/rsyslog.d/"
     # Log files
-    local_lk_log_file_path = "/data/honeypot-log/"
+    local_lk_log_file_path = "/data/link-log/"
     # Rulebase
     local_rulebase_path = "/data/rsyslog/rulebase/"
 
