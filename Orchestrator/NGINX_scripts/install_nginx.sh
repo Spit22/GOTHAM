@@ -68,7 +68,7 @@ rm /etc/nginx/nginx.conf
 echo "user root;
 events {}
 stream{
-    log_format combined '[\$time_local] - - Proxying $\protocol from $\remote_addr:$\remote_port to $\upstream_addr';
+    log_format combined '[\$time_local] - - Proxying \$protocol from \$remote_addr:\$remote_port to \$upstream_addr';
     include conf.d/links/*.conf;
 }" > /etc/nginx/nginx.conf
 
