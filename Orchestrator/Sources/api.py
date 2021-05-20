@@ -206,7 +206,7 @@ def add_honeypot():
         add_hp.deploy_rsyslog_conf(
             datacenter_settings, orchestrator_settings, id, parser)
     except Exception as e:
-        error = "Rsyslog configuration failed"
+        error = "Rsyslog configuration failed for hp "+str(id)
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
 
     # Create tag automaticaly
@@ -555,6 +555,16 @@ def add_lk():
 
     # Deploy new reverse-proxies's configurations on servers
     add_link.deploy_nginxConf(DB_settings, id, servers)
+
+    # Create and deploy rsyslog configuration on servers and the orchestrator
+    try:
+        # print("bypassed")
+        add_link.deploy_rsyslog_conf(
+            servers, orchestrator_settings, id, "%host:word%")
+    except Exception as e:
+        error = "Rsyslog configuration failed for link "+str(id)
+        return Gotham_error.format_usererror(error, str(e), debug_mode), 500
+
 
     # Check redirection is effective on all servers
     for server in servers:
