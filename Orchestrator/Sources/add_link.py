@@ -72,7 +72,7 @@ def generate_server_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, id_l
     # orch_rsyslog_port (int) : Port where rsyslog is listening
     # rulebase_path (string) : intern path of the rulebase
     # id_lk (string) : id of the link we are configuring logging
-    # rsyslog_conf_server_local_path (string) : intern path of rsyslog datacenter configuration
+    # rsyslog_conf_server_local_path (string) : intern path of rsyslog server configuration
 
     try:
         # Create the configuration file
@@ -87,9 +87,6 @@ def generate_server_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, id_l
         # Send to orchestrator in parsed JSON format
         rsyslog_conf_file.write('    action(Type="omfwd" Target="' + str(orch_ip) + '" Port="' + str(orch_rsyslog_port) + '" Protocol="tcp" Template="all-json-template")\n')
         # If parsing operations failed
-        rsyslog_conf_file.write('  } else {')
-        # Send to orchestrator in default JSON format
-        rsyslog_conf_file.write('    action(Type="omfwd" Target="' + str(orch_ip) + '" Port="' + str(orch_rsyslog_port) + '" Protocol="tcp" Template="default-template")\n')
         rsyslog_conf_file.write('  }\n')
         # Stop dealing with these logs
         rsyslog_conf_file.write('  stop\n')
@@ -150,7 +147,7 @@ def deploy_rsyslog_conf(servers, orchestrateur_settings, id_lk, rules):
 
     # PATH ON ORCHESTRATOR
     # Configuration
-    rsyslog_conf_server_local_path = "/data/rsyslog/datacenter-configuration/"
+    rsyslog_conf_server_local_path = "/data/rsyslog/servers-configuration/"
     rsyslog_conf_orchestrator_local_path = "/etc/rsyslog.d/"
     # Log files
     local_lk_log_file_path = "/data/link-log/"
@@ -191,7 +188,7 @@ def deploy_rsyslog_conf(servers, orchestrateur_settings, id_lk, rules):
                                                                   server["serv_ssh_key"],
                                                                   f"[[ -d {remote_rulebase_path} ]] && echo 'OK'")
         if not (rsyslog_conf_server_remote_path_exists == ['OK'] and remote_rulebase_path_exists == ['OK']):
-            error = "At least one directory on datacenter is missing"
+            error = "At least one directory on server is missing"
             logging.error(error)
             raise ValueError(error)
 
