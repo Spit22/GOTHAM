@@ -15,6 +15,7 @@ USERMOD=$(which usermod)
 CHMOD=$(which chmod)
 KEYGEN=$(which ssh-keygen)
 ENCODE=$(which base64)
+APT=$(which apt)
 
 ### CHECK IF ROOT ###
 if [ "$EUID" -ne 0 ]
@@ -29,7 +30,7 @@ echo "=== Preparing the gotham system... ==="
 $USERADD -o -u 0 -g 0 -N -d /root/ -M gotham > /dev/null 2>&1
 
 # Configure password
-mdp=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w12 | head -n1)
+mdp=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w50 | head -n1)
 $USERMOD -p "$mdp" gotham
 echo "[+] User gotham created with password : $mdp"
 
