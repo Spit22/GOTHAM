@@ -3,9 +3,9 @@
 # Authors : GOTHAM Team
 # Descr : this script permits to prepare te orchestrator system and install GOTHAM
 #
-# Last update : 20/05/2021
+# Last update : 21/05/2021
 
-#set -e pipefail
+set -e pipefail
 
 ### DEFINE GLOBAL VARIABLES ###
 GOTHAM_HOME=/opt/GOTHAM/
