@@ -50,7 +50,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        apt install libmariadb3 libmariadb-dev
+        sudo apt install libmariadb3 libmariadb-dev
         python -m pip install --upgrade pip
         pip install pytest
         if [ -f /home/runner/work/GOTHAM/GOTHAM/Orchestrator/Sources/requirements.txt ]; then pip install -r /home/runner/work/GOTHAM/GOTHAM/Orchestrator/Sources/requirements.txt; fi
