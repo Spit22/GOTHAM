@@ -55,6 +55,10 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
     - name: Test with pytest
+      env:
+          GOTHAM_HOME: $GITHUB_WORKSPACE
       run: |
         pip install pytest
+        echo $GOTHAM_HOME
         pytest
+      
