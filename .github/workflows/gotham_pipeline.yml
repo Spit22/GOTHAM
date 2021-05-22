@@ -56,9 +56,8 @@ jobs:
 
     - name: Test with pytest
       env:
-          GOTHAM_HOME: $GITHUB_WORKSPACE
+          GOTHAM_HOME: "/home/runner/work/GOTHAM/GOTHAM/"
       run: |
         pip install pytest
-        echo $GOTHAM_HOME
         pytest
       
