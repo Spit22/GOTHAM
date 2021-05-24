@@ -24,10 +24,10 @@ def add_server(args):
     #
     # Show id of created server id
 
-    name = args.name
-    descr = args.descr
+    name = normalize_name(args.name)
+    descr = normalize_descr(args.descr)
     tags = args.tag
-    ip = args.ip
+    ip = normalize_ip(args.ip)
     autotags = args.autotags
 
     try:
@@ -35,14 +35,19 @@ def add_server(args):
     except:
         print("Key not seems to be b64 encoded")
         sys.exit(1)
-    ssh_port = args.port
+    ssh_port = normalize_port(args.port)
 
+    
     # Define the queried endpoint
     endpoint = "/add/server"
 
     # Before external configuration
-    gp = args.gotham_port
-    gh = args.gotham_hostname
+    gp = normalize_port(args.gotham_port)
+    gh = normalize_ip(args.gotham_hostname)
+
+    if name == False or descr == False or ip == False or ssh_port == False or gp == False or gh == False:
+        sys.exit(1) 
+
 
     # Forge url
     url = "http://" + gh + ":" + gp + endpoint
@@ -92,11 +97,11 @@ def add_hp(args):
     #
     # Show id of created honeypot id
 
-    name = args.name
-    descr = args.descr
+    name = normalize_name(args.name)
+    descr = normalize_descr(args.descr)
     tags = args.tag
     parser = args.parser
-    logs = args.logs
+    logs = normalize_logs(args.logs)
     autotags = args.autotags
 
     try:
@@ -104,14 +109,17 @@ def add_hp(args):
     except:
         print("Source not seems to be b64 encoded")
         sys.exit(1)
-    port = args.port
+    port = normalize_port(args.port)
 
     # Define the queried endpoint
     endpoint = "/add/honeypot"
 
     # Before external configuration
-    gp = args.gotham_port
-    gh = args.gotham_hostname
+    gp = normalize_port(args.gotham_port)
+    gh = normalize_ip(args.gotham_hostname)
+
+    if name == False or descr == False or logs == False or port == False or gp == False or gh == False:
+        sys.exit(1) 
 
     # Forge url
     url = "http://" + gh + ":" + gp + endpoint
@@ -164,15 +172,18 @@ def add_link(args):
     tags_hp = args.tags_hp
     tags_serv = args.tags_serv
     exposed_ports = args.ports
-    nb_hp = args.nb_hp
-    nb_serv = args.nb_serv
+    nb_hp = normalize_nb_hp(args.nb_hp)
+    nb_serv = normalize_nb_serv(args.nb_serv)
 
     # Define the queried endpoint
     endpoint = "/add/link"
 
     # Before external configuration
-    gp = args.gotham_port
-    gh = args.gotham_hostname
+    gp = normalize_port(args.gotham_port)
+    gh = normalize_ip(args.gotham_hostname)
+
+    if nb_hp == False or nb_serv == False or gp == False or gh == False:
+        sys.exit(1) 
 
     # Forge url
     url = "http://" + gh + ":" + gp + endpoint
@@ -222,8 +233,11 @@ def rm_server(args):
     endpoint = "/delete/server"
 
     # Before external configuration
-    gp = args.gotham_port
-    gh = args.gotham_hostname
+    gp = normalize_port(args.gotham_port)
+    gh = normalize_ip(args.gotham_hostname)
+
+    if gp == False or gh == False:
+        sys.exit(1) 
 
     # Forge url
     url = "http://" + gh + ":" + gp + endpoint
@@ -269,8 +283,11 @@ def rm_hp(args):
     endpoint = "/delete/honeypot"
 
     # Before external configuration
-    gp = args.gotham_port
-    gh = args.gotham_hostname
+    gp = normalize_port(args.gotham_port)
+    gh = normalize_ip(args.gotham_hostname)
+
+    if gp == False or gh == False:
+        sys.exit(1) 
 
     # Forge url
     url = "http://" + gh + ":" + gp + endpoint
@@ -316,8 +333,11 @@ def rm_link(args):
     endpoint = "/delete/link"
 
     # Before external configuration
-    gp = args.gotham_port
-    gh = args.gotham_hostname
+    gp = normalize_port(args.gotham_port)
+    gh = normalize_ip(args.gotham_hostname)
+
+    if gp == False or gh == False:
+        sys.exit(1) 
 
     # Forge url
     url = "http://" + gh + ":" + gp + endpoint
@@ -375,8 +395,11 @@ def edit_server(args):
     endpoint = "/edit/server"
 
     # Before external configuration
-    gp = args.gotham_port
-    gh = args.gotham_hostname
+    gp = normalize_port(args.gotham_port)
+    gh = normalize_ip(args.gotham_hostname)
+
+    if gp == False or gh == False:
+        sys.exit(1) 
 
     # Forge url
     url = "http://" + gh + ":" + gp + endpoint
@@ -442,8 +465,11 @@ def edit_hp(args):
     endpoint = "/edit/honeypot"
 
     # Before external configuration
-    gp = args.gotham_port
-    gh = args.gotham_hostname
+    gp = normalize_port(args.gotham_port)
+    gh = normalize_ip(args.gotham_hostname)
+
+    if gp == False or gh == False:
+        sys.exit(1) 
 
     # Forge url
     url = "http://" + gh + ":" + gp + endpoint
@@ -504,8 +530,11 @@ def edit_link(args):
     endpoint = "/edit/link"
 
     # Before external configuration
-    gp = args.gotham_port
-    gh = args.gotham_hostname
+    gp = normalize_port(args.gotham_port)
+    gh = normalize_ip(args.gotham_hostname)
+
+    if gp == False or gh == False:
+        sys.exit(1) 
 
     # Forge url
     url = "http://" + gh + ":" + gp + endpoint
@@ -561,8 +590,11 @@ def list_server(args):
     endpoint = "/list/server"
 
     # Before external configuration
-    gp = args.gotham_port
-    gh = args.gotham_hostname
+    gp = normalize_port(args.gotham_port)
+    gh = normalize_ip(args.gotham_hostname)
+
+    if gp == False or gh == False:
+        sys.exit(1) 
 
     # Get id of server
     id = args.id
@@ -809,8 +841,11 @@ def list_hp(args):
     endpoint = "/list/honeypot"
 
     # Before external configuration
-    gp = args.gotham_port
-    gh = args.gotham_hostname
+    gp = normalize_port(args.gotham_port)
+    gh = normalize_ip(args.gotham_hostname)
+
+    if gp == False or gh == False:
+        sys.exit(1) 
 
     # Get infos of honeypot
     id = args.id
@@ -1056,8 +1091,11 @@ def list_link(args):
     endpoint = "/list/link"
 
     # Before external configuration
-    gp = args.gotham_port
-    gh = args.gotham_hostname
+    gp = normalize_port(args.gotham_port)
+    gh = normalize_ip(args.gotham_hostname)
+
+    if gp == False or gh == False:
+        sys.exit(1) 
 
     # Get infos of link
     id = args.id
@@ -1338,10 +1376,101 @@ def list_link(args):
         print("Error: api return a " + str(status_code) + " http code.")
 
 
+
+#===Normalize functions===#
+def normalize_name(name):
+    if len(name) > 128:
+        print("name has a invalid length : "+name+" : name length must be under 128 !")
+        return False
+    if not(re.match(r"^[a-zA-Z0-9_\-]*$", name)):
+        print("name has a invalid syntax : "+name)
+        return False
+    return name
+
+
+def normalize_descr(descr):
+    if not(re.match(r"^[a-zA-Z0-9_\-\s]*$", descr)):
+        print("descr has a invalid syntax : "+descr)
+        return False
+    return descr
+
+
+def normalize_port(port):
+    if (port == '' or port == None or port == 0):
+        pritn("port is undefined or empty")
+        return False
+    try:
+        int(port)
+    except:
+        print("port has a invalid type : "+port+" : port must be an interger !")
+        return False
+    port = int(port)
+    if (port < 1) or (port > 65536):
+        print("port has a invalid value : "+port+" : port must be between 1 and 65536 !")
+        return False
+    return port
+
+def normalize_logs(logs):
+    if len(logs) > 255:
+        print("log path has a invalid length: must be under 255 !")
+        return False
+    if not(re.match(r"^[a-zA-Z0-9_/:\"\-\s]*$", logs)):
+        print("log path has a invalid syntax")
+        return False
+    return logs
+
+def normalize_ip(ip):
+    if not(re.match(r"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$", ip)):
+        print("ip has a invalid syntax")
+        return False
+    return ip
+
+
+def normalize_nb_hp(nb_hp):
+    if str(nb_hp).lower() != "all":
+        if len(str(nb_hp)) > 5:
+            print("Number of honeypots (nb_hp) has a invalid length : "+nb_hp+" : nb_hp length must be under 5 !")
+            return False
+        try:
+            int(nb_hp)
+        except:
+            print("Number of honeypots (nb_hp) has a invalid type : "+nb_hp+" : nb_hp must be an interger !")
+            return False
+        if int(nb_hp) < 1:
+            print("Number of honeypots (nb_hp) has a invalid value : "+nb_hp+" : nb_hp must be superior to 0 !")
+            return False
+        return int(nb_hp)
+    else:
+        return "ALL"
+
+
+def normalize_nb_serv(nb_serv):
+    if str(nb_serv).lower() != "all":
+        if len(str(nb_serv)) > 5:
+            print("Number of servers (nb_serv) has a invalid length : "+nb_serv+" : nb_hp length must be under 5 !")
+            return False
+        try:
+            int(nb_serv)
+        except:
+            print("Number of servers (nb_serv) has a invalid type : "+nb_serv+" : nb_serv must be an interger !")
+            return False
+        if int(nb_serv) < 1:
+            print("Number of honeypots (nb_serv) has a invalid value : "+nb_serv+" : nb_serv must be superior to 0 !")
+            return False
+        return int(nb_serv)
+    else:
+        return "ALL"
+
+
+
 if __name__ == "__main__":
 
-    gh = config["orchestrator_infos"]["host"]
-    gp = config["orchestrator_infos"]["port"]
+    gh = normalize_ip(config["orchestrator_infos"]["host"])
+    if gh == False:
+        sys.exit(1)
+    gp = normalize_port(config["orchestrator_infos"]["port"])
+    if gp == False:
+        sys.exit(1)
     default_hp = config["hp_display"]["default"]
     default_serv = config["serv_display"]["default"]
     default_link = config["link_display"]["default"]
