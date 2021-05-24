@@ -79,7 +79,7 @@ def generate_server_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, id_l
         rsyslog_conf_file = open(
             rsyslog_conf_server_local_path + id_lk + ".conf", "a")
         # Monitor the log file of the link
-        rsyslog_conf_file.write('input(Type="imfile" File="/var/log/nginx/lk-c0f99d95688c414f89a7a0df1348d1cb.log" Tag="lk-c0f99d95688c414f89a7a0df1348d1cb")\n')
+        rsyslog_conf_file.write('input(Type="imfile" File="/var/log/nginx/'+ str(id_lk) +'.log" Tag="lk-c0f99d95688c414f89a7a0df1348d1cb")\n')
         rsyslog_conf_file.write('if $syslogtag contains "' + str(id_lk) + '" then {\n')
         # Send to orchestrator in parsed JSON format
         rsyslog_conf_file.write('  action(Type="omfwd" Target="' + str(orch_ip) + '" Port="' + str(orch_rsyslog_port) + '" Protocol="tcp" Template="LongTagForwardFormat")\n')
