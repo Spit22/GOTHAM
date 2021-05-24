@@ -97,6 +97,7 @@ def remove_links_on_servers(DB_settings, result):
             commands = ["rm /etc/nginx/conf.d/links/" +
                         result['link_id'] + "-*.conf", "nginx -s reload"]
             execute_commands(hostname, port, ssh_key, commands)
+            remove_rsyslog_configuration(serv_dico, result['link_id'])
         except Exception as e:
             error = str(result['link_id']) + \
                 " removal on servers failed : " + str(e)
@@ -107,3 +108,31 @@ def remove_links_on_servers(DB_settings, result):
             obj_linked[hp_dico["hp_id"]]="hp"
 
     return obj_linked
+
+
+def remove_rsyslog_configuration(server_settings, id_lk):
+    # Delete the rsyslog configuration of the link on the given server
+    #
+    # datacenter_settings (dict) : all authentication information to connect to datacenter
+    # id_hp (string) : id of the honeypot we are trying to delete configuration
+
+    # Vars
+    rsyslog_conf_server_local_path = "/data/rsyslog/servers-configuration/" + str(id_lk) + ".conf"
+    rsyslog_conf_orchestrator_local_path = "/etc/rsyslog.d/" + str(id_lk) + ".conf"
+    rsyslog_conf_server_remote_path = "/etc/rsyslog.d/" + str(id_lk) + ".conf"
+    local_lk_log_file_path = "/data/link-log/" + str(id_lk) + ".conf"
+    remote_lk_log_file_path = "/var/log/nginx/" + str(id_lk) + ".log"
+
+    # Remove RSYSLOG configuration on the remote server
+    try:
+        commands = ["rm " + rsyslog_conf_server_remote_path, "rm " + remote_lk_log_file_path]
+        execute_commands(
+            server_settings["serv_ip"], server_settings["serv_ssh_port"], server_settings["serv_ssh_key"], commands)
+    except Exception as e:
+        raise ValueError(e)
+    # Remove local RSYSLOG configuration
+    try:
+        for fileToDelete in [rsyslog_conf_server_local_path, rsyslog_conf_orchestrator_local_path, local_lk_log_file_path]:
+            os.remove(fileToDelete)
+    except Exception as e:
+        raise ValueError(e)
