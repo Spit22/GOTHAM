@@ -560,7 +560,7 @@ def add_lk():
     try:
         # print("bypassed")
         add_link.deploy_rsyslog_conf(
-            servers, orchestrator_settings, id, "%host:word%")
+            servers, orchestrator_settings, id)
     except Exception as e:
         error = "Rsyslog configuration failed for link "+str(id)
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
@@ -1770,4 +1770,5 @@ def get_version():
     return response, 200
 
 
-app.run(host='0.0.0.0')
+if __name__ == "__main__":
+    app.run(host='0.0.0.0')

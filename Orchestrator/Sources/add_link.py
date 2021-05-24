@@ -79,15 +79,9 @@ def generate_server_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, id_l
         rsyslog_conf_file = open(
             rsyslog_conf_server_local_path + id_lk + ".conf", "a")
         # Monitor the log file of the link
-        rsyslog_conf_file.write('if $programname == "' + str(id_lk) + '" then {\n')
-        # Apply parsing rules
-        rsyslog_conf_file.write('  action(Type="mmnormalize" ruleBase="' + str(rulebase_path) + str(id_lk) + '.rb")\n')
-        # If parsing operations succeeded
-        rsyslog_conf_file.write('  if $parsesuccess == "OK" then {')
+        rsyslog_conf_file.write('if $syslogtag contains "' + str(id_lk) + '" then {\n')
         # Send to orchestrator in parsed JSON format
-        rsyslog_conf_file.write('    action(Type="omfwd" Target="' + str(orch_ip) + '" Port="' + str(orch_rsyslog_port) + '" Protocol="tcp" Template="all-json-template")\n')
-        # If parsing operations failed
-        rsyslog_conf_file.write('  }\n')
+        rsyslog_conf_file.write('  action(Type="omfwd" Target="' + str(orch_ip) + '" Port="' + str(orch_rsyslog_port) + '" Protocol="tcp" Template="LongTagForwardFormat")\n')
         # Stop dealing with these logs
         rsyslog_conf_file.write('  stop\n')
         rsyslog_conf_file.write('}\n')
@@ -108,7 +102,7 @@ def generate_orchestrator_rsyslog_conf(id_lk, rsyslog_conf_orchestrator_local_pa
         rsyslog_conf_file = open(
             rsyslog_conf_orchestrator_local_path + id_lk + ".conf", "a")
         # Filter the logs with link tag
-        rsyslog_conf_file.write('if $msg contains "' + str(id_lk) + '" then {\n')
+        rsyslog_conf_file.write('if $syslogtag contains "' + str(id_lk) + '" then {\n')
         # Dump the logs in local log file
         rsyslog_conf_file.write('action(type="omfile" File="' + str(local_lk_log_file_path) + str(id_lk) + '.log" Template="RawFormat")\n')
         # Stop dealing with these logs
@@ -118,26 +112,8 @@ def generate_orchestrator_rsyslog_conf(id_lk, rsyslog_conf_orchestrator_local_pa
             str(e)
         raise ValueError(error)
 
-def generate_rulebase(id_lk, rules, rulebase_path):
-    # Generates the specific rulebase for link
-    #
-    # id_lk (string) : Id of the link we are configuring
-    # rules (string) : Link rsyslog rules
-    # rulebase_path (string) : Intern path to link rulebase
-    try:
-        # Create the rulebase
-        rulebase = open(rulebase_path + id_lk + ".rb", "a")
-        # Specify the liblognorm version
-        rulebase.write('version=2\n')
-        # Write each rule in the rulebase
-        for rule in rules.split(","):
-            rulebase.write("rule=:" + str(rule) + '\n')
-    except Exception as e:
-        error = "Fail to create rulebase : " + str(e)
-        raise ValueError(error)
 
-
-def deploy_rsyslog_conf(servers, orchestrateur_settings, id_lk, rules):
+def deploy_rsyslog_conf(servers, orchestrateur_settings, id_lk):
     # Deploy remotely the rsyslog configuration
     #
     # servers (dict) : all authentication information to connect to servers
@@ -151,8 +127,6 @@ def deploy_rsyslog_conf(servers, orchestrateur_settings, id_lk, rules):
     rsyslog_conf_orchestrator_local_path = "/etc/rsyslog.d/"
     # Log files
     local_lk_log_file_path = "/data/link-log/"
-    # Rulebase
-    local_rulebase_path = "/data/rsyslog/rulebase/"
 
     # PATH ON SERVERS
     # Configuration
@@ -171,9 +145,8 @@ def deploy_rsyslog_conf(servers, orchestrateur_settings, id_lk, rules):
         rsyslog_conf_server_local_path_exists = os.path.exists(rsyslog_conf_server_local_path)
         rsyslog_conf_orchestrator_local_path_exists = os.path.exists(rsyslog_conf_orchestrator_local_path)
         local_lk_log_file_path_exists = os.path.exists(local_lk_log_file_path)
-        local_rulebase_path_exists = os.path.exists(remote_rulebase_path)
         if not (
-                rsyslog_conf_server_local_path_exists and rsyslog_conf_orchestrator_local_path_exists and local_lk_log_file_path_exists and local_rulebase_path_exists):
+                rsyslog_conf_server_local_path_exists and rsyslog_conf_orchestrator_local_path_exists and local_lk_log_file_path_exists):
             error = "At least one directory on orchestrator is missing"
             logging.error(error)
             raise ValueError(error)
@@ -194,7 +167,6 @@ def deploy_rsyslog_conf(servers, orchestrateur_settings, id_lk, rules):
 
         # Generate configuration files and rulebase
         try:
-            generate_rulebase(id_lk, rules, local_rulebase_path)
             generate_server_rsyslog_conf(orchestrateur_settings["hostname"], orchestrateur_settings["syslog_port"],
                                              remote_rulebase_path, id_lk, rsyslog_conf_server_local_path)
             generate_orchestrator_rsyslog_conf(
@@ -205,9 +177,6 @@ def deploy_rsyslog_conf(servers, orchestrateur_settings, id_lk, rules):
             raise ValueError(error)
         # Send and apply server rsyslog configuration to the server
         try:
-            # Send the rulebase
-            send_file(server["serv_ip"], server["serv_ssh_port"], server["serv_ssh_key"], [
-                local_rulebase_path + id_lk + ".rb"], remote_rulebase_path)
             # Send rsyslog configuration
             send_file_and_execute_commands(server["serv_ip"], server["serv_ssh_port"], server["serv_ssh_key"], [
                 rsyslog_conf_server_local_path + id_lk + ".conf"], rsyslog_conf_server_remote_path,

@@ -47,9 +47,22 @@ echo "=== Configuring Rsyslog... ==="
 touch /etc/rsyslog.d/00-JSON_template.conf
 echo '''
 module(load="mmnormalize")
+module(load="imfile")
+
+template (name="LongTagForwardFormat" type="string" string="<%PRI%>%TIMESTAMP:::date-rfc3339% %HOSTNAME% %syslogtag%%msg:::sp-if-no-1st-sp%%msg%")
 
 template(name="all-json-template" type="list"){
     property(name="$!all-json")
+}
+
+template(name="default-template" type="list") {
+    constant(value="{")
+        constant(value="\"timestamp\":\"")     property(name="timereported" dateFormat="rfc3339")
+        constant(value="\",\"host\":\"")        property(name="hostname")
+        constant(value="\",\"severity\":\"")    property(name="syslogseverity-text")
+        constant(value="\",\"tag\":\"")   property(name="syslogtag" format="json")
+        constant(value="\",\"message\":\"")    property(name="msg" format="json")
+    constant(value="\"}")
 }
 
 ''' > /etc/rsyslog.d/00-JSON_template.conf
