@@ -19,6 +19,7 @@ CHOWN=$(which chown)
 CHMOD=$(which chmod)
 APT=$(which apt)
 PIP3=$(which pip3)
+RM=$(which rm)
 
 ### CHECK IF ROOT ###
 if [ "$EUID" -ne 0 ]
@@ -84,6 +85,7 @@ echo "[+] Rsyslog configured under /etc/rsyslog.d/"
 echo "=== Installing GOTHAM... ==="
 
 # Clone repository on this directory
+$RM -r $GOTHAM_HOME
 $GIT clone $GOTHAM_GIT $GOTHAM_HOME > /dev/null 2>&1
 $CHOWN -R gotham:root $GOTHAM_HOME
 echo "[+] GOTHAM cloned under $GOTHAM_HOME"
