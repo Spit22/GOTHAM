@@ -1,5 +1,5 @@
 flask
-re
+regex
 requests
 paramiko
 scp
