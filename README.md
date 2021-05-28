@@ -26,7 +26,7 @@ To implement these features, the orchestrator follows a simple logic : it deals 
 * Severs : servers hosting reverse-proxy service
 * Network links : redirection of flows from reverse-proxies to honeypots
 
-# Documentation
+# Documentation
 
 All technical and functional documentation is available at https://gotham.readthedocs.io/en/latest/index.html
 
