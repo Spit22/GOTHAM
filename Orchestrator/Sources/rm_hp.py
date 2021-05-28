@@ -1,20 +1,12 @@
 #===Import external libs===#
-import Gotham_check
-import Gotham_choose
 import Gotham_replace
 import configparser
-import sys
-import fileinput
-import base64
-import json
-import requests
 #==========================#
 
 #===Import GOTHAM's libs===#
 from Gotham_SSH_SCP import execute_commands
-from Gotham_link_BDD import remove_honeypot_DB, get_honeypot_infos, edit_lhs_DB, edit_link_DB, remove_lhs
-from Gotham_normalize import normalize_id_honeypot, normalize_honeypot_infos, normalize_display_object_infos
-import add_link
+from Gotham_link_BDD import remove_honeypot_DB, get_honeypot_infos
+from Gotham_normalize import normalize_id_honeypot, normalize_display_object_infos
 #==========================#
 
 #===Logging components===#
@@ -62,28 +54,30 @@ def main(DB_settings, datacenter_settings, id):
         hp_infos = normalize_display_object_infos(result[0], "hp")
         # Try to replace
         try:
-            Gotham_replace.replace_hp_for_rm(
+            succes=Gotham_replace.replace_hp_for_rm(
                 DB_settings, datacenter_settings, hp_infos)
         except Exception as e:
             raise ValueError(e)
 
-    # Remove the Honeypot from the datacenter
-    commands = [f"docker container stop {id}",
-                f"docker container rm {id}", "docker network prune -f"]
-    try:
-        execute_commands(
-            datacenter_settings['hostname'], datacenter_settings['ssh_port'], datacenter_settings['ssh_key'], commands)
-    except Exception as e:
-        logging.error(f"Remove container failed : {e}")
-        raise ValueError(e)
-    # Remove the Honeypot from the IDB
-    try:
-        remove_honeypot_DB(DB_settings, id)
-    except Exception as e:
-        logging.error(f"Remove container failed : {e}")
-        raise ValueError(e)
-    return True
-
+    if succes == True:
+        # Remove the Honeypot from the datacenter
+        commands = [f"docker container stop {id}",
+                    f"docker container rm {id}", "docker network prune -f"]
+        try:
+            execute_commands(
+                datacenter_settings['hostname'], datacenter_settings['ssh_port'], datacenter_settings['ssh_key'], commands)
+        except Exception as e:
+            logging.error(f"Remove container failed : {e}")
+            raise ValueError(e)
+        # Remove the Honeypot from the IDB
+        try:
+            remove_honeypot_DB(DB_settings, id)
+        except Exception as e:
+            logging.error(f"Remove container failed : {e}")
+            raise ValueError(e)
+        return True
+    else:
+        return False
 ######### RSYSLOG SECTION ###########
 
 

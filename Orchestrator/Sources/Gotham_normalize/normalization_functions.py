@@ -1,4 +1,3 @@
-import sys
 import re
 import configparser
 import os
@@ -60,6 +59,17 @@ def normalize_port(port):
             f"port has a invalid value : {port} : port must be between 1 and 65536 !")
     return port
 
+def normalize_duplicat(duplicat):
+    try:
+        duplicat=int(duplicat)
+    except:
+        logging.warning(
+            f"duplicat has a invalid type : {duplicat} : duplicat must be an interger !")
+    if duplicat != 1 and duplicat != 0:
+        logging.warning(
+            f"duplicat has a invalid value : {duplicat} : duplicat must be 1 or 0 !")
+    return duplicat
+
 
 def normalize_parser(parser):
     return parser
@@ -84,7 +94,7 @@ def normalize_source(source):
 
 
 def normalize_state(obj_type, state):
-    if (obj_type != "hp" and obj_type != "sv"):
+    if (obj_type != "hp" and obj_type != "serv"):
         error = str(obj_type) + " is incorrect"
         logging.error(error)
         raise ValueError(error)
@@ -193,7 +203,7 @@ def normalize_tag(tag):
         tag = config['tag']['default_value']
     tag = tag.strip()
     tag = tag[0].upper() + tag[1:]
-    if not(re.match(r"^[a-zA-Z0-9_\-]*$", tag)):
+    if not(re.match(r"^[a-zA-Z0-9_\-+:.]*$", tag)):
         logging.warning(f"tag has a invalid syntax : {tag}")
     return tag
 

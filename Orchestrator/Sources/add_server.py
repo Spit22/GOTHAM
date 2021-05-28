@@ -1,5 +1,4 @@
 #===Import external libs===#
-import base64
 #==========================#
 
 #===Import GOTHAM's libs===#

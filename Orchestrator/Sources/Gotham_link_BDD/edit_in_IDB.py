@@ -1,24 +1,27 @@
-# Import external libs
+#===Import external libs===#
 import mariadb
-import sys
 import configparser
-
-# Import Gotham's libs
-from . import get_infos, remove_in_IDB, add_in_IDB
-from Gotham_normalize import normalize_honeypot_infos, normalize_server_infos, normalize_link_infos, normalize_lhs_infos, normalize_modif_to_str, normalize_conditions_to_str
-
-
-# Logging components
 import os
 import logging
+#==========================#
+
+#===Import GOTHAM's libs===#
+from . import get_infos, remove_in_IDB, add_in_IDB
+from Gotham_normalize import normalize_honeypot_infos, normalize_server_infos, normalize_link_infos
+from Gotham_normalize import normalize_lhs_infos, normalize_modif_to_str, normalize_conditions_to_str
+#==========================#
+
+#===Logging components===#
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
                     level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+#=======================#
 
-# Retrieve settings from config file
+#===Retrieve settings from configuration file===#
 config = configparser.ConfigParser()
 config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
 tag_separator = config['tag']['separator']
+#===============================================#
 
 
 ############################### TAG SECTION ###############################
@@ -40,7 +43,6 @@ def server(DB_connection, modifs, conditions):
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     tag_separator = config['tag']['separator']
-    port_separator = config['port']['separator']
 
     # Normalize modifs
     try:
@@ -155,7 +157,6 @@ def honeypot(DB_connection, modifs, conditions):
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     tag_separator = config['tag']['separator']
-    port_separator = config['port']['separator']
 
     # Normalize modifs
     try:

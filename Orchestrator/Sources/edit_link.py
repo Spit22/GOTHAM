@@ -2,7 +2,6 @@
 
 #===Import external libs===#
 import configparser
-import sys
 import base64
 import requests
 import json
@@ -15,6 +14,7 @@ import Gotham_choose
 import Gotham_normalize
 import Gotham_replace
 import Gotham_SSH_SCP
+import Gotham_state
 import add_link
 #==========================#
 
@@ -43,6 +43,8 @@ def edit_tags(DB_settings, datacenter_settings, link, tags, type_tag):
     # tags (string) : new desired tags
     # type_tag (string) : "hp" or "serv"
 
+    all_ok = True
+
     if type_tag != "hp" and type_tag != "serv":
         logging.error(f"type_tag is incorrect")
         raise ValueError("typ_tag incorrect")
@@ -52,7 +54,10 @@ def edit_tags(DB_settings, datacenter_settings, link, tags, type_tag):
     dsp_link = Gotham_normalize.normalize_display_object_infos(
         link, "link", type_tag)
 
-    already_used = []
+    if type_tag == "serv":
+        already_used = []
+        already_used.append("OK")
+
     for object_infos in dsp_link[type_tag+"s"]:
         not_present_in_obj = list(
             set(new_tags) - set(object_infos[type_tag+"_tags"].lower().split("||")))
@@ -68,14 +73,18 @@ def edit_tags(DB_settings, datacenter_settings, link, tags, type_tag):
                         DB_settings, datacenter_settings, dsp_link, object_infos, tags, already_used)
                 except Exception as e:
                     raise ValueError(e)
+                if str(already_used[0]).upper()=="KO":
+                    all_ok = False
 
             elif type_tag == "hp":
                 try:
-                    Gotham_replace.replace_hp_for_added_tags_in_link(
+                    result=Gotham_replace.replace_hp_for_added_tags_in_link(
                         DB_settings, datacenter_settings, dsp_link, object_infos, tags)
                 except Exception as e:
                     raise ValueError(e)
-
+                if result == False:
+                    all_ok = False
+    return all_ok
 
 def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
     # Edit honeypot number or server number for a specified link
@@ -86,6 +95,19 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
     # nb (int) : new number of objects
     # type_nb (string) : "hp" or "serv"
 
+    # Retrieve settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    # Retrieve State list
+    state_list_serv = config['state']['serv_state'].split(",")
+    state_list_hp = config['state']['hp_state'].split(",")
+    
+    if len(state_list_serv)<4 or len(state_list_hp)<4:
+        error = "The config file needs 4 differents states for honeypot and server"
+        logging.error(error)
+        raise ValueError(error)
+
+
     dsp_link = Gotham_normalize.normalize_display_object_infos(
         link, "link", type_nb)
 
@@ -94,13 +116,21 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
     # Get already used objects
     present_objects = []
     for object_infos in dsp_link[type_nb+"s"]:
-        if type_nb == "hp":
-            present_object = Gotham_link_BDD.get_honeypot_infos(
-                DB_settings, id=object_infos[type_nb+"_id"])[0]
+        # Check objects state
+        try:
+            # Update state of object
+            present_object = Gotham_state.adapt_state(DB_settings, object_infos[type_nb+"_id"], type_nb, replace_auto=False)
+        except Exception as e:
+            logging.error(
+                "Error while configuring object " + type_nb + " state : "+str(e))
 
-        if type_nb == "serv":
-            present_object = Gotham_link_BDD.get_server_infos(
-                DB_settings, id=object_infos[type_nb+"_id"])[0]
+            if type_nb == "hp":
+                present_object = Gotham_link_BDD.get_honeypot_infos(
+                    DB_settings, id=object_infos[type_nb+"_id"])[0]
+
+            if type_nb == "serv":
+                present_object = Gotham_link_BDD.get_server_infos(
+                    DB_settings, id=object_infos[type_nb+"_id"])[0]
 
         present_objects.append(present_object)
     desired_ports = link["link_ports"].split(ports_separator)
@@ -131,12 +161,19 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                 objects_infos, dsp_link["link_ports"])
 
         if tags.lower() != "all":
+            # update state
+            try:
+                objects_infos = [Gotham_state.adapt_state(DB_settings,
+                    object_infos[type_nb+"_id"], type_nb) for object_infos in objects_infos]
+            except Exception as e:
+                logging.error(
+                    "Error while configuring object state : "+str(e))
             objects_infos = Gotham_check.check_tags(
                 type_nb, objects_infos, tags_hp=tags_hp, tags_serv=tags_serv)
 
         # Filter objects in error and already present in link
         objects_infos = [object_infos for object_infos in objects_infos if not(
-            object_infos[type_nb+"_state"] == 'ERROR' or object_infos[type_nb+"_id"] in link[type_nb+"_id"])]
+            object_infos[type_nb+"_state"] == (str(state_list_hp[2]).upper() if type_nb == "hp" else str(state_list_serv[2]).upper()) or object_infos[type_nb+"_state"] == (str(state_list_hp[3]).upper() if type_nb == "hp" else str(state_list_serv[3]).upper()) or object_infos[type_nb+"_id"] in link[type_nb+"_id"])]
 
         if str(nb).lower() != "all":
             if type_nb == "hp":
@@ -175,7 +212,7 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                 descr = "Duplication of " + \
                     selected_objects[i % len(selected_objects)]["hp_descr"]
                 duplicate_hp_infos = {"name": str(name), "descr": str(descr), "tags": str(selected_objects[i % len(selected_objects)]["hp_tags"].replace("||", tags_separator)), "logs": str(selected_objects[i % len(selected_objects)]["hp_logs"]), "parser": str(
-                    selected_objects[i % len(selected_objects)]["hp_parser"]), "port": str(selected_objects[i % len(selected_objects)]["hp_port_container"]), "dockerfile": str(encoded_dockerfile.decode("utf-8"))}
+                    selected_objects[i % len(selected_objects)]["hp_parser"]), "port": str(selected_objects[i % len(selected_objects)]["hp_port_container"]), "dockerfile": str(encoded_dockerfile.decode("utf-8")), "duplicat": 1}
 
                 try:
                     jsondata = json.dumps(duplicate_hp_infos)
@@ -232,17 +269,7 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
 
             # Insert data in Link_Hp_Serv
             for server in servers:
-                # Update state of server
-                modifs = {"state": "HEALTHY"}
-                conditions = {"id": server["serv_id"]}
-                Gotham_link_BDD.edit_server_DB(DB_settings, modifs, conditions)
-
                 for honeypot in added_hp:
-                    # Update state of honeypot
-                    modifs = {"state": "HEALTHY"}
-                    conditions = {"id": honeypot["hp_id"]}
-                    Gotham_link_BDD.edit_honeypot_DB(
-                        DB_settings, modifs, conditions)
                     # Create lhs_infos
                     lhs_infos = {"id_link": link["link_id"], "id_hp": honeypot["hp_id"],
                                  "id_serv": server["serv_id"], "port": server["lhs_port"]}
@@ -253,6 +280,20 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                         Gotham_link_BDD.add_lhs_DB(DB_settings, lhs_infos)
                     except Exception as e:
                         raise ValueError(e)
+
+                    try:
+                        # Update state of honeypot
+                        Gotham_state.adapt_state(DB_settings, honeypot["hp_id"], "hp")
+                    except Exception as e:
+                        logging.error(
+                            "Error while configuring honeypot state : "+str(e))
+                    
+                try:
+                    # Update state of server
+                    Gotham_state.adapt_state(DB_settings, server["serv_id"], "serv")
+                except Exception as e:
+                    logging.error(
+                        "Error while configuring server state : "+str(e))
 
         if type_nb == "serv":
             count_exposed_ports = {str(port): 0 for port in desired_ports}
@@ -325,18 +366,7 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
 
             # Insert data in Link_Hp_Serv
             for server in objects_infos:
-                # Update state of server
-                modifs = {"state": "HEALTHY"}
-                conditions = {"id": server["serv_id"]}
-                Gotham_link_BDD.edit_server_DB(DB_settings, modifs, conditions)
-
                 for honeypot in honeypots:
-                    # Update state of honeypot
-                    modifs = {"state": "HEALTHY"}
-                    conditions = {"id": honeypot["hp_id"]}
-                    Gotham_link_BDD.edit_honeypot_DB(
-                        DB_settings, modifs, conditions)
-
                     # Create lhs_infos
                     lhs_infos = {"id_link": link["link_id"], "id_hp": honeypot["hp_id"],
                                  "id_serv": server["serv_id"], "port": server["choosed_port"]}
@@ -347,6 +377,21 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                         Gotham_link_BDD.add_lhs_DB(DB_settings, lhs_infos)
                     except Exception as e:
                         raise ValueError(e)
+
+                    try:
+                        # Update state of honeypot
+                        Gotham_state.adapt_state(DB_settings, honeypot["hp_id"], "hp")
+                    except Exception as e:
+                        logging.error(
+                            "Error while configuring honeypot state : "+str(e))
+                    
+                try:
+                    # Update state of server
+                    Gotham_state.adapt_state(DB_settings, server["serv_id"], "serv")
+                except Exception as e:
+                    logging.error(
+                        "Error while configuring server state : "+str(e))
+
 
     elif int(nb) < int(link["link_nb_"+type_nb]):
 
@@ -396,6 +441,14 @@ def edit_nb(DB_settings, datacenter_settings, link, nb, type_nb):
                         DB_settings, id_link=dsp_link["link_id"], id_serv=del_object["serv_id"])
             except Exception as e:
                 raise ValueError(e)
+
+            try:
+                # Update state of object
+                Gotham_state.adapt_state(DB_settings, del_object[type_nb+"_id"], type_nb)
+            except Exception as e:
+                logging.error(
+                    "Error while configuring object state : "+str(e))
+
             try:
                 modifs = {"nb_"+type_nb: int(dsp_link["link_nb_"+type_nb])-1}
                 conditions = {"id": dsp_link["link_id"]}
@@ -413,6 +466,17 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
     # datacenter_settings (dict) : all authentication information to connect to datacenter
     # link (dict) : link information
     # new_pors (string) : new desired ports
+
+    # Retrieve settings from config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    # Retrieve State list
+    state_list = config['state']['serv_state'].split(",")
+    
+    if len(state_list)<4:
+        error = "The config file needs 4 differents states for honeypot and server"
+        logging.error(error)
+        raise ValueError(error)
 
     dsp_link = Gotham_normalize.normalize_display_object_infos(
         link, "link", "serv")
@@ -436,6 +500,14 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
     honeypots = [dict(tuple_of_hp_items) for tuple_of_hp_items in {
         tuple(hp.items()) for hp in honeypots}]
 
+    # update state
+    try:
+        honeypots = [Gotham_state.adapt_state(DB_settings,
+            honeypot["hp_id"], "hp", replace_auto=False) for honeypot in honeypots]
+    except Exception as e:
+        logging.error(
+            "Error while configuring honeypot state : "+str(e))
+
     # Generate NGINX configurations for each redirection on a specific exposed_port
     for exposed_port in added_ports:
         add_link.generate_nginxConf(
@@ -443,6 +515,14 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
     nb_del = 0
     servs_keeps = []
     for server in dsp_link["servs"]:
+        # Check objects state
+        try:
+            # Update state of object
+            Gotham_state.adapt_state(DB_settings, server["serv_id"], "serv", replace_auto=False)
+        except Exception as e:
+            logging.error(
+                "Error while configuring server state : "+str(e))
+
         exposed_ports = [hp["lhs_port"] for hp in server["hps"]]
         exposed_ports_unique = list(dict.fromkeys(exposed_ports))
         if len(exposed_ports_unique) == 1:
@@ -459,6 +539,12 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
                     logging.error(
                         f"{link['link_id']} removal on servers failed : {e}")
                     raise ValueError(e)
+                try:
+                    # Update state of the server
+                    Gotham_state.adapt_state(DB_settings, server["serv_id"], "serv")
+                except Exception as e:
+                    logging.error(
+                        "Error while configuring server state : "+str(e))
                 nb_del += 1
             else:
                 count_exposed_ports[str(exposed_ports_unique[0])] += 1
@@ -473,13 +559,22 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
         servers = Gotham_link_BDD.get_server_infos(DB_settings, tags=tags_serv)
 
         if tags_serv.lower() != "all":
+            # update state
+            try:
+                servers = [Gotham_state.adapt_state(DB_settings,
+                    server["serv_id"], "serv") for server in servers]
+            except Exception as e:
+                logging.error(
+                    "Error while configuring server state : "+str(e))
             servers = Gotham_check.check_tags(
                 "serv", servers, tags_serv=tags_serv)
 
         servers = Gotham_check.check_servers_ports_matching(servers, new_ports)
+        
+
         # Filter servers in error and already used by link
         servers = [server for server in servers if not(
-            server["serv_state"] == 'ERROR' or server["serv_id"] in servs_keeps)]
+            server["serv_state"] == str(state_list[2]).upper() or server["serv_state"] == str(state_list[3]).upper() or server["serv_id"] in servs_keeps)]
         if len(servers) < nb_del:
             try:
                 modifs = {"nb_serv": int(dsp_link["link_nb_serv"])-nb_del}
@@ -521,17 +616,7 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
         add_link.deploy_nginxConf(DB_settings, dsp_link["link_id"], servers)
         # Insert data in Link_Hp_Serv
         for server in servers:
-            # Update state of server
-            modifs = {"state": "HEALTHY"}
-            conditions = {"id": server["serv_id"]}
-            Gotham_link_BDD.edit_server_DB(DB_settings, modifs, conditions)
-
             for honeypot in honeypots:
-                # Update state of honeypot
-                modifs = {"state": "HEALTHY"}
-                conditions = {"id": honeypot["hp_id"]}
-                Gotham_link_BDD.edit_honeypot_DB(
-                    DB_settings, modifs, conditions)
                 # Create lhs_infos
                 lhs_infos = {"id_link": dsp_link["link_id"], "id_hp": honeypot["hp_id"],
                              "id_serv": server["serv_id"], "port": server["choosed_port"]}
@@ -539,3 +624,17 @@ def edit_ports(DB_settings, datacenter_settings, link, new_ports):
                 lhs_infos = Gotham_normalize.normalize_lhs_infos(lhs_infos)
                 # Store new link and tags in the internal database
                 Gotham_link_BDD.add_lhs_DB(DB_settings, lhs_infos)
+
+                try:
+                    # Update state of honeypot
+                    Gotham_state.adapt_state(DB_settings, honeypot["hp_id"], "hp")
+                except Exception as e:
+                    logging.error(
+                        "Error while configuring honeypot state : "+str(e))
+                
+            try:
+                # Update state of server
+                Gotham_state.adapt_state(DB_settings, server["serv_id"], "serv")
+            except Exception as e:
+                logging.error(
+                    "Error while configuring server state : "+str(e))

@@ -1,5 +1,12 @@
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/60015417/119951443-40ecdb80-bf9c-11eb-8e77-8bdb42243580.png"/>
+</p>
+
 # GOTHAM
 Global Orchestrator for Threat-intel through Honeypot Army Management
+
+
+[![Documentation Status](https://readthedocs.org/projects/gotham/badge/?version=latest)](https://gotham.readthedocs.io/en/latest/?badge=latest) ![GitHub](https://img.shields.io/github/license/spit22/GOTHAM) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/spit22/GOTHAM)
 
 # The project
 
@@ -18,6 +25,10 @@ To implement these features, the orchestrator follows a simple logic : it deals 
 * Honeypots :containers hosting vulnerable services
 * Severs : servers hosting reverse-proxy service
 * Network links : redirection of flows from reverse-proxies to honeypots
+
+# Documentation
+
+All technical and functional documentation is available at https://gotham.readthedocs.io/en/latest/index.html
 
 # The sources
 

@@ -1,17 +1,11 @@
 #===Import external libs===#
-import base64
-import sys
 import configparser
 #==========================#
 
 #===Import GOTHAM's libs===#
-import Gotham_link_BDD
 import Gotham_check
-import Gotham_choose
 import Gotham_replace
 import Gotham_normalize
-import Gotham_SSH_SCP
-import add_link
 #==========================#
 
 #===Logging components===#
@@ -47,10 +41,11 @@ def edit_tags(DB_settings, datacenter_settings, server, tags):
         server, "serv")
 
     try:
-        Gotham_replace.replace_serv_for_deleted_tags(
+        result=Gotham_replace.replace_serv_for_deleted_tags(
             DB_settings, datacenter_settings, dsp_server, deleted_tags)
     except Exception as e:
         raise ValueError(e)
+    return result
 
 
 def check_edited_connection(DB_settings, server, ip, ssh_port, ssh_key):

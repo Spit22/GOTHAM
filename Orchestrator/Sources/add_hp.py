@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+import subprocess
 
 #===Import GOTHAM's libs===#
-from Gotham_SSH_SCP import send_file_and_execute_commands, send_file, execute_commands
+from Gotham_SSH_SCP import send_file_and_execute_commands, send_file, execute_command_with_return, execute_commands
 #==========================#
 
 #===Logging components===#
@@ -13,7 +14,7 @@ logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
 #=======================#
 
 
-def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_port):
+def generate_dockercompose(id, dockerfile_path, honeypot_port, mapped_port):
     # Generates a docker-compose.yml file  from given information
     #
     # id (string) : id of the honeypot
@@ -31,9 +32,6 @@ def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_
     dockercompose.write('  honeypot:\n')
     # Configure container name
     dockercompose.write('    container_name: '+str(id)+'\n')
-    # Add volumes for logs
-    dockercompose.write('    volumes:\n')
-    dockercompose.write('      - /data/'+str(id)+'/logs:'+str(log_path)+'\n')
     # Build options
     dockercompose.write('    build:\n')
     dockercompose.write('      context: .\n')
@@ -42,13 +40,16 @@ def generate_dockercompose(id, dockerfile_path, log_path, honeypot_port, mapped_
     dockercompose.write('    ports:\n')
     dockercompose.write('      - \"'+str(mapped_port) +
                         ':'+str(honeypot_port)+"\"\n")
-    # Add a TTY
-    dockercompose.write('    tty: true\n')
+    # Change logging facility
+    dockercompose.write('    logging:\n')
+    dockercompose.write('      driver: syslog\n')
+    dockercompose.write('      options:\n')
+    dockercompose.write('        tag: ' + str(id) + '\n')
     # Close file
     dockercompose.close()
 
 
-def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id_hp):
+def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id_hp, logs):
     # Install and deploy an Nginx Reverse-Proxy on a given server
     #
     # ip_dc (string): ip of remote server
@@ -70,13 +71,23 @@ def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, id_hp):
         send_file_and_execute_commands(
             dc_ip, dc_ssh_port, dc_ssh_key, dockerfile_path, docker_dest, command_exec_compose)
     except Exception as e:
-        logging.error(e)
-        return False
-    # If deployment is OK, return True
-    return True
+        error = "Container deployement failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
+    # Create symlinks between log files and /dev/stdout
+    try:
+        log_path_list = logs.split(",")
+        commands = []
+        for path in log_path_list:
+            commands.append(f'docker exec {str(id_hp)} ln -sf /dev/stdout {str(path)}\n')
+        execute_commands(dc_ip, dc_ssh_port, dc_ssh_key, commands)
+    except Exception as e:
+        error = "Symlinks creation failed : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
 
 
-def generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, id_hp, rsyslog_conf_datacenter_local_path, remote_hp_log_file_path):
+def generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, id_hp, rsyslog_conf_datacenter_local_path):
     # Generates Rsyslog configuration for datacenter-side
     #
     # orch_ip (string) : Orchestrator's IP
@@ -84,23 +95,27 @@ def generate_datacenter_rsyslog_conf(orch_ip, orch_rsyslog_port, rulebase_path, 
     # rulebase_path (string) : intern path of the rulebase
     # id_hp (string) : id of the honeypot we are configuring logging
     # rsyslog_conf_datacenter_local_path (string) : intern path of rsyslog datacenter configuration
-    # remote_hp_log_file_path (string) : remote honeypot log files
 
     try:
         # Create the configuration file
         rsyslog_conf_file = open(
             rsyslog_conf_datacenter_local_path + id_hp + ".conf", "a")
         # Monitor the log file of the honeypot
-        rsyslog_conf_file.write(
-            'input(Type="imfile" File="' + remote_hp_log_file_path + '" Tag="' + id_hp + '")\n')
+        rsyslog_conf_file.write('if $programname == "' + str(id_hp) + '" then {\n')
         # Apply parsing rules
-        rsyslog_conf_file.write(
-            'action(Type="mmnormalize" ruleBase="' + str(rulebase_path) + '")\n')
-        # Send to orchestrator in JSON format
-        rsyslog_conf_file.write('action(Type="omfwd" Target="' + str(orch_ip) + '" Port="' + str(
-            orch_rsyslog_port) + '" Protocol="tcp" Template="JSON_template")\n')
+        rsyslog_conf_file.write('  action(Type="mmnormalize" ruleBase="' + str(rulebase_path) + str(id_hp) + '.rb")\n')
+        # If parsing operations succeeded
+        rsyslog_conf_file.write('  if $parsesuccess == "OK" then {')
+        # Send to orchestrator in parsed JSON format
+        rsyslog_conf_file.write('    action(Type="omfwd" Target="' + str(orch_ip) + '" Port="' + str(orch_rsyslog_port) + '" Protocol="tcp" Template="all-json-template")\n')
+        # If parsing operations failed
+        rsyslog_conf_file.write('  } else {')
+        # Send to orchestrator in default JSON format
+        rsyslog_conf_file.write('    action(Type="omfwd" Target="' + str(orch_ip) + '" Port="' + str(orch_rsyslog_port) + '" Protocol="tcp" Template="default-template")\n')
+        rsyslog_conf_file.write('  }\n')
         # Stop dealing with these logs
-        rsyslog_conf_file.write('stop\n')
+        rsyslog_conf_file.write('  stop\n')
+        rsyslog_conf_file.write('}\n')
     except Exception as e:
         error = "Fail to create rsyslog configuration for datacenter : " + \
             str(e)
@@ -120,12 +135,11 @@ def generate_orchestrator_rsyslog_conf(id_hp, rsyslog_conf_orchestrator_local_pa
         rsyslog_conf_file = open(
             rsyslog_conf_orchestrator_local_path + id_hp + ".conf", "a")
         # Filter the logs with honeypot tag
-        rsyslog_conf_file.write(':msg, contains, "' + id_hp + '"\n')
+        rsyslog_conf_file.write('if $msg contains "' + str(id_hp) + '" then {\n')
         # Dump the logs in local log file
-        rsyslog_conf_file.write(
-            'action(type="omfile" File="' + local_hp_log_file_path + '")\n')
+        rsyslog_conf_file.write('action(type="omfile" File="' + str(local_hp_log_file_path) + str(id_hp) + '.log" Template="RawFormat")\n')
         # Stop dealing with these logs
-        rsyslog_conf_file.write('stop\n')
+        rsyslog_conf_file.write('stop}\n')
     except Exception as e:
         error = "Fail to create rsyslog configuration for orchestrator : " + \
             str(e)
@@ -145,8 +159,8 @@ def generate_rulebase(id_hp, rules, rulebase_path):
         # Specify the liblognorm version
         rulebase.write('version=2\n')
         # Write each rule in the rulebase
-        for rule in rules:
-            rulebase.write(str(rule) + '\n')
+        for rule in rules.split(","):
+            rulebase.write("rule=:" + str(rule) + '\n')
     except Exception as e:
         error = "Fail to create rulebase : " + str(e)
         logging.error(error)
@@ -164,10 +178,11 @@ def deploy_rsyslog_conf(datacenter_settings, orchestrateur_settings, id_hp, rule
     # On effectue 2 connexions SSH
     dc_ssh_key_1 = datacenter_settings["ssh_key"]
     dc_ssh_key_2 = datacenter_settings["ssh_key"]
+
     # PATH ON ORCHESTRATOR
     # Configuration
     rsyslog_conf_datacenter_local_path = "/data/rsyslog/datacenter-configuration/"
-    rsyslog_conf_orchestrator_local_path = "/data/rsyslog/"
+    rsyslog_conf_orchestrator_local_path = "/etc/rsyslog.d/"
     # Log files
     local_hp_log_file_path = "/data/honeypot-log/"
     # Rulebase
@@ -176,27 +191,43 @@ def deploy_rsyslog_conf(datacenter_settings, orchestrateur_settings, id_hp, rule
     # PATH ON DATACENTER
     # Configuration
     #remote_path = "/data/"+str(id_hp)+"/"
-    rsyslog_conf_datacenter_remote_path = "/data/rsyslog/"
-    # Log files
-    remote_hp_log_file_path = "/data/"+str(id_hp)+"/logs/syslog"
+    rsyslog_conf_datacenter_remote_path = "/etc/rsyslog.d/"
     # Rulebase
     remote_rulebase_path = "/data/rsyslog/rulebase/"
 
     # SSH SCP ARGUMENTS
     exec_restart_rsyslog = ["service rsyslog restart"]
 
+    # Check if required directories on orchestrator exists
+    rsyslog_conf_datacenter_local_path_exists = os.path.exists(rsyslog_conf_datacenter_local_path)
+    rsyslog_conf_orchestrator_local_path_exists = os.path.exists(rsyslog_conf_orchestrator_local_path)
+    local_hp_log_file_path_exists = os.path.exists(local_hp_log_file_path)
+    local_rulebase_path_exists = os.path.exists(remote_rulebase_path)
+    if not(rsyslog_conf_datacenter_local_path_exists and rsyslog_conf_orchestrator_local_path_exists and local_hp_log_file_path_exists and local_rulebase_path_exists):
+        error = "At least one directory on orchestrator is missing"
+        logging.error(error)
+        raise ValueError(error)
+    
+    # Check if required directories on datacenter exists
+    rsyslog_conf_datacenter_remote_path_exists = execute_command_with_return(datacenter_settings["hostname"], datacenter_settings["ssh_port"], datacenter_settings["ssh_key"], f"[[ -d {rsyslog_conf_datacenter_remote_path} ]] && echo 'OK'")
+    remote_rulebase_path_exists = execute_command_with_return(datacenter_settings["hostname"], datacenter_settings["ssh_port"], datacenter_settings["ssh_key"], f"[[ -d {remote_rulebase_path} ]] && echo 'OK'")
+    if not(rsyslog_conf_datacenter_remote_path_exists == ['OK'] and remote_rulebase_path_exists == ['OK']):
+        error = "At least one directory on datacenter is missing"
+        logging.error(error)
+        raise ValueError(error)
+    
     # Generate configuration files and rulebase
     try:
         generate_rulebase(id_hp, rules, local_rulebase_path)
         generate_datacenter_rsyslog_conf(orchestrateur_settings["hostname"], orchestrateur_settings["syslog_port"],
-                                         remote_rulebase_path, id_hp, rsyslog_conf_datacenter_local_path, remote_hp_log_file_path)
+                                         remote_rulebase_path, id_hp, rsyslog_conf_datacenter_local_path)
         generate_orchestrator_rsyslog_conf(
             id_hp, rsyslog_conf_orchestrator_local_path, local_hp_log_file_path)
     except Exception as e:
         error = "Fail to generate rsyslog configuration : " + str(e)
         logging.error(error)
         raise ValueError(error)
-    # Send datacenter rsyslog configuration to the datacenter
+    # Send and apply datacenter rsyslog configuration to the datacenter
     try:
         # Send the rulebase
         send_file(datacenter_settings["hostname"], datacenter_settings["ssh_port"], dc_ssh_key_1, [
@@ -208,3 +239,12 @@ def deploy_rsyslog_conf(datacenter_settings, orchestrateur_settings, id_hp, rule
         error = "Fail to deploy rsyslog configuration : " + str(e)
         logging.error(error)
         raise ValueError(error)
+    
+    # Try to apply orchestrator rsyslog configuration
+    try:
+        subprocess.run(["systemctl", "restart", "rsyslog"])
+    except Exception as e:
+        error = "Fail to deploy rsyslog configuration : " + str(e)
+        logging.error(error)
+        raise ValueError(error)
+
