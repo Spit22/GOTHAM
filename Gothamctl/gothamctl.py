@@ -1398,7 +1398,7 @@ def normalize_descr(descr):
 
 def normalize_port(port):
     if (port == '' or port == None or port == 0):
-        pritn("port is undefined or empty")
+        print("port is undefined or empty")
         return False
     try:
         int(port)
