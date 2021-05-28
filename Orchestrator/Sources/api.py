@@ -974,7 +974,7 @@ def edit_lk():
                     error = "Some server tags does not exist"
                     return Gotham_error.format_usererror(error, str(e), debug_mode), 400
                 try:
-                    result=dit_link.edit_tags(DB_settings, datacenter_settings,
+                    result=edit_link.edit_tags(DB_settings, datacenter_settings,
                                             link_serv_hp, link_infos_received["tags_serv"], "serv")
                 except Exception as e:
                     error = "Tag server edition failed"
@@ -983,7 +983,7 @@ def edit_lk():
                 modifs["tags_serv"] = link_infos_received["tags_serv"]
             else:
                 error="Tag server edition failed, some links cannot be decremented" 
-                return Gotham_error.format_usererror(error, str(e), debug_mode), 500
+                return Gotham_error.format_usererror(error, str(""), debug_mode), 500
 
     # Update database in memory
     if modifs != {}:
@@ -1024,7 +1024,7 @@ def edit_lk():
                 modifs["tags_hp"] = link_infos_received["tags_hp"]
             else:
                 error="Tag honeypot edition failed, some links cannot be decremented" 
-                return Gotham_error.format_usererror(error, str(e), debug_mode), 500
+                return Gotham_error.format_usererror(error, str(""), debug_mode), 500
             
 
     # Update database
@@ -1449,7 +1449,7 @@ def ls_honeypot():
             # update state
             try:
                 honeypots_exact = [Gotham_state.adapt_state(DB_settings,
-                    honeypote["hp_id"], "hp") for honeypot in honeypots_exact]
+                    honeypot["hp_id"], "hp") for honeypot in honeypots_exact]
             except Exception as e:
                 logging.error(
                     "Error while configuring honeypot state : "+str(e))
