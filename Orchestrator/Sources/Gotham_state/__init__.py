@@ -4,7 +4,6 @@ import Gotham_check
 import Gotham_SSH_SCP
 import Gotham_replace
 
-from . import state_functions
 
 # Logging components
 import json
@@ -12,11 +11,15 @@ import base64
 import os
 import configparser
 import mariadb
+import sys
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
                     level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
+sys.path.insert(1, GOTHAM_HOME + 'Orchestrator/Sources')
+import rm_hp
+from . import state_functions
 
 
 def adapt_state(DB_settings, obj_id, obj_type, link_id="", check_all=True, replace_auto=True):
