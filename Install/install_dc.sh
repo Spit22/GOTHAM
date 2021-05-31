@@ -10,6 +10,7 @@ set -e pipefail
 
 ### DEFINE BINARY PATHS ###
 USERADD=$(which useradd)
+USERMOD=$(which usermod)
 GIT=$(which git)
 CHOWN=$(which chown)
 CHMOD=$(which chmod)

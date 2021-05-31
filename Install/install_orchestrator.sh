@@ -14,7 +14,6 @@ EXEC_BRANCH="dev_v1"
 
 ### DEFINE BINARY PATHS ###
 USERADD=$(which useradd)
-GIT=$(which git)
 CHOWN=$(which chown)
 CHMOD=$(which chmod)
 APT=$(which apt)
@@ -59,6 +58,7 @@ echo "[+] APT updated"
 # Install needed packages
 $APT install -y python3 python3-pip git mariadb-server git > /dev/null 2>&1
 PIP3=$(which pip3)
+GIT=$(which git)
 echo "[+] Some packages correctly installed"
 
 # Install libs
