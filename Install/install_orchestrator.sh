@@ -10,7 +10,7 @@ set -e pipefail
 ### DEFINE GLOBAL VARIABLES ###
 GOTHAM_HOME=/opt/GOTHAM/
 GOTHAM_GIT="https://github.com/Spit22/GOTHAM"
-EXEC_BRANCH="dev_v1"
+EXEC_BRANCH="remotes/origin/dev_v1"
 
 ### DEFINE BINARY PATHS ###
 USERADD=$(which useradd)
@@ -93,7 +93,7 @@ echo "[+] GOTHAM cloned under $GOTHAM_HOME"
 cd $GOTHAM_HOME
 
 # Choose the git branch
-$GIT checkout $EXEC_BRANCH > /dev/null 2>&1
+$GIT checkout -t $EXEC_BRANCH > /dev/null 2>&1
 echo "[+] Switched to $EXEC_BRANCH"
 
 # Install all python libs
