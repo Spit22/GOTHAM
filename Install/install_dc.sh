@@ -54,6 +54,8 @@ add-apt-repository \
    $(lsb_release -cs) \
    stable"
 
+# Update repo
+$APT update
 # Install docker
 $APT install -y docker-ce docker-ce-cli containerd.io docker-compose
 DOCKER=$(which docker)
