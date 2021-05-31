@@ -85,7 +85,6 @@ echo "[+] Rsyslog configured under /etc/rsyslog.d/"
 echo "=== Installing GOTHAM... ==="
 
 # Clone repository on this directory
-$RM -r $GOTHAM_HOME
 $GIT clone $GOTHAM_GIT $GOTHAM_HOME > /dev/null 2>&1
 $CHOWN -R gotham:root $GOTHAM_HOME
 echo "[+] GOTHAM cloned under $GOTHAM_HOME"
