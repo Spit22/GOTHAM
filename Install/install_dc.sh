@@ -11,7 +11,6 @@ set -e pipefail
 ### DEFINE BINARY PATHS ###
 USERADD=$(which useradd)
 USERMOD=$(which usermod)
-GIT=$(which git)
 CHOWN=$(which chown)
 CHMOD=$(which chmod)
 APT=$(which apt)
@@ -33,9 +32,11 @@ $APT install -y \
     apt-transport-https \
     ca-certificates \
     curl \
+    git \
     gnupg-agent \
     software-properties-common
 CURL=$(which curl)
+GIT=$(which git)
 
 # Add docker's GPG key
 $CURL -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
