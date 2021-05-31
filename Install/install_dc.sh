@@ -3,7 +3,7 @@
 # Authors : GOTHAM Team
 # Descr : this script permits to prepare te orchestrator system and install GOTHAM
 #
-# Last update : 21/05/2021
+# Last update : 31/05/2021
 set -e pipefail
 
 ### DEFINE GLOBAL VARIABLES ###
@@ -15,8 +15,6 @@ CHOWN=$(which chown)
 CHMOD=$(which chmod)
 APT=$(which apt)
 APTKEY=$(which apt-key)
-CURL=$(which curl)
-DOCKER=$(which docker)
 KEYGEN=$(which ssh-keygen)
 ENCODE=$(which base64)
 
@@ -36,6 +34,7 @@ $APT install -y \
     curl \
     gnupg-agent \
     software-properties-common
+CURL=$(which curl)
 
 # Add docker's GPG key
 $CURL -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
@@ -55,6 +54,7 @@ add-apt-repository \
 
 # Install docker
 $APT install -y docker-ce docker-ce-cli containerd.io docker-compose
+DOCKER=$(which docker)
 
 # Test docker
 $DOCKER run hello-world

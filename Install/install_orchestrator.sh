@@ -3,14 +3,14 @@
 # Authors : GOTHAM Team
 # Descr : this script permits to prepare te orchestrator system and install GOTHAM
 #
-# Last update : 21/05/2021
+# Last update : 31/05/2021
 
 set -e pipefail
 
 ### DEFINE GLOBAL VARIABLES ###
 GOTHAM_HOME=/opt/GOTHAM/
 GOTHAM_GIT="https://github.com/Spit22/GOTHAM"
-EXEC_BRANCH="dev_v1_1"
+EXEC_BRANCH="dev_v1"
 
 ### DEFINE BINARY PATHS ###
 USERADD=$(which useradd)
@@ -18,7 +18,6 @@ GIT=$(which git)
 CHOWN=$(which chown)
 CHMOD=$(which chmod)
 APT=$(which apt)
-PIP3=$(which pip3)
 RM=$(which rm)
 
 ### CHECK IF ROOT ###
@@ -59,6 +58,7 @@ echo "[+] APT updated"
 
 # Install needed packages
 $APT install -y python3 python3-pip git mariadb-server git > /dev/null 2>&1
+PIP3=$(which pip3)
 echo "[+] Some packages correctly installed"
 
 # Install libs
