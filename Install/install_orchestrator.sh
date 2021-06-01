@@ -93,7 +93,7 @@ echo "[+] GOTHAM cloned under $GOTHAM_HOME"
 cd $GOTHAM_HOME
 
 # Choose the git branch
-$GIT checkout -t $EXEC_BRANCH > /dev/null 2>&1
+$GIT checkout $EXEC_BRANCH > /dev/null 2>&1
 echo "[+] Switched to $EXEC_BRANCH"
 
 # Install all python libs
