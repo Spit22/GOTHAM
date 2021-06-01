@@ -109,5 +109,5 @@ echo $pubkey >> /root/.ssh/authorized_keys
 $CHMOD -R 600 /root/.ssh
 
 # Show base64 encoded private key user has to send to api
-echo "\n\n[+]Private key generated : \n"
+echo -e "\n\n[+]Private key generated : \n"
 $ENCODE /root/gotham_key | tr -d "\n"

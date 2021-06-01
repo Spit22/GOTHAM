@@ -24,8 +24,30 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+### PREPARE GOTHAM SYSTEM ###
+echo "=== Preparing the gotham system... ==="
+
+# Create GOTHAM user as an alias for the root account
+$USERADD -o -u 0 -g 0 -N -d /root/ -M gotham > /dev/null 2>&1
+
+# Configure password
+mdp=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w50 | head -n1)
+$USERMOD -p "$mdp" gotham
+echo "[+] User gotham created with password : $mdp"
+
+# Create the folder used by GOTHAM
+mkdir -p /data/tmp
+mkdir -p /data/rsyslog/rulebase
+mkdir -p /etc/rsyslog.d
+mkdir -p /etc/rsyslog.d
+echo "[+] All paths created"
+
+### INSTALL DEPENDANCIES ###
+echo "=== Installing dependancies... ==="
+
 # Update repo
-$APT update
+$APT update > /dev/null 2>&1
+echo "[+] APT updated"
 
 # Install utils
 $APT install -y \
@@ -34,15 +56,17 @@ $APT install -y \
     curl \
     git \
     gnupg-agent \
-    software-properties-common
+    software-properties-common > /dev/null 2>&1
 CURL=$(which curl)
 GIT=$(which git)
+echo "[+] Some packages successfully installed"
 
 # Add docker's GPG key
-$CURL -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+$CURL -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - > /dev/null 2>&1
+echo "[+] Docker apt key configured"
 
 # Check we have the correct key fingerprint
-$APTKEY fingerprint 0EBFCD88 | grep "docker@docker.com"
+$APTKEY fingerprint 0EBFCD88 | grep "docker@docker.com" > /dev/null 2>&1
 if [ $? != 0 ]; then
 	echo "Key is not valid"
 	exit
@@ -52,27 +76,20 @@ fi
 add-apt-repository \
    "deb [arch=amd64] https://download.docker.com/linux/debian \
    $(lsb_release -cs) \
-   stable"
+   stable" > /dev/null 2>&1
 
-# Update repo
-$APT update
+# Update repo again
+$APT update > /dev/null 2>&1
 # Install docker
-$APT install -y docker-ce docker-ce-cli containerd.io docker-compose
+$APT install -y docker-ce docker-ce-cli containerd.io docker-compose > /dev/null 2>&1
 DOCKER=$(which docker)
 
 # Test docker
-$DOCKER run hello-world
+$DOCKER run hello-world > /dev/null 2>&1
+echo "[+] Docker successfully installed"
 
-# Create the folder used by GOTHAM
-mkdir -p /data/tmp
-mkdir -p /data/rsyslog/rulebase
-mkdir -p /etc/rsyslog.d
-
-# Installation of openssh and base64
-$APT install -y openssh-server
-
-# Create GOTHAM user as an alias for the root account
-$USERADD -o -u 0 -g 0 -N -d /root/ -M gotham
+### INSTALL RSYSLOG ###
+echo "=== Configuring Rsyslog... ==="
 
 # Pre-configure rsyslog
 touch /etc/rsyslog.d/00-JSON_template.conf
@@ -96,7 +113,19 @@ template(name="default-template" type="list") {
 ''' > /etc/rsyslog.d/00-JSON_template.conf
 
 # Restart rsyslog
-systemctl restart rsyslog
+systemctl restart rsyslog > /dev/null 2>&1
+echo "[+] Rsyslog configured"
+
+### INSTALL AND CONFIGURE SSH SERVER ###
+echo "=== Installing and configuring SSH... ==="
+
+# Update repo
+$APT update > /dev/null 2>&1
+echo "[+] APT updated"
+
+# Installation of openssh and base64
+$APT install -y openssh-server > /dev/null 2>&1
+echo "[+] SSH Server installed"
 
 # Harden SSH configuration
 echo """
@@ -110,10 +139,14 @@ PubkeyAuthentication yes
 """ > /etc/ssh/sshd_config
 
 # Restart openssh
-systemctl restart ssh
+systemctl restart ssh > /dev/null 2>&1
+echo "[+] SSH Server configured"
+
+### GENERATE SSH KEY ###
+echo "=== Generating SSH Key... ==="
 
 # Generate a rsa 4096 key pair without passphrase
-$KEYGEN -b 4096 -t rsa -f /root/gotham_key -N ""
+$KEYGEN -b 4096 -t rsa -f /root/gotham_key -N "" > /dev/null 2>&1
 
 # Copy the public key to authorized keys of root users
 mkdir -p /root/.ssh
@@ -121,12 +154,9 @@ pubkey=$(cat /root/gotham_key.pub)
 echo $pubkey >> /root/.ssh/authorized_keys
 $CHMOD -R 600 /root/.ssh
 
-# Désactiver le mot de passe
-$USERMOD -p "default-gotham's-password" gotham
-
 # Restart again ssh
-/usr/sbin/service ssh restart
+/usr/sbin/service ssh restart > /dev/null 2>&1
 
 # Show base64 encoded private key user has to send to api
-echo "\n\nPrivate key : \n"
+echo -e "\n\n[+]Private key : \n"
 $ENCODE /root/gotham_key | tr -d "\n"
