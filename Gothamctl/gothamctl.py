@@ -41,8 +41,8 @@ def add_server(args):
     endpoint = "/add/server"
 
     # Before external configuration
-    gp = normalize_port(args.gotham_port)
-    gh = normalize_ip(args.gotham_hostname)
+    gp = str(normalize_port(args.gotham_port))
+    gh = args.gotham_hostname
 
     if not(name) or not(descr) or not(ip) or not(ssh_port) or not(gp) or not(gh):
         sys.exit(1)
@@ -116,8 +116,8 @@ def add_hp(args):
     endpoint = "/add/honeypot"
 
     # Before external configuration
-    gp = normalize_port(args.gotham_port)
-    gh = normalize_ip(args.gotham_hostname)
+    gp = str(normalize_port(args.gotham_port))
+    gh = args.gotham_hostname
 
     if not(name) or not(descr) or not(logs) or not(port) or not(gp) or not(gh):
         sys.exit(1)
@@ -184,8 +184,8 @@ def add_link(args):
     endpoint = "/add/link"
 
     # Before external configuration
-    gp = normalize_port(args.gotham_port)
-    gh = normalize_ip(args.gotham_hostname)
+    gp = str(normalize_port(args.gotham_port))
+    gh = args.gotham_hostname
 
     if not(nb_hp) or not(nb_serv) or not(gp) or not(gh):
         sys.exit(1)
@@ -242,8 +242,8 @@ def rm_server(args):
     endpoint = "/delete/server"
 
     # Before external configuration
-    gp = normalize_port(args.gotham_port)
-    gh = normalize_ip(args.gotham_hostname)
+    gp = str(normalize_port(args.gotham_port))
+    gh = args.gotham_hostname
 
     if not(gp) or not(gh):
         sys.exit(1)
@@ -296,8 +296,8 @@ def rm_hp(args):
     endpoint = "/delete/honeypot"
 
     # Before external configuration
-    gp = normalize_port(args.gotham_port)
-    gh = normalize_ip(args.gotham_hostname)
+    gp = str(normalize_port(args.gotham_port))
+    gh = args.gotham_hostname
 
     if not(gp) or not(gh):
         sys.exit(1)
@@ -350,8 +350,8 @@ def rm_link(args):
     endpoint = "/delete/link"
 
     # Before external configuration
-    gp = normalize_port(args.gotham_port)
-    gh = normalize_ip(args.gotham_hostname)
+    gp = str(normalize_port(args.gotham_port))
+    gh = args.gotham_hostname
 
     if not(gp) or not(gh):
         sys.exit(1)
@@ -415,8 +415,8 @@ def edit_server(args):
     endpoint = "/edit/server"
 
     # Before external configuration
-    gp = normalize_port(args.gotham_port)
-    gh = normalize_ip(args.gotham_hostname)
+    gp = str(normalize_port(args.gotham_port))
+    gh = args.gotham_hostname
 
     if not(gp) or not(gh):
         sys.exit(1)
@@ -487,8 +487,8 @@ def edit_hp(args):
     endpoint = "/edit/honeypot"
 
     # Before external configuration
-    gp = normalize_port(args.gotham_port)
-    gh = normalize_ip(args.gotham_hostname)
+    gp = str(normalize_port(args.gotham_port))
+    gh = args.gotham_hostname
 
     if not(gp) or not(gh):
         sys.exit(1)
@@ -554,8 +554,8 @@ def edit_link(args):
     endpoint = "/edit/link"
 
     # Before external configuration
-    gp = normalize_port(args.gotham_port)
-    gh = normalize_ip(args.gotham_hostname)
+    gp = str(normalize_port(args.gotham_port))
+    gh = args.gotham_hostname
 
     if not(gp) or not(gh):
         sys.exit(1)
@@ -617,8 +617,8 @@ def list_server(args):
     endpoint = "/list/server"
 
     # Before external configuration
-    gp = normalize_port(args.gotham_port)
-    gh = normalize_ip(args.gotham_hostname)
+    gp = str(normalize_port(args.gotham_port))
+    gh = args.gotham_hostname
 
     if not(gp) or not(gh):
         sys.exit(1)
@@ -865,8 +865,8 @@ def list_hp(args):
     endpoint = "/list/honeypot"
 
     # Before external configuration
-    gp = normalize_port(args.gotham_port)
-    gh = normalize_ip(args.gotham_hostname)
+    gp = str(normalize_port(args.gotham_port))
+    gh = args.gotham_hostname
 
     if not(gp) or not(gh):
         sys.exit(1)
@@ -1116,8 +1116,8 @@ def list_link(args):
     endpoint = "/list/link"
 
     # Before external configuration
-    gp = normalize_port(args.gotham_port)
-    gh = normalize_ip(args.gotham_hostname)
+    gp = str(normalize_port(args.gotham_port))
+    gh = args.gotham_hostname
 
     if not(gp) or not(gh):
         sys.exit(1)
@@ -1489,7 +1489,7 @@ def normalize_nb_serv(nb_serv):
 
 
 if __name__ == "__main__":
-    gh = normalize_ip(config["orchestrator_infos"]["host"])
+    gh = config["orchestrator_infos"]["host"]
     if not(gh):
         sys.exit(1)
     gp = normalize_port(config["orchestrator_infos"]["port"])
