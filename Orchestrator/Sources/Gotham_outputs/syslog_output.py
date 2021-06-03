@@ -29,6 +29,12 @@ def create(new_syslog_output, hostname, syslog_port, protocol):
         rsyslog_conf_file.write(f'    action(Type="omfwd" Target="{str(hostname)}" Port="{str(syslog_port)}" Protocol="{str(protocol)}" Template="RawFormat")\n')
         # Close the if condition
         rsyslog_conf_file.write('}\n')
+        # Monitor the log file of the link
+        rsyslog_conf_file.write('if $syslogtag contains "lk-" then {\n')
+        # Apply parsing rules
+        rsyslog_conf_file.write(f'    action(Type="omfwd" Target="{str(hostname)}" Port="{str(syslog_port)}" Protocol="{str(protocol)}" Template="RawFormat")\n')
+        # Close the if condition
+        rsyslog_conf_file.write('}\n')
     except Exception as e:
         error = "Fail to generate syslog output configuration file"
         logging.error(error)
