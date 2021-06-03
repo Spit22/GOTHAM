@@ -160,3 +160,4 @@ $CHMOD -R 600 /root/.ssh
 # Show base64 encoded private key user has to send to api
 echo -e "\n\n[+]Private key : \n"
 $ENCODE /root/gotham_key | tr -d "\n"
+echo "\n"
