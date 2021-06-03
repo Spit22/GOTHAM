@@ -148,7 +148,9 @@ def add_honeypot():
     separator = config['tag']['separator']
 
     if len(state_list) < 4:
-        error = "The config file needs 4 differents states for honeypot and server"
+        error = """
+        The config file needs 4 differents states for honeypot and server
+        """
         logging.error(error)
         return Gotham_error.format_usererror(
             error,
@@ -196,7 +198,9 @@ def add_honeypot():
     # First find an available port to map on datacenter
     used_ports = Gotham_check.check_used_port(DB_settings)
     available_ports = [
-        port for port in dc_ports_list if not(port in used_ports)]
+        port for port in dc_ports_list
+        if not(port in used_ports)
+    ]
 
     if available_ports == []:
         error = "No ports available for mapping on datacenter"
@@ -312,12 +316,14 @@ def add_serv():
     separator = config['tag']['separator']
 
     if len(state_list) < 4:
-        error = "The config file needs 4 differents states for honeypot and server"
+        error = """
+        The config file needs 4 differents states for honeypot and server
+        """
         logging.error(error)
         return Gotham_error.format_usererror(
             error, str(error), debug_mode), 400
 
-    # Get POST data on JSON format
+    # Get POST data on JSON format
     data = request.get_json()
 
     autotags = True if "autotags" in data and int(
@@ -442,7 +448,9 @@ def add_lk():
     state_list_hp = config['state']['hp_state']
 
     if len(state_list_serv) < 4 or len(state_list_hp) < 4:
-        error = "The config file needs 4 differents states for honeypot and server"
+        error = """
+        The config file needs 4 differents states for honeypot and server
+        """
         logging.error(error)
         return Gotham_error.format_usererror(
             error, str(error), debug_mode), 400
@@ -468,10 +476,8 @@ def add_lk():
         # Get all function's parameters
         tags_serv = lk_infos_received["tags_serv"]
         tags_hp = lk_infos_received["tags_hp"]
-        nb_serv = lk_infos_received["nb_serv"] if "nb_serv" in lk_infos_received.keys(
-        ) else data["nb_serv"]
-        nb_hp = lk_infos_received["nb_hp"] if "nb_hp" in lk_infos_received.keys(
-        ) else data["nb_hp"]
+        nb_serv = lk_infos_received["nb_serv"] if "nb_serv" in lk_infos_received.keys() else data["nb_serv"]
+        nb_hp = lk_infos_received["nb_hp"] if "nb_hp" in lk_infos_received.keys() else data["nb_hp"]
         exposed_ports = lk_infos_received["ports"]
         exposed_ports_list = exposed_ports.split(ports_separator)
 
@@ -564,11 +570,16 @@ def add_lk():
         server for server in servers if (
             server["serv_state"] != str(
                 state_list_serv[2]).upper() and server["serv_state"] != str(
-                state_list_serv[3]).upper())]
+                state_list_serv[3]).upper()
+        )
+    ]
 
     # Filter honeypots in error or down
     honeypots = [
-        honeypot for honeypot in honeypots if (honeypot["hp_state"] != str(state_list_hp[2]).upper() and honeypot["hp_state"] != str(state_list_hp[3]).upper())]
+        honeypot for honeypot in honeypots
+        if (honeypot["hp_state"] != str(state_list_hp[2]).upper()
+            and honeypot["hp_state"] != str(state_list_hp[3]).upper())
+    ]
 
     if str(nb_serv).lower() == "all":
         nb_serv = len(servers)
@@ -586,7 +597,9 @@ def add_lk():
 
     # If we don't have any honeypots corresponding, just return error,
     if len(honeypots) < 1:
-        error = "Can't configure link if there is no at least one hp corresponding to request"
+        error = """
+        Can't configure link if there is no at least one hp corresponding to request
+        """
         return Gotham_error.format_usererror(error, "", debug_mode), 400
 
     # Choose best honeypots (the lower scored)
@@ -602,12 +615,22 @@ def add_lk():
                 encoded_dockerfile = base64.b64encode(
                     file.read().encode("ascii"))
 
-            name = (honeypots[i % len(honeypots)]["hp_name"] + "_Duplicat" if len(honeypots[i % len(honeypots)]["hp_name"] +
-                                                                                  "_Duplicat") <= 128 else honeypots[i % len(honeypots)]["hp_name"][:(128 - len("_Duplicat"))] + "_Duplicat")
+            name = (honeypots[i % len(honeypots)]["hp_name"] +
+                    "_Duplicat" if len(honeypots[i % len(honeypots)]["hp_name"] + "_Duplicat")
+                    <= 128 else honeypots[i % len(honeypots)]["hp_name"][:(128 - len("_Duplicat"))] + "_Duplicat")
             descr = "Duplication of " + \
                 honeypots[i % len(honeypots)]["hp_descr"]
-            duplicate_hp_infos = {"name": str(name), "descr": str(descr), "tags": str(honeypots[i % len(honeypots)]["hp_tags"].replace("||", tags_separator)), "logs": str(honeypots[i % len(
-                honeypots)]["hp_logs"]), "parser": str(honeypots[i % len(honeypots)]["hp_parser"]), "port": int(honeypots[i % len(honeypots)]["hp_port_container"]), "dockerfile": str(encoded_dockerfile.decode("utf-8")), "duplicat": 1}
+
+            duplicate_hp_infos = {
+                "name": str(name),
+                "descr": str(descr),
+                "tags": str(honeypots[i % len(honeypots)]["hp_tags"].replace("||", tags_separator)),
+                "logs": str(honeypots[i % len(honeypots)]["hp_logs"]),
+                "parser": str(honeypots[i % len(honeypots)]["hp_parser"]),
+                "port": int(honeypots[i % len(honeypots)]["hp_port_container"]),
+                "dockerfile": str(encoded_dockerfile.decode("utf-8")),
+                "duplicat": 1
+            }
             try:
                 jsondata = json.dumps(duplicate_hp_infos)
                 url = "http://localhost:5000/add/honeypot"
