@@ -446,7 +446,7 @@ def edit_server(args):
     if status_code == 200:
         data = response.json()
         # Show result
-        print(data.json())
+        print(data)
 
     else:
         try:
@@ -519,7 +519,7 @@ def edit_hp(args):
 
     if status_code == 200:
         data = response.json()
-        print(data.json())
+        print(data)
 
     else:
         try:
