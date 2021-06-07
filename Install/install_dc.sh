@@ -56,6 +56,7 @@ $APT install -y \
     curl \
     git \
     gnupg-agent \
+    rsyslog \
     software-properties-common > /dev/null 2>&1
 CURL=$(which curl)
 GIT=$(which git)
