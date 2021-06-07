@@ -583,7 +583,7 @@ def edit_link(args):
     if status_code == 200:
         data = response.json()
         # Show result
-        print(data.json())
+        print(str(str(id)+ " edited."))
 
     else:
         try:
