@@ -1,4 +1,3 @@
-# Import libraries
 from Gotham_link_BDD import get_server_infos, get_tag_infos
 import configparser
 
@@ -11,37 +10,43 @@ logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
 
 
 def server(DB_settings, ip):
-    # Check if a server is already present in database
-    #
-    # DB_settings (json) : auth information
-    # ip (string) : ip of the server we want to check
-    #
-    # Return True if already exists, False in the other case
+    '''
+    Check if a server is already present in database
 
+    ARGUMENTS:
+        DB_settings (json) : auth information
+        ip (string) : ip of the server we want to check
+
+    Return True if already exists, False in the other case
+    '''
     response = get_server_infos(DB_settings, ip=ip)
     return not(response == [])
 
 
 def tag(DB_settings, tag, table=''):
-    # Check if a tag is already present in database
-    #
-    # DB_settings (json) : auth information
-    # tag (string) : tag we want to check
-    #
-    # Return True if already exists, False in the other case
+    '''
+    Check if a tag is already present in database
 
+    ARGUMENTS:
+        DB_settings (json) : auth information
+        tag (string) : tag we want to check
+
+    Return True if already exists, False in the other case
+    '''
     response = get_tag_infos(DB_settings, tag=tag, table=table)
     return not(response == [])
 
 
 def tags(DB_settings, tags, table=""):
-    # Check if tags is already present in database
-    #
-    # DB_settings (json) : auth information
-    # tags (string) : tags we want to check
-    #
-    # Raise error if tag does not exists
+    '''
+    Check if tags is already present in database
 
+    ARGUMENTS:
+        DB_settings (json) : auth information
+        tags (string) : tags we want to check
+
+    Raise error if tag does not exists
+    '''
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
     # Retrieve settings from config file
     config = configparser.ConfigParser()

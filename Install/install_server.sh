@@ -78,8 +78,8 @@ $APT update > /dev/null 2>&1
 echo "[+] APT updated"
 
 # Installation of openssh and base64
-$APT install -y openssh-server > /dev/null 2>&1
-echo "[+] SSH Server installed"
+$APT install -y openssh-server rsyslog > /dev/null 2>&1
+echo "[+] SSH Server and rsyslog installed"
 
 # Harden SSH configuration
 echo """
@@ -111,3 +111,4 @@ $CHMOD -R 600 /root/.ssh
 # Show base64 encoded private key user has to send to api
 echo -e "\n\n[+]Private key generated : \n"
 $ENCODE /root/gotham_key | tr -d "\n"
+echo ""
