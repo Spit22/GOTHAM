@@ -128,7 +128,7 @@ def generate_datacenter_rsyslog_conf(
             str(id_hp) +
             '.rb")\n')
         # If parsing operations succeeded
-        rsyslog_conf_file.write('  if $parsesuccess == "OK" then {')
+        rsyslog_conf_file.write('  if $parsesuccess == "OK" then {\n')
         # Send to orchestrator in parsed JSON format
         rsyslog_conf_file.write(
             '    action(Type="omfwd" Target="' +
@@ -137,7 +137,7 @@ def generate_datacenter_rsyslog_conf(
             str(orch_rsyslog_port) +
             '" Protocol="tcp" Template="all-json-template")\n')
         # If parsing operations failed
-        rsyslog_conf_file.write('  } else {')
+        rsyslog_conf_file.write('  } else {\n')
         # Send to orchestrator in default JSON format
         rsyslog_conf_file.write(
             '    action(Type="omfwd" Target="' +
