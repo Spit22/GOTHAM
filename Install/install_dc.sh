@@ -98,7 +98,10 @@ echo '''
 module(load="mmnormalize")
 
 template(name="all-json-template" type="list"){
-    property(name="$!all-json")
+    constant(value="{")
+    constant(value="\"tag\":\"")   property(name="programname" format="json")
+    constant(value="\",")
+    property(name="$!all-json" position.from="2")
 }
 
 template(name="default-template" type="list") {
