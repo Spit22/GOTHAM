@@ -3,7 +3,7 @@
 First, you can run the orchestrator's installation script :
 
 ```
-$ curl -s https://raw.githubusercontent.com/Spit22/GOTHAM/dev_V1_1/Install/install_orchestrator.sh | sudo bash
+$ curl -s https://raw.githubusercontent.com/Spit22/GOTHAM/dev_V1/Install/install_orchestrator.sh | sudo bash
 ```
 
 The script will perform some tasks to prepare your server to become an orchestrator :
