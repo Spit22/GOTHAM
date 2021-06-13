@@ -1400,81 +1400,83 @@ def rm_honeypot():
     error = ""
     if "error" in jsonresponse:
         return jsonresponse, 500
-    elif "exact" in jsonresponse and jsonresponse["exact"] != []:
-        if not(confirm):
-            return {
-                "message": "Are you sure you want to remove these honeypots ? (Y/n)", "hps": jsonresponse["exact"]}
-        else:
-            for hp in jsonresponse["exact"]:
-                try:
-                    succes = rm_hp.main(
-                        DB_settings,
-                        datacenter_settings,
-                        hp["hp_id"]
-                    )
-
-                except Exception:
-                    error += "Honeypot deletion failed for id: " + \
-                        hp["hp_id"] + "\n"
-                if succes:
+    elif "exact" in jsonresponse:
+        if jsonresponse["exact"] != []:
+            if not(confirm):
+                return {
+                    "message": "Are you sure you want to remove these honeypots ? (Y/n)", "hps": jsonresponse["exact"]}
+            else:
+                for hp in jsonresponse["exact"]:
                     try:
-                        rm_hp.remove_rsyslog_configuration(
+                        succes = rm_hp.main(
+                            DB_settings,
                             datacenter_settings,
                             hp["hp_id"]
                         )
+
                     except Exception:
-                        error += "Honeypot rsyslog deletion failed for id: " + \
+                        error += "Honeypot deletion failed for id: " + \
                             hp["hp_id"] + "\n"
+                    if succes:
+                        try:
+                            rm_hp.remove_rsyslog_configuration(
+                                datacenter_settings,
+                                hp["hp_id"]
+                            )
+                        except Exception:
+                            error += "Honeypot rsyslog deletion failed for id: " + \
+                                hp["hp_id"] + "\n"
 
-                    # If all operations succeed, return id of deleted object
-                    response += str({"id": str(hp["hp_id"])}
-                                    ).replace("\'", "\"") + "\n"
+                        # If all operations succeed, return id of deleted object
+                        response += str({"id": str(hp["hp_id"])}
+                                        ).replace("\'", "\"") + "\n"
 
+                    else:
+                        error += "Honeypot deletion failed for id: " + \
+                            hp["hp_id"] + "\n"
+                if error == "":
+                    return response, 200
                 else:
-                    error += "Honeypot deletion failed for id: " + \
-                        hp["hp_id"] + "\n"
-            if error == "":
-                return response, 200
+                    return response + error, 500
+
+    elif "others" in jsonresponse:
+        if jsonresponse["others"] != []:
+            if not(confirm):
+                return {
+                    "message": "Are you sure you want to remove these honeypots ? (Y/n)", "hps": jsonresponse["others"]}
             else:
-                return response + error, 500
-
-    elif "others" in jsonresponse and jsonresponse["others"] != []:
-        if not(confirm):
-            return {
-                "message": "Are you sure you want to remove these honeypots ? (Y/n)", "hps": jsonresponse["others"]}
-        else:
-            for hp in jsonresponse["others"]:
-                try:
-                    succes = rm_hp.main(
-                        DB_settings,
-                        datacenter_settings,
-                        hp["hp_id"]
-                    )
-
-                except Exception:
-                    error += "Honeypot deletion failed for id: " + \
-                        hp["hp_id"] + "\n"
-                if succes:
+                for hp in jsonresponse["others"]:
                     try:
-                        rm_hp.remove_rsyslog_configuration(
+                        succes = rm_hp.main(
+                            DB_settings,
                             datacenter_settings,
                             hp["hp_id"]
                         )
+
                     except Exception:
-                        error += "Honeypot rsyslog deletion failed for id: " + \
+                        error += "Honeypot deletion failed for id: " + \
+                            hp["hp_id"] + "\n"
+                    if succes:
+                        try:
+                            rm_hp.remove_rsyslog_configuration(
+                                datacenter_settings,
+                                hp["hp_id"]
+                            )
+                        except Exception:
+                            error += "Honeypot rsyslog deletion failed for id: " + \
+                                hp["hp_id"] + "\n"
+
+                        # If all operations succeed, return id of deleted object
+                        response += str({"id": str(hp["hp_id"])}
+                                        ).replace("\'", "\"") + "\n"
+                    else:
+                        error += "Honeypot deletion failed for id: " + \
                             hp["hp_id"] + "\n"
 
-                    # If all operations succeed, return id of deleted object
-                    response += str({"id": str(hp["hp_id"])}
-                                    ).replace("\'", "\"") + "\n"
+                if error == "":
+                    return response, 200
                 else:
-                    error += "Honeypot deletion failed for id: " + \
-                        hp["hp_id"] + "\n"
-
-            if error == "":
-                return response, 200
-            else:
-                return response + error, 500
+                    return response + error, 500
 
 
 @app.route('/delete/server', methods=['POST'])
