@@ -33,16 +33,20 @@ def syslog():
     # List required syslog outputs
     configuration_required = []
     for key, value in config.items("syslog"):
-        value = value.split(',')
+        value = value.split(';')
         hostname = value[0]
         syslog_port = value[1]
         protocol = value[2].lower()
+        honeypot_list = value[3]
+        server_list = value[4]
         configuration_required.append(
             syslog_output.naming(
                 key,
                 hostname,
                 syslog_port,
-                protocol
+                protocol,
+                honeypot_list,
+                server_list
             )
         )
 
@@ -61,7 +65,9 @@ def syslog():
                 new_syslog_output,
                 hostname,
                 syslog_port,
-                protocol
+                protocol,
+                honeypot_list,
+                server_list
             )
             logging.debug(
                 f"Syslog output created with following parameters : {protocol}@{hostname}:{syslog_port}")
