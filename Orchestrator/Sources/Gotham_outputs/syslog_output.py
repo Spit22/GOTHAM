@@ -50,7 +50,7 @@ def create(new_syslog_output, hostname, syslog_port, protocol, honeypot_list, se
             rsyslog_conf_file.write('\n')
 
         # Case where just some honeypot logs are sent
-        if len(honeypot_list) >= 1 and not('none' in honeypot_list):
+        if len(honeypot_list) >= 1 and not('none' in honeypot_list) and not('all' in honeypot_list):
             for chosen_hp in honeypot_list:
                 # Monitor the log file of the honeypot
                 rsyslog_conf_file.write(f'if $msg contains "{chosen_hp}" then' + '{\n')
@@ -63,7 +63,7 @@ def create(new_syslog_output, hostname, syslog_port, protocol, honeypot_list, se
                 rsyslog_conf_file.write('\n')
 
         # Case where just some server logs are sent
-        if len(server_list) >= 1 and not('none' in honeypot_list):
+        if len(server_list) >= 1 and not('none' in honeypot_list) and not('all' in server_list):
             for chosen_server in server_list:
                 # Monitor the log file of the link
                 rsyslog_conf_file.write(f'if $syslogtag contains "{chosen_server}" then' + '{\n')
