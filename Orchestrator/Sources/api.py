@@ -35,6 +35,7 @@ import Gotham_replace
 import Gotham_state
 import Gotham_error
 import Gotham_autotags
+import Gotham_outputs
 
 # Create the flask application
 app = flask.Flask(__name__)
@@ -107,6 +108,13 @@ tags_separator = config['tag']['separator']
 # Path to store object's data
 store_path = "/data"
 dockerfile_storage = "/data/"
+
+# Update outputs configuration
+try:
+    Gotham_outputs.syslog()
+except Exception as e:
+    error = f"Fail to update outputs configuration : {str(e)}"
+    logging.error(error)
 
 
 @app.route('/', methods=['GET'])

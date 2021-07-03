@@ -26,7 +26,7 @@ def create(new_syslog_output, hostname, syslog_port, protocol, honeypot_list, se
         rsyslog_conf_file = open(
             f"/etc/rsyslog.d/{str(new_syslog_output)}", "a"
         )
-        # All honeypot logs are sent
+        # Case where all honeypot logs are sent
         if len(honeypot_list) == 1 and honeypot_list[0].lower() == "all":
             # Monitor the log file of the honeypot
             rsyslog_conf_file.write('if $msg contains "hp-" then {\n')
@@ -38,7 +38,7 @@ def create(new_syslog_output, hostname, syslog_port, protocol, honeypot_list, se
             rsyslog_conf_file.write('}\n')
             rsyslog_conf_file.write('\n')
 
-        # All server logs are sent
+        # Case where all server logs are sent
         if len(server_list) == 1 and server_list[0].lower() == "all":
             # Monitor the log file of the link
             rsyslog_conf_file.write('if $syslogtag contains "lk-" then {\n')
@@ -49,7 +49,8 @@ def create(new_syslog_output, hostname, syslog_port, protocol, honeypot_list, se
             rsyslog_conf_file.write('}\n')
             rsyslog_conf_file.write('\n')
 
-        if len(honeypot_list) > 1:
+        # Case where just some honeypot logs are sent
+        if len(honeypot_list) >= 1 and not('none' in honeypot_list):
             for chosen_hp in honeypot_list:
                 # Monitor the log file of the honeypot
                 rsyslog_conf_file.write(f'if $msg contains "{chosen_hp}" then' + '{\n')
@@ -61,7 +62,8 @@ def create(new_syslog_output, hostname, syslog_port, protocol, honeypot_list, se
                 rsyslog_conf_file.write('}\n')
                 rsyslog_conf_file.write('\n')
 
-        if len(server_list) > 1:
+        # Case where just some server logs are sent
+        if len(server_list) >= 1 and not('none' in honeypot_list):
             for chosen_server in server_list:
                 # Monitor the log file of the link
                 rsyslog_conf_file.write(f'if $syslogtag contains "{chosen_server}" then' + '{\n')
@@ -75,6 +77,7 @@ def create(new_syslog_output, hostname, syslog_port, protocol, honeypot_list, se
         error = "Fail to generate syslog output configuration file"
         logging.error(error)
         raise ValueError(error)
+    # Apply changes by restarting rsyslog
     try:
         subprocess.run(["systemctl", "restart", "rsyslog"])
     except Exception as e:

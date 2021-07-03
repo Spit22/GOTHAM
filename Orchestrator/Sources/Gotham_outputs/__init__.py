@@ -32,6 +32,10 @@ def syslog():
 
     # List required syslog outputs
     configuration_required = []
+    if not(config.items("syslog")):
+        error = "Syslog outputs configuration is empty"
+        logging.error(error)
+        raise ValueError(error)
     for key, value in config.items("syslog"):
         value = value.split(';')
         hostname = value[0]
