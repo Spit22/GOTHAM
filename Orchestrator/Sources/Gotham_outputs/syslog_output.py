@@ -78,12 +78,12 @@ def create(new_syslog_output, hostname, syslog_port, protocol, honeypot_list, se
         logging.error(error)
         raise ValueError(error)
     # Apply changes by restarting rsyslog
-    try:
-        subprocess.run(["systemctl", "restart", "rsyslog"])
-    except Exception as e:
-        error = f"Fail to deploy syslog output configuration : {str(e)}"
-        logging.error(error)
-        raise ValueError(error)
+    #try:
+    #    subprocess.run(["systemctl", "restart", "rsyslog"])
+    #except Exception as e:
+    #    error = f"Fail to deploy syslog output configuration : {str(e)}"
+    #    logging.error(error)
+    #    raise ValueError(error)
 
 
 def delete(obsolete_syslog_output):
