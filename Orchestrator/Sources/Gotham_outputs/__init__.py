@@ -10,6 +10,7 @@ GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
                     level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
+
 def list_existing_outputs(type):
     '''
     List existing outputs based on created configuration files in /etc/rsyslog.d/
@@ -33,7 +34,7 @@ def syslog():
     Manage syslog outputs, based on orchestrator configuration
     '''
     # List existing syslog outputs
-    existing_configuration = list_existing_outputs(type)
+    existing_configuration = list_existing_outputs('syslog')
 
     # Retrieve syslog output configuration from main config file
     config = configparser.ConfigParser()
