@@ -31,7 +31,7 @@ def list_existing_outputs(type):
 
 def syslog():
     '''
-    Manage syslog outputs, based on orchestrator configuration
+    Manage syslog outputs, based on orchestrator rsyslog configuration
     '''
     # List existing syslog outputs
     existing_configuration = list_existing_outputs('syslog')

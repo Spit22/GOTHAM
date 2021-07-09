@@ -1,4 +1,3 @@
-import subprocess
 import hashlib
 
 # Logging components
@@ -77,13 +76,6 @@ def create(new_syslog_output, hostname, syslog_port, protocol, honeypot_list, se
         error = "Fail to generate syslog output configuration file"
         logging.error(error)
         raise ValueError(error)
-    # Apply changes by restarting rsyslog
-    #try:
-    #    subprocess.run(["systemctl", "restart", "rsyslog"])
-    #except Exception as e:
-    #    error = f"Fail to deploy syslog output configuration : {str(e)}"
-    #    logging.error(error)
-    #    raise ValueError(error)
 
 
 def delete(obsolete_syslog_output):
