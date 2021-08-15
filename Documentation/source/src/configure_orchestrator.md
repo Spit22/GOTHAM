@@ -17,6 +17,7 @@ The following list cover all sections supported in the configuration file :
   - [datacenter] sections defines how the orchestrator has to connect to datacenter
   - [internaldb] sections defines hwo GOTHAM has to connect to internal database
   - [orchestrator] sections defines some useful information for GOTHAM (like the ip address to use, the port on which syslog listen)
+  - [syslog] sections defines the syslog outputs
 
 We will detail each sections by showing a configuration template.
 
@@ -155,4 +156,13 @@ database = "mysql database"
 [orchestrator]
 ip = "orchestrator's ip to use"
 syslog_port = "syslog port, may be 1514"
+```
+
+### Syslog
+```
+[syslog]
+output_name = remote_ip;remote_port;protocol;honeypot_list;server_list
+fu = 192.168.1.42;1514;udp;all;all
+bar = 192.168.1.42;1514;tcp;hp-e90ffc0a3c33436292ec39d2d33cd922;lk-r80hd8ta3d3353dj82ec39d2435t8dc22
+fubar = 192.168.1.42;1514;tcp;hp-326ac32e998c43df8560d3c07c192d11,hp-028f6cad28cd4e9d8be2a1393e0e72ca;lk-r80hd8ta3d3353dj82ec39d2435t8dc22,hp-d5cd768dc9b8489ea5400b6ae879a87e
 ```

@@ -35,18 +35,18 @@ import Gotham_replace
 import Gotham_state
 import Gotham_error
 import Gotham_autotags
+import Gotham_outputs
 
 # Create the flask application
 app = flask.Flask(__name__)
 
-#===Logging components===#
+# Logging components
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
                     level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
-#=======================#
 
 
-#===Retrieve settings from configuration file===#
+# Retrieve settings from configuration file
 # General settings
 app.config["DEBUG"] = True
 version = "0.1.0"
@@ -107,6 +107,13 @@ tags_separator = config['tag']['separator']
 # Path to store object's data
 store_path = "/data"
 dockerfile_storage = "/data/"
+
+# Update outputs configuration
+try:
+    Gotham_outputs.syslog()
+except Exception as e:
+    error = f"Fail to update outputs configuration : {str(e)}"
+    logging.error(error)
 
 
 @app.route('/', methods=['GET'])
@@ -212,7 +219,7 @@ def add_honeypot():
     # Generate honeypot's id
     id = 'hp-' + str(uuid.uuid4().hex)
 
-    # Write the dockerfile in the local storage
+    # Write the dockerfile in the local storage
     dockerfile_path = str(dockerfile_storage) + str(id) + "/"
 
     if not os.path.isdir(dockerfile_path):
@@ -605,7 +612,7 @@ def add_lk():
     # Choose best honeypots (the lower scored)
     honeypots = Gotham_choose.choose_honeypots(honeypots, nb_hp, tags_hp)
 
-    # Checking we have enough honeypots for the nb_hp directive
+    # Checking we have enough honeypots for the nb_hp directive
     if len(honeypots) < nb_hp:
         added_hp = []
 
@@ -1333,7 +1340,7 @@ def edit_lk():
 
         modifications = True
 
-    # Clean modifs dict before editing nb_hp
+    # Clean modifs dict before editing nb_hp
     modifs = {}
 
     if "nb_hp" in link_infos_received.keys():
@@ -1488,7 +1495,7 @@ def rm_serv():
         id (string) : id of the server
     '''
 
-    # Get POST data on JSON format
+    # Get POST data on JSON format
     data = request.get_json()
 
     if "confirm" in data and int(data["confirm"]) == 1:
@@ -1818,7 +1825,7 @@ def ls_honeypot():
             ) for honeypot in honeypots]
             return {"honeypots": honeypots}, 200
         else:
-            logging.error(f"You tried to list honeypots but no one exists")
+            logging.error("You tried to list honeypots but no one exists")
             error = "No honeypot managed in GOTHAM"
             return Gotham_error.format_usererror(error, "", debug_mode), 404
 
@@ -1916,7 +1923,7 @@ def ls_serv():
         else:
             serv_infos_received["state"] = "%"
 
-        if find_exact == True:
+        if find_exact:
             servers_exact = Gotham_link_BDD.get_server_infos(
                 DB_settings,
                 mode=False,
@@ -2008,7 +2015,7 @@ def ls_serv():
                         server, "serv"), "serv") for server in servers]
             return {"servers": servers}
         else:
-            logging.error(f"You tried to list servers but no one exists")
+            logging.error("You tried to list servers but no one exists")
             error = "No server managed in GOTHAM"
             return Gotham_error.format_usererror(error, "", debug_mode), 404
 
@@ -2157,7 +2164,7 @@ def ls_lk():
             ) for link in links]
             return {"links": links}, 200
         else:
-            logging.error(f"You tried to list links but no one exists")
+            logging.error("You tried to list links but no one exists")
             error = "No link managed by GOTHAM"
             return Gotham_error.format_usererror(error, "", debug_mode), 404
 
@@ -2213,7 +2220,7 @@ def get_version():
     # Return the orchestrator's version
     #
 
-    # Return orchestrator version
+    # Return orchestrator version
     response = str({"version": str(version)}).replace("\'", "\"") + "\n"
     return response, 200
 

@@ -11,38 +11,67 @@ logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
                     level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
 
-def syslog():
+def list_existing_outputs(type):
     '''
-    Manage syslog outputs, based on orchestrator configuration
-    '''
-    # Retrieve syslog output configuration from main config file
-    config = configparser.ConfigParser()
-    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
-    if not(config.has_section('syslog')):
-        return False
+    List existing outputs based on created configuration files in /etc/rsyslog.d/
 
-    # List existing syslog outputs
+    ARGUMENTS:
+        type(string): type of output
+            - syslog
+    '''
     included_extensions = ['conf']
-    included_prefix = ['10-syslog']
+    included_prefix = [f'10-{type}']
     existing_configuration = [
         f for f in os.listdir("/etc/rsyslog.d/") if any(
             f.startswith(pref) for pref in included_prefix) and any(
             f.endswith(ext) for ext in included_extensions)
         ]
+    return existing_configuration
+
+
+def syslog():
+    '''
+    Manage syslog outputs, based on orchestrator rsyslog configuration
+    '''
+    # List existing syslog outputs
+    existing_configuration = list_existing_outputs('syslog')
+
+    # Retrieve syslog output configuration from main config file
+    config = configparser.ConfigParser()
+    config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
+    # If there is no configuration, delete all existing configuration
+    if not(config.has_section('syslog')):
+        for obsolete_syslog_output in existing_configuration:
+            try:
+                syslog_output.delete(obsolete_syslog_output)
+                logging.debug(
+                    f"Syslog output deleted : {obsolete_syslog_output}")
+            except Exception:
+                error = "Fail to create syslog output"
+                raise ValueError(error)
+        return True
 
     # List required syslog outputs
     configuration_required = []
+    if not(config.items("syslog")):
+        error = "Syslog outputs configuration is empty"
+        logging.error(error)
+        raise ValueError(error)
     for key, value in config.items("syslog"):
-        value = value.split(',')
+        value = value.split(';')
         hostname = value[0]
         syslog_port = value[1]
         protocol = value[2].lower()
+        honeypot_list = value[3]
+        server_list = value[4]
         configuration_required.append(
             syslog_output.naming(
                 key,
                 hostname,
                 syslog_port,
-                protocol
+                protocol,
+                honeypot_list,
+                server_list
             )
         )
 
@@ -61,7 +90,9 @@ def syslog():
                 new_syslog_output,
                 hostname,
                 syslog_port,
-                protocol
+                protocol,
+                honeypot_list,
+                server_list
             )
             logging.debug(
                 f"Syslog output created with following parameters : {protocol}@{hostname}:{syslog_port}")
@@ -74,7 +105,7 @@ def syslog():
         try:
             syslog_output.delete(obsolete_syslog_output)
             logging.debug(
-                f"Syslog output deleted with following parameters : {protocol}@{hostname}:{syslog_port}")
+                f"Syslog output deleted : {obsolete_syslog_output}")
         except Exception:
             error = "Fail to create syslog output"
             raise ValueError(error)
