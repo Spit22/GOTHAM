@@ -11,7 +11,7 @@ Welcome to GOTHAM's documentation!
    :caption: Contents:
 
    src/welcome.md
-   src/install_orchestrator.md
+   src/install_orchestrator.rst
    src/configure_orchestrator.md
    src/prepare_datacenter.md
    src/prepare_servers.md
