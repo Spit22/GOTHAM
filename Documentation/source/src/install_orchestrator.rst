@@ -3,7 +3,7 @@ Orchestrator installation
 
 First, you can run the orchestrator's installation script :
 
-.. prompt:: bash $
+.. code:: bash
 
     curl -s https://raw.githubusercontent.com/Spit22/GOTHAM/dev_V1/Install/install_orchestrator.sh | sudo bash
 
@@ -25,7 +25,7 @@ Once the script finished, you can retrieve GOTHAM on ``/opt/GOTHAM``.
 Then you have to define GOTHAM_HOME by :
 
 
-.. prompt:: bash $
+.. code:: bash
 
     source /etc/profile
 
@@ -34,7 +34,7 @@ And it's all. You can now configure your orchestrator under ``/opt/GOTHAM/Orches
 
 To run the orchestrator's api, you have to execute the following command :
 
-.. prompt:: bash $
+.. code:: bash
 
     python3 /opt/GOTHAM/Orchestrator/Sources/api.py3
     python3 /opt/GOTHAM/Orchestrator/Sources/watchconfig.py
