@@ -1,20 +1,24 @@
-# Gothamctl installation
+**********************
+Gothamctl installation
+**********************
 
 gothamctl is an easy administration tool for GOTHAM administrators.
 
 It is available on the GOTHAM github repository :
 
-```
-$ cd $GOTHAM_HOME/Gothamctl/
-```
+.. code:: bash
+
+  cd $GOTHAM_HOME/Gothamctl/
+
 
 Then, you can copy this folder on ervery workstations you want (Debian,Ubuntu,Windows,MAC) as it is fully portable. The only requirement is that python3 is installed.
 
 To install gothamctl as system-part command on UNIX-LIKE systems, please do :
 
-```
-$ ln -s $GOTHAM_HOME/Gothamctl/gothamctl.py /usr/sbin/gothamctl
-```
+.. code:: bash
+
+  ln -s $GOTHAM_HOME/Gothamctl/gothamctl.py /usr/sbin/gothamctl
+
 
 So you will just have to run 'gothamctl' on your terminal to execute it.
 

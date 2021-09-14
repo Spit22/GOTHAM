@@ -29,12 +29,8 @@ Here some explanations :
 * 'tags_hp' field permits to define which type of honeypot we want to expose
 * 'tags_serv' field permits to define on which type of server we want to expose honeypots
 * 'nb_hp' field corresponds to the amount of honeypot that we want to integrate to the link. There is two cases :
-  
-.. admonition:: 
-    
-  provided nb_hp > actual nb_hp : in this case, GOTHAM will choose the most relevant honeypots, and duplicate them.
-  provided nb_hp < actual nb_hp : in this case, GOTHAM will choose the most relevant honeypots, and use them.
-
+* provided nb_hp > actual nb_hp : in this case, GOTHAM will choose the most relevant honeypots, and duplicate them.
+* provided nb_hp < actual nb_hp : in this case, GOTHAM will choose the most relevant honeypots, and use them.
 * 'nb_serv' field corresponds to the amount of server used to expose honeypots. Provided nb_serv has to be inferior or equal to the actual number of servers managed by GOTHAM.
 * 'exposed_ports' field contains coma-separated list of port on which honeypots are exposed to the internet
 
