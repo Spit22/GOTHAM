@@ -1,5 +1,5 @@
 .. GOTHAM documentation master file, created by
-   sphinx-quickstart on Sun Jan 24 17:52:48 2021.
+   sphinx-quickstart on Mon May 10 09:13:01 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
@@ -7,13 +7,19 @@ Welcome to GOTHAM's documentation!
 ==================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
-   doc_files/Welcome.md
-
-
-
+   src/welcome.md
+   src/install_orchestrator.rst
+   src/configure_orchestrator.md
+   src/prepare_datacenter.md
+   src/prepare_servers.md
+   src/install_gothamctl.md
+   src/configure_gothamctl.md
+   src/howto_honeypots.md
+   src/howto_servers.md
+   src/howto_links.md
 
 Indices and tables
 ==================

@@ -13,9 +13,9 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
 
-    runs-on: ubuntu-latest
+  lint:
+    runs-on: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v2
@@ -39,6 +39,8 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     
     - name: Test with pytest
+      env:
+          GOTHAM_HOME: "/home/runner/work/GOTHAM/GOTHAM/"
       run: |
         pip install pytest
         pytest $GITHUB_WORKSPACE/Orchestrator/tests/test_intern
