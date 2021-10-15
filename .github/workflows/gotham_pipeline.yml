@@ -19,31 +19,46 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-
-    - name: Set up Python 3.8
+    - name: Set up Python 3.9
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
+        python-version: 3.9
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
+        sudo apt install libmariadb3 libmariadb-dev
+        if [ -f /home/runner/work/GOTHAM/GOTHAM/Orchestrator/Sources/requirements.txt ]; then pip install -r /home/runner/work/GOTHAM/GOTHAM/Orchestrator/Sources/requirements.txt; fi
+        pip install flake8
+        
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    
+        
+  unittest:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+
+    - name: Install dependencies
+      run: |
+        sudo apt install libmariadb3 libmariadb-dev
+        python -m pip install --upgrade pip
+        pip install pytest
+        if [ -f /home/runner/work/GOTHAM/GOTHAM/Orchestrator/Sources/requirements.txt ]; then pip install -r /home/runner/work/GOTHAM/GOTHAM/Orchestrator/Sources/requirements.txt; fi
+
     - name: Test with pytest
       env:
           GOTHAM_HOME: "/home/runner/work/GOTHAM/GOTHAM/"
       run: |
         pip install pytest
-        pytest $GITHUB_WORKSPACE/Orchestrator/tests/test_intern
-      env:
-        GOTHAM_HOME: $GITHUB_WORKSPACE
-
+#       pytest
