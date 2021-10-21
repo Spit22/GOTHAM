@@ -4,12 +4,16 @@ import os
 import logging
 
 from . import get_infos
-from Gotham_normalize import normalize_full_link_infos, normalize_full_lhs_infos, normalize_full_server_infos, normalize_full_honeypot_infos
+from Gotham_normalize import normalize_full_link_infos
+from Gotham_normalize import normalize_full_lhs_infos
+from Gotham_normalize import normalize_full_server_infos
+from Gotham_normalize import normalize_full_honeypot_infos
 
 # Logging components
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+                    level=logging.DEBUG,
+                    format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
 # Retrieve settings from configuration file
 config = configparser.ConfigParser()

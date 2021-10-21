@@ -1,25 +1,25 @@
-#===Import external libs===#
 import mariadb
 import os
 import logging
-#==========================#
 
-#===Logging components===#
+# Logging components
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
 logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
-#=======================#
+                    level=logging.DEBUG,
+                    format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
 
-############################### SERVER SECTION ###############################
+# Server Section
 
 def server(DB_connection, id):
     '''
     Remove a server from the internal database
 
     ARGUMENTS:
-        DB_connection (<mariadb connection object>) = connection with the internal database
-        id (string) : the id of the server we want to remove from the internal database
+        DB_connection (<mariadb connection object>) = connection with
+            the internal database
+        id (string) : the id of the server we want to remove from
+            the internal database
     '''
     # First, remove the relation between the server and its tags
     try:
@@ -47,9 +47,12 @@ def server_in_serv_tag(DB_connection, id="", tag=""):
     Remove a server tag from the internal database
 
     ARGUMENTS:
-        DB_connection (<mariadb connection object>) = connection with the internal database
-        id (string) : the id of the server tag we want to remove from the internal database
-        tag (string) : name of the tag we want to remove from the internal database
+        DB_connection (<mariadb connection object>) = connection with the
+            internal database
+        id (string) : the id of the server tag we want to remove from the
+            internal database
+        tag (string) : name of the tag we want to remove from the internal
+            database
     '''
     # Get MariaDB cursor
     cur = DB_connection.cursor()
@@ -76,25 +79,27 @@ def server_in_serv_tag(DB_connection, id="", tag=""):
         raise ValueError(error)
 
     # Check if tag is still used
-    #tag_info=tag if tag !="" else "%"
-    #id_tag=id if id !="" else "%"
-    #tag_infos=get_infos.tag(DB_connection, tag=tag_info, id=id_tag)
+    # tag_info=tag if tag !="" else "%"
+    # id_tag=id if id !="" else "%"
+    # tag_infos=get_infos.tag(DB_connection, tag=tag_info, id=id_tag)
 
-    #tag_used=check_TAGS.check_tag_still_used(DB_connection, id=tag_infos[0]["id"])
+    # tag_used=check_TAGS.check_tag_still_used(DB_connection, id=tag_infos[0]["id"])
 
     # if tag_used==[]:
     #    tag(DB_connection,id_tag=tag_infos[0]["id"])
 
 
-############################### HONEYPOT SECTION ###############################
+# Honeypot section
 
 def honeypot(DB_connection, id):
     '''
     Remove a honeypot from the internal database
 
     ARGUMENTS:
-        DB_connection (<mariadb connection object>) = connection with the internal database
-        id (string) : the id of the honeypot we want to remove from the internal database
+        DB_connection (<mariadb connection object>) = connection with the
+            internal database
+        id (string) : the id of the honeypot we want to remove from the
+            internal database
     '''
     # First, delete the relations between the honeypot and its tags
     honeypot_in_hp_tag(DB_connection, id)
@@ -122,9 +127,12 @@ def honeypot_in_hp_tag(DB_connection, id="", tag=""):
     Remove a honeypot tag from the internal database
 
     ARGUMENTS:
-        DB_connection (<mariadb connection object>) = connection with the internal database
-        id (string) : the id of the honeypot tag we want to remove from the internal database
-        tag (string) : name of the tag we want to remove from the internal database
+        DB_connection (<mariadb connection object>) = connection with the
+            internal database
+        id (string) : the id of the honeypot tag we want to remove from the
+            internal database
+        tag (string) : name of the tag we want to remove from the internal
+            database
     '''
     # Get MariaDB cursor
     cur = DB_connection.cursor()
@@ -151,23 +159,25 @@ def honeypot_in_hp_tag(DB_connection, id="", tag=""):
         raise ValueError(error)
 
     # Check if tag is still used
-    #tag_info=tag if tag !="" else "%"
-    #id_tag=id if id !="" else "%"
-    #tag_infos=get_infos.tag(DB_connection, tag=tag_info, id=id_tag)
-    #tag_used=check_TAGS.check_tag_still_used(DB_connection, id=tag_infos[0]["id"])
+    # tag_info=tag if tag !="" else "%"
+    # id_tag=id if id !="" else "%"
+    # tag_infos=get_infos.tag(DB_connection, tag=tag_info, id=id_tag)
+    # tag_used=check_TAGS.check_tag_still_used(DB_connection, id=tag_infos[0]["id"])
     # if tag_used==[]:
     #    tag(DB_connection,id_tag=tag_infos[0]["id"])
 
 
-############################### LINK SECTION ###############################
+# Link section
 
 def link(DB_connection, id):
     '''
     Remove a link from the internal database from
 
     ARGUMENTS:
-        DB_connection (<mariadb connection object>) = connection with the internal database
-        id (string) : the id of the link we want to remove from the internal database
+        DB_connection (<mariadb connection object>) = connection with the
+            internal database
+        id (string) : the id of the link we want to remove from the internal
+            database
     '''
     # Remove the relation between the link and the serv_tag
     try:
@@ -206,9 +216,12 @@ def link_in_link_tags_hp(DB_connection, id="", tag_hp=""):
     Remove a honeypot tag of the link from the internal database
 
     ARGUMENTS:
-        DB_connection (<mariadb connection object>) = connection with the internal database
-        id (string) : the id of the honeypot tag we want to remove from the internal database
-        tag (string) : name of the honeypot tag we want to remove from the internal database
+        DB_connection (<mariadb connection object>) = connection with the
+            internal database
+        id (string) : the id of the honeypot tag we want to remove from the
+            internal database
+        tag (string) : name of the honeypot tag we want to remove from the
+            internal database
     '''
     # Get MariaDB cursor
     cur = DB_connection.cursor()
@@ -241,9 +254,12 @@ def link_in_link_tags_serv(DB_connection, id="", tag_serv=""):
     Remove a server tag of the link from the internal database
 
     ARGUMENTS:
-        DB_connection (<mariadb connection object>) = connection with the internal database
-        id (string) : the id of the server tag we want to remove from the internal database
-        tag (string) : name of the server tag we want to remove from the internal database
+        DB_connection (<mariadb connection object>) = connection with the
+            internal database
+        id (string) : the id of the server tag we want to remove from the
+            internal database
+        tag (string) : name of the server tag we want to remove from the
+            internal database
     '''
     # Get MariaDB cursor
     cur = DB_connection.cursor()
@@ -276,10 +292,14 @@ def lhs(DB_connection, id_link="%", id_hp="%", id_serv="%"):
     Remove a Link/Honeypot/Server combination from the internal database
 
     ARGUMENTS:
-        DB_connection (<mariadb connection object>) = connection with the internal database
-        id_link (string, optional) : the id of the link we want to remove from the internal database
-        id_hp (string, optional) : the id of the hp we want to remove from the internal database
-        id_serv (string, optional) : the id of the serv we want to remove from the internal database
+        DB_connection (<mariadb connection object>) = connection with the
+            internal database
+        id_link (string, optional) : the id of the link we want to remove from
+            the internal database
+        id_hp (string, optional) : the id of the hp we want to remove from the
+            internal database
+        id_serv (string, optional) : the id of the serv we want to remove from
+            the internal database
     '''
     # Get MariaDB cursor
     cur = DB_connection.cursor()
@@ -298,16 +318,19 @@ def lhs(DB_connection, id_link="%", id_hp="%", id_serv="%"):
         raise ValueError(error)
 
 
-############################### TAG SECTION ###############################
+# Tag section
 
 def tag(DB_connection, id_tag="%", tag="%"):
     '''
     Remove a tag from the internal database from
 
     ARGUMENTS:
-        DB_connection (<mariadb connection object>) = connection with the internal database
-        id (string) : the id of the tag we want to remove from the internal database
-        tag (string) : name of the tag we want to remove from the internal database
+        DB_connection (<mariadb connection object>) = connection with the
+            internal database
+        id (string) : the id of the tag we want to remove from the internal
+            database
+        tag (string) : name of the tag we want to remove from the internal
+            database
     '''
     # Get MariaDB cursor
     cur = DB_connection.cursor()

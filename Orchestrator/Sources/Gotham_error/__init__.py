@@ -10,7 +10,6 @@ def format_usererror(error_title, debug_informations, debug_mode):
     #
     # Return a json string containing error information like {"error": "An error occured in port edition", "debug":"str can't be a NULL - variable referenced before asssigment - not a valid RSA key file"}
 
-
     # Get the json formated error
     error = error_classes.format_error(
         error_title, debug_informations, debug_mode)

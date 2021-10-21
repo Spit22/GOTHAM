@@ -22,5 +22,5 @@ def format_error(error_title, debug_information, debug_mode):
     if debug_mode:
         error["debug"] = str(debug_information)
 
-    # Return the formatted error
+    # Return the formatted error
     return str(json.dumps(error))+"\n"

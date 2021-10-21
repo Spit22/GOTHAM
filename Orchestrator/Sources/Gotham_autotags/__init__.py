@@ -1,4 +1,3 @@
-import Gotham_SSH_SCP
 import Gotham_link_BDD
 
 from . import autotags_functions
@@ -95,7 +94,8 @@ def server(DB_settings, serv_id="", serv_ip=""):
         # Check if the server exists in the IDB
         if object_infos == []:
             logging.error(
-                f"You tried to autotag a server that doesn't exists (" + str(serv_id if serv_id != "" else serv_ip) + ")")
+                "You tried to autotag a server that doesn't exists (" + str(serv_id if serv_id != "" else serv_ip) + ")"
+            )
             error = "Unknown serv " + \
                 str(serv_id if serv_id != "" else serv_ip)
             raise ValueError(error)

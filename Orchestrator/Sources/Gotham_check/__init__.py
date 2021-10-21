@@ -173,7 +173,7 @@ def check_tag_still_used(DB_settings, tag="%", id="%"):
 
 
 def check_used_port(DB_settings):
-    ''' 
+    '''
     Determine used ports on datacenter side
 
     ARGUMENTS:

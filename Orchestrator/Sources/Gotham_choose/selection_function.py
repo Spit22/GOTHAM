@@ -69,7 +69,7 @@ def weighting_nb_port(servs_infos):
     servs_infos = [{
         **serv_infos,
         **{"weight": int(serv_infos["weight"]) +
-        (weight * int(len(serv_infos["lhs_port"].replace("||||||", "||||").split("||||"))))}
+            (weight * int(len(serv_infos["lhs_port"].replace("||||||", "||||").split("||||"))))}
     } if (
         serv_infos["lhs_port"] != '' and not(serv_infos["lhs_port"] is None)
         and serv_infos["lhs_port"] != 'NULL'
@@ -112,7 +112,7 @@ def weighting_state(object_type, objects_infos):
     ) else {
         **object_infos,
         **{"weight": int(object_infos["weight"]) +
-        int(max([int(i) for i in weights.values()]))}
+            int(max([int(i) for i in weights.values()]))}
     } for object_infos in objects_infos
     ]
 
@@ -169,7 +169,7 @@ def weighting_nb_useless_tags(object_type, objects_infos, tags):
 
 def weighting_nb_free_port(servs_infos):
     '''
-    Add a weight corresponding to the number of free port associated with 
+    Add a weight corresponding to the number of free port associated with
     each server
 
     ARGUMENTS:

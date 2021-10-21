@@ -1,4 +1,4 @@
-# GENERAL LIBS
+# GENERAL LIBS
 import logging
 import flask
 import json
@@ -9,7 +9,7 @@ import random
 import requests
 import configparser
 import sys
-from flask import request, jsonify
+from flask import request
 
 # GOTHAM'S Add Scripts
 import add_server
