@@ -1,0 +1,14 @@
+# Dockerfile Gotham Installation SERVER
+FROM debian:jessie
+
+# OS UPDATE
+RUN apt-get -y update && apt-get -y dist-upgrade && apt-get -y autoremove && apt-get clean
+
+#INSTALL DEPENDENCIES
+RUN apt-get -y install curl git-all rsyslog apt-utils vim
+
+#INSTALL Server
+RUN git clone https://github.com/Spit22/GOTHAM.git
+RUN echo "# 00-JSON_template.conf" > /etc/rsyslog.d/00-JSON_template.conf && cd /GOTHAM/Install/ && chmod +x install_server.sh && ./install_server.sh
+
+CMD ["/bin/bash"]
