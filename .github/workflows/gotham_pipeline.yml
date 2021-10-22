@@ -48,6 +48,8 @@ jobs:
         fetch-depth: '2'
     - name: gitleaks-action
       uses: zricethezav/gitleaks-action@master
+      with:
+        path: /home/runner/work/GOTHAM/GOTHAM/
     
     
   unittest:
