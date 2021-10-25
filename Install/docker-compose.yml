@@ -1,0 +1,9 @@
+version: '3.9'
+services:
+  ssh:
+    build:
+    container_name: docker_gothma_server_cont
+    image: docker_gotham_server_img:latest
+    ports:
+      - "80:80"
+      - "443:443"

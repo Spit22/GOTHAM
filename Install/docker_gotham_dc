@@ -9,6 +9,7 @@ RUN apt-get -y install curl git-all rsyslog apt-utils vim
 
 #INSTALL Server
 RUN git clone https://github.com/Spit22/GOTHAM.git
-RUN chmod +x /GOTHAM/Install/install_server.sh
-RUN ["/bin/bash"] ["-c"] ["/GOTHAM/Install/install_server.sh"]
+RUN chmod +x /GOTHAM/Install/install_dc.sh
+RUN ["/bin/bash"] ["-c"] ["/GOTHAM/Install/install_dc.sh"]
+
 CMD ["/bin/bash"]

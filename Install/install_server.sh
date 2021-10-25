@@ -44,7 +44,7 @@ echo "[+] All paths created"
 echo "=== Configuring Rsyslog... ==="
 
 # Pre-configure rsyslog
-# touch /etc/rsyslog.d/00-JSON_template.conf
+touch /etc/rsyslog.d/00-JSON_template.conf
 echo '''
 module(load="mmnormalize")
 module(load="imfile")
