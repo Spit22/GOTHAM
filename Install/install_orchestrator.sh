@@ -19,10 +19,10 @@ APT=$(which apt)
 RM=$(which rm)
 
 ### CHECK IF ROOT ###
-if [ "$EUID" -ne 0 ]
-  then echo "[-] Please run this script as root"
-  exit
-fi
+#if [ "$EUID" -ne 0 ]
+#  then echo "[-] Please run this script as root"
+#  exit
+#fi
 
 ### PREPARE GOTHAM SYSTEM ###
 echo "=== Preparing the gotham system... ==="
