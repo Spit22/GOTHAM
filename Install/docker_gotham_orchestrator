@@ -9,7 +9,7 @@ RUN apt-get -y install curl git-all rsyslog apt-utils vim
 
 #INSTALL Server
 RUN git clone https://github.com/Spit22/GOTHAM.git
-RUN git branch dev_V1_eloi && chmod +x /GOTHAM/Install/install_orchestrator.sh
+RUN cd GOTHAM/Install/ && git branch dev_V1_eloi && chmod +x /GOTHAM/Install/install_orchestrator.sh
 RUN ["/bin/bash"] ["-c"] ["/GOTHAM/Install/install_orchestrator.sh"]
 
 CMD ["/bin/bash"]
