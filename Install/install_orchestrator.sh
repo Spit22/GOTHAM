@@ -77,7 +77,7 @@ input(type="imtcp" port="1514")
 ''' > /etc/rsyslog.d/00-syslog_server.conf
 
 # Restart rsyslog
-systemctl restart rsyslog > /dev/null 2>&1
+# systemctl restart rsyslog > /dev/null 2>&1
 echo "[+] Rsyslog configured under /etc/rsyslog.d/"
 
 
