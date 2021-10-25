@@ -55,7 +55,7 @@ $APT update > /dev/null 2>&1
 echo "[+] APT updated"
 
 # Install needed packages
-$APT install -y python3 python3-pip git mariadb-server git rsyslog > /dev/null 2>&1
+$APT install -y python3 python3-pip mariadb-server > /dev/null 2>&1
 PIP3=$(which pip3)
 GIT=$(which git)
 echo "[+] Some packages correctly installed"
