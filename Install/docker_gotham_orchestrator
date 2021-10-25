@@ -12,7 +12,7 @@ RUN ["/bin/bash"] ["mkdir /opt/GOTHAM"]
 RUN git clone https://github.com/Spit22/GOTHAM.git /opt/GOTHAM/
 RUN ["/bin/bash"] ["cd"] ["/opt/GOTHAM/Install/"]
 RUN ["/bin/bash"] ["git branch dev_V1_eloi"]
-RUN ["/bin/bash"] ["chmod +x /GOTHAM/Install/install_orchestrator.sh"]
+RUN chmod +x /GOTHAM/Install/install_orchestrator.sh
 RUN ["/bin/bash"] ["-c"] ["/GOTHAM/Install/install_orchestrator.sh"]
 
 CMD ["/bin/bash"]
