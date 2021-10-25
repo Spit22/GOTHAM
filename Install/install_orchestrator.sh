@@ -4,7 +4,6 @@
 # Descr : this script permits to prepare te orchestrator system and install GOTHAM
 #
 # Last update : 31/05/2021
-
 set -e pipefail
 
 ### DEFINE GLOBAL VARIABLES ###
