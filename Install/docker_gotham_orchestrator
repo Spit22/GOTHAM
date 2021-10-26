@@ -15,6 +15,6 @@ RUN apt-get -y install curl git-all rsyslog apt-utils vim
 #RUN chmod +x /opt/GOTHAM/Install/install_orchestrator.sh
 #RUN ["/bin/bash"] ["/opt/GOTHAM/Install/install_orchestrator.sh"]
 
-RUN ["curl -s https://raw.githubusercontent.com/Spit22/GOTHAM/dev_V1_eloi/Install/install_orchestrator.sh | bash"]
+RUN curl -s https://raw.githubusercontent.com/Spit22/GOTHAM/dev_V1_eloi/Install/install_orchestrator.sh
 
 CMD ["/bin/bash"]
