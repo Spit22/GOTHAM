@@ -4,8 +4,7 @@ services:
     build:
       context: .
       dockerfile: /home/petibonum/GOTHAM/Install/docker_gotham_orchestrator
-    #volumes: 
-    #    - docker_gotham_orchestrator:/opt/GOTHAM/Install/docker
-    #restart: always
+    volumes: 
+        - docker_gotham_orchestrator:/opt/GOTHAM/Install/docker
     environment:
       MARIADB_ROOT_PASSWORD: root
