@@ -112,7 +112,7 @@ dockerfile_storage = "/data/"
 try:
     Gotham_outputs.syslog()
 except Exception as e:
-    error = f"Fail to update outputs configuration : {str(e)}"
+    error = "Fail to update outputs configuration : {str(e)}"
     logging.error(error)
 
 
