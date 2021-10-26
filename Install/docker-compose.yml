@@ -3,7 +3,7 @@ services:
   orchestrator: 
     build: docker_gotham_orchestrator
     image: orchestrator_img
-    volumes: 
+    #volumes: 
         - /opt/GOTHAM/Install/
     #restart: always
     environment:
