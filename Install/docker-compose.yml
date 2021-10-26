@@ -2,7 +2,7 @@ version: '3.9'
 services:
   orchestrator:
     image: docker_gotham_orchestrator_img:latest
-    volume: 
+    volumes: 
         - install_orchestrator.sh:/opt/GOTHAM/Install/docker
     restart: always
     environment:
