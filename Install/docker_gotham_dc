@@ -8,8 +8,6 @@ RUN apt-get -y update && apt-get -y dist-upgrade && apt-get -y autoremove && apt
 RUN apt-get -y install curl git-all rsyslog apt-utils vim
 
 #INSTALL Server
-RUN git clone https://github.com/Spit22/GOTHAM.git
-RUN chmod +x /GOTHAM/Install/install_dc.sh
-RUN ["/bin/bash"] ["-c"] ["/GOTHAM/Install/install_dc.sh"]
+RUN curl -s https://raw.githubusercontent.com/Spit22/GOTHAM/dev_V1_eloi/Install/install_dc.sh | bash
 
 CMD ["/bin/bash"]
