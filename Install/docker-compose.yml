@@ -2,8 +2,8 @@ version: '3.9'
 services:
   orchestrator:
     image: docker_gotham_orchestrator_img:latest
-    volumes: 
-        - install_orchestrator.sh:~/GOTHAM/Install/
+    #volumes: 
+    #    - install_orchestrator.sh:~/GOTHAM/Install/
     restart: always
     environment:
       MARIADB_ROOT_PASSWORD: root
