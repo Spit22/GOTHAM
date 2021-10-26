@@ -1,8 +1,7 @@
 version: '3.9'
 services:
-  orchestrator:
-    context: /home/petibonum/GOTHAM/Install/docker_gotham_orchestrator
-    build: docker_gotham_orchestrator
+  orchestrator: 
+    build: /home/petibonum/GOTHAM/Install/docker_gotham_orchestrator
     volumes: 
         - /opt/GOTHAM/Install/
     #restart: always
