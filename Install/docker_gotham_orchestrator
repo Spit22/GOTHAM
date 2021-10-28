@@ -35,13 +35,13 @@ RUN ["/bin/bash"] ["echo"] ["-e"] ["#GOTHAM global variables\nexport GOTHAM_HOME
 RUN ["/bin/bash"] ["chmod +x /etc/profile.d/gotham.sh"] && \
     echo "[+] Gotham profile generated under /etc/profile.d/gotham.sh"
 
-RUN ["/bin/bash"] ["mkdir -p /data/template"] &&  \
-    ["/bin/bash"] ["mkdir -p /data/rsyslog/datacenter-configuration"] && \
-    ["/bin/bash"] ["mkdir -p /data/rsyslog/servers-configuration"] && \
-    ["/bin/bash"] ["mkdir -p /data/honeypot-log"] && \
-    ["/bin/bash"] ["mkdir -p /data/link-log"] && \ 
-    ["/bin/bash"] ["mkdir -p /data/rsyslog/rulebase"] && \
-    ["/bin/bash"] ["mkdir -p /etc/rsyslog.d"] && \
+RUN mkdir -p /data/template &&  \
+    mkdir -p /data/rsyslog/datacenter-configuration && \
+    mkdir -p /data/rsyslog/servers-configuration && \
+    mkdir -p /data/honeypot-log && \
+    mkdir -p /data/link-log && \ 
+    mkdir -p /data/rsyslog/rulebase && \
+    mkdir -p /etc/rsyslog.d && \
     echo "[+] All paths created"
 
 RUN echo "=== Installing dependancies... ==="
