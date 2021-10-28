@@ -32,7 +32,7 @@ RUN useradd -o -u 0 -g 0 -N -d /root/ -M gotham > /dev/null 2>&1
 RUN echo "[+] User gotham created"
 
 RUN ["/bin/bash"] ["echo"] ["-e"] ["#GOTHAM global variables\nexport GOTHAM_HOME=/opt/GOTHAM/"]" [">"] ["/etc/profile.d/gotham.sh"]
-RUN $CHMOD +x /etc/profile.d/gotham.sh && \
+RUN ["/bin/bash"] ["chmod +x /etc/profile.d/gotham.sh"] && \
     echo "[+] Gotham profile generated under /etc/profile.d/gotham.sh"
 
 RUN ["/bin/bash"] ["mkdir -p /data/template"] &&  \
@@ -46,15 +46,15 @@ RUN ["/bin/bash"] ["mkdir -p /data/template"] &&  \
 
 RUN echo "=== Installing dependancies... ==="
 
-RUN $APT update > /dev/null 2>&1 && \
+RUN ["/bin/bash"] ["apt update > /dev/null 2>&1"] && \
     echo "[+] APT updated"
 
-RUN $APT install -y python3 python3-pip mariadb-server > /dev/null 2>&1 && \
+RUN ["/bin/bash"] ["apt install -y python3 python3-pip mariadb-server > /dev/null 2>&1"] && \
     PIP3=$(which pip3) && \
     GIT=$(which git) && \
     echo "[+] Some packages correctly installed"
 
-RUN $APT install -y libmariadb-dev > /dev/null 2>&1 && \
+RUN ["/bin/bash"] ["apt install -y libmariadb-dev > /dev/null 2>&1"] && \
     echo "[+] Some libraries correctly installed"
 
 ### INSTALL RSYSLOG ###
@@ -76,27 +76,27 @@ RUN echo "[+] Rsyslog configured under /etc/rsyslog.d/"
 RUN echo "=== Installing GOTHAM... ==="
 
 # Clone repository on this directory
-RUN $GIT clone $GOTHAM_GIT $GOTHAM_HOME > /dev/null 2>&1 && \
-    $CHOWN -R gotham:root $GOTHAM_HOME && \
+RUN ["/bin/bash"] ["git clone $GOTHAM_GIT $GOTHAM_HOME > /dev/null 2>&1"] && \
+    ["/bin/bash"] ["chown -R gotham:root $GOTHAM_HOME"] && \
     echo "[+] GOTHAM cloned under $GOTHAM_HOME"
 
 # Going on the repository folder
 RUN ["/bin/bash"] ["cd"] ["$GOTHAM_HOME"]
 
 # Choose the git branch
-RUN $GIT checkout $EXEC_BRANCH > /dev/null 2>&1 && \
+RUN ["/bin/bash"] ["git checkout $EXEC_BRANCH > /dev/null 2>&1"] && \
     echo "[+] Switched to $EXEC_BRANCH"
 
 # Install all python libs
-RUN $PIP3 install -r $GOTHAM_HOME/Orchestrator/Sources/requirements.txt > /dev/null 2>&1 && \
+RUN ["/bin/bash"] ["pip3 install -r $GOTHAM_HOME/Orchestrator/Sources/requirements.txt > /dev/null 2>&1"] && \
     echo "[+] Pip dependancies installed"
 
 # Create the log folder
 RUN ["/bin/bash"] ["mkdir -p $GOTHAM_HOME/Orchestrator/Logs"]
 
 # Configure database
-RUN mysql -u root -e "CREATE DATABASE GOTHAM;" > /dev/null 2>&1 && \
-    mysql -u root GOTHAM < $GOTHAM_HOME/Orchestrator/Internal_Database/gotham.sql > /dev/null 2>&1 && \
+RUN ["/bin/bash"] ["mysql -u root -e "CREATE DATABASE GOTHAM;" > /dev/null 2>&1"] && \
+    ["/bin/bash"] ["mysql -u root GOTHAM < $GOTHAM_HOME/Orchestrator/Internal_Database/gotham.sql > /dev/null 2>&1"] && \
     echo "[+] MySQL db successfully imported"
 
 CMD ["/bin/bash"]
