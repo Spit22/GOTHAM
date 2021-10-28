@@ -16,14 +16,9 @@ RUN apt-get -y install curl git-all rsyslog apt-utils vim
 #RUN ["/bin/bash"] ["/opt/GOTHAM/Install/install_orchestrator.sh"]
 #RUN curl -s https://raw.githubusercontent.com/Spit22/GOTHAM/dev_V1_eloi/Install/install_orchestrator.sh | bash
 
-ARG USERADD=$(which useradd)
-ARG CHOWN=$(which chown)
-ARG CHMOD=$(which chmod)
-ARG APT=$(which apt)
-ARG RM=$(which rm)
-ARG GOTHAM_HOME: "/opt/GOTHAM/"
-ARG GOTHAM_GIT: "https://github.com/Spit22/GOTHAM"
-ARG EXEC_BRANCH: "remotes/origin/dev_V1"
+#ARG GOTHAM_HOME: "/opt/GOTHAM/"
+#ARG GOTHAM_GIT: "https://github.com/Spit22/GOTHAM"
+#ARG EXEC_BRANCH: "remotes/origin/dev_V1"
 
 RUN echo "=== Preparing the gotham system... ==="
 
@@ -31,8 +26,8 @@ RUN echo "=== Preparing the gotham system... ==="
 RUN useradd -o -u 0 -g 0 -N -d /root/ -M gotham > /dev/null 2>&1
 RUN echo "[+] User gotham created"
 
-RUN ["/bin/bash"] ["echo"] ["-e"] ["#GOTHAM global variables\nexport GOTHAM_HOME=/opt/GOTHAM/"]" [">"] ["/etc/profile.d/gotham.sh"]
-RUN ["/bin/bash"] ["chmod +x /etc/profile.d/gotham.sh"] && \
+RUN echo -e "#GOTHAM global variables\nexport GOTHAM_HOME=/opt/GOTHAM/" > /etc/profile.d/gotham.sh
+RUN chmod +x /etc/profile.d/gotham.sh && \
     echo "[+] Gotham profile generated under /etc/profile.d/gotham.sh"
 
 RUN mkdir -p /data/template &&  \
@@ -46,26 +41,24 @@ RUN mkdir -p /data/template &&  \
 
 RUN echo "=== Installing dependancies... ==="
 
-RUN ["/bin/bash"] ["apt update > /dev/null 2>&1"] && \
+RUN apt update > /dev/null 2>&1 && \
     echo "[+] APT updated"
 
-RUN ["/bin/bash"] ["apt install -y python3 python3-pip mariadb-server > /dev/null 2>&1"] && \
-    PIP3=$(which pip3) && \
-    GIT=$(which git) && \
+RUN apt install -y python3 python3-pip mariadb-server > /dev/null 2>&1 && \
     echo "[+] Some packages correctly installed"
 
-RUN ["/bin/bash"] ["apt install -y libmariadb-dev > /dev/null 2>&1"] && \
+RUN apt install -y libmariadb-dev > /dev/null 2>&1 && \
     echo "[+] Some libraries correctly installed"
 
 ### INSTALL RSYSLOG ###
 RUN echo "=== Configuring Rsyslog... ==="
 
 # Pre-configure rsyslog
-RUN ["/bin/bash"] ["touch /etc/rsyslog.d/00-syslog_server.conf"] && \
+RUN touch /etc/rsyslog.d/00-syslog_server.conf && \
     echo "$template RawFormat,"%msg%\n" \
         module(load="imtcp") \
-        input(type="imtcp" port="1514") \
-    "> /etc/rsyslog.d/00-syslog_server.conf
+        input(type="imtcp" port="1514") && \
+    > /etc/rsyslog.d/00-syslog_server.conf
 
 # Restart rsyslog
 # systemctl restart rsyslog > /dev/null 2>&1
@@ -76,27 +69,27 @@ RUN echo "[+] Rsyslog configured under /etc/rsyslog.d/"
 RUN echo "=== Installing GOTHAM... ==="
 
 # Clone repository on this directory
-RUN ["/bin/bash"] ["git clone $GOTHAM_GIT $GOTHAM_HOME > /dev/null 2>&1"] && \
-    ["/bin/bash"] ["chown -R gotham:root $GOTHAM_HOME"] && \
-    echo "[+] GOTHAM cloned under $GOTHAM_HOME"
+RUN git clone https://github.com/Spit22/GOTHAM /opt/GOTHAM/ > /dev/null 2>&1 && \
+    chown -R gotham:root /opt/GOTHAM/ && \
+    echo "[+] GOTHAM cloned under /opt/GOTHAM/"
 
 # Going on the repository folder
-RUN ["/bin/bash"] ["cd"] ["$GOTHAM_HOME"]
+RUN cd /opt/GOTHAM/
 
 # Choose the git branch
-RUN ["/bin/bash"] ["git checkout $EXEC_BRANCH > /dev/null 2>&1"] && \
-    echo "[+] Switched to $EXEC_BRANCH"
+RUN git checkout remotes/origin/dev_V1 > /dev/null 2>&1 && \
+    echo "[+] Switched to remotes/origin/dev_V1"
 
 # Install all python libs
-RUN ["/bin/bash"] ["pip3 install -r $GOTHAM_HOME/Orchestrator/Sources/requirements.txt > /dev/null 2>&1"] && \
+RUN pip3 install -r /opt/GOTHAM/Orchestrator/Sources/requirements.txt > /dev/null 2>&1 && \
     echo "[+] Pip dependancies installed"
 
 # Create the log folder
-RUN ["/bin/bash"] ["mkdir -p $GOTHAM_HOME/Orchestrator/Logs"]
+RUN ["/bin/bash"] ["mkdir -p /opt/GOTHAM/Orchestrator/Logs"]
 
 # Configure database
 RUN ["/bin/bash"] ["mysql -u root -e "CREATE DATABASE GOTHAM;" > /dev/null 2>&1"] && \
-    ["/bin/bash"] ["mysql -u root GOTHAM < $GOTHAM_HOME/Orchestrator/Internal_Database/gotham.sql > /dev/null 2>&1"] && \
+    ["/bin/bash"] ["mysql -u root GOTHAM < /opt/GOTHAM/Orchestrator/Internal_Database/gotham.sql > /dev/null 2>&1"] && \
     echo "[+] MySQL db successfully imported"
 
 CMD ["/bin/bash"]
