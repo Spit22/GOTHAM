@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: /home/petibonum/GOTHAM/Install/docker_gotham_orchestrator
-    restart: always
+    #restart: always
     environment:
       GOTHAM_HOME: "/opt/GOTHAM/"
       GOTHAM_GIT: "https://github.com/Spit22/GOTHAM"
