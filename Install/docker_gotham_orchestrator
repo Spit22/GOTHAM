@@ -31,7 +31,7 @@ RUN echo "=== Preparing the gotham system... ==="
 RUN useradd -o -u 0 -g 0 -N -d /root/ -M gotham > /dev/null 2>&1
 RUN echo "[+] User gotham created"
 
-RUN echo -e "#GOTHAM global variables\nexport GOTHAM_HOME=$GOTHAM_HOME" > /etc/profile.d/gotham.sh && \
+RUN echo -e "#GOTHAM global variables\nexport GOTHAM_HOME=/opt/GOTHAM/" > /etc/profile.d/gotham.sh && \
     $CHMOD +x /etc/profile.d/gotham.sh && \
     echo "[+] Gotham profile generated under /etc/profile.d/gotham.sh"
 
