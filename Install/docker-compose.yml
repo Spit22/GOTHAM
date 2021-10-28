@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: /home/petibonum/GOTHAM/Install/docker_gotham_orchestrator
-    #restart: always
+    run: always
     environment:
       GOTHAM_HOME: "/opt/GOTHAM/"
       GOTHAM_GIT: "https://github.com/Spit22/GOTHAM"
@@ -19,7 +19,7 @@ services:
       MARIADB_ROOT_PASSWORD: root
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 2
   
   ## SERVER
   #server:
