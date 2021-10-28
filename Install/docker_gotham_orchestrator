@@ -24,7 +24,8 @@ ARG RM=$(which rm)
 
 RUN echo "=== Preparing the gotham system... ==="
 
-RUN $USERADD -o -u 0 -g 0 -N -d /root/ -M gotham > /dev/null 2>&1
+#RUN $USERADD -o -u 0 -g 0 -N -d /root/ -M gotham > /dev/null 2>&1
+RUN useradd -o -u 0 -g 0 -N -d /root/ -M gotham > /dev/null 2>&1
 RUN echo "[+] User gotham created"
 
 RUN echo -e "#GOTHAM global variables\nexport GOTHAM_HOME=$GOTHAM_HOME" > /etc/profile.d/gotham.sh && \
