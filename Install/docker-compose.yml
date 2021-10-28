@@ -11,11 +11,11 @@ services:
       GOTHAM_HOME: "/opt/GOTHAM/"
       GOTHAM_GIT: "https://github.com/Spit22/GOTHAM"
       EXEC_BRANCH: "remotes/origin/dev_V1"
-      USERADD: "$(which useradd)"
-      CHOWN: "$(which chown)"
-      CHMOD: "$(which chmod)"
-      APT: "$(which apt)"
-      RM: "$(which rm)"
+      #USERADD: "$(which useradd)"
+      #CHOWN: "$(which chown)"
+      #CHMOD: "$(which chmod)"
+      #APT: "$(which apt)"
+      #RM: "$(which rm)"
       MARIADB_ROOT_PASSWORD: root
     deploy:
       mode: replicated
