@@ -117,7 +117,7 @@ template(name="default-template" type="list") {
 ''' > /etc/rsyslog.d/00-JSON_template.conf
 
 # Restart rsyslog
-systemctl restart rsyslog > /dev/null 2>&1
+#systemctl restart rsyslog > /dev/null 2>&1
 echo "[+] Rsyslog configured"
 
 ### INSTALL AND CONFIGURE SSH SERVER ###
@@ -143,7 +143,7 @@ PubkeyAuthentication yes
 """ > /etc/ssh/sshd_config
 
 # Restart openssh
-systemctl restart ssh > /dev/null 2>&1
+#systemctl restart ssh > /dev/null 2>&1
 echo "[+] SSH Server configured"
 
 ### GENERATE SSH KEY ###

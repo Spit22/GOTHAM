@@ -18,10 +18,10 @@ ENCODE=$(which base64)
 APT=$(which apt)
 
 ### CHECK IF ROOT ###
-if [ "$EUID" -ne 0 ]
-  then echo "[-] Please run this script as root"
-  exit
-fi
+#if [ "$EUID" -ne 0 ]
+#  then echo "[-] Please run this script as root"
+#  exit
+#fi
 
 ### PREPARE GOTHAM SYSTEM ###
 echo "=== Preparing the gotham system... ==="
@@ -68,7 +68,7 @@ template(name="default-template" type="list") {
 ''' > /etc/rsyslog.d/00-JSON_template.conf
 
 # Restart rsyslog
-systemctl restart rsyslog
+#systemctl restart rsyslog
 echo "[+] Rsyslog configured"
 
 ### INSTALL AND CONFIGURE SSH SERVER ###
@@ -93,7 +93,7 @@ PubkeyAuthentication yes
 """ > /etc/ssh/sshd_config
 
 # Restart openssh
-service ssh restart
+#service ssh restart
 echo "[+] SSH Server configured"
 
 ### GENERATE SSH KEY ###

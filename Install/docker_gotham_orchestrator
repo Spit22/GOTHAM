@@ -8,13 +8,85 @@ RUN apt-get -y update && apt-get -y dist-upgrade && apt-get -y autoremove && apt
 RUN apt-get -y install curl git-all rsyslog apt-utils vim
 
 #INSTALL Server
-RUN ["/bin/bash"] ["mkdir /opt/GOTHAM"]
-RUN git clone https://github.com/Spit22/GOTHAM.git /opt/GOTHAM/
+#RUN ["/bin/bash"] ["mkdir /opt/GOTHAM"]
+#RUN git clone https://github.com/Spit22/GOTHAM.git /opt/GOTHAM/
 #RUN ["/bin/bash"] ["cd"] ["/opt/GOTHAM/Install/"]
 #RUN ["/bin/bash"] ["git branch dev_V1_eloi"]
 #RUN chmod +x /opt/GOTHAM/Install/install_orchestrator.sh
 #RUN ["/bin/bash"] ["/opt/GOTHAM/Install/install_orchestrator.sh"]
+#RUN curl -s https://raw.githubusercontent.com/Spit22/GOTHAM/dev_V1_eloi/Install/install_orchestrator.sh | bash
 
-RUN curl -s https://raw.githubusercontent.com/Spit22/GOTHAM/dev_V1_eloi/Install/install_orchestrator.sh | bash
+RUN echo "=== Preparing the gotham system... ==="
+
+RUN $USERADD -o -u 0 -g 0 -N -d /root/ -M gotham > /dev/null 2>&1 && \
+    echo "[+] User gotham created"
+
+RUN echo -e "#GOTHAM global variables\nexport GOTHAM_HOME=$GOTHAM_HOME" > /etc/profile.d/gotham.sh && \
+    $CHMOD +x /etc/profile.d/gotham.sh && \
+    echo "[+] Gotham profile generated under /etc/profile.d/gotham.sh"
+
+RUN ["/bin/bash"] ["mkdir -p /data/template"] &&  \
+    ["/bin/bash"] ["mkdir -p /data/rsyslog/datacenter-configuration"] && \
+    ["/bin/bash"] ["mkdir -p /data/rsyslog/servers-configuration"] && \
+    ["/bin/bash"] ["mkdir -p /data/honeypot-log"] && \
+    ["/bin/bash"] ["mkdir -p /data/link-log"] && \ 
+    ["/bin/bash"] ["mkdir -p /data/rsyslog/rulebase"] && \
+    ["/bin/bash"] ["mkdir -p /etc/rsyslog.d"] && \
+    echo "[+] All paths created"
+
+RUN echo "=== Installing dependancies... ==="
+
+RUN $APT update > /dev/null 2>&1 && \
+    echo "[+] APT updated"
+
+RUN $APT install -y python3 python3-pip mariadb-server > /dev/null 2>&1 && \
+    PIP3=$(which pip3) && \
+    GIT=$(which git) && \
+    echo "[+] Some packages correctly installed"
+
+RUN $APT install -y libmariadb-dev > /dev/null 2>&1 && \
+    echo "[+] Some libraries correctly installed"
+
+### INSTALL RSYSLOG ###
+RUN echo "=== Configuring Rsyslog... ==="
+
+# Pre-configure rsyslog
+RUN ["/bin/bash"] ["touch /etc/rsyslog.d/00-syslog_server.conf"] && \
+    echo "$template RawFormat,"%msg%\n" \
+        module(load="imtcp") \
+        input(type="imtcp" port="1514") \
+    "> /etc/rsyslog.d/00-syslog_server.conf
+
+# Restart rsyslog
+# systemctl restart rsyslog > /dev/null 2>&1
+RUN echo "[+] Rsyslog configured under /etc/rsyslog.d/"
+
+
+### INSTALL GOTHAM ###
+RUN echo "=== Installing GOTHAM... ==="
+
+# Clone repository on this directory
+RUN $GIT clone $GOTHAM_GIT $GOTHAM_HOME > /dev/null 2>&1 && \
+    $CHOWN -R gotham:root $GOTHAM_HOME && \
+    echo "[+] GOTHAM cloned under $GOTHAM_HOME"
+
+# Going on the repository folder
+RUN ["/bin/bash"] ["cd"] ["$GOTHAM_HOME"]
+
+# Choose the git branch
+RUN $GIT checkout $EXEC_BRANCH > /dev/null 2>&1 && \
+    echo "[+] Switched to $EXEC_BRANCH"
+
+# Install all python libs
+RUN $PIP3 install -r $GOTHAM_HOME/Orchestrator/Sources/requirements.txt > /dev/null 2>&1 && \
+    echo "[+] Pip dependancies installed"
+
+# Create the log folder
+RUN ["/bin/bash"] ["mkdir -p $GOTHAM_HOME/Orchestrator/Logs"]
+
+# Configure database
+RUN mysql -u root -e "CREATE DATABASE GOTHAM;" > /dev/null 2>&1 && \
+    mysql -u root GOTHAM < $GOTHAM_HOME/Orchestrator/Internal_Database/gotham.sql > /dev/null 2>&1 && \
+    echo "[+] MySQL db successfully imported"
 
 CMD ["/bin/bash"]

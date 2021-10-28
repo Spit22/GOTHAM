@@ -1,11 +1,45 @@
 version: '3.9'
 services:
+
+  ## ORCHESTRATOR
   orchestrator: 
     build:
       context: .
       dockerfile: /home/petibonum/GOTHAM/Install/docker_gotham_orchestrator
-    #volumes: 
-    #    - docker_gotham_orchestrator:/opt/GOTHAM/Install/docker
     restart: always
     environment:
+      GOTHAM_HOME: "/opt/GOTHAM/"
+      GOTHAM_GIT: "https://github.com/Spit22/GOTHAM"
+      EXEC_BRANCH: "remotes/origin/dev_V1"
+      USERADD: $(which useradd)
+      CHOWN: $(which chown)
+      CHMOD: $(which chmod)
+      APT: $(which apt)
+      RM: $(which rm)
       MARIADB_ROOT_PASSWORD: root
+    deploy:
+      mode: replicated
+      replicas: 1
+  
+  ## SERVER
+  #server:
+  #  build:
+  #    context: .
+  #    dockerfile: /home/petibonum/GOTHAM/Install/docker_gotham_server
+  #  restart: always
+  #  deploy:
+  #    mode: replicated
+  #    replicas: 2
+
+  ## DATA-CENTER
+  #dc:
+  #  build:
+  #    context: .
+  #    dockerfile: /home/petibonum/GOTHAM/Install/docker_gotham_dc
+  #  restart: always
+  #  deploy:
+  #    mode: replicated
+  #    replicas: 1
+
+
+  
