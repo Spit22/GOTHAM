@@ -21,6 +21,9 @@ ARG CHOWN=$(which chown)
 ARG CHMOD=$(which chmod)
 ARG APT=$(which apt)
 ARG RM=$(which rm)
+ARG GOTHAM_HOME: "/opt/GOTHAM/"
+ARG GOTHAM_GIT: "https://github.com/Spit22/GOTHAM"
+ARG EXEC_BRANCH: "remotes/origin/dev_V1"
 
 RUN echo "=== Preparing the gotham system... ==="
 
