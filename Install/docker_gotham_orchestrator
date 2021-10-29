@@ -5,7 +5,7 @@ FROM debian:jessie
 RUN apt-get -y update && apt-get -y dist-upgrade && apt-get -y autoremove && apt-get clean
 
 #INSTALL DEPENDENCIES
-RUN apt-get -y install curl git-all rsyslog apt-utils vim
+RUN apt-get install -y curl git-all rsyslog apt-utils vim python3 python3-pip mariadb-server libmariadb-dev
 
 #INSTALL Server
 #RUN ["/bin/bash"] ["mkdir /opt/GOTHAM"]
@@ -44,11 +44,11 @@ RUN echo "=== Installing dependancies... ==="
 RUN apt update > /dev/null 2>&1 && \
     echo "[+] APT updated"
 
-RUN apt install -y python3 python3-pip mariadb-server > /dev/null 2>&1 && \
-    echo "[+] Some packages correctly installed"
+#RUN apt install -y python3 python3-pip mariadb-server > /dev/null 2>&1 && \
+#    echo "[+] Some packages correctly installed"
 
-RUN apt install -y libmariadb-dev > /dev/null 2>&1 && \
-    echo "[+] Some libraries correctly installed"
+#RUN apt install -y libmariadb-dev > /dev/null 2>&1 && \
+#    echo "[+] Some libraries correctly installed"
 
 ### INSTALL RSYSLOG ###
 RUN echo "=== Configuring Rsyslog... ==="
