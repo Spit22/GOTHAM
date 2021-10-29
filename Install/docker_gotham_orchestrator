@@ -7,21 +7,9 @@ RUN apt-get -y update && apt-get -y dist-upgrade && apt-get -y autoremove && apt
 #INSTALL DEPENDENCIES
 RUN apt-get install -y curl git-all rsyslog apt-utils vim python3 python3-pip mariadb-server && \
     wget http://archive.ubuntu.com/ubuntu/pool/universe/m/mariadb-connector-c/libmariadb-dev_3.0.3-1build1_amd64.deb && \
-    dpkg -i libmariadb-dev_3.0.3-1build1_amd64.deb
+    dpkg -i libmariadb-dev_3.0.3-1build1_amd64.deb  
 
-
-#INSTALL Server
-#RUN ["/bin/bash"] ["mkdir /opt/GOTHAM"]
-#RUN git clone https://github.com/Spit22/GOTHAM.git /opt/GOTHAM/
-#RUN ["/bin/bash"] ["cd"] ["/opt/GOTHAM/Install/"]
-#RUN ["/bin/bash"] ["git branch dev_V1_eloi"]
-#RUN chmod +x /opt/GOTHAM/Install/install_orchestrator.sh
-#RUN ["/bin/bash"] ["/opt/GOTHAM/Install/install_orchestrator.sh"]
-#RUN curl -s https://raw.githubusercontent.com/Spit22/GOTHAM/dev_V1_eloi/Install/install_orchestrator.sh | bash
-
-#ARG GOTHAM_HOME: "/opt/GOTHAM/"
-#ARG GOTHAM_GIT: "https://github.com/Spit22/GOTHAM"
-#ARG EXEC_BRANCH: "remotes/origin/dev_V1"
+ARG MARIADB_ROOT_PASSWORD: 'root'
 
 RUN echo "=== Preparing the gotham system... ==="
 

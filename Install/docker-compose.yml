@@ -20,7 +20,6 @@ services:
   #  build:
   #    context: .
   #    dockerfile: /home/petibonum/GOTHAM/Install/docker_gotham_server
-  #  restart: always
   #  deploy:
   #    mode: replicated
   #    replicas: 2
