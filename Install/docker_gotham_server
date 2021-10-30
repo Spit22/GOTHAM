@@ -79,7 +79,7 @@ RUN mkdir -p /root/.ssh && \
 
 # Show base64 encoded private key user has to send to api
 RUN echo -e "\n\n[+]Private key generated : \n" && \
-    #encode /root/gotham_key | tr -d "\n" && \
+    cat /root/gotham_key | base64 && \
     echo ""
 
 
