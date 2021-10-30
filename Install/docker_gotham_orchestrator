@@ -79,8 +79,8 @@ RUN pip3 install -r /opt/GOTHAM/Orchestrator/Sources/requirements.txt > /dev/nul
 RUN ["/bin/bash"] ["mkdir -p /opt/GOTHAM/Orchestrator/Logs"]
 
 # Configure database
-RUN ["/bin/bash"] ["mysql -u root -e "CREATE DATABASE GOTHAM;" > /dev/null 2>&1"] && \
-    ["/bin/bash"] ["mysql -u root GOTHAM < /opt/GOTHAM/Orchestrator/Internal_Database/gotham.sql > /dev/null 2>&1"] && \
+RUN mysql -u root -e "CREATE DATABASE GOTHAM;" > /dev/null 2>&1 && \
+    mysql -u root GOTHAM < /opt/GOTHAM/Orchestrator/Internal_Database/gotham.sql > /dev/null 2>&1 && \
     echo "[+] MySQL db successfully imported"
 
 CMD ["/bin/bash"]
