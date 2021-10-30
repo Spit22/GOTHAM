@@ -15,7 +15,7 @@ RUN curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-c
     docker-compose --version
 
 RUN apt-get -y update && \
-    apt-get -y install docker-ce docker-ce-cli containerd.io
+    apt-get -y install libseccomp2 libdevmapper1.02.1 apparmor docker-ce-rootless-extras pigz docker-ce docker-ce-cli containerd.io
 
 
 ### PREPARE GOTHAM SYSTEM ###
