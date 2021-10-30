@@ -5,7 +5,7 @@ FROM debian:jessie
 RUN apt-get -y update && apt-get -y dist-upgrade && apt-get -y autoremove && apt-get clean
 
 #INSTALL DEPENDENCIES
-RUN apt-get -y install curl git-all rsyslog apt-utils vim apt-transport-https ca-certificates gnupg gnupg-agent software-properties-common openssh-server lsb-release && \
+RUN apt-get -y install curl git-all rsyslog apt-utils vim apt-transport-https ca-certificates gnupg gnupg-agent software-properties-common pigz openssh-server lsb-release libseccomp2 libdevmapper1.02.1 apparmor && \
      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpgs && \
      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu focal stable" > /etc/apt/sources.list.d/docker.list
 
@@ -15,7 +15,7 @@ RUN curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-c
     docker-compose --version
 
 RUN apt-get -y update && \
-    apt-get -y install libseccomp2 libdevmapper1.02.1 apparmor docker-ce-rootless-extras pigz docker-ce docker-ce-cli containerd.io
+    apt-get -y install docker-ce-rootless-extras docker-ce docker-ce-cli containerd.io
 
 
 ### PREPARE GOTHAM SYSTEM ###
