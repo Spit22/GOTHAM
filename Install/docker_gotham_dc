@@ -5,7 +5,7 @@ FROM debian:jessie
 RUN apt-get -y update && apt-get -y dist-upgrade && apt-get -y autoremove && apt-get clean
 
 #INSTALL DEPENDENCIES
-RUN apt-get -y install curl git-all rsyslog apt-utils vim apt-transport-https ca-certificates gnupg-agent software-properties-common
+RUN apt-get -y install curl git-all rsyslog apt-utils vim apt-transport-https ca-certificates gnupg-agent software-properties-common docker-ce docker-ce-cli containerd.io docker-compose openssh-server
 
 ### PREPARE GOTHAM SYSTEM ###
 RUN echo "=== Preparing the gotham system... ==="
@@ -50,91 +50,75 @@ RUN add-apt-repository \
    stable" > /dev/null 2>&1
 
 # Update repo again
-$APT update > /dev/null 2>&1
-# Install docker
-$APT install -y docker-ce docker-ce-cli containerd.io docker-compose > /dev/null 2>&1
-DOCKER=$(which docker)
+RUN apt update > /dev/null 2>&1
 
 # Test docker
-$DOCKER run hello-world > /dev/null 2>&1
-echo "[+] Docker successfully installed"
+RUN docker run hello-world > /dev/null 2>&1 && \
+    echo "[+] Docker successfully installed"
 
 ### INSTALL RSYSLOG ###
-echo "=== Configuring Rsyslog... ==="
+RUN echo "=== Configuring Rsyslog... ==="
 
 # Pre-configure rsyslog
-touch /etc/rsyslog.d/00-JSON_template.conf
-echo '''
-module(load="mmnormalize")
-
-template(name="all-json-template" type="list"){
-    constant(value="{")
-    constant(value="\"tag\":\"")   property(name="programname" format="json")
-    constant(value="\",")
-    property(name="$!all-json" position.from="2")
-}
-
-template(name="default-template" type="list") {
-    constant(value="{")
-        constant(value="\"timestamp\":\"")     property(name="timereported" dateFormat="rfc3339")
-        constant(value="\",\"host\":\"")        property(name="hostname")
-        constant(value="\",\"severity\":\"")    property(name="syslogseverity-text")
-        constant(value="\",\"tag\":\"")   property(name="programname" format="json")
-        constant(value="\",\"message\":\"")    property(name="msg" format="json")
-    constant(value="\"}")
-}
-
-''' > /etc/rsyslog.d/00-JSON_template.conf
-
-# Restart rsyslog
-#systemctl restart rsyslog > /dev/null 2>&1
-echo "[+] Rsyslog configured"
+RUN touch /etc/rsyslog.d/00-JSON_template.conf && \
+    echo ''' \
+    module(load="mmnormalize") \
+    template(name="all-json-template" type="list"){ \
+        constant(value="{") \
+        constant(value="\"tag\":\"")   property(name="programname" format="json") \
+        constant(value="\",") \
+        property(name="$!all-json" position.from="2") \
+    } \
+    template(name="default-template" type="list") { \
+        constant(value="{") \
+            constant(value="\"timestamp\":\"")     property(name="timereported" dateFormat="rfc3339") \
+            constant(value="\",\"host\":\"")        property(name="hostname") \
+            constant(value="\",\"severity\":\"")    property(name="syslogseverity-text") \
+            constant(value="\",\"tag\":\"")   property(name="programname" format="json") \
+            constant(value="\",\"message\":\"")    property(name="msg" format="json") \
+        constant(value="\"}") \
+    } \
+    ''' > /etc/rsyslog.d/00-JSON_template.conf
 
 ### INSTALL AND CONFIGURE SSH SERVER ###
-echo "=== Installing and configuring SSH... ==="
+RUN echo "=== Installing and configuring SSH... ==="
 
 # Update repo
-$APT update > /dev/null 2>&1
-echo "[+] APT updated"
+RUN apt update > /dev/null 2>&1 && \
+    echo "[+] APT updated"
 
 # Installation of openssh and base64
-$APT install -y openssh-server > /dev/null 2>&1
-echo "[+] SSH Server installed"
+RUN echo "[+] SSH Server installed"
 
 # Harden SSH configuration
-echo """
-# OPENSSH CONFIGURATION POC FOR GOTHAM USE ONLY
-
-Port 22
-ListenAddress 0.0.0.0
-
-PermitRootLogin Yes
-PubkeyAuthentication yes
-""" > /etc/ssh/sshd_config
+RUN echo """ \
+    Port 22 \
+    ListenAddress 0.0.0.0 \
+    PermitRootLogin Yes \
+    PubkeyAuthentication yes \
+    """ > /etc/ssh/sshd_config
 
 # Restart openssh
-#systemctl restart ssh > /dev/null 2>&1
-echo "[+] SSH Server configured"
+RUN echo "[+] SSH Server configured"
 
 ### GENERATE SSH KEY ###
-echo "=== Generating SSH Key... ==="
+RUN echo "=== Generating SSH Key... ==="
 
 # Generate a rsa 4096 key pair without passphrase
-$KEYGEN -b 4096 -t rsa -f /root/gotham_key -N "" > /dev/null 2>&1
+RUN ssh-keygen -b 4096 -t rsa -f /root/gotham_key -N "" > /dev/null 2>&1
 
 # Copy the public key to authorized keys of root users
-mkdir -p /root/.ssh
-pubkey=$(cat /root/gotham_key.pub)
-echo $pubkey >> /root/.ssh/authorized_keys
-$CHMOD -R 600 /root/.ssh
+RUN mkdir -p /root/.ssh && \
+    pubkey=$(cat /root/gotham_key.pub) && \
+    echo $pubkey >> /root/.ssh/authorized_keys && \
+    chmod -R 600 /root/.ssh
 
 # Restart again ssh
-/usr/sbin/service ssh restart > /dev/null 2>&1
+RUN /usr/sbin/service ssh restart > /dev/null 2>&1
 
 # Show base64 encoded private key user has to send to api
-echo -e "\n\n[+]Private key : \n"
-$ENCODE /root/gotham_key | tr -d "\n"
-echo ""
-
+RUN echo -e "\n\n[+]Private key : \n" && \
+    cat /root/gotham_key | base64 && \
+    echo ""
 
 CMD ["/bin/bash"]
