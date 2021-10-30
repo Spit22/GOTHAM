@@ -25,14 +25,13 @@ services:
       replicas: 1
 
   ## DATA-CENTER
-  #dc:
-  #  build:
-  #    context: .
-  #    dockerfile: /home/petibonum/GOTHAM/Install/docker_gotham_dc
-  #  restart: always
-  #  deploy:
-  #    mode: replicated
-  #    replicas: 1
+  dc:
+    build:
+      context: .
+      dockerfile: /home/petibonum/GOTHAM/Install/docker_gotham_dc
+    deploy:
+      mode: replicated
+      replicas: 1
 
 
   
