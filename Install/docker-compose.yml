@@ -3,17 +3,17 @@ services:
 
   ## ORCHESTRATOR
   #orchestrator: 
-  #  build:
-  #    context: .
-  #    dockerfile: /home/petibonum/GOTHAM/Install/docker_gotham_orchestrator
-  #  environment:
-  #    GOTHAM_HOME: "/opt/GOTHAM/"
-  #    GOTHAM_GIT: "https://github.com/Spit22/GOTHAM"
-  #    EXEC_BRANCH: "remotes/origin/dev_V1"
-  #    MARIADB_ROOT_PASSWORD: root
-  #  deploy:
-  #    mode: replicated
-  #    replicas: 1
+    build:
+    context: .
+      dockerfile: /home/petibonum/GOTHAM/Install/docker_gotham_orchestrator
+    environment:
+      GOTHAM_HOME: "/opt/GOTHAM/"
+      GOTHAM_GIT: "https://github.com/Spit22/GOTHAM"
+      EXEC_BRANCH: "remotes/origin/dev_V1"
+      MARIADB_ROOT_PASSWORD=root
+    deploy:
+      mode: replicated
+      replicas: 1
   
   ## SERVER
   server:
