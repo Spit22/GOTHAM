@@ -5,7 +5,15 @@ FROM debian:jessie
 RUN apt-get -y update && apt-get -y dist-upgrade && apt-get -y autoremove && apt-get clean
 
 #INSTALL DEPENDENCIES
-RUN apt-get -y install curl git-all rsyslog apt-utils vim apt-transport-https ca-certificates gnupg-agent software-properties-common docker-ce docker-ce-cli containerd.io docker-compose openssh-server
+RUN apt-get -y install curl git-all rsyslog apt-utils vim apt-transport-https ca-certificates gnupg gnupg-agent software-properties-common openssh-server lsb-release && \
+     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
+     echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+RUN apt-get -y update && \
+    apt-get -y install docker-ce docker-ce-cli containerd.io
+
 
 ### PREPARE GOTHAM SYSTEM ###
 RUN echo "=== Preparing the gotham system... ==="
