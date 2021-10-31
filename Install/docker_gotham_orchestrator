@@ -5,9 +5,17 @@ FROM debian:jessie
 RUN apt-get -y update && apt-get -y dist-upgrade && apt-get -y autoremove && apt-get clean
 
 #INSTALL DEPENDENCIES
-RUN apt-get install -y curl git-all rsyslog apt-utils vim python3 python3-pip mariadb-server
+RUN apt-get install -y curl git-all rsyslog apt-utils vim python3 python3-pip
     #wget http://archive.ubuntu.com/ubuntu/pool/universe/m/mariadb-connector-c/libmariadb-dev_3.0.3-1build1_amd64.deb && \
-    #dpkg -i libmariadb-dev_3.0.3-1build1_amd64.deb  
+    #dpkg -i libmariadb-dev_3.0.3-1build1_amd64.deb
+RUN apt-get -y install software-properties-common gnupg2 && \
+    apt-get -y upgrade && \
+    apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xF1656F24C74CD1D8 && \
+    add-apt-repository "deb [arch=amd64] http://mariadb.mirror.liquidtelecom.com/repo/10.5/debian $(lsb_release -cs) main" && \
+    apt-get -y update && \
+    apt-get -y install mariadb-server mariadb-client
+
+
 
 ENV MARIADB_ROOT_PASSWORD: root
 
