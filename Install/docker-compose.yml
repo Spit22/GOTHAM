@@ -10,7 +10,7 @@ services:
   #    GOTHAM_HOME: "/opt/GOTHAM/"
   #    GOTHAM_GIT: "https://github.com/Spit22/GOTHAM"
   #    EXEC_BRANCH: "remotes/origin/dev_V1"
-  #    MARIADB_ROOT_PASSWORD=root
+  #    MYSQL_ROOT_PASSWORD: root
   #  deploy:
   #    mode: replicated
   #    replicas: 1
