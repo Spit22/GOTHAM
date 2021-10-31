@@ -1,18 +1,21 @@
 # Dockerfile Gotham Installation SERVER
 FROM debian:jessie
 
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN apt-get install -y -q
+
 # OS UPDATE
 RUN apt-get -y update && apt-get -y dist-upgrade && apt-get -y autoremove && apt-get clean
 
 #INSTALL DEPENDENCIES
-RUN apt-get -y install build-essential curl git-all rsyslog apt-utils vim apt-transport-https ca-certificates gnupg gnupg-agent software-properties-common pigz openssh-server lsb-release libseccomp2 libdevmapper1.02.1 apparmor
+RUN apt-get -y install build-essential curl git-all rsyslog apt-utils dialog vim apt-transport-https ca-certificates gnupg gnupg-agent software-properties-common pigz openssh-server lsb-release libseccomp2 libdevmapper1.02.1 apparmor
 #RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
-#RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu focal stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 RUN apt-get -y update
-RUN apt-get -y install docker-ce docker-ce-cli containerd.io
-
+RUN apt-get -y install docker-ce-cli
 
 RUN curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose && \
@@ -49,11 +52,7 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - > /d
     echo "[+] Docker apt key configured"
 
 # Check we have the correct key fingerprint
-RUN aptkey fingerprint 0EBFCD88 | grep "docker@docker.com" > /dev/null 2>&1 && \
-    if [ $? != 0 ]; then && \
-        echo "Key is not valid" && \
-        exit && \
-    fi
+RUN apt-key fingerprint 0EBFCD88 | grep "docker@docker.com" > /dev/null 2>&1
 
 # Add repository
 RUN add-apt-repository \
@@ -63,10 +62,6 @@ RUN add-apt-repository \
 
 # Update repo again
 RUN apt update > /dev/null 2>&1
-
-# Test docker
-RUN docker run hello-world > /dev/null 2>&1 && \
-    echo "[+] Docker successfully installed"
 
 ### INSTALL RSYSLOG ###
 RUN echo "=== Configuring Rsyslog... ==="
@@ -124,9 +119,6 @@ RUN mkdir -p /root/.ssh && \
     pubkey=$(cat /root/gotham_key.pub) && \
     echo $pubkey >> /root/.ssh/authorized_keys && \
     chmod -R 600 /root/.ssh
-
-# Restart again ssh
-RUN /usr/sbin/service ssh restart > /dev/null 2>&1
 
 # Show base64 encoded private key user has to send to api
 RUN echo -e "\n\n[+]Private key : \n" && \

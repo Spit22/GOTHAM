@@ -9,7 +9,7 @@ RUN apt-get install -y curl git-all rsyslog apt-utils vim python3 python3-pip ma
     wget http://archive.ubuntu.com/ubuntu/pool/universe/m/mariadb-connector-c/libmariadb-dev_3.0.3-1build1_amd64.deb && \
     dpkg -i libmariadb-dev_3.0.3-1build1_amd64.deb  
 
-ENV MARIADB_ROOT_PASSWORD=root
+ENV MARIADB_ROOT_PASSWORD: root
 
 RUN echo "=== Preparing the gotham system... ==="
 
