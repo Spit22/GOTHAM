@@ -3,6 +3,7 @@
 </p>
 
 # GOTHAM
+
 Global Orchestrator for Threat-intel through Honeypot Army Management
 
 
@@ -10,33 +11,54 @@ Global Orchestrator for Threat-intel through Honeypot Army Management
 
 # The project
 
-The aim of this project is to respond to 3 challenges : 
+Welcome to the GOTHAM Project !
+
+GOTHAM is an orchestrator of honeypots. His reason of being is to respond to these 3 challenges : 
 
 * Honeypots generates heterogenous data
 * the relevance of the location of a honeypot varies over time
 * a large number of honeypots are needed to cover as many vulnerabilities as possible
 
-The GOTHAM project presents itself as an orchestrator. At first, this orchestrator is able to collect and harmonize data from many honeypots. Then, it proposes to ease the administration of honeypots by adding an abstraction layer over technical things (honeypots, servers, etc...). Therefore the user no longer needs to know where and how a honeypot is hosted.
+At first, this orchestrator is able to collect and harmonize data from many honeypots. Then, it proposes to ease the administration of honeypots by adding an abstraction layer over technical things (honeypots, servers, etc...). Therefore the user no longer needs to know where and how a honeypot is hosted.
 
 Honeypots are made accessible through reverse-proxies which are scattered across different networks and geographic areas. This specificity allows users to modify the perceptible location of a honeypot.
 
 To implement these features, the orchestrator follows a simple logic : it deals with 3 objects only.
 
-* Honeypots :containers hosting vulnerable services
-* Severs : servers hosting reverse-proxy service
-* Network links : redirection of flows from reverse-proxies to honeypots
+* Honeypots : docker containers hosting vulnerable services
+* Severs : servers hosting reverse-proxy services
+* Network links : redirection of flows from one or more reverse-proxies to one or more honeypots
+
+# Get started
+
+## Install orchestrator
+
+Installation script for orchestrator is available :
+
+```
+curl -s https://raw.githubusercontent.com/Spit22/GOTHAM/master/Install/install_orchestrator.sh | sudo bash
+```
+
+## Install datacenter
+
+Installation script for datacenter is available :
+
+```
+curl -s https://raw.githubusercontent.com/Spit22/GOTHAM/master/Install/install_dc.sh | sudo bash
+```
+
+## Install a server
+
+Installation script for server is available :
+
+```
+curl -s https://raw.githubusercontent.com/Spit22/GOTHAM/master/Install/install_server.sh | sudo bash
+```
+
+To get an overview of GOTHAM capabilities, consult the documentation.
 
 # Documentation
 
 All technical and functional documentation is available at https://gotham.readthedocs.io/en/latest/index.html
 
-# The sources
 
-Here are the details of the sources of the project :
-
-* Orchestrator/Config : configuration files used by the orchestrator
-* Orchestrator/Internal_Database : required files to set up the internal database
-* Orchestrator/Logs : log files of the orchestrator
-* Orchestrator/NGINX_scripts : required scripts to install NGINX on remote servers
-* Orchestrator/Sources : source files of the project
-* Orchestrator/Sources/Gotham_* : libraries used by the orchestrator
