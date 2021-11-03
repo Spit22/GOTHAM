@@ -39,6 +39,18 @@ Installation script for orchestrator is available :
 curl -s https://raw.githubusercontent.com/Spit22/GOTHAM/master/Install/install_orchestrator.sh | sudo bash
 ```
 
+Apply GOTHAM's environment variables :
+
+```
+source /etc/profile
+```
+
+Lauch orchestrator's API :
+
+```
+python3 /opt/GOTHAM/Orchestrator/Sources/api.py3
+```
+
 ## Install datacenter
 
 Installation script for datacenter is available :
@@ -56,6 +68,15 @@ curl -s https://raw.githubusercontent.com/Spit22/GOTHAM/master/Install/install_s
 ```
 
 To get an overview of GOTHAM capabilities, consult the documentation.
+
+## Install gothamctl
+
+```
+git clone https://github.com/Spit22/GOTHAM.git
+cd $GOTHAM_HOME/Gothamctl/
+ln -s $GOTHAM_HOME/Gothamctl/gothamctl.py /usr/sbin/gothamctl
+```
+
 
 # Documentation
 
