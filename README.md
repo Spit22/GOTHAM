@@ -7,7 +7,7 @@
 Global Orchestrator for Threat-intel through Honeypot Army Management
 
 
-[![Documentation Status](https://readthedocs.org/projects/gotham/badge/?version=latest)](https://gotham.readthedocs.io/en/latest/?badge=latest) ![GitHub](https://img.shields.io/github/license/spit22/GOTHAM) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/spit22/GOTHAM)
+[![Documentation Status](https://readthedocs.org/projects/gotham/badge/?version=latest)](https://gotham.readthedocs.io/en/latest/?badge=latest) ![GitHub](https://img.shields.io/github/license/spit22/GOTHAM) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/spit22/GOTHAM) [![GOTHAM application](https://github.com/Spit22/GOTHAM/actions/workflows/gotham_pipeline.yml/badge.svg)](https://github.com/Spit22/GOTHAM/actions/workflows/gotham_pipeline.yml)
 
 # The project
 
