@@ -19,9 +19,14 @@ def normalize_honeypot_infos(hp_infos):
         hp_infos (dict) : honeypot information
     '''
     for key, value in hp_infos.items():
+        # Choose the right function based on the key (id, name, descr...)
         normalize_key = getattr(normalization_functions, 'normalize_' + key)
+        # Normalization of the id or states are special : we need to indicate
+        # the object (honeypot, server or link) we are working with
+        # In this case it's honeypots
         if (key == "id" or key == "state"):
             hp_infos[key] = normalize_key("hp", value)
+        # Normalization of the others information
         else:
             hp_infos[key] = normalize_key(value)
     return hp_infos
@@ -35,11 +40,16 @@ def normalize_server_infos(serv_infos):
         serv_infos (dict) : server information
     '''
     for key, value in serv_infos.items():
+        # Choose the right function based on the key (id, name, descr...)
         normalize_key = getattr(normalization_functions, 'normalize_' + key)
+        # Normalization of the id or states are special : we need to indicate
+        # the object (honeypot, server or link) we are working with
+        # In this case it's servers
         if (key == "id"):
             serv_infos[key] = normalize_key("sv", value)
         elif (key == "state"):
             serv_infos[key] = normalize_key("serv", value)
+        # Normalization of the others information
         else:
             serv_infos[key] = normalize_key(value)
     return serv_infos
@@ -53,13 +63,21 @@ def normalize_link_infos(lk_infos):
         lk_infos (dict) : link information
     '''
     for key, value in lk_infos.items():
+        # Whether with honeypots or server tags, the function is the same
         if (key == "tags_hp" or key == "tags_serv"):
             normalize_key = getattr(normalization_functions, 'normalize_tags')
+        # Choose the right function based on the key (id, name, descr...)
         else:
             normalize_key = getattr(
-                normalization_functions, 'normalize_' + key)
+                normalization_functions,
+                'normalize_' + key
+            )
+        # Normalization of the id or states are special : we need to indicate
+        # the object (honeypot, server or link) we are working with
+        # In this case it's links
         if (key == "id" or key == "state"):
             lk_infos[key] = normalize_key("lk", value)
+        # Normalization of the others information
         else:
             lk_infos[key] = normalize_key(value)
     return lk_infos
@@ -73,6 +91,8 @@ def normalize_lhs_infos(lhs_infos):
         lhs_infos (dict) : combination information
     '''
     for key, value in lhs_infos.items():
+        # Choose the right function based on the object
+        # (honeypot, server or link)
         if (key == "id_hp"):
             normalize_key = getattr(normalization_functions, 'normalize_id')
             lhs_infos[key] = normalize_key("hp", value)
@@ -82,21 +102,32 @@ def normalize_lhs_infos(lhs_infos):
         elif (key == "id_link"):
             normalize_key = getattr(normalization_functions, 'normalize_id')
             lhs_infos[key] = normalize_key("lk", value)
+        # Normalization of the others information
         else:
             normalize_key = getattr(
-                normalization_functions, 'normalize_' + key)
+                normalization_functions,
+                'normalize_' + key
+            )
             lhs_infos[key] = normalize_key(value)
     return lhs_infos
 
 
 def normalize_full_honeypot_infos(hp_infos):
+    '''
+    TODO
+    '''
     # Retrieve settings from config file
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     default_hp_infos = config['honeypot_infos_default']
+    # Normalize honeypot information
     hp_infos = normalize_honeypot_infos(hp_infos)
+    # For each piece of information, check that mandatory ones
+    # are defined, then set to default undefined information that
+    # are not required
     for key, value in default_hp_infos.items():
+        # Mandatory information -> must be defined
         if value == 'NOT NULL':
             if not(key in hp_infos):
                 error = "Missing value of " + str(key)
@@ -108,6 +139,7 @@ def normalize_full_honeypot_infos(hp_infos):
                 error = str(id) + "Missing value of " + str(key)
                 logging.error(error)
                 raise ValueError(error)
+        # Optional information -> set to default if undefined
         else:
             if not(key in hp_infos):
                 hp_infos[key] = value
@@ -115,13 +147,21 @@ def normalize_full_honeypot_infos(hp_infos):
 
 
 def normalize_full_server_infos(server_infos):
+    '''
+    TODO
+    '''
     # Retrieve settings from config file
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     default_server_infos = config['server_infos_default']
+    # Normalize server information
     server_infos = normalize_server_infos(server_infos)
+    # For each piece of information, check that mandatory ones
+    # are defined, then set to default undefined information that
+    # are not required
     for key, value in default_server_infos.items():
+        # Mandatory information -> must be defined
         if value == 'NOT NULL':
             if not(key in server_infos):
                 error = str(id) + "Missing value of " + str(key)
@@ -133,6 +173,7 @@ def normalize_full_server_infos(server_infos):
                 error = str(id) + "Missing value of " + str(key)
                 logging.error(error)
                 raise ValueError(error)
+        # Optional information -> set to default if undefined
         else:
             if not(key in server_infos):
                 server_infos[key] = value
@@ -140,13 +181,21 @@ def normalize_full_server_infos(server_infos):
 
 
 def normalize_full_link_infos(lk_infos):
+    '''
+    TODO
+    '''
     # Retrieve settings from config file
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     default_lk_infos = config['link_infos_default']
+    # Normalize link information
     lk_infos = normalize_link_infos(lk_infos)
+    # For each piece of information, check that mandatory ones
+    # are defined, then set to default undefined information that
+    # are not required
     for key, value in default_lk_infos.items():
+        # Mandatory information -> must be defined
         if value == 'NOT NULL':
             if not(key in lk_infos):
                 error = str(id) + "Missing value of " + str(key)
@@ -158,6 +207,7 @@ def normalize_full_link_infos(lk_infos):
                 error = str(id) + "Missing value of " + str(key)
                 logging.error(error)
                 raise ValueError(error)
+        # Optional information -> set to default if undefined
         else:
             if not(key in lk_infos):
                 lk_infos[key] = value
@@ -165,10 +215,23 @@ def normalize_full_link_infos(lk_infos):
 
 
 def normalize_full_lhs_infos(lhs_infos):
-    default_lhs_infos = {"id_link": "NOT NULL", "id_hp": "NOT NULL",
-                         "id_serv": "NOT NULL", "port": "NOT NULL"}
+    '''
+    TODO
+    '''
+    # Define default information for lhs combination
+    default_lhs_infos = {
+        "id_link": "NOT NULL",
+        "id_hp": "NOT NULL",
+        "id_serv": "NOT NULL",
+        "port": "NOT NULL"
+    }
+    # Normalize lhs information
     lhs_infos = normalize_lhs_infos(lhs_infos)
+    # For each piece of information, check that mandatory ones
+    # are defined, then set to default undefined information that
+    # are not required
     for key, value in default_lhs_infos.items():
+        # Mandatory information -> must be defined
         if value == 'NOT NULL':
             if not(key in lhs_infos):
                 error = str(id) + "Missing value of " + str(key)
@@ -178,6 +241,7 @@ def normalize_full_lhs_infos(lhs_infos):
                 error = str(id) + "Missing value of " + str(key)
                 logging.error(error)
                 raise ValueError(error)
+        # Optional information -> set to default if undefined
         else:
             if not(key in lhs_infos):
                 lhs_infos[key] = value
@@ -185,9 +249,12 @@ def normalize_full_lhs_infos(lhs_infos):
 
 
 def normalize_display_object_infos(object_infos, obj_type, next_type=''):
+    '''
+    TODO
+    '''
     obj_types_possible = ["hp", "serv", "link"]
-    if not(obj_type in obj_types_possible and (
-            next_type in obj_types_possible or next_type == '')):
+    if not(obj_type in obj_types_possible
+           and (next_type in obj_types_possible or next_type == '')):
         error = str(id) + "Wrong value of " + str(obj_type)
         logging.error(error)
         raise ValueError(error)
@@ -212,7 +279,12 @@ def normalize_display_object_infos(object_infos, obj_type, next_type=''):
 
 
 def normalize_display_object_infos_with_tags(
-        object_infos, obj_type, next_type=''):
+        object_infos,
+        obj_type,
+        next_type=''):
+    '''
+    TODO
+    '''
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
@@ -296,6 +368,9 @@ def normalize_id_link(id):
 
 
 def normalize_modif_to_str(modifs):
+    '''
+    TODO
+    '''
     replacement_dict = {"': ": "=", "{'": "", "}": "", ", '": ", "}
     result = str(modifs)
     for key, value in replacement_dict.items():
@@ -304,6 +379,9 @@ def normalize_modif_to_str(modifs):
 
 
 def normalize_conditions_to_str(conditions):
+    '''
+    TODO
+    '''
     replacement_dict = {"': ": "=", "{'": "", "}": "", ", '": " and "}
     result = str(conditions)
     for key, value in replacement_dict.items():
