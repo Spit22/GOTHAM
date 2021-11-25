@@ -24,12 +24,15 @@ def add_server(args):
 
     Show id of created server id
     '''
+
+    # Retrieve arguments value
     name = normalize_name(args.name)
     descr = normalize_descr(args.descr)
     tags = args.tag
     ip = normalize_ip(args.ip)
     autotags = args.autotags
 
+    # Retrieve SSH key and port
     try:
         ssh_key = str(base64.b64encode(args.key.read().encode("ascii")).decode("ascii"))
     except Exception:
@@ -44,6 +47,7 @@ def add_server(args):
     gp = str(normalize_port(args.gotham_port))
     gh = args.gotham_hostname
 
+    # If any required argument is missing, quit
     if not(name) or not(descr) or not(ip) or not(ssh_port) or not(gp) or not(gh):
         sys.exit(1)
 
@@ -60,15 +64,17 @@ def add_server(args):
         "ssh_port": ssh_port
     }
 
+    # Define if autotag functionality is required
     if autotags:
         data["autotags"] = "1"
     else:
         data["autotags"] = "0"
 
-    # Query URL and get json
+    # Query URL, post data and catch the answer
     response = requests.post(url, json=data)
     status_code = response.status_code
 
+    # If the request succeeded, print the answer to the user
     if status_code == 200:
         data = response.json()
         # Show result
@@ -77,6 +83,7 @@ def add_server(args):
         else:
             print(str(data))
 
+    # If request failed, print the error to the user
     else:
         try:
             data = response.json()
@@ -98,6 +105,7 @@ def add_hp(args):
     Show id of created honeypot id
     '''
 
+    # Retrieve arguments value
     name = normalize_name(args.name)
     descr = normalize_descr(args.descr)
     tags = args.tag
@@ -105,6 +113,7 @@ def add_hp(args):
     logs = normalize_logs(args.logs)
     autotags = args.autotags
 
+    # Retrieve SSH key and port
     try:
         src = str(base64.b64encode(args.src.read().encode("ascii")).decode("ascii"))
     except Exception:
@@ -119,6 +128,7 @@ def add_hp(args):
     gp = str(normalize_port(args.gotham_port))
     gh = args.gotham_hostname
 
+    # If any required argument is missing, quit
     if not(name) or not(descr) or not(logs) or not(port) or not(gp) or not(gh):
         sys.exit(1)
 
@@ -136,6 +146,7 @@ def add_hp(args):
         "port": port,
     }
 
+    # Define if autotag functionality is required
     if autotags:
         data["autotags"] = "1"
     else:
@@ -145,6 +156,7 @@ def add_hp(args):
     response = requests.post(url, json=data)
     status_code = response.status_code
 
+    # If the request succeeded, print the answer to the user
     if status_code == 200:
         data = response.json()
         # Show result
@@ -153,6 +165,7 @@ def add_hp(args):
         else:
             print(str(data))
 
+    # If request failed, print the error to the user
     else:
         try:
             data = response.json()
@@ -174,6 +187,7 @@ def add_link(args):
     Show id of created link id
     '''
 
+    # Retrieve arguments value
     tags_hp = args.tags_hp
     tags_serv = args.tags_serv
     exposed_ports = args.ports
@@ -187,6 +201,7 @@ def add_link(args):
     gp = str(normalize_port(args.gotham_port))
     gh = args.gotham_hostname
 
+    # If any required argument is missing, quit
     if not(nb_hp) or not(nb_serv) or not(gp) or not(gh):
         sys.exit(1)
 
@@ -206,6 +221,7 @@ def add_link(args):
     response = requests.post(url, json=data)
     status_code = response.status_code
 
+    # If the request succeeded, print the answer to the user
     if status_code == 200:
         data = response.json()
         # Show result
@@ -214,6 +230,7 @@ def add_link(args):
         else:
             print(str(data))
 
+    # If request failed, print the error to the user
     else:
         try:
             data = response.json()
@@ -245,6 +262,7 @@ def rm_server(args):
     gp = str(normalize_port(args.gotham_port))
     gh = args.gotham_hostname
 
+    # If any required argument is missing, quit
     if not(gp) or not(gh):
         sys.exit(1)
 
@@ -260,6 +278,7 @@ def rm_server(args):
     response = requests.post(url, json=data)
     status_code = response.status_code
 
+    # If the request succeeded, print the answer to the user
     if status_code == 200:
         data = response.json()
         # Show result
@@ -268,6 +287,7 @@ def rm_server(args):
         else:
             print(str(data))
 
+    # If request failed, print the error to the user
     else:
         try:
             data = response.json()
@@ -299,6 +319,7 @@ def rm_hp(args):
     gp = str(normalize_port(args.gotham_port))
     gh = args.gotham_hostname
 
+    # If any required argument is missing, quit
     if not(gp) or not(gh):
         sys.exit(1)
 
@@ -314,6 +335,7 @@ def rm_hp(args):
     response = requests.post(url, json=data)
     status_code = response.status_code
 
+    # If the request succeeded, print the answer to the user
     if status_code == 200:
         data = response.json()
         # Show result
@@ -322,6 +344,7 @@ def rm_hp(args):
         else:
             print(str(data))
 
+    # If request failed, print the error to the user
     else:
         try:
             data = response.json()
@@ -353,6 +376,7 @@ def rm_link(args):
     gp = str(normalize_port(args.gotham_port))
     gh = args.gotham_hostname
 
+    # If any required argument is missing, quit
     if not(gp) or not(gh):
         sys.exit(1)
 
@@ -368,6 +392,7 @@ def rm_link(args):
     response = requests.post(url, json=data)
     status_code = response.status_code
 
+    # If the request succeeded, print the answer to the user
     if status_code == 200:
         data = response.json()
         # Show result
@@ -376,6 +401,7 @@ def rm_link(args):
         else:
             print(str(data))
 
+    # If request failed, print the error to the user
     else:
         try:
             data = response.json()
@@ -397,18 +423,18 @@ def edit_server(args):
     Show modified server
     '''
 
-    # retreive server information
+    # Retrieve arguments value
     id = args.id
     name = args.name
     descr = args.descr
     tags = args.tag
     ip = args.ip
 
+    # Retrieve SSH key and port
     if args.key:
         ssh_key = str(base64.b64encode(args.key.read().encode("ascii")).decode("ascii"))
     else:
         ssh_key = False
-
     ssh_port = args.port
 
     # Define the queried endpoint
@@ -418,6 +444,7 @@ def edit_server(args):
     gp = str(normalize_port(args.gotham_port))
     gh = args.gotham_hostname
 
+    # If any required argument is missing, quit
     if not(gp) or not(gh):
         sys.exit(1)
 
@@ -425,29 +452,27 @@ def edit_server(args):
     url = "http://" + gh + ":" + gp + endpoint
 
     # Forge POST data
-    data = {"id": id}
-    if ip:
-        data["ip"] = ip
-    if name:
-        data["name"] = name
-    if descr:
-        data["descr"] = descr
-    if tags:
-        data["tags"] = tags
-    if ssh_key:
-        data["ssh_key"] = ssh_key
-    if ssh_port:
-        data["ssh_port"] = ssh_port
+    data = {
+        "id": id,
+        "ip": ip,
+        "name": name,
+        "descr": descr,
+        "tags": tags,
+        "ssh_key": ssh_key,
+        "ssh_port": ssh_port
+    }
 
     # Query URL and get json
     response = requests.post(url, json=data)
     status_code = response.status_code
 
+    # If the request succeeded, print the answer to the user
     if status_code == 200:
         data = response.json()
         # Show result
         print(data)
 
+    # If request failed, print the error to the user
     else:
         try:
             data = response.json()
@@ -469,7 +494,7 @@ def edit_hp(args):
     Show modified honeypot
     '''
 
-    # retreive honeypot information
+    # Retrieve arguments value
     id = args.id
     name = args.name
     descr = args.descr
@@ -478,6 +503,7 @@ def edit_hp(args):
     logs = args.logs
     port = args.port
 
+    # Retrieve source file of the honeypot
     if args.src:
         src = str(base64.b64encode(args.src.read().encode("ascii")).decode("ascii"))
     else:
@@ -490,6 +516,7 @@ def edit_hp(args):
     gp = str(normalize_port(args.gotham_port))
     gh = args.gotham_hostname
 
+    # If any required argument is missing, quit
     if not(gp) or not(gh):
         sys.exit(1)
 
@@ -497,30 +524,27 @@ def edit_hp(args):
     url = "http://" + gh + ":" + gp + endpoint
 
     # Forge POST data
-    data = {"id": id}
-    if name:
-        data["name"] = name
-    if descr:
-        data["descr"] = descr
-    if tags:
-        data["tags"] = tags
-    if parser:
-        data["parser"] = parser
-    if logs:
-        data["logs"] = logs
-    if src:
-        data["dockerfile"] = src
-    if port:
-        data["port"] = port
+    data = {
+        "id": id,
+        "name": name,
+        "descr": descr,
+        "tags": tags,
+        "parser": parser,
+        "logs": logs,
+        "dockerfile": src,
+        "port": port
+    }
 
     # Query URL and get json
     response = requests.post(url, json=data)
     status_code = response.status_code
 
+    # If the request succeeded, print the answer to the user
     if status_code == 200:
         data = response.json()
         print(data)
 
+    # If request failed, print the error to the user
     else:
         try:
             data = response.json()
@@ -542,7 +566,7 @@ def edit_link(args):
     Show modified link
     '''
 
-    # retreive link information
+    # Retrieve arguments value
     id = args.id
     tags_hp = args.tags_hp
     tags_serv = args.tags_serv
@@ -557,6 +581,7 @@ def edit_link(args):
     gp = str(normalize_port(args.gotham_port))
     gh = args.gotham_hostname
 
+    # If any required argument is missing, quit
     if not(gp) or not(gh):
         sys.exit(1)
 
@@ -564,27 +589,26 @@ def edit_link(args):
     url = "http://" + gh + ":" + gp + endpoint
 
     # Forge POST data
-    data = {"id": id}
-    if tags_serv:
-        data["tags_serv"] = tags_serv
-    if tags_hp:
-        data["tags_hp"] = tags_hp
-    if nb_hp:
-        data["nb_hp"] = nb_hp
-    if nb_serv:
-        data["nb_serv"] = nb_serv
-    if exposed_ports:
-        data["exposed_ports"] = exposed_ports
+    data = {
+        "id": id,
+        "tags_serv": tags_serv,
+        "tags_hp": tags_hp,
+        "nb_hp": nb_hp,
+        "nb_serv": nb_serv,
+        "exposed_ports": exposed_ports
+    }
 
     # Query URL and get json
     response = requests.post(url, json=data)
     status_code = response.status_code
 
+    # If the request succeeded, print the answer to the user
     if status_code == 200:
         data = response.json()
         # Show result
-        print(str(str(id)+ " edited."))
+        print(str(str(id) + " edited."))
 
+    # If request failed, print the error to the user
     else:
         try:
             data = response.json()
@@ -606,6 +630,7 @@ def list_server(args):
     Print string formatted table
     '''
 
+    # Retrieve default configuration
     hp_display = config['hp_display']
     del hp_display["default"]
     serv_display = config['serv_display']
@@ -620,10 +645,11 @@ def list_server(args):
     gp = str(normalize_port(args.gotham_port))
     gh = args.gotham_hostname
 
+    # If any required argument is missing, quit
     if not(gp) or not(gh):
         sys.exit(1)
 
-    # Get id of server
+    # Retrieve arguments value
     id = args.id
     ip = args.ip
     name = args.name
@@ -637,40 +663,47 @@ def list_server(args):
     detail_lvl = args.d
     overplus = int(args.p)
 
+    # Protocol used
     prot = "http"
-    # Forge url
+    # Forge url according to requested information
     url = prot+"://" + gh + ":" + gp + endpoint
-
+    # The user want to filter server with its id
     if id:
         if url == prot + "://" + gh + ":" + gp + endpoint:
             url += "?" + "id=" + id
         else:
             url += "&" + "id=" + id
+    # The user want to filter server with its ip
     if ip:
         if url == prot + "://" + gh + ":" + gp + endpoint:
             url += "?" + "ip=" + ip
         else:
             url += "&"+"ip="+ip
+    # The user want to filter server with its name
     if name:
         if url == prot + "://" + gh + ":" + gp + endpoint:
             url += "?" + "name=" + name
         else:
             url += "&" + "name=" + name
+    # The user want to filter server with its name
     if tags:
         if url == prot + "://" + gh + ":" + gp + endpoint:
             url += "?" + "tags=" + tags
         else:
             url += "&"+"tags="+tags
+    # The user want to filter server with its name
     if state:
         if url == prot + "://" + gh + ":" + gp + endpoint:
             url += "?" + "state=" + state
         else:
             url += "&"+"state="+state
+    # The user want to filter server with its description
     if descr:
         if url == prot + "://" + gh + ":" + gp + endpoint:
             url += "?" + "descr=" + descr
         else:
             url += "&" + "descr=" + descr
+    # The user want to filter server with its ssh_port
     if ssh_port:
         if url == prot + "://" + gh + ":" + gp + endpoint:
             url += "?" + "ssh_port=" + ssh_port
@@ -681,15 +714,19 @@ def list_server(args):
     response = requests.get(url)
     status_code = response.status_code
 
+    # If the request succeeded, print the answer to the user with
+    # the requested format (list, table, json...)
     if status_code == 200:
-        # Show result
+        # Retrieve answer value
         data = response.json()
         servs_infos = []
         servs_infos_others = []
         serv_infos = {}
 
+        # Check if requested detail level exists
         if detail_lvl not in serv_display.keys():
             print("Error Format")
+        # TODO comments
         else:
             if detail_lvl != "full":
                 serv_keys_display = [key.strip() for key in serv_display[detail_lvl].split(',')]
@@ -1401,7 +1438,8 @@ def list_link(args):
             print("Error: api return a " + str(status_code) + " http code.")
 
 
-#===Normalize functions===#
+# Normalize functions
+
 def normalize_name(name):
     if len(name) > 128:
         print("name has a invalid length : "+name+" : name length must be under 128 !")
@@ -1420,7 +1458,7 @@ def normalize_descr(descr):
 
 
 def normalize_port(port):
-    if (port == '' or port == None or port == 0):
+    if (port == '' or port is None or port == 0):
         print("port is undefined or empty")
         return False
     try:
@@ -1489,20 +1527,25 @@ def normalize_nb_serv(nb_serv):
 
 
 if __name__ == "__main__":
+    # Retrieve orchestrator information from configuration
+    # Hostname
     gh = config["orchestrator_infos"]["host"]
     if not(gh):
         sys.exit(1)
+    # API port
     gp = normalize_port(config["orchestrator_infos"]["port"])
     if not(gp):
         sys.exit(1)
+
+    # Retrieve default display settings from configuration
     default_hp = config["hp_display"]["default"]
     default_serv = config["serv_display"]["default"]
     default_link = config["link_display"]["default"]
 
-    # Create the parser
+    # Create the parser object
     parser = argparse.ArgumentParser(description='Gothamctl')
 
-    # Configure main parser
+    # Configure main parser object
     parser._positionals.title = 'ARGUMENTS'
     parser._optionals.title = 'OPTIONS'
 
@@ -1514,7 +1557,7 @@ if __name__ == "__main__":
     # Create main subparsers
     subparsers = parser.add_subparsers(help='sub-command help')
 
-    # Create operation parsers
+    # Create operations
     parser_add = subparsers.add_parser('add', help='operation add')
     parser_remove = subparsers.add_parser('rm', help='operation remove')
     parser_edit = subparsers.add_parser('edit', help='operation edit')
@@ -1588,10 +1631,12 @@ if __name__ == "__main__":
     parser_add_link.add_argument('-ports', help='List of exposed ports', required=True)
     parser_add_link.add_argument('-nb_hp', help='Amount of honeypot', required=True)
     parser_add_link.add_argument('-nb_serv', help='Amount of server', required=True)
+    
     # =====REMOVE ARGUMENTS=====#
     parser_remove_hp.add_argument('-id', help='ID of the honeypot', required=True)
     parser_remove_server.add_argument('-id', help='ID of the server', required=True)
     parser_remove_link.add_argument('-id', help='ID of the link', required=True)
+    
     # =====EDIT ARGUMENTS=====#
     # Create edit_hp arguments
     parser_edit_hp.add_argument('-id', help='Id of the honeypot', required=True)
@@ -1617,6 +1662,7 @@ if __name__ == "__main__":
     parser_edit_link.add_argument('-nb_hp', help='Amount of honeypot', required=False)
     parser_edit_link.add_argument('-nb_serv', help='Amount of server', required=False)
     parser_edit_link.add_argument('-ports', help='Ports to expose with link', required=False)
+    
     # =====LIST ARGUMENTS=====#
     # Create list_hp arguments
     parser_list_hp.add_argument('-id', help='ID of the honeypot', required=False)
