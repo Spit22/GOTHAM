@@ -1,5 +1,6 @@
 # GENERAL LIBS
 import logging
+import logging.config
 import flask
 import json
 import uuid
@@ -41,10 +42,15 @@ import Gotham_outputs
 app = flask.Flask(__name__)
 
 # Logging components
-GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+'''OLD CONFIGURATION
 logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
                     level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
-
+'''
+# Import logging configuration
+GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
+logging.config.fileConfig(GOTHAM_HOME + 'Orchestrator/Config/logging.conf')
+# Create an api-logger logger
+logger = logging.getLogger('api-logger')
 
 # Retrieve settings from configuration file
 # General settings
@@ -113,7 +119,7 @@ try:
     Gotham_outputs.syslog()
 except Exception as e:
     error = f"Fail to update outputs configuration : {str(e)}"
-    logging.error(error)
+    logger.error(error)
 
 
 @app.route('/', methods=['GET'])
@@ -158,7 +164,7 @@ def add_honeypot():
         error = """
         The config file needs 4 differents states for honeypot and server
         """
-        logging.error(error)
+        logger.error(error)
         return Gotham_error.format_usererror(
             error,
             str(error),
@@ -293,7 +299,7 @@ def add_honeypot():
         # Update state of honeypot
         Gotham_state.adapt_state(DB_settings, hp_infos["id"], "hp")
     except Exception as e:
-        logging.error(
+        logger.error(
             "Error while configuring honeypot state : " + str(e))
 
     # If all operations succeed, return id of created object
@@ -307,14 +313,16 @@ def add_serv():
     Creates a server object
 
     ARGUMENTS:
-        name (string) : nom du serveur
-        descr (string) : description du serveur
-        tags (list) : liste des tags du serveur
-        ip (string) : adresse IP publique du serveur
-        ssh_key (string) : clé SSH à utiliser pour la connexion
-        ssh_port (int) : port d'écoute du service SSH
+        name (string) : name of the server
+        descr (string) : description of the server
+        tags (list) : server tags list
+        ip (string) : IP address of the server
+        ssh_key (string) : SSH key used to connect to the server
+        ssh_port (int) : SSH listening port on the server
     '''
 
+    # Debug log
+    logger.debug('/add/server endpoint triggered')
     # Retrieve settings from config file
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
@@ -326,7 +334,7 @@ def add_serv():
         error = """
         The config file needs 4 differents states for honeypot and server
         """
-        logging.error(error)
+        logger.error(error)
         return Gotham_error.format_usererror(
             error, str(error), debug_mode), 400
 
@@ -423,7 +431,7 @@ def add_serv():
         # Update state of server
         Gotham_state.adapt_state(DB_settings, serv_infos["id"], "serv")
     except Exception as e:
-        logging.error(
+        logger.error(
             "Error while configuring server state : " + str(e))
 
     # If all operations succeed, return id of created object
@@ -437,13 +445,15 @@ def add_lk():
     Creates a link object
 
     ARGUMENTS:
-        tags_serv (list) : tag du/des serveurs ciblés
-        tags_hp (list) : tag du/des hp ciblés
-        nb_serv (int) : nombre de serveurs ciblés
-        nb_hp (int) : nombre de hp ciblés
-        exposed_port (list): list des ports à utiliser
+        tags_serv (list) : tags of targeted servers
+        tags_hp (list) : tags of targeted honeypots
+        nb_serv (int) : number of targeted servers
+        nb_hp (int) : number of targeted honeypots
+        exposed_port (list): list of port to use (on servers)
     '''
 
+    # Debug log
+    logger.debug('/add/link endpoint triggered')
     # Get POST data on JSON format
     data = request.get_json()
 
@@ -458,7 +468,7 @@ def add_lk():
         error = """
         The config file needs 4 differents states for honeypot and server
         """
-        logging.error(error)
+        logger.error(error)
         return Gotham_error.format_usererror(
             error, str(error), debug_mode), 400
 
@@ -541,7 +551,7 @@ def add_lk():
                 "hp"
             ) for honeypot in honeypots]
         except Exception as e:
-            logging.error(
+            logger.error(
                 "Error while configuring honeypot state : " + str(e))
         honeypots = Gotham_check.check_tags(
             "hp",
@@ -561,7 +571,7 @@ def add_lk():
                 "serv"
             ) for server in servers]
         except Exception as e:
-            logging.error(
+            logger.error(
                 "Error while configuring server state : " + str(e))
         servers = Gotham_check.check_tags(
             "serv",
@@ -769,14 +779,14 @@ def add_lk():
                     "hp"
                 )
             except Exception as e:
-                logging.error(
+                logger.error(
                     "Error while configuring honeypot state : " + str(e))
 
         try:
             # Update state of server
             Gotham_state.adapt_state(DB_settings, server["serv_id"], "serv")
         except Exception as e:
-            logging.error(
+            logger.error(
                 "Error while configuring server state : " + str(e))
 
     # If all operations succeed, return id of created object
@@ -790,15 +800,17 @@ def edit_honeypot():
     Edits a honeypot object
 
     ARGUMENTS:
-        id (string) : id du honeypot à modifier
-        name (string) : nom du honeypot
-        descr (string) : description du honeypot
-        tags (list) : liste des tags du honeypot
-        logs (string) : path des logs à monitorer
-        parser (string) : règle de parsing des logs monitorés
-        service_port (int) : port on which the honeypot will lcoally listen
+        id (string) : id of the honeypot to edit
+        name (string) : name of the honeypot
+        descr (string) : description of the honeypot
+        tags (list) : honeypot tags list
+        logs (string) : paths to monitored log files
+        parser (string) : parsing rules of monitored logs
+        service_port (int) : port on which the honeypot will locally listen
     '''
 
+    # Debug log
+    logger.debug('/add/honeypot endpoint triggered')
     # Get POST data on JSON format
     data = request.get_json()
 
@@ -843,7 +855,7 @@ def edit_honeypot():
         DB_settings, id=hp_infos_received["id"])
 
     if honeypots == []:
-        logging.error(
+        logger.error(
             f"You tried to edit a honeypot that doesn't exists with the id = {hp_infos_received['id']}")
         error = "Unknown hp id" + hp_infos_received["id"]
         return Gotham_error.format_usererror(error, "", debug_mode), 400
@@ -914,7 +926,7 @@ def edit_honeypot():
             honeypot = Gotham_state.adapt_state(
                 DB_settings, hp_infos_received["id"], "hp")
         except Exception as e:
-            logging.error(
+            logger.error(
                 "Error while configuring honeypot state : " + str(e))
             honeypot = Gotham_link_BDD.get_honeypot_infos(
                 DB_settings, id=hp_infos_received["id"])[0]
@@ -933,15 +945,17 @@ def edit_serv():
     Edits a server object
 
     ARGUMENTS:
-        id (string) : id du serveur à modifier
-        name (string) : nom du serveur
-        descr (string) : description du serveur
-        tags (list) : liste des tags du serveur
-        ip (string) : adresse IP publique du serveur
-        ssh_key (string) : clé SSH à utiliser pour la connexion
-        ssh_port (int) : port d'écoute du service SSH
+        id (string) : id of the server to edit
+        name (string) : nom of the server
+        descr (string) : description of the server
+        tags (list) : server tags list
+        ip (string) : IP address of the server
+        ssh_key (string) : SSH key used to connect to the server
+        ssh_port (int) : SSH listening port on the server
     '''
 
+    # Debug log
+    logger.debug('/edit/server endpoint triggered')
     # Get POST data on JSON format
     data = request.get_json()
 
@@ -987,7 +1001,7 @@ def edit_serv():
         DB_settings, id=serv_infos_received["id"])
 
     if servers == []:
-        logging.error(
+        logger.error(
             f"You tried to edit a server that doesn't exists with the id = {serv_infos_received['id']}")
         error = "Unknown id " + serv_infos_received["id"]
         return Gotham_error.format_usererror(error, "", debug_mode), 400
@@ -1066,7 +1080,7 @@ def edit_serv():
             server = Gotham_state.adapt_state(
                 DB_settings, serv_infos_received["id"], "serv")
         except Exception as e:
-            logging.error(
+            logger.error(
                 "Error while configuring server state : " + str(e))
             server = Gotham_link_BDD.get_server_infos(
                 DB_settings, id=serv_infos_received["id"])[0]
@@ -1089,14 +1103,16 @@ def edit_lk():
     Edits a link object
 
     ARGUMENTS:
-        id (string) : id du lien à modifier
-        tags_serv (list) : tag du/des serveurs ciblés
-        tags_hp (list) : tag du/des hp ciblés
-        nb_serv (int) : nombre de serveurs ciblés
-        nb_hp (int) : nombre de hp ciblés
+        id (string) : if of the link to edit
+        tags_serv (list) : tags of targeted servers
+        tags_hp (list) : tags of targeted honeypots
+        nb_serv (int) : number of targeted servers
+        nb_hp (int) : number of targeted honeypots
         ports (string) : exposed ports
     '''
 
+    # Debug log
+    logger.debug('/edit/link endpoint triggered')
     # Get POST data on JSON format
     data = request.get_json()
 
@@ -1140,7 +1156,7 @@ def edit_lk():
         DB_settings, id=link_infos_received["id"])
 
     if links == []:
-        logging.error(
+        logger.error(
             f"You tried to edit a link that doesn't exists with the id = {id}")
         error = "Unknown id " + link_infos_received["id"]
         return Gotham_error.format_usererror(error, "", debug_mode), 400
@@ -1377,10 +1393,15 @@ def edit_lk():
 
 @app.route('/delete/honeypot', methods=['POST'])
 def rm_honeypot():
-    # Removes a honeypot object
-    #
-    # id (string) : id du honeypot à supprimer
+    '''
+    Removes a honeypot object
 
+    ARGUMENTS:
+        id (string) : id of the honeypot to delete
+    '''
+
+    # Debug log
+    logger.debug('/delete/honeypot endpoint triggered')
     # Get POST data on JSON format
     data = request.get_json()
 
@@ -1492,9 +1513,11 @@ def rm_serv():
     Removes a server object
 
     ARGUMENTS:
-        id (string) : id of the server
+        id (string) : id of the server to delete
     '''
 
+    # Debug log
+    logger.debug('/delete/server endpoint triggered')
     # Get POST data on JSON format
     data = request.get_json()
 
@@ -1583,9 +1606,11 @@ def rm_lk():
     Removes a link object
 
     ARGUMENTS:
-        id (string) : id of the link
+        id (string) : id of the link to delete
     '''
 
+    # Debug log
+    logger.debug('/delete/link endpoint triggered')
     # Get POST data on JSON format
     data = request.get_json()
 
@@ -1655,8 +1680,11 @@ def ls_honeypot():
     Gives information on honeypot object
 
     ARGUMENTS:
-        id (string) : id du honeypot à afficher
+        id (string) : id of the honeypot to list
     '''
+
+    # Debug log
+    logger.debug('/list/honeypot endpoint triggered')
 
     hp_infos_received = {}
 
@@ -1769,7 +1797,7 @@ def ls_honeypot():
                     "hp"
                 ) for honeypot in honeypots_exact]
             except Exception as e:
-                logging.error(
+                logger.error(
                     "Error while configuring honeypot state : " + str(e))
             try:
                 honeypots_others = [Gotham_state.adapt_state(
@@ -1778,7 +1806,7 @@ def ls_honeypot():
                     "hp"
                 ) for honeypot in honeypots_others]
             except Exception as e:
-                logging.error(
+                logger.error(
                     "Error while configuring honeypot state : " + str(e))
 
             honeypots_exact = [Gotham_normalize.normalize_display_object_infos_with_tags(
@@ -1798,7 +1826,7 @@ def ls_honeypot():
             return {"exact": honeypots_exact, "others": honeypots_others}, 200
 
         else:
-            logging.error(
+            logger.error(
                 f"No honeypot found with given arguments : {hp_infos_received}")
             error = "No honeypot found"
             return Gotham_error.format_usererror(error, "", debug_mode), 406
@@ -1814,7 +1842,7 @@ def ls_honeypot():
                     "hp"
                 ) for honeypot in honeypots]
             except Exception as e:
-                logging.error(
+                logger.error(
                     "Error while configuring honeypot state : " + str(e))
             honeypots = [Gotham_normalize.normalize_display_object_infos_with_tags(
                 Gotham_normalize.normalize_display_object_infos(
@@ -1825,7 +1853,7 @@ def ls_honeypot():
             ) for honeypot in honeypots]
             return {"honeypots": honeypots}, 200
         else:
-            logging.error("You tried to list honeypots but no one exists")
+            logger.error("You tried to list honeypots but no one exists")
             error = "No honeypot managed in GOTHAM"
             return Gotham_error.format_usererror(error, "", debug_mode), 404
 
@@ -1836,8 +1864,11 @@ def ls_serv():
     Gives information on server object
 
     ARGUMENTS:
-        id (string) : id du serveur à afficher
+        id (string) : id of the server to list
     '''
+
+    # Debug log
+    logger.debug('/list/server endpoint triggered')
 
     serv_infos_received = {}
 
@@ -1963,7 +1994,7 @@ def ls_serv():
                     "serv"
                 ) for server in servers_exact]
             except Exception as e:
-                logging.error(
+                logger.error(
                     "Error while configuring server state : " + str(e))
             try:
                 servers_others = [Gotham_state.adapt_state(
@@ -1972,7 +2003,7 @@ def ls_serv():
                     "serv"
                 ) for server in servers_others]
             except Exception as e:
-                logging.error(
+                logger.error(
                     "Error while configuring server state : " + str(e))
 
             servers_exact = [Gotham_normalize.normalize_display_object_infos_with_tags(
@@ -1992,7 +2023,7 @@ def ls_serv():
             return {"exact": servers_exact, "others": servers_others}, 200
 
         else:
-            logging.error(
+            logger.error(
                 f"No server found with given arguments : {serv_infos_received}")
             error = "No server found"
             return Gotham_error.format_usererror(error, "", debug_mode), 406
@@ -2007,7 +2038,7 @@ def ls_serv():
                     "serv"
                 ) for server in servers]
             except Exception as e:
-                logging.error(
+                logger.error(
                     "Error while configuring server state : " + str(e))
             servers = [
                 Gotham_normalize.normalize_display_object_infos_with_tags(
@@ -2015,7 +2046,7 @@ def ls_serv():
                         server, "serv"), "serv") for server in servers]
             return {"servers": servers}
         else:
-            logging.error("You tried to list servers but no one exists")
+            logger.error("You tried to list servers but no one exists")
             error = "No server managed in GOTHAM"
             return Gotham_error.format_usererror(error, "", debug_mode), 404
 
@@ -2026,8 +2057,11 @@ def ls_lk():
     Gives information on link object
 
     ARGUMENTS:
-        id (string) : id du lien à afficher
+        id (string) : id of the link to list
     '''
+
+    # Debug log
+    logger.debug('/list/link endpoint triggered')
 
     link_infos_received = {}
 
@@ -2146,7 +2180,7 @@ def ls_lk():
             return {"exact": links_exact, "others": links_others}, 200
 
         else:
-            logging.error(
+            logger.error(
                 f"No link found with given arguments : {link_infos_received}")
             error = "No link found"
             return Gotham_error.format_usererror(error, "", debug_mode), 406
@@ -2164,14 +2198,19 @@ def ls_lk():
             ) for link in links]
             return {"links": links}, 200
         else:
-            logging.error("You tried to list links but no one exists")
+            logger.error("You tried to list links but no one exists")
             error = "No link managed by GOTHAM"
             return Gotham_error.format_usererror(error, "", debug_mode), 404
 
 
 @app.route('/list/all', methods=['GET'])
 def ls_all():
-    # Gives information on all objects
+    '''
+    Gives information on all objects
+    '''
+
+    # Debug log
+    logger.debug('/list/all endpoint triggered')
 
     honeypots = Gotham_link_BDD.get_honeypot_infos(DB_settings)
 
@@ -2217,8 +2256,12 @@ def ls_all():
 
 @app.route('/version', methods=['GET'])
 def get_version():
-    # Return the orchestrator's version
-    #
+    '''
+    Return the orchestrator's version
+    '''
+
+    # Debug log
+    logger.debug('/version endpoint triggered')
 
     # Return orchestrator version
     response = str({"version": str(version)}).replace("\'", "\"") + "\n"
@@ -2226,4 +2269,5 @@ def get_version():
 
 
 if __name__ == "__main__":
+    logger.debug('start')
     app.run(host='0.0.0.0')
