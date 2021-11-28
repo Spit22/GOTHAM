@@ -143,16 +143,18 @@ def add_honeypot():
     Creates a honeypot object
 
     ARGUMENTS:
-        name (string) : nom du honeypot
-        descr (string) : description du honeypot
-        tags (list) : liste des tags du honeypot
-        logs (string) : path des logs à monitorer
-        parser (string) : règle de parsing des logs monitorés
+        name (string) : name of the honeypot
+        descr (string) : description of the honeypot
+        tags (list) : honeypot tags list
+        logs (string) : path of the monitored log files
+        parser (string) : parsing rules for monitored logs
         dockerfile (string) : dockerfile to generate the honeypot
             on datacenter, base64 encoded
         service_port (int) : port on which the honeypot will lcoally listen
     '''
 
+    # Debug log
+    logger.debug('/add/honeypot endpoint triggered')
     # Retrieve settings from config file
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
