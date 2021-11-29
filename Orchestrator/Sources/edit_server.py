@@ -8,8 +8,8 @@ import Gotham_normalize
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logger = logging.getLogger('general-logger')
+
 
 # Retrieve settings from configuration file
 config = configparser.ConfigParser()
@@ -63,14 +63,14 @@ def check_edited_connection(DB_settings, server, ip, ssh_port, ssh_key):
         exists = Gotham_check.check_doublon_server(DB_settings, ip)
         if exists:
             error = "Provided ip already exists in database"
-            logging.error(error)
+            logger.error('[edit_server]' + error)
             raise ValueError(error)
 
     # Check given auth information are ok
     connected = Gotham_check.check_ssh(ip, ssh_port, ssh_key)
     if not connected:
         error = "Provided ssh_key or ssh_port is wrong"
-        logging.error(error)
+        logger.error('[edit_server]' + error)
         raise ValueError(error)
 
     return

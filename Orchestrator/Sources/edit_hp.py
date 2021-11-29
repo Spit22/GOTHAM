@@ -9,8 +9,8 @@ import Gotham_normalize
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logger = logging.getLogger('general-logger')
+
 
 # Retrieve settings from configuration file
 config = configparser.ConfigParser()
@@ -42,5 +42,7 @@ def edit_tags(DB_settings, datacenter_settings, honeypot, tags):
         result = Gotham_replace.replace_hp_for_deleted_tags(
             DB_settings, datacenter_settings, dsp_honeypot, deleted_tags)
     except Exception as e:
-        raise ValueError(e)
+        error = "Tag edition failed : " + str(e)
+        logger.error('[edit_hp] ' + error)
+        raise ValueError(error)
     return result
