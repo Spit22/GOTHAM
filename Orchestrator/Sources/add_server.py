@@ -6,8 +6,7 @@ from Gotham_SSH_SCP import send_file_and_execute_commands
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logger = logging.getLogger('general-logger')
 
 
 def deploy(ip, ssh_port, used_ssh_key):
@@ -36,6 +35,6 @@ def deploy(ip, ssh_port, used_ssh_key):
             command_exec_install
         )
     except Exception as e:
-        logging.error(f"Server deployement failed : {e}")
+        logger.error(f"[add_server] Server deployement failed : {e}")
         return False
     return True
