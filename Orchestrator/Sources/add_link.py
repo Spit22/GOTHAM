@@ -203,7 +203,7 @@ def deploy_rsyslog_conf(servers, orchestrateur_settings, id_lk):
                 rsyslog_conf_orchestrator_local_path_exists and
                 local_lk_log_file_path_exists):
             error = "At least one directory on orchestrator is missing"
-            logger.error(error)
+            logger.error('[add_link] ' + error)
             raise ValueError(error)
 
         # Check if required directories on server exists
@@ -220,7 +220,7 @@ def deploy_rsyslog_conf(servers, orchestrateur_settings, id_lk):
         if not (rsyslog_conf_server_remote_path_exists == [
                 'OK'] and remote_rulebase_path_exists == ['OK']):
             error = "At least one directory on server is missing"
-            logger.error(error)
+            logger.error('[add_link] ' + error)
             raise ValueError(error)
 
         # Generate configuration files and rulebase
@@ -236,7 +236,7 @@ def deploy_rsyslog_conf(servers, orchestrateur_settings, id_lk):
             )
         except Exception as e:
             error = "Fail to generate rsyslog configuration : " + str(e)
-            logger.error(error)
+            logger.error('[add_link] ' + error)
             raise ValueError(error)
         # Send and apply server rsyslog configuration to the server
         try:
@@ -251,7 +251,7 @@ def deploy_rsyslog_conf(servers, orchestrateur_settings, id_lk):
             )
         except Exception as e:
             error = "Fail to deploy rsyslog configuration : " + str(e)
-            logger.error(error)
+            logger.error('[add_link] ' + error)
             raise ValueError(error)
 
     # Try to apply orchestrator rsyslog configuration
@@ -259,5 +259,5 @@ def deploy_rsyslog_conf(servers, orchestrateur_settings, id_lk):
         subprocess.run(["systemctl", "restart", "rsyslog"])
     except Exception as e:
         error = "Fail to deploy rsyslog configuration : " + str(e)
-        logger.error(error)
+        logger.error('[add_link] ' + error)
         raise ValueError(error)
