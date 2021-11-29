@@ -154,7 +154,7 @@ def add_honeypot():
     '''
 
     # Debug log
-    logger.debug('/add/honeypot endpoint triggered')
+    logger.debug('[ADD][HONEYPOT] /add/honeypot endpoint triggered')
     # Retrieve settings from config file
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
@@ -166,7 +166,7 @@ def add_honeypot():
         error = """
         The config file needs 4 differents states for honeypot and server
         """
-        logger.error(error)
+        logger.error('[ADD][HONEYPOT] ' + error)
         return Gotham_error.format_usererror(
             error,
             str(error),
@@ -208,6 +208,7 @@ def add_honeypot():
         port = hp_infos_received["port"]
     except Exception as e:
         error = "Invalid POST data"
+        logger.error('[ADD][HONEYPOT] ' + error + ' : ' + str(e))
         return Gotham_error.format_usererror(error, str(e), debug_mode), 400
 
     # First find an available port to map on datacenter
@@ -239,6 +240,7 @@ def add_honeypot():
     else:
         error = "A dockerfile with same name already exists under " + \
             str(store_path)
+        logger.error('[ADD][HONEYPOT] ' + error)
         return Gotham_error.format_usererror(error, "", debug_mode), 500
 
     # Generate docker-compose.yml from information
@@ -255,7 +257,8 @@ def add_honeypot():
             logs
         )
     except Exception as e:
-        error = "SSH connection failed"
+        error = "Deploy container failed"
+        logger.error('[ADD][HONEYPOT] ' + error + ' : ' + str(e))
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
 
     # Create and deploy rsyslog configuration on the datacenter and the
@@ -268,7 +271,8 @@ def add_honeypot():
             parser
         )
     except Exception as e:
-        error = "Rsyslog configuration failed for hp " + str(id)
+        error = "Rsyslog configuration deployment failed for hp " + str(id)
+        logger.error('[ADD][HONEYPOT] ' + error + ' : ' + str(e))
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
 
     # Create tag automaticaly
@@ -324,7 +328,7 @@ def add_serv():
     '''
 
     # Debug log
-    logger.debug('/add/server endpoint triggered')
+    logger.debug('[ADD][SERVER] /add/server endpoint triggered')
     # Retrieve settings from config file
     config = configparser.ConfigParser()
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
@@ -336,7 +340,7 @@ def add_serv():
         error = """
         The config file needs 4 differents states for honeypot and server
         """
-        logger.error(error)
+        logger.error('[ADD][SERVER] ' + error)
         return Gotham_error.format_usererror(
             error, str(error), debug_mode), 400
 
@@ -374,6 +378,7 @@ def add_serv():
 
     except Exception as e:
         error = "Invalid POST data"
+        logger.error('[ADD][SERVER] ' + error + ' : ' + str(e))
         return Gotham_error.format_usererror(error, str(e), debug_mode), 400
 
     # First check the ip not already exists in database
@@ -381,6 +386,7 @@ def add_serv():
 
     if exists:
         error = "Provided ip already exists in database"
+        logger.error('[ADD][SERVER] ' + error)
         return Gotham_error.format_usererror(error, "", debug_mode), 403
 
     # Check given auth information are ok
@@ -388,6 +394,7 @@ def add_serv():
 
     if not connected:
         error = "Provided ssh_key of ssh_port is wrong"
+        logger.error('[ADD][SERVER] ' + error)
         return Gotham_error.format_usererror(error, "", debug_mode), 400
 
     # If all checks are ok, we can generate an id for the new server
@@ -400,6 +407,7 @@ def add_serv():
 
     except Exception as e:
         error = "Server deployment failed"
+        logger.error('[ADD][SERVER] ' + error + ' : ' + str(e))
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
 
     # Create tag automaticaly
@@ -455,7 +463,7 @@ def add_lk():
     '''
 
     # Debug log
-    logger.debug('/add/link endpoint triggered')
+    logger.debug('[ADD][LINK] /add/link endpoint triggered')
     # Get POST data on JSON format
     data = request.get_json()
 
@@ -470,7 +478,7 @@ def add_lk():
         error = """
         The config file needs 4 differents states for honeypot and server
         """
-        logger.error(error)
+        logger.error('[ADD][LINK] ' + error)
         return Gotham_error.format_usererror(
             error, str(error), debug_mode), 400
 
@@ -502,6 +510,7 @@ def add_lk():
 
     except Exception as e:
         error = "Invalid POST data"
+        logger.error('[ADD][LINK] ' + error + ' : ' + str(e))
         return Gotham_error.format_usererror(error, str(e), debug_mode), 400
 
     # We check that no link exists with same tags, otherwise return error
@@ -519,6 +528,7 @@ def add_lk():
 
     if existingLinks != []:
         error = "A link is already configured for this tags"
+        logger.error('[ADD][LINK] ' + error)
         return Gotham_error.format_usererror(error, "", debug_mode), 403
 
     # We check all provided server tags exists, otherwise return error
@@ -528,6 +538,7 @@ def add_lk():
                 DB_settings, tags_serv, table="serv")
         except Exception as e:
             error = "Some server tags does not exist"
+            logger.error('[ADD][LINK] ' + error + ' : ' + str(e))
             return Gotham_error.format_usererror(
                 error, str(e), debug_mode), 400
 
@@ -538,6 +549,7 @@ def add_lk():
 
         except Exception as e:
             error = "Some honeypot tags does not exist"
+            logger.error('[ADD][LINK] ' + error + ' : ' + str(e))
             return Gotham_error.format_usererror(
                 error, str(e), debug_mode), 400
 
@@ -612,6 +624,7 @@ def add_lk():
         error = "Can't deploy link on " + \
             str(nb_serv) + " servers while there is only " + \
             str(len(servers)) + " servers available"
+        logger.error('[ADD][LINK] ' + error)
         return Gotham_error.format_usererror(error, "", debug_mode), 400
 
     # If we don't have any honeypots corresponding, just return error,
@@ -619,6 +632,7 @@ def add_lk():
         error = """
         Can't configure link if there is no at least one hp corresponding to request
         """
+        logger.error('[ADD][LINK] ' + error)
         return Gotham_error.format_usererror(error, "", debug_mode), 400
 
     # Choose best honeypots (the lower scored)
@@ -660,6 +674,7 @@ def add_lk():
                 added_hp.append(id_hp)
             except Exception as e:
                 error = "Hp duplication failed"
+                logger.error('[ADD][LINK] ' + error + ' : ' + str(e))
                 return Gotham_error.format_usererror(
                     error, str(e), debug_mode), 500
 
@@ -730,6 +745,7 @@ def add_lk():
             servers, orchestrator_settings, id)
     except Exception as e:
         error = "Rsyslog configuration failed for link " + str(id)
+        logger.error('[ADD][LINK] ' + error + ' : ' + str(e))
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
 
     # Check redirection is effective on all servers
@@ -740,6 +756,7 @@ def add_lk():
         if not connected:
             error = "Link seems to not beeing effective on server " + \
                 str(server["serv_ip"])
+            logger.error('[ADD][LINK] ' + error)
             return Gotham_error.format_usererror(error, "", debug_mode), 500
 
     # Create lk_infos
@@ -812,7 +829,7 @@ def edit_honeypot():
     '''
 
     # Debug log
-    logger.debug('/add/honeypot endpoint triggered')
+    logger.debug('[EDIT][HONEYPOT] /add/honeypot endpoint triggered')
     # Get POST data on JSON format
     data = request.get_json()
 
@@ -824,6 +841,7 @@ def edit_honeypot():
 
         else:
             error = "Honeypot id missing"
+            logger.error('[EDIT][HONEYPOT] ' + error)
             return Gotham_error.format_usererror(error, "", debug_mode), 400
 
         if "name" in data.keys():
@@ -850,6 +868,7 @@ def edit_honeypot():
 
     except Exception as e:
         error = "Invalid POST data"
+        logger.error('[EDIT][HONEYPOT] ' + error + ' : ' + str(e))
         return Gotham_error.format_usererror(error, str(e), debug_mode), 400
 
     # Check if the honyepot exists in the IDB
@@ -857,9 +876,8 @@ def edit_honeypot():
         DB_settings, id=hp_infos_received["id"])
 
     if honeypots == []:
-        logger.error(
-            f"You tried to edit a honeypot that doesn't exists with the id = {hp_infos_received['id']}")
         error = "Unknown hp id" + hp_infos_received["id"]
+        logger.error('[EDIT][HONEYPOT] ' + error)
         return Gotham_error.format_usererror(error, "", debug_mode), 400
 
     honeypot = honeypots[0]
@@ -896,6 +914,7 @@ def edit_honeypot():
 
             else:
                 error = "Tag edition failed"
+                logger.error('[EDIT][HONEYPOT] ' + error)
                 return Gotham_error.format_usererror(
                     error,
                     str(debug_information),
@@ -905,18 +924,21 @@ def edit_honeypot():
     if "logs" in hp_infos_received.keys():
         if hp_infos_received["logs"] != honeypot["hp_logs"]:
             error = "Log parameters edition not implemented"
+            logger.error('[EDIT][HONEYPOT] ' + error)
             return Gotham_error.format_usererror(error, "", debug_mode), 501
             modifs["logs"] = hp_infos_received["logs"]
 
     if "parser" in hp_infos_received.keys():
         if hp_infos_received["parser"] != honeypot["hp_parser"]:
             error = "Parser parameters edition not implemented"
+            logger.error('[EDIT][HONEYPOT] ' + error)
             return Gotham_error.format_usererror(error, "", debug_mode), 501
             modifs["parser"] = hp_infos_received["parser"]
 
     if "port" in hp_infos_received.keys():
         if hp_infos_received["port"] != honeypot["hp_port"]:
             error = "Port parameters edition not implemented"
+            logger.error('[EDIT][HONEYPOT] ' + error)
             return Gotham_error.format_usererror(error, "", debug_mode), 501
             modifs["port"] = hp_infos_received["port"]
 
@@ -929,7 +951,7 @@ def edit_honeypot():
                 DB_settings, hp_infos_received["id"], "hp")
         except Exception as e:
             logger.error(
-                "Error while configuring honeypot state : " + str(e))
+                "[EDIT][HONEYPOT] Error while configuring honeypot state : " + str(e))
             honeypot = Gotham_link_BDD.get_honeypot_infos(
                 DB_settings, id=hp_infos_received["id"])[0]
 
@@ -957,7 +979,7 @@ def edit_serv():
     '''
 
     # Debug log
-    logger.debug('/edit/server endpoint triggered')
+    logger.debug('[EDIT][SERVER] /edit/server endpoint triggered')
     # Get POST data on JSON format
     data = request.get_json()
 
@@ -996,6 +1018,7 @@ def edit_serv():
 
     except Exception as e:
         error = "Invalid POST data"
+        logger.error('[EDIT][SERVER] ' + error + ' : ' + str(e))
         return Gotham_error.format_usererror(error, str(e), debug_mode), 400
 
     # Check if the server exists in the IDB
@@ -1003,9 +1026,8 @@ def edit_serv():
         DB_settings, id=serv_infos_received["id"])
 
     if servers == []:
-        logger.error(
-            f"You tried to edit a server that doesn't exists with the id = {serv_infos_received['id']}")
         error = "Unknown id " + serv_infos_received["id"]
+        logger.error('[EDIT][SERVER] ' + error)
         return Gotham_error.format_usererror(error, "", debug_mode), 400
 
     server = servers[0]
@@ -1036,6 +1058,7 @@ def edit_serv():
 
             else:
                 error = "Tag edition failed"
+                logger.error('[EDIT][SERVER] ' + error)
                 return Gotham_error.format_usererror(
                     error, str(debug_information), debug_mode), 500
 
@@ -1071,6 +1094,7 @@ def edit_serv():
 
         except Exception as e:
             error = "Connexion edition failed"
+            logger.error('[EDIT][SERVER] ' + error + ' : ' + str(e))
             return Gotham_error.format_usererror(
                 error, str(e), debug_mode), 500
 
@@ -1083,7 +1107,7 @@ def edit_serv():
                 DB_settings, serv_infos_received["id"], "serv")
         except Exception as e:
             logger.error(
-                "Error while configuring server state : " + str(e))
+                "[EDIT][SERVER] Error while configuring server state : " + str(e))
             server = Gotham_link_BDD.get_server_infos(
                 DB_settings, id=serv_infos_received["id"])[0]
 
@@ -1114,7 +1138,7 @@ def edit_lk():
     '''
 
     # Debug log
-    logger.debug('/edit/link endpoint triggered')
+    logger.debug('[EDIT][LINK] /edit/link endpoint triggered')
     # Get POST data on JSON format
     data = request.get_json()
 
@@ -1128,6 +1152,7 @@ def edit_lk():
 
         else:
             error = "Link id not specified"
+            logger.error('[EDIT][LINK] ' + error)
             return Gotham_error.format_usererror(error, "", debug_mode), 400
 
         if "tags_serv" in data.keys():
@@ -1151,6 +1176,7 @@ def edit_lk():
 
     except Exception as e:
         error = "Invalid POST data"
+        logger.error('[EDIT][LINK] ' + error + ' : ' + str(e))
         return Gotham_error.format_usererror(error, str(e), debug_mode), 400
 
     # Check if the link exists in the IDB
@@ -1158,9 +1184,8 @@ def edit_lk():
         DB_settings, id=link_infos_received["id"])
 
     if links == []:
-        logger.error(
-            f"You tried to edit a link that doesn't exists with the id = {id}")
         error = "Unknown id " + link_infos_received["id"]
+        logger.error('[EDIT][LINK] ' + error)
         return Gotham_error.format_usererror(error, "", debug_mode), 400
 
     link = links[0]
@@ -1189,6 +1214,7 @@ def edit_lk():
                         DB_settings, link_infos_received["tags_serv"], table="serv")
                 except Exception as e:
                     error = "Some server tags does not exist"
+                    logger.error('[EDIT][LINK] ' + error + ' : ' + str(e))
                     return Gotham_error.format_usererror(
                         error, str(e), debug_mode), 400
                 try:
@@ -1201,12 +1227,14 @@ def edit_lk():
                     )
                 except Exception as e:
                     error = "Tag server edition failed"
+                    logger.error('[EDIT][LINK] ' + error + ' : ' + str(e))
                     return Gotham_error.format_usererror(
                         error, str(e), debug_mode), 500
             if result:
                 modifs["tags_serv"] = link_infos_received["tags_serv"]
             else:
                 error = "Tag server edition failed, some links cannot be decremented"
+                logger.error('[EDIT][LINK] ' + error)
                 return Gotham_error.format_usererror(
                     error, str(""), debug_mode), 500
 
@@ -1239,6 +1267,7 @@ def edit_lk():
                         DB_settings, link_infos_received["tags_hp"], table="hp")
                 except Exception as e:
                     error = "Some honeypot tags does not exist"
+                    logger.error('[EDIT][LINK] ' + error + ' : ' + str(e))
                     return Gotham_error.format_usererror(
                         error, str(e), debug_mode), 400
                 try:
@@ -1251,12 +1280,14 @@ def edit_lk():
                     )
                 except Exception as e:
                     error = "Tag honeypot edition failed"
+                    logger.error('[EDIT][LINK] ' + error + ' : ' + str(e))
                     return Gotham_error.format_usererror(
                         error, str(e), debug_mode), 500
             if result:
                 modifs["tags_hp"] = link_infos_received["tags_hp"]
             else:
                 error = "Tag honeypot edition failed, some links cannot be decremented"
+                logger.error('[EDIT][LINK] ' + error)
                 return Gotham_error.format_usererror(
                     error, str(""), debug_mode), 500
 
@@ -1289,6 +1320,7 @@ def edit_lk():
                 )
             except Exception as e:
                 error = "Port edition failed"
+                logger.error('[EDIT][LINK] ' + error + ' : ' + str(e))
                 return Gotham_error.format_usererror(
                     error, str(e), debug_mode), 500
             modifs["ports"] = link_infos_received["ports"]
@@ -1310,6 +1342,7 @@ def edit_lk():
                 Gotham_replace.distrib_servers_on_link_ports(DB_settings, link)
             except Exception as e:
                 error = "Port redistribution failed"
+                logger.error('[EDIT][LINK] ' + error + ' : ' + str(e))
                 return Gotham_error.format_usererror(
                     error, str(e), debug_mode), 500
 
@@ -1339,6 +1372,7 @@ def edit_lk():
                 )
             except Exception as e:
                 error = "Server number edition failed"
+                logger.error('[EDIT][LINK] ' + error + ' : ' + str(e))
                 return Gotham_error.format_usererror(
                     error, str(e), debug_mode), 500
             modifs["nb_serv"] = nb_serv
@@ -1373,6 +1407,7 @@ def edit_lk():
                 )
             except Exception as e:
                 error = "Honeypot number edition failed"
+                logger.error('[EDIT][LINK] ' + error + ' : ' + str(e))
                 return Gotham_error.format_usererror(
                     error, str(e), debug_mode), 500
             modifs["nb_hp"] = nb_hp
@@ -1403,7 +1438,7 @@ def rm_honeypot():
     '''
 
     # Debug log
-    logger.debug('/delete/honeypot endpoint triggered')
+    logger.debug('[DELETE][HONEYPOT] /delete/honeypot endpoint triggered')
     # Get POST data on JSON format
     data = request.get_json()
 
@@ -1424,6 +1459,7 @@ def rm_honeypot():
         jsonresponse = r.json()
     except Exception as e:
         error = "Hp finding failed"
+        logger.error('[DELETE][HONEYPOT] ' + error + ' : ' + str(e))
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
 
     response = ""
@@ -1467,6 +1503,7 @@ def rm_honeypot():
                 if error == "":
                     return response, 200
                 else:
+                    logger.error('[DELETE][HONEYPOT] ' + error)
                     return response + error, 500
 
     elif "others" in jsonresponse:
@@ -1506,6 +1543,7 @@ def rm_honeypot():
                 if error == "":
                     return response, 200
                 else:
+                    logger.error('[DELETE][HONEYPOT] ' + error)
                     return response + error, 500
 
 
@@ -1519,7 +1557,7 @@ def rm_serv():
     '''
 
     # Debug log
-    logger.debug('/delete/server endpoint triggered')
+    logger.debug('[DELETE][SERVER] /delete/server endpoint triggered')
     # Get POST data on JSON format
     data = request.get_json()
 
@@ -1540,6 +1578,7 @@ def rm_serv():
         jsonresponse = r.json()
     except Exception as e:
         error = "Serv finding failed"
+        logger.error('[DELETE][SERVER] ' + error + ' : ' + str(e))
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
 
     response = ""
@@ -1570,6 +1609,7 @@ def rm_serv():
             if error == "":
                 return response, 200
             else:
+                logger.error('[DELETE][SERVER] ' + error)
                 return response + error, 500
 
     elif "others" in jsonresponse and jsonresponse["others"] != []:
@@ -1599,6 +1639,7 @@ def rm_serv():
             if error == "":
                 return response, 200
             else:
+                logger.error('[DELETE][SERVER] ' + error)
                 return response + error, 500
 
 
@@ -1612,7 +1653,7 @@ def rm_lk():
     '''
 
     # Debug log
-    logger.debug('/delete/link endpoint triggered')
+    logger.debug('[DELETE][LINK] /delete/link endpoint triggered')
     # Get POST data on JSON format
     data = request.get_json()
 
@@ -1633,6 +1674,7 @@ def rm_lk():
         jsonresponse = r.json()
     except Exception as e:
         error = "Link finding failed"
+        logger.error('[DELETE][LINK] ' + error + ' : ' + str(e))
         return Gotham_error.format_usererror(error, str(e), debug_mode), 500
 
     response = ""
@@ -1655,6 +1697,7 @@ def rm_lk():
             if error == "":
                 return response, 200
             else:
+                logger.error('[DELETE][LINK] ' + error)
                 return response + error, 500
 
     elif "others" in jsonresponse and jsonresponse["others"] != []:
@@ -1673,6 +1716,7 @@ def rm_lk():
             if error == "":
                 return response, 200
             else:
+                logger.error('[DELETE][LINK] ' + error)
                 return response + error, 500
 
 
@@ -1686,7 +1730,7 @@ def ls_honeypot():
     '''
 
     # Debug log
-    logger.debug('/list/honeypot endpoint triggered')
+    logger.debug('[LIST][HONEYPOT] /list/honeypot endpoint triggered')
 
     hp_infos_received = {}
 
@@ -1800,7 +1844,7 @@ def ls_honeypot():
                 ) for honeypot in honeypots_exact]
             except Exception as e:
                 logger.error(
-                    "Error while configuring honeypot state : " + str(e))
+                    "[LIST][HONEYPOT] Error while configuring honeypot state : " + str(e))
             try:
                 honeypots_others = [Gotham_state.adapt_state(
                     DB_settings,
@@ -1809,7 +1853,7 @@ def ls_honeypot():
                 ) for honeypot in honeypots_others]
             except Exception as e:
                 logger.error(
-                    "Error while configuring honeypot state : " + str(e))
+                    "[LIST][HONEYPOT] Error while configuring honeypot state : " + str(e))
 
             honeypots_exact = [Gotham_normalize.normalize_display_object_infos_with_tags(
                 Gotham_normalize.normalize_display_object_infos(
@@ -1828,9 +1872,8 @@ def ls_honeypot():
             return {"exact": honeypots_exact, "others": honeypots_others}, 200
 
         else:
-            logger.error(
-                f"No honeypot found with given arguments : {hp_infos_received}")
             error = "No honeypot found"
+            logger.error('[LIST][HONEYPOT] ' + error)
             return Gotham_error.format_usererror(error, "", debug_mode), 406
 
     else:
@@ -1845,7 +1888,7 @@ def ls_honeypot():
                 ) for honeypot in honeypots]
             except Exception as e:
                 logger.error(
-                    "Error while configuring honeypot state : " + str(e))
+                    "[LIST][HONEYPOT] Error while configuring honeypot state : " + str(e))
             honeypots = [Gotham_normalize.normalize_display_object_infos_with_tags(
                 Gotham_normalize.normalize_display_object_infos(
                     honeypot,
@@ -1855,8 +1898,8 @@ def ls_honeypot():
             ) for honeypot in honeypots]
             return {"honeypots": honeypots}, 200
         else:
-            logger.error("You tried to list honeypots but no one exists")
             error = "No honeypot managed in GOTHAM"
+            logger.error('[LIST][HONEYPOT] ' + error)
             return Gotham_error.format_usererror(error, "", debug_mode), 404
 
 
@@ -1870,7 +1913,7 @@ def ls_serv():
     '''
 
     # Debug log
-    logger.debug('/list/server endpoint triggered')
+    logger.debug('[LIST][SERVER] /list/server endpoint triggered')
 
     serv_infos_received = {}
 
@@ -1997,7 +2040,7 @@ def ls_serv():
                 ) for server in servers_exact]
             except Exception as e:
                 logger.error(
-                    "Error while configuring server state : " + str(e))
+                    "[LIST][SERVER] Error while configuring server state : " + str(e))
             try:
                 servers_others = [Gotham_state.adapt_state(
                     DB_settings,
@@ -2006,7 +2049,7 @@ def ls_serv():
                 ) for server in servers_others]
             except Exception as e:
                 logger.error(
-                    "Error while configuring server state : " + str(e))
+                    "[LIST][SERVER] Error while configuring server state : " + str(e))
 
             servers_exact = [Gotham_normalize.normalize_display_object_infos_with_tags(
                 Gotham_normalize.normalize_display_object_infos(
@@ -2025,9 +2068,8 @@ def ls_serv():
             return {"exact": servers_exact, "others": servers_others}, 200
 
         else:
-            logger.error(
-                f"No server found with given arguments : {serv_infos_received}")
             error = "No server found"
+            logger.error('[LIST][SERVER] ' + error)
             return Gotham_error.format_usererror(error, "", debug_mode), 406
     else:
         servers = Gotham_link_BDD.get_server_infos(DB_settings)
@@ -2041,15 +2083,15 @@ def ls_serv():
                 ) for server in servers]
             except Exception as e:
                 logger.error(
-                    "Error while configuring server state : " + str(e))
+                    "[LIST][SERVER] Error while configuring server state : " + str(e))
             servers = [
                 Gotham_normalize.normalize_display_object_infos_with_tags(
                     Gotham_normalize.normalize_display_object_infos(
                         server, "serv"), "serv") for server in servers]
             return {"servers": servers}
         else:
-            logger.error("You tried to list servers but no one exists")
             error = "No server managed in GOTHAM"
+            logger.error('[LIST][SERVER] ' + error + ' : ' + str(e))
             return Gotham_error.format_usererror(error, "", debug_mode), 404
 
 
@@ -2063,7 +2105,7 @@ def ls_lk():
     '''
 
     # Debug log
-    logger.debug('/list/link endpoint triggered')
+    logger.debug('[LIST][LINK] /list/link endpoint triggered')
 
     link_infos_received = {}
 
@@ -2182,9 +2224,8 @@ def ls_lk():
             return {"exact": links_exact, "others": links_others}, 200
 
         else:
-            logger.error(
-                f"No link found with given arguments : {link_infos_received}")
             error = "No link found"
+            logger.error('[LIST][LINK] ' + error)
             return Gotham_error.format_usererror(error, "", debug_mode), 406
 
     else:
@@ -2200,8 +2241,8 @@ def ls_lk():
             ) for link in links]
             return {"links": links}, 200
         else:
-            logger.error("You tried to list links but no one exists")
             error = "No link managed by GOTHAM"
+            logger.error('[LIST][LINK] ' + error)
             return Gotham_error.format_usererror(error, "", debug_mode), 404
 
 
@@ -2212,7 +2253,7 @@ def ls_all():
     '''
 
     # Debug log
-    logger.debug('/list/all endpoint triggered')
+    logger.debug('[LIST][ALL] /list/all endpoint triggered')
 
     honeypots = Gotham_link_BDD.get_honeypot_infos(DB_settings)
 
@@ -2263,7 +2304,7 @@ def get_version():
     '''
 
     # Debug log
-    logger.debug('/version endpoint triggered')
+    logger.debug('[GET][VERSION] /version endpoint triggered')
 
     # Return orchestrator version
     response = str({"version": str(version)}).replace("\'", "\"") + "\n"
