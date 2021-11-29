@@ -11,8 +11,8 @@ from Gotham_normalize import normalize_id_honeypot, normalize_display_object_inf
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logger = logging.getLogger('general-logger')
+
 
 # Retrieve settings from configuration file
 config = configparser.ConfigParser()
@@ -38,7 +38,7 @@ def main(DB_settings, datacenter_settings, id):
         id = normalize_id_honeypot(id)
     except Exception:
         error = "Can't remove the honeypot : its id is invalid"
-        logging.error(error)
+        logger.error('[rm_hp] ' + error)
         raise ValueError(error)
 
     # Check if the honyepot exists in the IDB
@@ -46,7 +46,7 @@ def main(DB_settings, datacenter_settings, id):
     if result == []:
         error = "You tried to remove a honeypot that doesn't exists with the id =" + \
             str(id)
-        logging.error(error)
+        logger.error('[rm_hp]' + error)
         raise ValueError(error)
 
     # Check if the honeypot is running
@@ -74,13 +74,13 @@ def main(DB_settings, datacenter_settings, id):
                 commands
             )
         except Exception as e:
-            logging.error(f"Remove container failed : {e}")
+            logger.error(f"[rm_hp] Remove container failed : {e}")
             raise ValueError(e)
         # Remove the Honeypot from the IDB
         try:
             remove_honeypot_DB(DB_settings, id)
         except Exception as e:
-            logging.error(f"Remove container failed : {e}")
+            logger.error(f"[rm_hp] Remove container failed : {e}")
             raise ValueError(e)
         return True
     else:

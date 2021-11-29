@@ -7,8 +7,7 @@ import Gotham_replace
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logger = logging.getLogger('general-logger')
 
 
 def main(DB_settings, datacenter_settings, id):
@@ -28,18 +27,18 @@ def main(DB_settings, datacenter_settings, id):
         serv_infos = {'id': id}
         serv_infos = normalize_server_infos(serv_infos)
     except Exception as e:
-        logging.error(f"Can't remove the server : its id is invalid")
-        raise ValueError(e)
+        error = "Can't remove the server : its id is invalid : " + str(e)
+        logger.error("[rm_server] " + error)
+        raise ValueError(error)
 
     # Check if the server exists in the IDB
 
     result = get_server_infos(DB_settings, id=id)
 
     if result == []:
-        logging.error(
-            f"You tried to remove a server that doesn't exists with the id = {id}")
-        raise ValueError(
-            "You tried to remove a server that doesn't exists with the id =" + str(id))
+        error = f"You tried to remove a server that doesn't exists with the id = {id}"
+        logger.error("[rm_server] " + error)
+        raise ValueError(error)
 
     # Check if the server is running
     if result[0]['link_id'] is not None and result[0]['link_id'] != "NULL":
@@ -68,8 +67,9 @@ def main(DB_settings, datacenter_settings, id):
                 result[0]['serv_id']
             )
         except Exception as e:
-            logging.error(f"Remove server failed : {e}")
-            raise ValueError(e)
+            error = f"Remove server failed : {e}"
+            logger.error('[rm_server] ' + error)
+            raise ValueError(error)
         return True
     else:
         return False
@@ -95,5 +95,6 @@ def remove_nginx_on_server(hostname, port, ssh_key):
         print("bypassed")
         # execute_commands(hostname,port,ssh_key,commands)
     except Exception as e:
-        logging.error(f"Remove server failed : {e}")
-        raise ValueError(e)
+        error = f"Remove server failed : {e}"
+        logger.error('[rm_server] ' + error)
+        raise ValueError(error)

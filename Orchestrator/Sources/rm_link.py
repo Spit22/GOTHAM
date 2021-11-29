@@ -9,8 +9,7 @@ from Gotham_normalize import normalize_id_link, normalize_display_object_infos
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logger = logging.getLogger('general-logger')
 
 
 def main(DB_settings, id):
@@ -29,14 +28,14 @@ def main(DB_settings, id):
         id = normalize_id_link(id)
     except Exception as e:
         error = "Can't remove the link : " + str(e)
-        logging.error(error)
+        logger.error('[rm_link] ' + error)
         raise ValueError(error)
     # Check if the link exists in the IDB
     result = get_link_serv_hp_infos(DB_settings, id=id)
     if result == []:
         error = "You tried to remove a link that doesn't exists with the id = " + \
             str(id)
-        logging.error(error)
+        logger.error('[rm_link] ' + error)
         raise ValueError(error)
     # Remove link on the servers affected by the link
     try:
@@ -53,14 +52,14 @@ def main(DB_settings, id):
         )
     except Exception as e:
         error = "Remove NGINX scripts of link failed : " + str(e)
-        logging.error(error)
+        logger.error('[rm_link] ' + error)
         raise ValueError(error)
     # Remove the Link from the IDB
     try:
         remove_link_DB(DB_settings, id)
     except Exception as e:
         error = "Remove link failed : " + str(e)
-        logging.error(error)
+        logger.error('[rm_link] ' + error)
         raise ValueError(error)
 
     for id_obj, type_obj in obj_linked.items():
@@ -72,8 +71,8 @@ def main(DB_settings, id):
                 type_obj
             )
         except Exception as e:
-            logging.error(
-                "Error while configuring server state : " + str(e))
+            logger.error(
+                "[rm_link] Error while configuring server state : " + str(e))
     return True
 
 
@@ -94,7 +93,7 @@ def remove_links_on_servers(DB_settings, result):
         )
     except Exception as e:
         error = "Display object failed : " + str(e)
-        logging.error(error)
+        logger.error('[rm_link] ' + error)
         raise ValueError(error)
     servs = lk_display['servs']
     # Save linked object
@@ -116,7 +115,7 @@ def remove_links_on_servers(DB_settings, result):
         except Exception as e:
             error = str(result['link_id']) + \
                 " removal on servers failed : " + str(e)
-            logging.error(error)
+            logger.error('[rm_link] ' + error)
             raise ValueError(error)
         obj_linked[serv_dico["serv_id"]] = "serv"
         for hp_dico in serv_dico["hps"]:
@@ -157,6 +156,8 @@ def remove_rsyslog_configuration(server_settings, id_lk):
             commands
         )
     except Exception as e:
+        error = "Remote rsyslog configuration removal failed : " + str(e)
+        logger.error('[rm_link] ' + error)
         raise ValueError(e)
     # Remove local RSYSLOG configuration
     try:
@@ -165,4 +166,6 @@ def remove_rsyslog_configuration(server_settings, id_lk):
                              local_lk_log_file_path]:
             os.remove(fileToDelete)
     except Exception as e:
-        raise ValueError(e)
+        error = "Local rsyslog configuration removal failed : " + str(e)
+        logger.error('[rm_link] ' + error)
+        raise ValueError(error)
