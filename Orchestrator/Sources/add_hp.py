@@ -9,8 +9,7 @@ from Gotham_SSH_SCP import execute_command_with_return, execute_commands
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logger = logging.getLogger('general-logger')
 
 
 def generate_dockercompose(id, dockerfile_path, honeypot_port, mapped_port):
@@ -49,6 +48,7 @@ def generate_dockercompose(id, dockerfile_path, honeypot_port, mapped_port):
     dockercompose.write('        tag: ' + str(id) + '\n')
     # Close file
     dockercompose.close()
+    logger.debug("[add_hp] Dockerfile successfully generated")
 
 
 def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key,
@@ -81,7 +81,7 @@ def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key,
             docker_dest, command_exec_compose)
     except Exception as e:
         error = "Container deployement failed : " + str(e)
-        logging.error(error)
+        logger.error(error)
         raise ValueError(error)
     # Create symlinks between log files and /dev/stdout
     try:
@@ -93,7 +93,7 @@ def deploy_container(dc_ip, dc_ssh_port, dc_ssh_key,
         execute_commands(dc_ip, dc_ssh_port, dc_ssh_key, commands)
     except Exception as e:
         error = "Symlinks creation failed : " + str(e)
-        logging.error(error)
+        logger.error(error)
         raise ValueError(error)
 
 
@@ -152,7 +152,7 @@ def generate_datacenter_rsyslog_conf(
     except Exception as e:
         error = "Fail to create rsyslog configuration for datacenter : " + \
             str(e)
-        logging.error(error)
+        logger.error(error)
         raise ValueError(error)
 
 
@@ -188,7 +188,7 @@ def generate_orchestrator_rsyslog_conf(
     except Exception as e:
         error = "Fail to create rsyslog configuration for orchestrator : " + \
             str(e)
-        logging.error(error)
+        logger.error(error)
         raise ValueError(error)
 
 
@@ -212,7 +212,7 @@ def generate_rulebase(id_hp, rules, rulebase_path):
             rulebase.write("rule=:" + str(rule) + '\n')
     except Exception as e:
         error = "Fail to create rulebase : " + str(e)
-        logging.error(error)
+        logger.error(error)
         raise ValueError(error)
 
 
@@ -264,7 +264,7 @@ def deploy_rsyslog_conf(datacenter_settings,
            and rsyslog_conf_orchestrator_local_path_exists
            and local_hp_log_file_path_exists and local_rulebase_path_exists):
         error = "At least one directory on orchestrator is missing"
-        logging.error(error)
+        logger.error(error)
         raise ValueError(error)
 
     # Check if required directories on datacenter exists
@@ -281,7 +281,7 @@ def deploy_rsyslog_conf(datacenter_settings,
     if not(rsyslog_conf_datacenter_remote_path_exists == [
            'OK'] and remote_rulebase_path_exists == ['OK']):
         error = "At least one directory on datacenter is missing"
-        logging.error(error)
+        logger.error(error)
         raise ValueError(error)
 
     # Generate configuration files and rulebase
@@ -297,7 +297,7 @@ def deploy_rsyslog_conf(datacenter_settings,
         )
     except Exception as e:
         error = "Fail to generate rsyslog configuration : " + str(e)
-        logging.error(error)
+        logger.error(error)
         raise ValueError(error)
     # Send and apply datacenter rsyslog configuration to the datacenter
     try:
@@ -316,7 +316,7 @@ def deploy_rsyslog_conf(datacenter_settings,
         )
     except Exception as e:
         error = "Fail to deploy rsyslog configuration : " + str(e)
-        logging.error(error)
+        logger.error(error)
         raise ValueError(error)
 
     # Try to apply orchestrator rsyslog configuration
@@ -324,5 +324,5 @@ def deploy_rsyslog_conf(datacenter_settings,
         subprocess.run(["systemctl", "restart", "rsyslog"])
     except Exception as e:
         error = "Fail to deploy rsyslog configuration : " + str(e)
-        logging.error(error)
+        logger.error(error)
         raise ValueError(error)
