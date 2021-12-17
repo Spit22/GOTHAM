@@ -2091,7 +2091,7 @@ def ls_serv():
             return {"servers": servers}
         else:
             error = "No server managed in GOTHAM"
-            logger.error('[LIST][SERVER] ' + error + ' : ' + str(e))
+            logger.error('[LIST][SERVER] ' + error + ' : ')
             return Gotham_error.format_usererror(error, "", debug_mode), 404
 
 

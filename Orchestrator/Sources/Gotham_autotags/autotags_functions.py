@@ -1,15 +1,14 @@
 import requests
+import configparser
+import base64
 
 import Gotham_SSH_SCP
 
 # Logging components
-import configparser
 import os
-import base64
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logger = logging.getLogger('libraries-logger')
 
 
 def autotag_by_trivy(hp_id):
@@ -41,8 +40,8 @@ def autotag_by_trivy(hp_id):
         dc_ssh_key = dc_ssh_key.decode('ascii')  # ssh_key is ascii string
         dc_ssh_key_rsyslog = dc_ssh_key  #  ssh_key for rsyslog
     except Exception as e:
-        error = "Error loading datacenter's SSH key: " + str(e)
-        logging.error(error)
+        error = f"Error loading datacenter's SSH key: {e}"
+        logger.error(error)
         raise Exception(error)
 
     # Put datacenter settings in a dictionary
@@ -65,8 +64,7 @@ def autotag_by_trivy(hp_id):
             command
         )
     except ValueError as e:
-        error = "Error while trying to execute ssh command for trivy check on hp (id: " + hp_id + ") : " + str(e)
-        logging.error(error)
+        error = f"Error while trying to execute ssh command for trivy check on hp (id: {hp_id}) : {e}"
         raise ValueError(error)
     # Command to print results
     command = 'cat /root/Library/Caches/result.txt'
@@ -81,8 +79,7 @@ def autotag_by_trivy(hp_id):
         if tags != []:
             tags = tags[0].split(separator)
     except ValueError as e:
-        error = "Error while trying to execute ssh command for trivy check on hp (id: " + hp_id + ") : " + str(e)
-        logging.error(error)
+        error = f"Error while trying to execute ssh command for trivy check on hp (id: {hp_id}) : {e}"
         raise ValueError(error)
 
     return list(set(tags))
@@ -112,8 +109,8 @@ def autotag_by_docker_top(hp_id):
         dc_ssh_key = dc_ssh_key.decode('ascii')  # ssh_key is ascii string
         dc_ssh_key_rsyslog = dc_ssh_key  #  ssh_key for rsyslog
     except Exception as e:
-        error = "Error loading datacenter's SSH key: " + str(e)
-        logging.error(error)
+        error = f"Error loading datacenter's SSH key: {e}"
+        logger.error(error)
         raise Exception(error)
     # Put datacenter settings in a dictionary
     datacenter_settings = {
@@ -133,8 +130,7 @@ def autotag_by_docker_top(hp_id):
             command
         )
     except ValueError as e:
-        error = "Error while trying to execute ssh command for docker top on hp (id: " + hp_id + ") : " + str(e)
-        logging.error(error)
+        error = f"Error while trying to execute ssh command for docker top on hp (id: {hp_id}) : {e}"
         raise ValueError(error)
     return list(set(tags))
 
@@ -162,9 +158,8 @@ def autotag_by_ipstack(serv_ip):
         r = requests.get(url, params=params)
         jsonresponse = r.json()
     except Exception as e:
-        error = "Error while trying to get ipstack information on the ip " + \
-            str(serv_ip) + " : " + str(e)
-        logging.error(error)
+        error = f"Error while trying to get ipstack information on the ip {serv_ip} : {e}"
+        logger.error(error)
         raise ValueError(error)
     # Parse results
     for item in parser.split(","):

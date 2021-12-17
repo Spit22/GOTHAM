@@ -1,14 +1,14 @@
+import configparser
+
 import Gotham_link_BDD
 
 from . import autotags_functions
 
 # Logging components
 import os
-import configparser
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logger = logging.getLogger('libraries-logger')
 
 
 def honeypot(hp_id):
@@ -29,17 +29,19 @@ def honeypot(hp_id):
     # Set tags with trivy
     try:
         trivy_tags = autotags_functions.autotag_by_trivy(hp_id)
+        logger.debug(f"Trivy check executed on honeypot {hp_id}")
     except ValueError as e:
-        error = "Error while trying to execute ssh command for trivy check on hp (id: " + hp_id + ") : " + str(e)
-        logging.error(error)
+        error = f"Error while trying to execute ssh command for trivy check on hp (id: {hp_id}) : {e}"
+        logger.error(error)
         raise ValueError(error)
 
     # Set tags with docker top
     try:
         docker_tags = autotags_functions.autotag_by_docker_top(hp_id)
+        logger.debug(f"Tags settings with docker top executed on honeypot {hp_id}")
     except ValueError as e:
-        error = "Error while trying to execute ssh command for docker top on hp (id: " + hp_id + ") : " + str(e)
-        logging.error(error)
+        error = f"Error while trying to execute ssh command for docker top on hp (id: {hp_id}) : {e}"
+        logger.error(error)
         raise ValueError(error)
 
     tags_list = list(set(trivy_tags + docker_tags))
@@ -66,34 +68,36 @@ def server(DB_settings, serv_id="", serv_ip=""):
 
     # Case where both arguments are empty
     if serv_id == "" and serv_ip == "":
-        error = "Need id or ip of the serv in autotags_server function"
-        logging.error(error)
+        error = "Server id or ip of the server is missing in autotags_server function"
+        logger.error(error)
         raise ValueError(error)
     # Case where one of the arguments is empty
     elif (serv_id != "" and serv_ip == "") or (serv_id == "" and serv_ip != ""):
-        # Case where ip is empty
+        # Case where server ip is empty
         if serv_id != "" and serv_ip == "":
             try:
+                # Retrieve server information with its id
                 object_infos = Gotham_link_BDD.get_server_infos(
                     DB_settings,
                     id=str(serv_id)
                 )
             except ValueError as e:
-                logging.error(e)
+                logger.error(e)
                 raise ValueError(e)
-        # Case where id is empty
+        # Case where server id is empty
         elif serv_id == "" and serv_ip != "":
             try:
+                # Retrieve server information with its ip address
                 object_infos = Gotham_link_BDD.get_server_infos(
                     DB_settings,
                     ip=str(serv_ip)
                 )
             except ValueError as e:
-                logging.error(e)
+                logger.error(e)
                 raise ValueError(e)
         # Check if the server exists in the IDB
         if object_infos == []:
-            logging.error(
+            logger.error(
                 "You tried to autotag a server that doesn't exists (" + str(serv_id if serv_id != "" else serv_ip) + ")"
             )
             error = "Unknown serv " + \
@@ -105,10 +109,10 @@ def server(DB_settings, serv_id="", serv_ip=""):
     # Set tags with ipstack
     try:
         ipstack_tags = autotags_functions.autotag_by_ipstack(serv_ip)
+        logger.debug("Tags settings with ipstack executed on server " + str(serv_id if serv_id != "" else serv_ip))
     except ValueError as e:
-        error = "Error while trying to get geolocation informations on serv (id: " + serv_id + ") : " + str(
-            e)
-        logging.error(error)
+        error = "Error while trying to get geolocation informations on serv (" + str(serv_id if serv_id != "" else serv_ip) + ") : " + str(e)
+        logger.error(error)
         raise ValueError(error)
     tags_list = list(set(ipstack_tags))
     tags = separator.join(tags_list)
