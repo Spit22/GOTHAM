@@ -3,22 +3,29 @@ import configparser
 # Logging components
 import os
 import logging
-
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logger = logging.getLogger('libraries-logger')
 
 
 def check_tags(object_type, objects_infos,
                tags_hp='', tags_serv='', mode=False):
     '''
-    '''
+    Determine if tags are really present for a given object
 
-    if (object_type != "hp"
-       and object_type != "serv"
-       and object_type != "link"):
-        error = str(object_type) + " is uncorrect"
-        logging.error(error)
+    ARGUMENTS:
+        object_type (string) : "hp" or "serv" or "link"
+        object_infos (list of dicts) : all information on given object
+        tags_hp (string) : honeypot tags
+        tags_serv (string) : server tags
+        mode (bool) : true for an exact research (there is no other tags),
+            false in the other case (it can has other tags)
+
+    Return items of objects_infos which have good tags
+    '''
+    # Check if object_type exists
+    if not(object_type in ["hp", "serv", "link"]):
+        error = f"Wrong object_type : {object_type}"
+        logger.error(error)
         raise ValueError(error)
 
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
@@ -27,6 +34,7 @@ def check_tags(object_type, objects_infos,
     config.read(GOTHAM_HOME + 'Orchestrator/Config/config.ini')
     separator = config['tag']['separator']
 
+    # Dealing with servers and honeypots
     if object_type == "hp" or object_type == "serv":
         if object_type == "hp":
             tags_list = tags_hp.lower().split(separator)
@@ -38,6 +46,7 @@ def check_tags(object_type, objects_infos,
         elif mode:
             result = [object_infos for object_infos in objects_infos if (len(set(object_infos[object_type + "_tags"].lower().split(
                 '||')).intersection(tags_list)) == len(tags_list) == len(object_infos[object_type + "_tags"].lower().split('||')))]
+    # Dealing with links
     elif object_type == "link":
         tags_hp_list = tags_hp.lower().split(separator)
         tags_serv_list = tags_serv.lower().split(separator)
@@ -76,7 +85,7 @@ def check_tag_still_used(DB_connection, tag="%", id="%"):
 
     if json_data == []:
         error = "Tag can't be found"
-        logging.error(error)
+        logger.error(error)
         raise ValueError(error)
 
     id_tag = json_data[0]["id"]

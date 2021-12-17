@@ -3,10 +3,8 @@ from Gotham_SSH_SCP import execute_commands
 # Logging components
 import os
 import logging
-
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logger = logging.getLogger('libraries-logger')
 
 
 def main(ip, ssh_port, used_ssh_key):
@@ -28,8 +26,8 @@ def main(ip, ssh_port, used_ssh_key):
     try:
         execute_commands(ip, ssh_port, used_ssh_key, command_exec_check)
     except Exception as e:
-        error = "Can't execute commands on " + str(ip) + " : " + str(e)
-        logging.error(error)
+        error = f"Can't execute commands on {ip} : {e}"
+        logger.error(error)
         raise ValueError(error)
     # If we were able to execute the commands, return True
     return True

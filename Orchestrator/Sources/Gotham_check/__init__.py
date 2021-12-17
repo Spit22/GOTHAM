@@ -12,8 +12,7 @@ import mariadb
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logger = logging.getLogger('libraries-logger')
 
 
 def check_ssh(ip, ssh_port, ssh_key):
@@ -28,8 +27,13 @@ def check_ssh(ip, ssh_port, ssh_key):
 
     Return True if connection succeed, false in the other case
     '''
-
-    return check_SSH.main(ip, ssh_port, ssh_key)
+    try:
+        result = check_SSH.main(ip, ssh_port, ssh_key)
+    except Exception as e:
+        error = f"check_SSH.main failed : {e}"
+        logger.error(error)
+        raise ValueError(error)
+    return result
 
 
 def check_ping(hostname):
@@ -41,7 +45,13 @@ def check_ping(hostname):
 
     Return True if server is alive, False in the other case
     '''
-    return check_PING.main(hostname)
+    try:
+        result = check_PING.main(hostname)
+    except Exception as e:
+        error = f"check_PING.main failed : {e}"
+        logger.error(error)
+        raise ValueError(error)
+    return result
 
 
 def check_tags(object_type, objects_infos,
@@ -59,8 +69,13 @@ def check_tags(object_type, objects_infos,
 
     Return items of objects_infos which have good tags
     '''
-    return check_TAGS.check_tags(
-        object_type, objects_infos, tags_hp, tags_serv, mode)
+    try:
+        result = check_TAGS.check_tags(object_type, objects_infos, tags_hp, tags_serv, mode)
+    except Exception as e:
+        error = f"check_TAGS.check_tags failed : {e}"
+        logger.error(error)
+        raise ValueError(error)
+    return result
 
 
 def check_server_ports_is_free(serv_infos, ports):
@@ -73,7 +88,13 @@ def check_server_ports_is_free(serv_infos, ports):
 
     Return the list of available ports presents in the list of given ports
     '''
-    return check_SERVER_PORTS.check_server_ports(serv_infos, ports)
+    try:
+        result = check_SERVER_PORTS.check_server_ports(serv_infos, ports)
+    except Exception as e:
+        error = f"check_SERVER_PORTS.check_server_ports failed : {e}"
+        logger.error(error)
+        raise ValueError(error)
+    return result
 
 
 def check_servers_ports_matching(servs_infos, ports):
@@ -89,13 +110,17 @@ def check_servers_ports_matching(servs_infos, ports):
     '''
     result = []
     for serv_infos in servs_infos:
-        free_ports = check_server_ports_is_free(serv_infos, ports)
+        try:
+            free_ports = check_server_ports_is_free(serv_infos, ports)
+        except Exception as e:
+            error = f"check_server_ports_is_free failed : {e}"
+            logger.error(error)
+            raise ValueError(error)
         if free_ports != '':
             result.append(dict(
                 serv_infos,
                 **{"free_ports": free_ports}
             ))
-
     return result
 
 
@@ -109,7 +134,13 @@ def check_doublon_server(DB_settings, ip):
 
     Return True if already exists, False in the other case
     '''
-    return check_DOUBLON.server(DB_settings, ip)
+    try:
+        is_doublon = check_DOUBLON.server(DB_settings, ip)
+    except Exception as e:
+        error = f"check_DOUBLON.server failed : {e}"
+        logger.error(error)
+        raise ValueError(error)
+    return is_doublon
 
 
 def check_doublon_tag(DB_settings, tag, table=''):
@@ -122,7 +153,13 @@ def check_doublon_tag(DB_settings, tag, table=''):
 
     Return True if already exists, False in the other case
     '''
-    return check_DOUBLON.tag(DB_settings, tag, table=table)
+    try:
+        is_doublon = check_DOUBLON.check_doublon_tag(DB_settings, tag, table=table)
+    except Exception as e:
+        error = f"check_DOUBLON.check_doublon_tag failed : {e}"
+        logger.error(error)
+        raise ValueError(error)
+    return is_doublon
 
 
 def check_doublon_tags(DB_settings, tags, table=""):
@@ -136,9 +173,11 @@ def check_doublon_tags(DB_settings, tags, table=""):
     Raise error if tag does not exists
     '''
     try:
-        check_DOUBLON.tags(DB_settings, tags, table=table)
+        check_DOUBLON.check_doublon_set_of_tag(DB_settings, tags, table=table)
     except Exception as e:
-        raise ValueError("Error while check doublon tags : " + str(e))
+        error = f"check_DOUBLON.check_doublon_set_of_tag failed : {e}"
+        logger.error(error)
+        raise ValueError(error)
 
 
 def check_tag_still_used(DB_settings, tag="%", id="%"):
@@ -162,12 +201,14 @@ def check_tag_still_used(DB_settings, tag="%", id="%"):
         )
     except mariadb.Error as e:
         error = "Can't connect to the internal database : " + str(e)
-        logging.error(error)
+        logger.error(error)
         raise ValueError(error)
     try:
         result = check_TAGS.check_tag_still_used(DB_connection, tag, id)
     except Exception as e:
-        raise ValueError(e)
+        error = f"check_TAGS.check_tag_still_used failed : {e}"
+        logger.error(error)
+        raise ValueError(error)
     DB_connection.close()
     return result
 
@@ -191,12 +232,23 @@ def check_used_port(DB_settings):
         )
     except mariadb.Error as e:
         error = "Can't connect to the internal database : " + str(e)
-        logging.error(error)
+        logger.error(error)
         raise ValueError(error)
-    result = check_USED_PORT.get_used_port(DB_connection)
+    try:
+        result = check_USED_PORT.get_used_port(DB_connection)
+    except Exception as e:
+        error = f"check_USED_PORT.get_used_port failed : {e}"
+        logger.error(error)
+        raise ValueError(error)
     DB_connection.close()
     return result
 
 
 def check_server_redirects(ip_srv, port):
-    return check_SERVER_REDIRECTS.main(ip_srv, port)
+    try:
+        result = check_SERVER_REDIRECTS.main(ip_srv, port)
+    except Exception as e:
+        error = f"check_SERVER_REDIRECTS.main failed : {e}"
+        logger.error(error)
+        raise ValueError(error)
+    return result

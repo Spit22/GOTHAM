@@ -11,9 +11,12 @@ def main(ip_srv, port):
 
     Return True if port is open, False in the other case
     '''
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    result = sock.connect_ex((ip_srv, int(port)))
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        result = sock.connect_ex((ip_srv, int(port)))
+    except Exception as e:
+        error = f"socket opening failed : {e}"
+        raise ValueError(error)
     if result == 0:
         return True
     sock.close()
