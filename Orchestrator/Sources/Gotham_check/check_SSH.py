@@ -26,7 +26,7 @@ def main(ip, ssh_port, used_ssh_key):
     try:
         execute_commands(ip, ssh_port, used_ssh_key, command_exec_check)
     except Exception as e:
-        error = f"Can't execute commands on {ip} : {e}"
+        error = f"[GOTHAM CHECK] Can't execute commands on {ip} : {e}"
         logger.error(error)
         raise ValueError(error)
     # If we were able to execute the commands, return True

@@ -21,7 +21,7 @@ def server(DB_settings, ip):
     try:
         response = get_server_infos(DB_settings, ip=ip)
     except Exception as e:
-        error = f"get_server_infos failed : {e}"
+        error = f"[GOTHAM CHECK] get_server_infos failed : {e}"
         raise ValueError(error)
     return not(response == [])
 
@@ -39,7 +39,7 @@ def check_doublon_tag(DB_settings, tag, table=''):
     try:
         response = get_tag_infos(DB_settings, tag=tag, table=table)
     except Exception as e:
-        error = f"get_tag_infos failed : {e}"
+        error = f"[GOTHAM CHECK] get_tag_infos failed : {e}"
         raise ValueError(error)
     return not(response == [])
 
@@ -66,9 +66,9 @@ def check_doublon_set_of_tag(DB_settings, tags, table=""):
         try:
             check_a_tag = check_doublon_tag(DB_settings, tag=a_tag, table=table)
         except Exception as e:
-            error = f"check_doublon_tag failed : {e}"
+            error = f"[GOTHAM CHECK] check_doublon_tag failed : {e}"
             raise ValueError(error)
         if not(check_a_tag):
-            error = f"Tag does not exists : {a_tag}"
+            error = f"[GOTHAM CHECK] Tag does not exists : {a_tag}"
             logger.error(error)
             raise ValueError(error)

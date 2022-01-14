@@ -30,7 +30,7 @@ def check_ssh(ip, ssh_port, ssh_key):
     try:
         result = check_SSH.main(ip, ssh_port, ssh_key)
     except Exception as e:
-        error = f"check_SSH.main failed : {e}"
+        error = f"[GOTHAM CHECK] check_SSH.main failed : {e}"
         logger.error(error)
         raise ValueError(error)
     return result
@@ -48,7 +48,7 @@ def check_ping(hostname):
     try:
         result = check_PING.main(hostname)
     except Exception as e:
-        error = f"check_PING.main failed : {e}"
+        error = f"[GOTHAM CHECK] check_PING.main failed : {e}"
         logger.error(error)
         raise ValueError(error)
     return result
@@ -72,7 +72,7 @@ def check_tags(object_type, objects_infos,
     try:
         result = check_TAGS.check_tags(object_type, objects_infos, tags_hp, tags_serv, mode)
     except Exception as e:
-        error = f"check_TAGS.check_tags failed : {e}"
+        error = f"[GOTHAM CHECK] check_TAGS.check_tags failed : {e}"
         logger.error(error)
         raise ValueError(error)
     return result
@@ -91,7 +91,7 @@ def check_server_ports_is_free(serv_infos, ports):
     try:
         result = check_SERVER_PORTS.check_server_ports(serv_infos, ports)
     except Exception as e:
-        error = f"check_SERVER_PORTS.check_server_ports failed : {e}"
+        error = f"[GOTHAM CHECK] check_SERVER_PORTS.check_server_ports failed : {e}"
         logger.error(error)
         raise ValueError(error)
     return result
@@ -113,7 +113,7 @@ def check_servers_ports_matching(servs_infos, ports):
         try:
             free_ports = check_server_ports_is_free(serv_infos, ports)
         except Exception as e:
-            error = f"check_server_ports_is_free failed : {e}"
+            error = f"[GOTHAM CHECK] check_server_ports_is_free failed : {e}"
             logger.error(error)
             raise ValueError(error)
         if free_ports != '':
@@ -137,7 +137,7 @@ def check_doublon_server(DB_settings, ip):
     try:
         is_doublon = check_DOUBLON.server(DB_settings, ip)
     except Exception as e:
-        error = f"check_DOUBLON.server failed : {e}"
+        error = f"[GOTHAM CHECK] check_DOUBLON.server failed : {e}"
         logger.error(error)
         raise ValueError(error)
     return is_doublon
@@ -156,7 +156,7 @@ def check_doublon_tag(DB_settings, tag, table=''):
     try:
         is_doublon = check_DOUBLON.check_doublon_tag(DB_settings, tag, table=table)
     except Exception as e:
-        error = f"check_DOUBLON.check_doublon_tag failed : {e}"
+        error = f"[GOTHAM CHECK] check_DOUBLON.check_doublon_tag failed : {e}"
         logger.error(error)
         raise ValueError(error)
     return is_doublon
@@ -175,7 +175,7 @@ def check_doublon_tags(DB_settings, tags, table=""):
     try:
         check_DOUBLON.check_doublon_set_of_tag(DB_settings, tags, table=table)
     except Exception as e:
-        error = f"check_DOUBLON.check_doublon_set_of_tag failed : {e}"
+        error = f"[GOTHAM CHECK] check_DOUBLON.check_doublon_set_of_tag failed : {e}"
         logger.error(error)
         raise ValueError(error)
 
@@ -200,13 +200,13 @@ def check_tag_still_used(DB_settings, tag="%", id="%"):
             database=DB_settings["database"]
         )
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[GOTHAM CHECK] Can't connect to the internal database : " + str(e)
         logger.error(error)
         raise ValueError(error)
     try:
         result = check_TAGS.check_tag_still_used(DB_connection, tag, id)
     except Exception as e:
-        error = f"check_TAGS.check_tag_still_used failed : {e}"
+        error = f"[GOTHAM CHECK] check_TAGS.check_tag_still_used failed : {e}"
         logger.error(error)
         raise ValueError(error)
     DB_connection.close()
@@ -231,13 +231,13 @@ def check_used_port(DB_settings):
             database=DB_settings["database"]
         )
     except mariadb.Error as e:
-        error = "Can't connect to the internal database : " + str(e)
+        error = "[GOTHAM CHECK] Can't connect to the internal database : " + str(e)
         logger.error(error)
         raise ValueError(error)
     try:
         result = check_USED_PORT.get_used_port(DB_connection)
     except Exception as e:
-        error = f"check_USED_PORT.get_used_port failed : {e}"
+        error = f"[GOTHAM CHECK] check_USED_PORT.get_used_port failed : {e}"
         logger.error(error)
         raise ValueError(error)
     DB_connection.close()
@@ -248,7 +248,7 @@ def check_server_redirects(ip_srv, port):
     try:
         result = check_SERVER_REDIRECTS.main(ip_srv, port)
     except Exception as e:
-        error = f"check_SERVER_REDIRECTS.main failed : {e}"
+        error = f"[GOTHAM CHECK] check_SERVER_REDIRECTS.main failed : {e}"
         logger.error(error)
         raise ValueError(error)
     return result

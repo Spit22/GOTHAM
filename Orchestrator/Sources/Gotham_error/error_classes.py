@@ -1,10 +1,4 @@
 import json
-# Logging comiponents
-import os
-import logging
-GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
 
 
 def format_error(error_title, debug_information, debug_mode):

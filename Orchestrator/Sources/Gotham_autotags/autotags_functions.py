@@ -40,7 +40,7 @@ def autotag_by_trivy(hp_id):
         dc_ssh_key = dc_ssh_key.decode('ascii')  # ssh_key is ascii string
         dc_ssh_key_rsyslog = dc_ssh_key  #  ssh_key for rsyslog
     except Exception as e:
-        error = f"Error loading datacenter's SSH key: {e}"
+        error = f"[GOTHAM AUTOTAGS] Error loading datacenter's SSH key: {e}"
         logger.error(error)
         raise Exception(error)
 
@@ -64,7 +64,7 @@ def autotag_by_trivy(hp_id):
             command
         )
     except ValueError as e:
-        error = f"Error while trying to execute ssh command for trivy check on hp (id: {hp_id}) : {e}"
+        error = f"[GOTHAM AUTOTAGS] Error while trying to execute ssh command for trivy check on hp (id: {hp_id}) : {e}"
         raise ValueError(error)
     # Command to print results
     command = 'cat /root/Library/Caches/result.txt'
@@ -79,7 +79,7 @@ def autotag_by_trivy(hp_id):
         if tags != []:
             tags = tags[0].split(separator)
     except ValueError as e:
-        error = f"Error while trying to execute ssh command for trivy check on hp (id: {hp_id}) : {e}"
+        error = f"[GOTHAM AUTOTAGS] Error while trying to execute ssh command for trivy check on hp (id: {hp_id}) : {e}"
         raise ValueError(error)
 
     return list(set(tags))
@@ -109,7 +109,7 @@ def autotag_by_docker_top(hp_id):
         dc_ssh_key = dc_ssh_key.decode('ascii')  # ssh_key is ascii string
         dc_ssh_key_rsyslog = dc_ssh_key  #  ssh_key for rsyslog
     except Exception as e:
-        error = f"Error loading datacenter's SSH key: {e}"
+        error = f"[GOTHAM AUTOTAGS] Error loading datacenter's SSH key: {e}"
         logger.error(error)
         raise Exception(error)
     # Put datacenter settings in a dictionary
@@ -130,7 +130,7 @@ def autotag_by_docker_top(hp_id):
             command
         )
     except ValueError as e:
-        error = f"Error while trying to execute ssh command for docker top on hp (id: {hp_id}) : {e}"
+        error = f"[GOTHAM AUTOTAGS] Error while trying to execute ssh command for docker top on hp (id: {hp_id}) : {e}"
         raise ValueError(error)
     return list(set(tags))
 
@@ -158,7 +158,7 @@ def autotag_by_ipstack(serv_ip):
         r = requests.get(url, params=params)
         jsonresponse = r.json()
     except Exception as e:
-        error = f"Error while trying to get ipstack information on the ip {serv_ip} : {e}"
+        error = f"[GOTHAM AUTOTAGS] Error while trying to get ipstack information on the ip {serv_ip} : {e}"
         logger.error(error)
         raise ValueError(error)
     # Parse results

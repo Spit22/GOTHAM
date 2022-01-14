@@ -1,6 +1,4 @@
 import mariadb
-import os
-import logging
 
 from . import get_infos
 from . import add_in_IDB
@@ -8,10 +6,10 @@ from . import remove_in_IDB
 from . import edit_in_IDB
 
 # Logging components
+import os
+import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG,
-                    format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logger = logging.getLogger('libraries-logger')
 
 
 def get_server_infos(DB_settings, mode=False, ip="%", id="%",
@@ -50,9 +48,11 @@ def get_server_infos(DB_settings, mode=False, ip="%", id="%",
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database has started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database has started"
+        )
     except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Retrieve server information from the internal database
@@ -69,7 +69,9 @@ def get_server_infos(DB_settings, mode=False, ip="%", id="%",
     )
     # Close the connection to the internal database
     DB_connection.close()
-    logging.debug("[-] Connection to the internal database has been closed")
+    logging.debug(
+        "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+    )
     return result
 
 
@@ -118,9 +120,11 @@ def get_honeypot_infos(DB_settings, mode=False, id="%", name="%", tags="%",
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database has started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database has started"
+        )
     except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Retrieve honeypot information from the internal database
@@ -140,7 +144,9 @@ def get_honeypot_infos(DB_settings, mode=False, id="%", name="%", tags="%",
     )
     # Close the connection to the internal database
     DB_connection.close()
-    logging.debug("[-] Connection to the internal database has been closed")
+    logging.debug(
+        "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+    )
     return result
 
 
@@ -180,9 +186,11 @@ def get_link_infos(DB_settings, mode=False, id="%", nb_hp="%",
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database has started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database has started"
+        )
     except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Retrieve link information from the internal database
@@ -197,7 +205,9 @@ def get_link_infos(DB_settings, mode=False, id="%", nb_hp="%",
     )
     # Close the connection to the internal database
     DB_connection.close()
-    logging.debug("[-] Connection to the internal database has been closed")
+    logging.debug(
+        "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+    )
     return result
 
 
@@ -237,9 +247,11 @@ def get_link_hp_serv_infos(DB_settings, mode=False, id="%",
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database has started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database has started"
+        )
     except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Retrieve link information from the internal database
@@ -254,7 +266,9 @@ def get_link_hp_serv_infos(DB_settings, mode=False, id="%",
     )
     # Close the connection to the internal database
     DB_connection.close()
-    logging.debug("[-] Connection to the internal database has been closed")
+    logging.debug(
+        "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+    )
     return result
 
 
@@ -294,9 +308,11 @@ def get_link_serv_hp_infos(DB_settings, mode=False, id="%",
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database has started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database has started"
+        )
     except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Retrieve link information from the internal database
@@ -311,7 +327,9 @@ def get_link_serv_hp_infos(DB_settings, mode=False, id="%",
     )
     # Close the connection to the internal database
     DB_connection.close()
-    logging.debug("[-] Connection to the internal database has been closed")
+    logging.debug(
+        "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+    )
     return result
 
 
@@ -342,9 +360,11 @@ def get_tag_infos(DB_settings, mode=False, tag="%", id="%", table=""):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database has started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database has started"
+        )
     except mariadb.Error as e:
-        error = "[ X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Retrieve link information from the internal database according to the
@@ -357,7 +377,9 @@ def get_tag_infos(DB_settings, mode=False, tag="%", id="%", table=""):
         result = get_infos.tag_serv(DB_connection, mode, tag, id)
     # Close the connection to the internal database
     DB_connection.close()
-    logging.debug("[-] Connection to the internal database has been closed")
+    logging.debug(
+        "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+    )
     return result
 
 
@@ -380,9 +402,11 @@ def add_server_DB(DB_settings, server_infos):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database has started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database has started"
+        )
     except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Try to add the server in the internal database
@@ -390,13 +414,15 @@ def add_server_DB(DB_settings, server_infos):
         add_in_IDB.server(DB_connection, server_infos)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed")
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+        )
     except Exception as e:
         error = "Add server in IDB failed : " + str(e)
         logging.error(error)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed")
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+        )
         raise ValueError(error)
 
 
@@ -419,9 +445,11 @@ def add_honeypot_DB(DB_settings, hp_infos):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database has started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database has started"
+        )
     except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Try to add the server in the internal database
@@ -429,13 +457,15 @@ def add_honeypot_DB(DB_settings, hp_infos):
         add_in_IDB.honeypot(DB_connection, hp_infos)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed")
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+        )
     except Exception as e:
-        error = "Add honeypot in IDB failed : " + str(e)
+        error = f"[GOTHAM LINK BDD] Add honeypot in IDB failed : {e}"
         logging.error(error)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed")
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+        )
         raise ValueError(error)
 
 
@@ -458,9 +488,11 @@ def add_link_DB(DB_settings, lk_infos):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database has started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database has started"
+        )
     except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Try to add the server in the internal database
@@ -468,13 +500,15 @@ def add_link_DB(DB_settings, lk_infos):
         add_in_IDB.link(DB_connection, lk_infos)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed")
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+        )
     except mariadb.Error as e:
-        error = "Add link in IDB failed : " + str(e)
+        error = "[GOTHAM LINK BDD] Add link in IDB failed : " + str(e)
         logging.error(error)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed")
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+        )
         raise ValueError(error)
 
 
@@ -497,9 +531,11 @@ def add_lhs_DB(DB_settings, lhs_infos):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database started"
+        )
     except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Try to add the server in the internal database
@@ -507,13 +543,15 @@ def add_lhs_DB(DB_settings, lhs_infos):
         add_in_IDB.link_hp_serv(DB_connection, lhs_infos)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed")
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+        )
     except Exception as e:
-        error = "Add combination in IDB failed : " + str(e)
+        error = f"[GOTHAM LINK BDD] Add combination in IDB failed : {e}"
         logging.error(error)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed")
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+        )
         raise ValueError(error)
 
 
@@ -536,9 +574,11 @@ def remove_server_DB(DB_settings, id):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database has started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database has started"
+        )
     except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Try to remove the server from the internal database
@@ -546,13 +586,15 @@ def remove_server_DB(DB_settings, id):
         remove_in_IDB.server(DB_connection, id)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed")
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+        )
     except Exception as e:
-        error = "Remove server from the IDB failed : " + str(e)
+        error = f"[GOTHAM LINK BDD] Remove server from the IDB failed : {e}"
         logging.error(error)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed")
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+        )
         raise ValueError(e)
 
 
@@ -577,9 +619,11 @@ def remove_server_tags_DB(DB_settings, id="", tag=""):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database has started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database has started"
+        )
     except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Try to remove the server tag from the internal database
@@ -587,13 +631,15 @@ def remove_server_tags_DB(DB_settings, id="", tag=""):
         remove_in_IDB.server_in_serv_tag(DB_connection, id, tag)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed")
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+        )
     except Exception as e:
-        error = "Remove server tag from the IDB failed : " + str(e)
+        error = f"[GOTHAM LINK BDD] Remove server tag from the IDB failed : {e}"
         logging.error(error)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed")
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+        )
         raise ValueError(e)
 
 
@@ -616,9 +662,11 @@ def remove_honeypot_DB(DB_settings, id):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database has started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database has started"
+        )
     except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Try to remove the honeypot from the internal database
@@ -626,13 +674,15 @@ def remove_honeypot_DB(DB_settings, id):
         remove_in_IDB.honeypot(DB_connection, id)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed")
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+        )
     except Exception as e:
-        error = "Remove honeypot from the IDB failed : " + str(e)
+        error = f"[GOTHAM LINK BDD] Remove honeypot from the IDB failed : {e}"
         logging.error(error)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed")
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+        )
         raise ValueError(e)
 
 
@@ -655,9 +705,11 @@ def remove_link_DB(DB_settings, id):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database has started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database has started"
+        )
     except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Remove the link from the internal database
@@ -665,14 +717,14 @@ def remove_link_DB(DB_settings, id):
         remove_in_IDB.link(DB_connection, id)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed"
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
         )
     except Exception as e:
-        error = "Remove link from the IDB failed : " + str(e)
+        error = f"[GOTHAM LINK BDD] Remove link from the IDB failed : {e}"
         logging.error(error)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed"
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
         )
         raise ValueError(e)
 
@@ -700,9 +752,11 @@ def remove_lhs(DB_settings, id_link="%", id_hp="%", id_serv="%"):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database has started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database has started"
+        )
     except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Try to remove the link from the internal database
@@ -710,14 +764,14 @@ def remove_lhs(DB_settings, id_link="%", id_hp="%", id_serv="%"):
         remove_in_IDB.lhs(DB_connection, id_link, id_hp, id_serv)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed"
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
         )
     except Exception as e:
-        error = "Remove combination from the IDB failed : " + str(e)
+        error = f"[GOTHAM LINK BDD] Remove combination from the IDB failed : {e}"
         logging.error(error)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed"
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
         )
         raise ValueError(e)
 
@@ -742,9 +796,11 @@ def edit_link_DB(DB_settings, modifs, conditions):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database has started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database has started"
+        )
     except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Try to edit the link
@@ -752,13 +808,15 @@ def edit_link_DB(DB_settings, modifs, conditions):
         edit_in_IDB.link(DB_connection, modifs, conditions)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed")
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+        )
     except Exception as e:
-        error = "Edit link in the IDB failed : " + str(e)
+        error = f"[GOTHAM LINK BDD] Edit link in the IDB failed : {e}"
         logging.error(error)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed")
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+        )
         raise ValueError(e)
 
 
@@ -781,9 +839,11 @@ def edit_lhs_DB(DB_settings, modifs, conditions):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database has started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database has started"
+        )
     except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Try to edit the lhs
@@ -791,13 +851,14 @@ def edit_lhs_DB(DB_settings, modifs, conditions):
         edit_in_IDB.lhs(DB_connection, modifs, conditions)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed")
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
+        )
     except Exception as e:
-        error = "Edit combination in the IDB failed : " + str(e)
+        error = f"[GOTHAM LINK BDD] Edit combination in the IDB failed : {e}"
         logging.error(error)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed"
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
         )
         raise ValueError(e)
 
@@ -822,9 +883,11 @@ def edit_honeypot_DB(DB_settings, modifs, conditions):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database has started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database has started"
+        )
     except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Try to edit the honeypot
@@ -832,14 +895,14 @@ def edit_honeypot_DB(DB_settings, modifs, conditions):
         edit_in_IDB.honeypot(DB_connection, modifs, conditions)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed"
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
         )
     except Exception as e:
-        error = "Edit honeypot in the IDB failed : " + str(e)
+        error = f"[GOTHAM LINK BDD] Edit honeypot in the IDB failed : {e}"
         logging.error(error)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed"
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
         )
         raise ValueError(e)
 
@@ -864,9 +927,11 @@ def edit_server_DB(DB_settings, modifs, conditions):
             port=int(DB_settings["port"]),
             database=DB_settings["database"]
         )
-        logging.debug("[+] Connection to the internal database has started")
+        logging.debug(
+            "[GOTHAM LINK BDD] Connection to the internal database has started"
+        )
     except mariadb.Error as e:
-        error = "[X] Can't connect to the internal database : " + str(e)
+        error = f"[GOTHAM LINK BDD] Can't connect to the internal database : {e}"
         logging.error(error)
         raise ValueError(error)
     # Try to edit the server
@@ -874,13 +939,13 @@ def edit_server_DB(DB_settings, modifs, conditions):
         edit_in_IDB.server(DB_connection, modifs, conditions)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed"
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
         )
     except Exception as e:
-        error = "Edit server in the IDB failed : " + str(e)
+        error = f"[GOTHAM LINK BDD] Edit server in the IDB failed : {e}"
         logging.error(error)
         DB_connection.close()
         logging.debug(
-            "[-] Connection to the internal database has been closed"
+            "[GOTHAM LINK BDD] Connection to the internal database has been closed"
         )
         raise ValueError(e)

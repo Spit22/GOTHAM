@@ -1,14 +1,7 @@
 from . import selection_function
 
 import configparser
-
-# Logging components
 import os
-import logging
-GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
-
 
 def choose_honeypots(hps_infos, nb_hp, tags_hp, del_weight=False):
     '''

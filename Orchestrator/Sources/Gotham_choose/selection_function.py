@@ -4,8 +4,7 @@ import configparser
 import os
 import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logger = logging.getLogger('libraries-logger')
 
 
 def weighting_nb_link(object_type, objects_infos):
@@ -21,8 +20,8 @@ def weighting_nb_link(object_type, objects_infos):
 
     # Check object_type
     if (object_type != "hp" and object_type != "serv"):
-        error = str(object_type) + " is uncorrect"
-        logging.error(error)
+        error = f"[GOTHAM CHOOSE] Invalid object type : {object_type}"
+        logger.error(error)
         raise ValueError(error)
 
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
@@ -92,8 +91,8 @@ def weighting_state(object_type, objects_infos):
 
     # Check object_type
     if (object_type != "hp" and object_type != "serv"):
-        error = str(object_type) + " is uncorrect"
-        logging.error(error)
+        error = f"[GOTHAM CHOOSE] Invalid object type : {object_type}"
+        logger.error(error)
         raise ValueError(error)
 
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
@@ -135,8 +134,8 @@ def weighting_nb_useless_tags(object_type, objects_infos, tags):
 
     # Check object_type
     if (object_type != "hp" and object_type != "serv"):
-        error = str(object_type) + " is uncorrect"
-        logging.error(error)
+        error = f"[GOTHAM CHOOSE] Invalid object type : {object_type}"
+        logger.error(error)
         raise ValueError(error)
 
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
@@ -247,14 +246,14 @@ def weighting_time(object_type, objects_infos, column):
 
     # Check object_type
     if (object_type != "hp" and object_type != "serv"):
-        error = str(object_type) + " is uncorrect"
-        logging.error(error)
+        error = f"[GOTHAM CHOOSE] Invalid object type : {object_type}"
+        logger.error(error)
         raise ValueError(error)
 
     # Check column
     if (column != "created_at" and column != "updated_at"):
-        error = str(object_type) + " is uncorrect"
-        logging.error(error)
+        error = f"[GOTHAM CHOOSE] Invalid object type : {object_type}"
+        logger.error(error)
         raise ValueError(error)
 
     GOTHAM_HOME = os.environ.get('GOTHAM_HOME')

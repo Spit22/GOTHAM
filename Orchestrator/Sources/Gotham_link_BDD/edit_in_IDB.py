@@ -1,16 +1,15 @@
 import mariadb
 import configparser
-import os
-import logging
 
 from . import get_infos, remove_in_IDB, add_in_IDB
 from Gotham_normalize import normalize_honeypot_infos, normalize_server_infos, normalize_link_infos
 from Gotham_normalize import normalize_lhs_infos, normalize_modif_to_str, normalize_conditions_to_str
 
 # Logging components
+import os
+import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG, format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logger = logging.getLogger('libraries-logger')
 
 # Retrieve settings from configuration file
 config = configparser.ConfigParser()
@@ -37,16 +36,16 @@ def server(DB_connection, modifs, conditions):
     try:
         modifs = normalize_server_infos(modifs)
     except Exception as e:
-        error = "Bad server modification : " + str(e)
-        logging.error(error)
+        error = f"[GOTHAM LINK BDD] Bad server modification : {e}"
+        logger.error(error)
         raise ValueError(error)
 
     # Normalize conditions
     try:
         conditions = normalize_server_infos(conditions)
     except Exception as e:
-        error = "Bad server modification's conditions : " + str(e)
-        logging.error(error)
+        error = f"[GOTHAM LINK BDD] Bad server modification's conditions : {e}"
+        logger.error(error)
         raise ValueError(error)
 
     # Case where we want to modify tags of the server
@@ -94,13 +93,13 @@ def server(DB_connection, modifs, conditions):
                 except Exception as e:
                     raise ValueError(e)
         else:
-            error = "Tags modification without id in conditions not implemented"
-            logging.error(error)
+            error = "[GOTHAM LINK BDD] Tags modification without id in conditions not implemented"
+            logger.error(error)
             raise ValueError(error)
 
     if [val for key, val in conditions.items() if 'tags' in key] != []:
-        error = "Modification by tag not implemented"
-        logging.error(error)
+        error = "[GOTHAM LINK BDD] Modification by tag not implemented"
+        logger.error(error)
         raise ValueError(error)
 
     if modifs != {}:
@@ -108,16 +107,15 @@ def server(DB_connection, modifs, conditions):
         try:
             modifs = normalize_modif_to_str(modifs)
         except Exception as e:
-            error = "Can't prepare server modification : " + str(e)
-            logging.error(error)
+            error = f"[GOTHAM LINK BDD] Can't prepare server modification : {e}"
+            logger.error(error)
             raise ValueError(error)
         # Prepare conditions
         try:
             conditions = normalize_conditions_to_str(conditions)
         except Exception as e:
-            error = "Can't prepare server modification's conditions : " + \
-                str(e)
-            logging.error(error)
+            error = f"Can't prepare server modification's conditions : {e}"
+            logger.error(error)
             raise ValueError(error)
         # Create the query
         if conditions != {}:
@@ -131,13 +129,10 @@ def server(DB_connection, modifs, conditions):
             # Edit values in Server table
             cur.execute(query)
             DB_connection.commit()
-            logging.info(
-                f"Modification ok -- SET {modifs}  WHERE {conditions} -- in the table 'Server'")
+            logger.info(f"[GOTHAM LINK BDD] Modification ok -- SET {modifs}  WHERE {conditions} -- in the table 'Server'")
         except mariadb.Error as e:
-            error = "Modification failed -- SET " + \
-                str(modifs) + " WHERE " + str(conditions) + \
-                "--  in the table 'Server' : " + str(e)
-            logging.error(error)
+            error = f"[GOTHAM LINK BDD] Modification failed -- SET {modifs} WHERE {conditions} --  in the table 'Server' : {e}"
+            logger.error(error)
             raise ValueError(error)
 
 
@@ -160,16 +155,16 @@ def honeypot(DB_connection, modifs, conditions):
     try:
         modifs = normalize_honeypot_infos(modifs)
     except Exception as e:
-        error = "Bad honeypot modification : " + str(e)
-        logging.error(error)
+        error = f"[GOTHAM LINK BDD] Bad honeypot modification : {e}"
+        logger.error(error)
         raise ValueError(error)
 
     # Normalize conditions
     try:
         conditions = normalize_honeypot_infos(conditions)
     except Exception as e:
-        error = "Bad honeypot modification's conditions : " + str(e)
-        logging.error(error)
+        error = "[GOTHAM LINK BDD] Bad honeypot modification's conditions : {e}"
+        logger.error(error)
         raise ValueError(error)
 
     # Case where we want to modify tags of the honeypot
@@ -217,13 +212,13 @@ def honeypot(DB_connection, modifs, conditions):
                 except Exception as e:
                     raise ValueError(e)
         else:
-            error = "Tags modification without id in conditions not implemented"
-            logging.error(error)
+            error = "[GOTHAM LINK BDD] Tags modification without id in conditions not implemented"
+            logger.error(error)
             raise ValueError(error)
 
     if [val for key, val in conditions.items() if 'tags' in key] != []:
-        error = "Modification by tag not implemented"
-        logging.error(error)
+        error = "[GOTHAM LINK BDD] Modification by tag not implemented"
+        logger.error(error)
         raise ValueError(error)
 
     if modifs != {}:
@@ -232,16 +227,15 @@ def honeypot(DB_connection, modifs, conditions):
         try:
             modifs = normalize_modif_to_str(modifs)
         except Exception as e:
-            error = "Can't prepare honeypot modification : " + str(e)
-            logging.error(error)
+            error = f"[GOTHAM LINK BDD] Can't prepare honeypot modification : {e}"
+            logger.error(error)
             raise ValueError(error)
         # Prepare conditions
         try:
             conditions = normalize_conditions_to_str(conditions)
         except Exception as e:
-            error = "Can't prepare honeypot modification's conditions : " + \
-                str(e)
-            logging.error(error)
+            error = f"[GOTHAM LINK BDD] Can't prepare honeypot modification's conditions : {e}"
+            logger.error(error)
             raise ValueError(error)
         # Create the query
         if conditions != {}:
@@ -255,13 +249,10 @@ def honeypot(DB_connection, modifs, conditions):
             # Edit values in Honeypot table
             cur.execute(query)
             DB_connection.commit()
-            logging.info(
-                f"Modification ok -- SET {modifs}  WHERE {conditions} -- in the table 'Honeypot'")
+            logger.info(f"[GOTHAM LINK BDD] Modification ok -- SET {modifs}  WHERE {conditions} -- in the table 'Honeypot'")
         except mariadb.Error as e:
-            error = "Modification failed -- SET " + \
-                str(modifs) + " WHERE " + str(conditions) + \
-                "--  in the table 'Honeypot' : " + str(e)
-            logging.error(error)
+            error = f"[GOTHAM LINK BDD] Modification failed -- SET {modifs} WHERE {conditions} --  in the table 'Honeypot' : {e}"
+            logger.error(error)
             raise ValueError(error)
 
 
@@ -278,15 +269,15 @@ def link(DB_connection, modifs, conditions):
     try:
         modifs = normalize_link_infos(modifs)
     except Exception as e:
-        error = "Bad link modification : " + str(e)
-        logging.error(error)
+        error = f"[GOTHAM LINK BDD] Bad link modification : {e}"
+        logger.error(error)
         raise ValueError(error)
     # Normalize conditions
     try:
         conditions = normalize_link_infos(conditions)
     except Exception as e:
-        error = "Bad link modification's conditions : " + str(e)
-        logging.error(error)
+        error = f"[GOTHAM LINK BDD] Bad link modification's conditions : {e}"
+        logger.error(error)
         raise ValueError(error)
 
     # Case where we want to modify honeypot tags of the link
@@ -317,8 +308,8 @@ def link(DB_connection, modifs, conditions):
                     tag_id = answer[0]['id']
                 # If it doesn't exists, add the honeypot tag in the IDB
                 else:
-                    error = "Error with tags: some honeypot tags do not exists"
-                    logging.error(error)
+                    error = "[GOTHAM LINK BDD] Error with tags: some honeypot tags do not exists"
+                    logger.error(error)
                     raise ValueError(error)
                 # Add the relation between link and tag in hp_Tags table
                 try:
@@ -327,8 +318,8 @@ def link(DB_connection, modifs, conditions):
                 except Exception as e:
                     raise ValueError(e)
         else:
-            error = "Tags modification without id in conditions not implemented"
-            logging.error(error)
+            error = "[GOTHAM LINK BDD] Tags modification without id in conditions not implemented"
+            logger.error(error)
             raise ValueError(error)
 
     # Case where we want to modify server tags of the link
@@ -359,8 +350,8 @@ def link(DB_connection, modifs, conditions):
                     tag_id = answer[0]['id']
                 # If it doesn't exists, add the server tag in the IDB
                 else:
-                    error = "Error with tags: some server tags do not exists"
-                    logging.error(error)
+                    error = "[GOTHAM LINK BDD] Error with tags: some server tags do not exists"
+                    logger.error(error)
                     raise ValueError(error)
                 # Add the relation between link and tag in hp_Tags table
                 try:
@@ -369,13 +360,13 @@ def link(DB_connection, modifs, conditions):
                 except Exception as e:
                     raise ValueError(e)
         else:
-            error = "Tags modification without id in conditions not implemented"
-            logging.error(error)
+            error = "[GOTHAM LINK BDD] Tags modification without id in conditions not implemented"
+            logger.error(error)
             raise ValueError(error)
 
     if [val for key, val in conditions.items() if 'tag' in key] != []:
-        error = "Modification by tag not implemented"
-        logging.error(error)
+        error = "[GOTHAM LINK BDD] Modification by tag not implemented"
+        logger.error(error)
         raise ValueError(error)
 
     if modifs != {}:
@@ -384,15 +375,15 @@ def link(DB_connection, modifs, conditions):
         try:
             modifs = normalize_modif_to_str(modifs)
         except Exception as e:
-            error = "Can't prepare link modification : " + str(e)
-            logging.error(error)
+            error = f"[GOTHAM LINK BDD] Can't prepare link modification : {e}"
+            logger.error(error)
             raise ValueError(error)
         # Prepare conditions
         try:
             conditions = normalize_conditions_to_str(conditions)
         except Exception as e:
-            error = "Can't prepare link modification's conditions : " + str(e)
-            logging.error(error)
+            error = f"Can't prepare link modification's conditions : {e}"
+            logger.error(error)
             raise ValueError(error)
         # Create the query
         if conditions != {}:
@@ -406,13 +397,10 @@ def link(DB_connection, modifs, conditions):
             # Edit values in Link table
             cur.execute(query)
             DB_connection.commit()
-            logging.info(
-                f"Modification ok -- SET {modifs}  WHERE {conditions} -- in the table 'Link'")
+            logger.info(f"[GOTHAM LINK BDD] Modification ok -- SET {modifs}  WHERE {conditions} -- in the table 'Link'")
         except mariadb.Error as e:
-            error = "Modification failed -- SET " + \
-                str(modifs) + " WHERE " + str(conditions) + \
-                "--  in the table 'Link' : " + str(e)
-            logging.error(error)
+            error = f"Modification failed -- SET {modifs} WHERE {conditions} --  in the table 'Link' : {e}"
+            logger.error(error)
             raise ValueError(error)
 
 
@@ -429,31 +417,31 @@ def lhs(DB_connection, modifs, conditions):
     try:
         modifs = normalize_lhs_infos(modifs)
     except Exception as e:
-        error = "Bad lhs modification : " + str(e)
-        logging.error(error)
+        error = f"[GOTHAM LINK BDD] Bad lhs modification : {e}"
+        logger.error(error)
         raise ValueError(error)
 
     # Normalize conditions
     try:
         conditions = normalize_lhs_infos(conditions)
     except Exception as e:
-        error = "Bad lhs modification's conditions : " + str(e)
-        logging.error(error)
+        error = f"[GOTHAM LINK BDD] Bad lhs modification's conditions : {e}"
+        logger.error(error)
         raise ValueError(error)
 
     # Prepare modifs
     try:
         modifs = normalize_modif_to_str(modifs)
     except Exception as e:
-        error = "Can't prepare lhs modification : " + str(e)
-        logging.error(error)
+        error = f"[GOTHAM LINK BDD] Can't prepare lhs modification : {e}"
+        logger.error(error)
         raise ValueError(error)
     # Prepare conditions
     try:
         conditions = normalize_conditions_to_str(conditions)
     except Exception as e:
-        error = "Can't prepare lhs modif's conditions : " + str(e)
-        logging.error(error)
+        error = f"Can't prepare lhs modif's conditions : {e}"
+        logger.error(error)
         raise ValueError(error)
     # Create the query
     query = "UPDATE Link_Hp_Serv SET " + modifs + " WHERE " + conditions
@@ -464,11 +452,8 @@ def lhs(DB_connection, modifs, conditions):
         # Edit values in Link_Hp_Serv table
         cur.execute(query)
         DB_connection.commit()
-        logging.info(
-            f"Modification ok -- SET {modifs}  WHERE {conditions} -- in the table 'Link_Hp_Serv'")
+        logger.info(f"Modification ok -- SET {modifs}  WHERE {conditions} -- in the table 'Link_Hp_Serv'")
     except mariadb.Error as e:
-        error = "Modification failed -- SET " + \
-            str(modifs) + " WHERE " + str(conditions) + \
-            "--  in the table 'Link_Hp_Serv' : " + str(e)
-        logging.error(error)
+        error = f"Modification failed -- SET {modifs} WHERE {conditions} --  in the table 'Link_Hp_Serv' : {e}"
+        logger.error(error)
         raise ValueError(error)

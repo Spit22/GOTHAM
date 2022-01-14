@@ -1,7 +1,5 @@
 import mariadb
 import configparser
-import os
-import logging
 
 from . import get_infos
 from Gotham_normalize import normalize_full_link_infos
@@ -10,10 +8,10 @@ from Gotham_normalize import normalize_full_server_infos
 from Gotham_normalize import normalize_full_honeypot_infos
 
 # Logging components
+import os
+import logging
 GOTHAM_HOME = os.environ.get('GOTHAM_HOME')
-logging.basicConfig(filename=GOTHAM_HOME + 'Orchestrator/Logs/gotham.log',
-                    level=logging.DEBUG,
-                    format='%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s')
+logger = logging.getLogger('libraries-logger')
 
 # Retrieve settings from configuration file
 config = configparser.ConfigParser()
@@ -37,10 +35,10 @@ def tag(DB_connection, tag):
     try:
         cur.execute("INSERT INTO Tags (tag) VALUES (?)", (tag,))
         DB_connection.commit()
-        logging.info(f"'{tag}' added in the table 'Tags'")
+        logger.info(f"[GOTHAM LINK BDD] '{tag}' added in the table 'Tags'")
     except mariadb.Error as e:
-        error = str(tag) + " insertion in the table 'Tags' failed : " + str(e)
-        logging.error(error)
+        error = f"[GOTHAM LINK BDD] {tag} insertion in the table 'Tags' failed : {e}"
+        logger.error(error)
         raise ValueError(error)
 
 
@@ -58,8 +56,8 @@ def server(DB_connection, server_infos):
     try:
         server_infos = normalize_full_server_infos(server_infos)
     except Exception as e:
-        error = "Bad server infos : " + str(e)
-        logging.error(error)
+        error = f"[GOTHAM LINK BDD] Bad server infos : {e}"
+        logger.error(error)
         raise ValueError(error)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
@@ -97,11 +95,10 @@ def server(DB_connection, server_infos):
                 serv_tags(DB_connection, tag_id, server_infos["id"])
             except Exception as e:
                 raise ValueError(e)
-        logging.info(f"'{server_infos['id']}' added in the table 'Server'")
+        logger.info(f"'[GOTHAM LINK BDD] {server_infos['id']}' added in the table 'Server'")
     except mariadb.Error as e:
-        error = str(server_infos['id']) + \
-            " insertion in the table 'Server' failed : " + str(e)
-        logging.error(error)
+        error = f"[GOTHAM LINK BDD] {server_infos['id']} insertion in the table 'Server' failed : {e}"
+        logger.error(error)
         raise ValueError(error)
 
 
@@ -126,11 +123,10 @@ def serv_tags(DB_connection, tag_id, id_serv):
             (tag_id, id_serv)
         )
         DB_connection.commit()
-        logging.info(f"'{tag_id}' added in the table 'Serv_Tags'")
+        logger.info(f"[GOTHAM LINK BDD] '{tag_id}' added in the table 'Serv_Tags'")
     except mariadb.Error as e:
-        error = str(tag_id) + " --- " + str(id_serv) + \
-            " insertion in the table 'Serv_Tags' failed : " + str(e)
-        logging.error(error)
+        error = f"[GOTHAM LINK BDD] {tag_id} --- {id_serv} insertion in the table 'Serv_Tags' failed : {e}"
+        logger.error(error)
         raise ValueError(error)
 
 
@@ -148,8 +144,8 @@ def honeypot(DB_connection, hp_infos):
     try:
         hp_infos = normalize_full_honeypot_infos(hp_infos)
     except Exception as e:
-        error = "Bad honeypot infos : " + str(e)
-        logging.error(error)
+        error = f"[GOTHAM LINK BDD] Bad honeypot infos : {e}"
+        logger.error(error)
         raise ValueError(error)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
@@ -190,11 +186,10 @@ def honeypot(DB_connection, hp_infos):
                 hp_tags(DB_connection, tag_id, hp_infos["id"])
             except Exception as e:
                 raise ValueError(e)
-        logging.info(f"'{hp_infos['id']}' added in the table 'Honeypot'")
+        logger.info(f"[GOTHAM LINK BDD] '{hp_infos['id']}' added in the table 'Honeypot'")
     except mariadb.Error as e:
-        error = str(hp_infos['name']) + \
-            " insertion in the table 'Honeypot' failed : " + str(e)
-        logging.error(error)
+        error = f"[GOTHAM LINK BDD] {hp_infos['name']} insertion in the table 'Honeypot' failed : {e}"
+        logger.error(error)
         raise ValueError(error)
 
 
@@ -219,11 +214,10 @@ def hp_tags(DB_connection, tag_id, id_hp):
             (tag_id, id_hp)
         )
         DB_connection.commit()
-        logging.info(f"'{id_hp}' added in the table 'Hp_Tags'")
+        logger.info(f"[GOTHAM LINK BDD] '{id_hp}' added in the table 'Hp_Tags'")
     except mariadb.Error as e:
-        error = str(tag_id) + " --- " + str(id_hp) + \
-            " insertion in the table 'Hp_Tags' failed : " + str(e)
-        logging.error(error)
+        error = f"[GOTHAM LINK BDD] {tag_id} --- {id_hp} insertion in the table 'Hp_Tags' failed : {e}"
+        logger.error(error)
         raise ValueError(error)
 
 
@@ -241,8 +235,8 @@ def link(DB_connection, lk_infos):
     try:
         lk_infos = normalize_full_link_infos(lk_infos)
     except Exception as e:
-        error = "Bad link infos : " + str(e)
-        logging.error(error)
+        error = f"[GOTHAM LINK BDD] Bad link infos : {e}"
+        logger.error(error)
         raise ValueError(error)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
@@ -295,11 +289,10 @@ def link(DB_connection, lk_infos):
             # Add the relation between Link and serv_tag in Link_Tags_serv
             # table
             link_tags_serv(DB_connection, tag_id, lk_infos["id"])
-        logging.info(f"'{lk_infos['id']}' added in the table 'Link' ")
+        logger.info(f"[GOTHAM LINK BDD] '{lk_infos['id']}' added in the table 'Link' ")
     except mariadb.Error as e:
-        error = str(lk_infos['id']) + \
-            " insertion in the table 'Link' failed : " + str(e)
-        logging.error(error)
+        error = f"[GOTHAM LINK BDD] {lk_infos['id']} insertion in the table 'Link' failed : {e}"
+        logger.error(error)
         raise ValueError(error)
 
 
@@ -322,12 +315,11 @@ def link_tags_hp(DB_connection, tag_id, id_lk):
             (tag_id, id_lk)
         )
         DB_connection.commit()
-        logging.info(
-            f"'{tag_id} -- {id_lk}' added in the table 'Link_Tags_hp'")
+        logger.info(
+            f"[GOTHAM LINK BDD] '{tag_id} -- {id_lk}' added in the table 'Link_Tags_hp'")
     except mariadb.Error as e:
-        error = str(tag_id) + " --- " + str(id_lk) + \
-            " insertion in the table 'Link_Tags_hp' failed : " + str(e)
-        logging.error(error)
+        error = f"{tag_id} --- {id_lk} insertion in the table 'Link_Tags_hp' failed : {e}"
+        logger.error(error)
         raise ValueError(error)
 
 
@@ -350,12 +342,11 @@ def link_tags_serv(DB_connection, tag_id, id_lk):
             (tag_id, id_lk)
         )
         DB_connection.commit()
-        logging.info(
-            f"'{tag_id} -- {id_lk}' added in the table 'Link_Tags_serv'")
+        logger.info(
+            f"[GOTHAM LINK BDD] '{tag_id} -- {id_lk}' added in the table 'Link_Tags_serv'")
     except mariadb.Error as e:
-        error = str(tag_id) + " --- " + str(id_lk) + \
-            " insertion in the table 'Link_Tags_serv' failed : " + str(e)
-        logging.error(error)
+        error = f"{tag_id} --- {id_lk} insertion in the table 'Link_Tags_serv' failed : {e}"
+        logger.error(error)
         raise ValueError(error)
 
 
@@ -373,8 +364,8 @@ def link_hp_serv(DB_connection, lhs_infos):
     try:
         lhs_infos = normalize_full_lhs_infos(lhs_infos)
     except Exception as e:
-        error = "Bad lhs infos : " + str(e)
-        logging.error(error)
+        error = "[GOTHAM LINK BDD] Bad lhs infos : " + str(e)
+        logger.error(error)
         raise ValueError(error)
     # Get MariaDB cursor
     cur = DB_connection.cursor()
@@ -389,10 +380,9 @@ def link_hp_serv(DB_connection, lhs_infos):
              lhs_infos["port"])
         )
         DB_connection.commit()
-        logging.info(
-            f"'{lhs_infos['id_link']} -- {lhs_infos['id_hp']} -- {lhs_infos['id_serv']}' added in the table 'Link_Hp_Serv'")
+        logger.info(
+            f"[GOTHAM LINK BDD] '{lhs_infos['id_link']} -- {lhs_infos['id_hp']} -- {lhs_infos['id_serv']}' added in the table 'Link_Hp_Serv'")
     except mariadb.Error as e:
-        error = str(lhs_infos['id_link']) + " --- " + str(lhs_infos['id_hp']) + " --- " + str(
-            lhs_infos['id_serv']) + " insertion in the table 'Link_Hp_Serv' : " + str(e)
-        logging.error(error)
+        error = f"{lhs_infos['id_link']} --- {lhs_infos['id_hp']} --- {lhs_infos['id_serv']} insertion in the table 'Link_Hp_Serv' : {e}"
+        logger.error(error)
         raise ValueError(error)

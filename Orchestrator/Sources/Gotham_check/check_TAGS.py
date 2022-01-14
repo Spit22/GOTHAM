@@ -24,7 +24,7 @@ def check_tags(object_type, objects_infos,
     '''
     # Check if object_type exists
     if not(object_type in ["hp", "serv", "link"]):
-        error = f"Wrong object_type : {object_type}"
+        error = f"[GOTHAM CHECK] Wrong object_type : {object_type}"
         logger.error(error)
         raise ValueError(error)
 
@@ -84,7 +84,7 @@ def check_tag_still_used(DB_connection, tag="%", id="%"):
         json_data.append(dict(zip(row_headers, result)))
 
     if json_data == []:
-        error = "Tag can't be found"
+        error = "[GOTHAM CHECK] Tag can't be found"
         logger.error(error)
         raise ValueError(error)
 

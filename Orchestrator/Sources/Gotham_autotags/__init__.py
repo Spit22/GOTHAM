@@ -29,18 +29,18 @@ def honeypot(hp_id):
     # Set tags with trivy
     try:
         trivy_tags = autotags_functions.autotag_by_trivy(hp_id)
-        logger.debug(f"Trivy check executed on honeypot {hp_id}")
+        logger.debug(f"[GOTHAM AUTOTAGS] Trivy check executed on honeypot {hp_id}")
     except ValueError as e:
-        error = f"Error while trying to execute ssh command for trivy check on hp (id: {hp_id}) : {e}"
+        error = f"[GOTHAM AUTOTAGS] Error while trying to execute ssh command for trivy check on honeypot object (id: {hp_id}) : {e}"
         logger.error(error)
         raise ValueError(error)
 
     # Set tags with docker top
     try:
         docker_tags = autotags_functions.autotag_by_docker_top(hp_id)
-        logger.debug(f"Tags settings with docker top executed on honeypot {hp_id}")
+        logger.debug(f"[GOTHAM AUTOTAGS] Tags settings with docker top executed on honeypot {hp_id}")
     except ValueError as e:
-        error = f"Error while trying to execute ssh command for docker top on hp (id: {hp_id}) : {e}"
+        error = f"[GOTHAM AUTOTAGS] Error while trying to execute ssh command for docker top on honeypot object (id: {hp_id}) : {e}"
         logger.error(error)
         raise ValueError(error)
 
@@ -68,7 +68,7 @@ def server(DB_settings, serv_id="", serv_ip=""):
 
     # Case where both arguments are empty
     if serv_id == "" and serv_ip == "":
-        error = "Server id or ip of the server is missing in autotags_server function"
+        error = "[GOTHAM AUTOTAGS] ID or IP address of the server is missing in autotags_server function"
         logger.error(error)
         raise ValueError(error)
     # Case where one of the arguments is empty
@@ -98,7 +98,7 @@ def server(DB_settings, serv_id="", serv_ip=""):
         # Check if the server exists in the IDB
         if object_infos == []:
             logger.error(
-                "You tried to autotag a server that doesn't exists (" + str(serv_id if serv_id != "" else serv_ip) + ")"
+                "[GOTHAM AUTOTAGS] You tried to apply autotag to a server that doesn't exists (" + str(serv_id if serv_id != "" else serv_ip) + ")"
             )
             error = "Unknown serv " + \
                 str(serv_id if serv_id != "" else serv_ip)
@@ -109,9 +109,9 @@ def server(DB_settings, serv_id="", serv_ip=""):
     # Set tags with ipstack
     try:
         ipstack_tags = autotags_functions.autotag_by_ipstack(serv_ip)
-        logger.debug("Tags settings with ipstack executed on server " + str(serv_id if serv_id != "" else serv_ip))
+        logger.debug("[GOTHAM AUTOTAGS] Tags settings with ipstack executed on server " + str(serv_id if serv_id != "" else serv_ip))
     except ValueError as e:
-        error = "Error while trying to get geolocation informations on serv (" + str(serv_id if serv_id != "" else serv_ip) + ") : " + str(e)
+        error = "[GOTHAM AUTOTAGS] Error while trying to get geolocation informations on serv (" + str(serv_id if serv_id != "" else serv_ip) + ") : " + str(e)
         logger.error(error)
         raise ValueError(error)
     tags_list = list(set(ipstack_tags))
