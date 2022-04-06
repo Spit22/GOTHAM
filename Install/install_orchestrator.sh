@@ -19,11 +19,11 @@ GOTHAM_GIT="https://github.com/Spit22/GOTHAM"
 EXEC_BRANCH="remotes/origin/dev_V1"
 
 ### DEFINE BINARY PATHS ###
-USERADD=$(which useradd) || echo -e "${red}[-] Unknown command : useradd${default}" && exit 1
-CHOWN=$(which chown) || echo -e "${red}[-] Unknown command : chown${default}" && exit 1
-CHMOD=$(which chmod) || echo -e "${red}[-] Unknown command : chmod${default}" && exit 1
-APT=$(which apt) || echo -e "${red}[-] Unknown command : apt${default}" && exit 1
-RM=$(which rm) || echo -e "${red}[-] Unknown command : rm${default}" && exit 1
+USERADD=$(which useradd) || (echo -e "${red}[-] Unknown command : useradd${default}" && exit 1)
+CHOWN=$(which chown) || (echo -e "${red}[-] Unknown command : chown${default}" && exit 1)
+CHMOD=$(which chmod) || (echo -e "${red}[-] Unknown command : chmod${default}" && exit 1)
+APT=$(which apt) || (echo -e "${red}[-] Unknown command : apt${default}" && exit 1)
+RM=$(which rm) || (echo -e "${red}[-] Unknown command : rm${default}" && exit 1)
 
 ### CHECK IF ROOT ###
 if [ "$EUID" -ne 0 ]
