@@ -97,8 +97,8 @@ echo -e "${blue}=== Install GOTHAM ===${default}"
 
 # Clone repository on this directory
 echo -ne "${yellow}[...] Cloning GOTHAM repository${default}"
-$GIT clone $GOTHAM_GIT $GOTHAM_HOME > /dev/null 2>&1
-$CHOWN -R gotham:root $GOTHAM_HOME
+$GIT clone $GOTHAM_GIT $GOTHAM_HOME > /dev/null 2>&1 || (echo -ne "${red}\n[-] Error cloning GOTHAM repository in /opt\n${default}" && exit 1)
+$CHOWN -R gotham:root $GOTHAM_HOME || (echo -ne "${red}\n[-] Error setting owner of GOTHAM repository\n${default}" && exit 1)
 echo -ne "${green}\r[+] GOTHAM cloned under $GOTHAM_HOME\n${default}"
 
 # Going on the repository folder
@@ -118,6 +118,6 @@ mkdir -p $GOTHAM_HOME/Orchestrator/Logs
 
 # Configure database
 echo -ne "${yellow}[...] Creating database${default}"
-mysql -u root -e "CREATE DATABASE GOTHAM;" > /dev/null 2>&1
-mysql -u root GOTHAM < $GOTHAM_HOME/Orchestrator/Internal_Database/gotham.sql > /dev/null 2>&1
+mysql -u root -e "CREATE DATABASE GOTHAM;" > /dev/null 2>&1 || (echo -ne "${red}\n[-] Error creating gotham's database\n${default}" && exit 1)
+mysql -u root GOTHAM < $GOTHAM_HOME/Orchestrator/Internal_Database/gotham.sql > /dev/null 2>&1 || (echo -ne "${red}\n[-] Error importing gotham's database\n${default}" && exit 1)
 echo -ne "${green}\r[+] MySQL db successfully imported\n${default}"
