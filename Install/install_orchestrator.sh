@@ -11,6 +11,7 @@ set -euo pipefail
 red="\e[0;91m"
 blue="\e[0;94m"
 green="\e[0;92m"
+yellow="\e[0;33m"
 default="\e[0m"
 
 ### DEFINE GLOBAL VARIABLES ###
@@ -32,7 +33,7 @@ if [ "$EUID" -ne 0 ]
 fi
 
 ### PREPARE GOTHAM SYSTEM ###
-echo -e "${blue}=== Preparing the gotham system... ===${default}"
+echo -e "${blue}=== Prepare the gotham system ===${default}"
 
 # Create GOTHAM user as an alias for the root account
 $USERADD -o -u 0 -g 0 -N -d /root/ -M gotham > /dev/null 2>&1
@@ -55,24 +56,27 @@ echo -e "${green}[+] All paths created${default}"
 
 
 ### INSTALL DEPENDANCIES ###
-echo -e "${blue}=== Installing dependancies... ===${default}"
+echo -e "${blue}=== Install dependancies ===${default}"
 
 # Update repository
+echo -ne "${yellow}[...] Updating system${default}"
 $APT update > /dev/null 2>&1
-echo -e "${green}[+] APT updated${default}"
+echo -ne "${green}\r[+] System updated\n${default}"
 
 # Install needed packages
+echo -ne "${yellow}[...] Installing packages${default}"
 $APT install -y python3 python3-pip git mariadb-server git rsyslog > /dev/null 2>&1
 PIP3=$(which pip3)
 GIT=$(which git)
-echo -e "${green}[+] Some packages correctly installed${default}"
+echo -ne "${green}\r[+] Packages correctly installed\n${default}"
 
 # Install libs
+echo -ne "${yellow}[...] Installing libraries${default}"
 $APT install -y libmariadb-dev > /dev/null 2>&1
-echo -e "${green}[+] Some libraries correctly installed${default}"
+echo -ne "${green}\r[+] Libraries correctly installed\n${default}"
 
 ### INSTALL RSYSLOG ###
-echo -e "${blue}=== Configuring Rsyslog... ===${default}"
+echo -e "${blue}=== Configure Rsyslog ===${default}"
 
 # Pre-configure rsyslog
 touch /etc/rsyslog.d/00-syslog_server.conf
@@ -83,17 +87,19 @@ input(type="imtcp" port="1514")
 ''' > /etc/rsyslog.d/00-syslog_server.conf
 
 # Restart rsyslog
+echo -ne "${yellow}[...] Configuring rsyslog${default}"
 systemctl restart rsyslog > /dev/null 2>&1
-echo -e "${green}[+] Rsyslog configured under /etc/rsyslog.d/${default}"
+echo -ne "${green}\r[+] Rsyslog configured under /etc/rsyslog.d/\n${default}"
 
 
 ### INSTALL GOTHAM ###
-echo -e "${blue}=== Installing GOTHAM... ===${default}"
+echo -e "${blue}=== Install GOTHAM ===${default}"
 
 # Clone repository on this directory
+echo -ne "${yellow}[...] Cloning GOTHAM repository${default}"
 $GIT clone $GOTHAM_GIT $GOTHAM_HOME > /dev/null 2>&1
 $CHOWN -R gotham:root $GOTHAM_HOME
-echo -e "${green}[+] GOTHAM cloned under $GOTHAM_HOME${default}"
+echo -ne "${green}\r[+] GOTHAM cloned under $GOTHAM_HOME\n${default}"
 
 # Going on the repository folder
 cd $GOTHAM_HOME
@@ -103,13 +109,15 @@ $GIT checkout $EXEC_BRANCH > /dev/null 2>&1
 echo -e "${green}[+] Switched to $EXEC_BRANCH${default}"
 
 # Install all python libs
+echo -ne "${yellow}[...] Installing python dependancies${default}"
 $PIP3 install -r $GOTHAM_HOME/Orchestrator/Sources/requirements.txt > /dev/null 2>&1
-echo -e "${green}[+] Pip dependancies installed${default}"
+echo -ne "${green}\r[+] Python dependancies installed\n${default}"
 
 # Create the log folder
 mkdir -p $GOTHAM_HOME/Orchestrator/Logs
 
 # Configure database
+echo -ne "${yellow}[...] Creating database${default}"
 mysql -u root -e "CREATE DATABASE GOTHAM;" > /dev/null 2>&1
 mysql -u root GOTHAM < $GOTHAM_HOME/Orchestrator/Internal_Database/gotham.sql > /dev/null 2>&1
-echo -e "${green}[+] MySQL db successfully imported${default}"
+echo -ne "${green}\r[+] MySQL db successfully imported\n${default}"
