@@ -161,5 +161,6 @@ Using gothamctl
 The gothamctl command is easier than the previous method :
 
 .. code:: bash
+  
   gothamctl.py ls server -id SERVER_ID
 

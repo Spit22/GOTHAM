@@ -109,7 +109,7 @@ The gothamctl command is easier than the previous method :
 
 .. code:: bash
 
-gothamctl.py edit link -id ID [-tags_hp TAGS_HP] [-tags_serv TAGS_SERV] [-nb_hp NB_HP] [-nb_serv NB_SERV] [-ports PORTS]
+  gothamctl.py edit link -id ID [-tags_hp TAGS_HP] [-tags_serv TAGS_SERV] [-nb_hp NB_HP] [-nb_serv NB_SERV] [-ports PORTS]
 
 
 How to list all links on GOTHAM ?
